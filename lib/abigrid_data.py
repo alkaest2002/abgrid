@@ -1,7 +1,8 @@
 import string
 import datetime
-from typing import Any, Tuple, Dict, Optional
+
 from pathlib import Path
+from typing import Any, Tuple, Dict, Optional
 from lib.abgrid_network import ABGridNetwork
 
 class ABGridData:

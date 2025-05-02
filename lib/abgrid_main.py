@@ -4,6 +4,7 @@ import re
 import string
 import json
 import jinja2
+
 from pathlib import Path
 from typing import Literal, Dict, Any
 from weasyprint import HTML

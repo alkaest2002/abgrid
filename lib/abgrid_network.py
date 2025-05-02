@@ -1,4 +1,3 @@
-# Imports
 import io
 import pandas as pd
 import matplotlib

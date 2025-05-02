@@ -1,8 +1,9 @@
-from pathlib import Path
 import yaml
+
+from pathlib import Path
+from typing import Tuple, Optional, Dict, Any
 from pydantic import ValidationError
 from lib.abgrid_schemas import ProjectSchema, GroupSchema
-from typing import Tuple, Optional, Dict, Any
 
 # Define the main class to handle loading and validating the YAML
 class ABGridYAML:
