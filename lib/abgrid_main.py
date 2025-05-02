@@ -131,7 +131,7 @@ class ABGridMain:
         
         # Notify on error
         if sheets_errors:
-            print(sheets_errors)
+            raise ValueError(sheets_errors)
         
         # Render answer sheets as PDF
         self.render_pdf("answersheet", sheets_data, "")
