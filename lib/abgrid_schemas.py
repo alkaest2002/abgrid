@@ -1,4 +1,4 @@
-from pydantic import BaseModel, Field, field_validator, model_validator
+from pydantic import BaseModel, Field, constr, field_validator, model_validator
 from typing import Dict, List, Set
 
 # Define a Pydantic model for the project schema
@@ -6,24 +6,24 @@ class ProjectSchema(BaseModel):
     """
     A Pydantic model that represents a project's data schema.
     """
-    titolo: str  # The title of the project
-    numero_gruppi: int = Field(ge=1, le=20)  # Number of groups, must be between 1 and 20
-    numero_partecipanti_per_gruppo: int = Field(ge=4, le=15)  # Participants per group, must be between 4 and 15
-    consegna: str  # Delivery or context field
-    domandaA: str  # Question A
-    domandaA_scelte: str  # Choices for question A
-    domandaB: str  # Question B
-    domandaB_scelte: str  # Choices for question B
-    model_config = {"extra": "forbid"}  # Configuration to forbid extra fields
+    titolo: constr(min_length=1, max_length=100) # type: ignore
+    numero_gruppi: int = Field(ge=1, le=20)
+    numero_partecipanti_per_gruppo: int = Field(ge=4, le=15)
+    consegna: constr(min_length=1, max_length=200) # type: ignore
+    domandaA: constr(min_length=1, max_length=300) # type: ignore
+    domandaA_scelte: constr(min_length=1, max_length=150) # type: ignore
+    domandaB: constr(min_length=1, max_length=300) # type: ignore
+    domandaB_scelte: constr(min_length=1, max_length=150) # type: ignore
+    model_config = {"extra": "forbid"} # Configuration to forbid extra fields
 
 # Define a Pydantic model for the group schema
 class GroupSchema(BaseModel):
     """
     A Pydantic model that represents the schema for a group within a project.
     """
-    IDGruppo: int = Field(ge=1, le=20)  # Group ID, must be between 1 and 20
-    scelteA: List[Dict[str, str]]  # List of dictionaries representing choices A
-    scelteB: List[Dict[str, str]]  # List of dictionaries representing choices B
+    IDGruppo: int = Field(ge=1, le=20)
+    scelteA: List[Dict[str, str]]
+    scelteB: List[Dict[str, str]]
     model_config = {"extra": "forbid"}  # Configuration to forbid extra fields
 
     @field_validator('scelteA', 'scelteB')
