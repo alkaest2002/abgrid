@@ -1,0 +1,263 @@
+{% macro network_info(info) %}
+<span>
+  NN {{ info.network_nodes }}, NE {{ info.network_edges }}, NC {{ (info.network_centralization * 100)|round|int }}%, NT {{
+  (info.network_transitivity * 100)|round|int }}%, NR {{ (info.network_reciprocity * 100)|round|int }}%
+</span>
+{% endmacro %}
+
+{% macro network_tabular(type, data) %}
+<table class="report-table-tabular">
+  <tr>
+    <th>ID</th>
+    <th>{% if type == "A" %}SCELTE{% else %}RIFIUTI{% endif %}</th>
+    <th>IC</th>
+    <th>PR</th>
+    <th>BC</th>
+    <th>CC</th>
+    <th>OR</th>
+    <th>NI</th>
+  </tr>
+  {% for k in data.keys() %}
+  <tr>
+    <td>{{ k }}</td>
+    <td>{{ data[k].lns }}</td>
+    <td>{{ data[k].ic_r | int }}</td>
+    <td>{{ data[k].pr_r | int }}</td>
+    <td>{{ data[k].bc_r | int }}</td>
+    <td>{{ data[k].cc_r | int }}</td>
+    <td>{{ '%0.2f'| format(data[k].or | round(2)) }}</td>
+    <td>{% if data[k].ni %}x{% endif%}</td>
+  </tr>
+  {% endfor %}
+</table>
+{% endmacro %}
+
+{% macro network(type, question, graph, info, data) %}
+<table class="report-table-graph">
+  <tr>
+    <td>
+      <p class="question">
+        {{ type }}. {{ question }}
+      </p>
+    </td>
+  </tr>
+  <tr>
+    <td>
+      <img src="{{ graph }}" class="graph-main" />
+    </td>
+  </tr>
+  <tr>
+    <td class="hero letter-{% if type == 'A' %}A{% else %}B{% endif %}">{{ type }}</td>
+  </tr>
+  <tr>
+    <td>
+      <p class="g_info">
+        {{ network_info(info) }}
+      </p>
+    </td>
+  </tr>
+  <tr>
+    <td style="vertical-align:top">
+      {{ network_tabular(type, data) }}
+    </td>
+  </tr>
+</table>
+{% endmacro %}
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      font-size: 11pt;
+      font-family: Arial, Helvetica, sans-serif;
+      font-size: 10pt;
+      box-sizing: border-box
+    }
+  </style>
+  <style>
+    @page {
+      position: relative;
+      width: 210mm;
+      height: 297mm;
+      page-break-after: always;
+    }
+
+    table {
+      border-collapse: collapse;
+      width: 100%;
+    }
+
+    th,
+    td {
+      text-align: center;
+    }
+
+    .logo {
+      display: flex;
+      align-items: center;
+    }
+
+    .logo>div {
+      font-size: 2em;
+      font-weight: bold;
+    }
+
+    .logo-letter {
+      padding: 10px;
+      border-radius: 4px;
+      margin-right: 4px;
+    }
+
+    .letter-A {
+      color: #0000FF;
+    }
+
+    .letter-B {
+      color: #FF0000;
+    }
+
+    .letter-A-reversed {
+      background-color: #0000FF;
+      color: #fff;
+    }
+
+    .letter-B-reversed {
+      background-color: #FF0000;
+      color: #fff;
+    }
+
+    .intro h1 {
+      font-size: 2em;
+    }
+
+    .disclaimer {
+      margin-top: 10px;
+      margin-bottom: 40px;
+    }
+
+    .hero {
+      font-size: 3em;
+      text-align: center;
+      vertical-align: middle;
+      font-weight: bold;
+      padding-top: 20px;
+      padding-bottom: 20px;
+    }
+
+    .report-info {
+      padding-bottom: 20px;
+      border-bottom: 1px solid #000;
+    }
+
+    .report-table-graph {
+      margin-top: 20px;
+    }
+
+    .question {
+      text-align: left;
+    }
+
+    .g_info {
+      text-align: left;
+      margin-bottom: 10px;
+    }
+
+    .graph-main {
+      display: block;
+      margin: auto;
+      height: 280px;
+    }
+
+    .report-table-tabular {
+      border-top: 2px solid #000;
+      border-bottom: 2px solid #000;
+    }
+
+    .report-table-tabular th {
+      padding: 5px 3px;
+      background-color: #ddd;
+      border-bottom: 1px solid #000;
+    }
+
+    .report-table-tabular td {
+      padding: 5px 3px;
+      border-top: 1px solid #ddd;
+    }
+
+    .report-table-tabular tr:nth-child(odd) td {
+      background-color: #eee;
+    }
+
+    .no-border {
+      border: 1px solid transparent;
+      width: 20px;
+    }
+
+    .legend {
+      margin-top: 25px;
+    }
+
+    .footer {
+      position: relative;
+      top: 40px;
+      font-size: 8pt !important;
+      color: #acacac;
+      text-align: justify;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="page">
+    <div class="intro">
+      <div class="logo">
+        <div class="logo-letter letter-A-reversed">A</div>
+        <div class="logo-letter letter-B-reversed">B</div>
+        <div>GRID</div>
+      </div>
+    </div>
+    <div class="disclaimer">
+      <em>
+        Il presente report è stato generato da un computer. La sua interpretazione è riservata agli specialisti HR che
+        hanno frequentato il corso in "Dinamiche di gruppo e introduzione alla Network Analysis".
+      </em>
+    </div>
+    <div class="report-info">
+      <b>
+        <span>{{ assessment_info | upper }} - Gruppo {{ group_id | upper }}</span><br />
+      </b>
+    </div>
+    <table class="report-table">
+      <tr>
+        <td>
+          {{ network("A", ga_question, ga_graph, ga_info, ga_data) }}
+        </td>
+        <td class="no-border"></td>
+        <td>
+          {{ network("B", gb_question, gb_graph, gb_info, gb_data) }}
+        </td>
+      </tr>
+    </table>
+    <div class="legend">
+      <b>NN</b> = Number of Nodes, <b>NE</b> = Number of Edges, <b>NE</b> = Network Centralization, <b>NT</b> =
+      Network Transitivity<br /><b>NP</b> = Network Reciprocity, <b>IC</b> = In-Degree Centrality (rango), <b>PR</b> = PageRank
+      Centrality (rango)<br /><b>BC</b> = Betweenness Centrality (rango), <b>CC</b> = Closenness Centrality
+      (rango)<br /><b>OR</b> = Other Nodes Reachability (%), <b>NI</b> = No In-Degree.
+    </div>
+    <div class="footer">
+      <p><b>Autori</b>: Dr. Pierpaolo CALANNA, PhD, Dr. Gaetano BUONAIUTO (2021-{{ year }}), <b>Licenza d'uso</b>:
+        l'impaginazione del presente report, la personalizzazione dei grafici, nonché la scelta degli indici
+        quantitativi sono regolati da licenza Creative Commons: Attribuzione - Non opere derivate 4.0 Internazionale
+        (https://creativecommons.org/licenses/by-nd/4.0).</p>
+    </div>
+  </div>
+</body>
+
+</html>

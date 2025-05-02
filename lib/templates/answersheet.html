@@ -1,0 +1,127 @@
+{% macro get_barcode(group, participant) %}
+  <span class="barcode">*{{group}}!{{participant}}*</span>
+{% endmacro %}
+
+{% macro get_likert(likert) %}
+  <div class="bubble">
+    {% for option in likert %}
+      <span>{{ option }}</span>
+    {% endfor %}
+  </div>
+{% endmacro%}
+
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        font-size: 1em;
+        font-family: Arial, Helvetica, sans-serif;
+        box-sizing: border-box
+      }
+
+      html {
+        font-size: 12pt;
+      }
+    </style>
+    <style>
+    	@page {
+        padding: 0;
+        margin: 40mm;
+      }
+
+      .page {
+    		width: 210mm;
+		    height: 297mm;
+        page-break-after: always;
+      }
+
+      .intro h1 {
+        position: relative;
+        font-size: 2em;
+        margin-bottom: 24pt;
+      }
+
+      .participant {
+        font-size: 1.5em;
+        margin: 24pt auto;
+      }
+      
+      .explanation {
+        margin-bottom: 50px;
+      }
+
+      .question {
+        margin-bottom: 30px;
+        max-width: 15cm;
+      }
+
+      .question-hint {
+        margin-top: 10px;
+        font-size: 10pt;
+        color: #555;
+      }
+    	
+      .bubble span {
+        display: inline-block;
+        margin-top: 12pt;
+        margin-right: 3pt;
+        font-family: "OMR";
+        font-size: 11pt;
+      }
+
+      .barcode-wrapper {
+        position: relative;
+        bottom: -320px;
+        left: 0;
+        display: inline-block;
+        margin-top: 50px;
+        padding: 20px;
+        border: 1px solid #333;
+        border-radius: 6px;
+      }
+
+      .barcode-wrapper .barcode {
+        font-family: "3 of 9 Barcode";
+        font-size: 45pt;
+        text-align: center;
+      }
+
+    </style>
+  </head>
+  <body>
+    {% for group in groups %}
+      {% for participant in likert %}
+        <div class="page">
+          <div class="intro">
+            <h1><b>AB</b>-Grid</h1>
+          </div>
+          <div class="participant">
+            <span>Gruppo: {{ group }}, Partecipante: {{ participant }}</span>
+          </div>
+          <div class="explanation">
+            <p>{{ explanation }}</p>
+          </div>
+          <div class="question">
+            <p class="question-a"><b>A. {{ ga_question }}</b></p>
+            <p class="question-hint">{{ ga_question_hint }}</p>
+            {{ get_likert(likert) }}
+          </div>
+          <div class="question">
+            <p class="question-b"><b>B. {{ gb_question }}</b></p>
+            <p class="question-hint">{{ gb_question_hint }}</p>
+            {{ get_likert(likert) }}
+          </div>
+          <div class="barcode-wrapper">
+            <p class="barcode">{{ get_barcode(group, participant) }}</p>
+          </div>
+        </div>
+      {% endfor %}
+    {% endfor %}
+  </body>
+</html>
