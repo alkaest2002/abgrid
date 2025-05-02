@@ -1,3 +1,4 @@
+from pathlib import Path
 import yaml
 from pydantic import ValidationError
 from lib.abgrid_schemas import ProjectSchema, GroupSchema
@@ -36,7 +37,7 @@ class ABGridYAML:
             # Return validation errors if any
             return None, e.errors()
 
-    def load_data(self, yaml_type: str, yaml_file_path: str) -> Tuple[Optional[Dict[str, Any]], Optional[str]]:
+    def load_data(self, yaml_type: str, yaml_file_path: Path) -> Tuple[Optional[Dict[str, Any]], Optional[str]]:
         """
         Load and validate YAML data from a file.
 
@@ -58,9 +59,9 @@ class ABGridYAML:
         
         except FileNotFoundError:
             # Return error for file not found
-            return None, "Cannot locate YAML file."
+            return None, f"Cannot locate YAML file {yaml_file_path.name}."
         
-        except yaml.YAMLError as e:
+        except yaml.YAMLError:
             # Return error for YAML parsing issues
-            return None, "YAML file could not be parsed."
+            return None, "YAML file {yaml_file_path.name} could not be parsed."
 
