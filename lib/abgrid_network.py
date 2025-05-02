@@ -188,12 +188,22 @@ class ABGridNetwork:
         )
         
         # Calculate macro-level statistics for the network
+        network_nodes = G.number_of_nodes()
+        network_edges = G.number_of_edges()
+        print([ k for k in list(nx.enumerate_all_cliques(G.to_undirected())) if len(k) > 2])
+        network_k_cliques = len([ k for k in list(nx.enumerate_all_cliques(G.to_undirected())) if len(k) > 2])
+        network_centralization = round(self.get_network_centralization(G), 3)
+        network_transitivity = round(nx.transitivity(G), 3)
+        network_reciprocity = round(nx.reciprocity(G), 3)
+        
+        # Create macro_stats object
         macro_stats = {
-            'network_nodes': G.number_of_nodes(),
-            'network_edges': G.number_of_edges(),
-            'network_centralization': round(self.get_network_centralization(G), 3),
-            'network_transitivity': round(nx.transitivity(G), 3),
-            'network_reciprocity': round(nx.reciprocity(G), 3)  # type: ignore
+            'network_nodes': network_nodes,
+            'network_edges': network_edges,
+            'network_k_cliques':network_k_cliques,
+            'network_centralization': network_centralization,
+            'network_transitivity': network_transitivity,
+            'network_reciprocity':  network_reciprocity
         }
         
         # Return both macro and micro-level statistics
