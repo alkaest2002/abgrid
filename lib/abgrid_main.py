@@ -20,8 +20,7 @@ class ABGridMain:
     Main class to manage project initialization, file generation, and report rendering for a grid-based project.
     """
     
-    @notify_decorator("init project")
-    def __init__(self, project: str):
+    def __init__(self, project: str, project_folder_path: Path, project_filepath: Path, groups_filepaths: list[Path]):
         """
         Initialize the main handler for grid projects by setting up relevant file paths.
         
@@ -30,22 +29,9 @@ class ABGridMain:
         Raises:
             FileNotFoundError: If necessary project files are missing.
         """
-
-        # Init property
-        self.abgrid_data = None
-
-        # Set relevant paths
-        project_folder_path = Path("./data") / project
-        project_filepath = next(project_folder_path.glob(f"{project}.*"))
-        groups_filepaths = list(project_folder_path.glob("*gruppo_*.*"))
-       
-        # Check whether necessary resources exist
-        if all([project_filepath, groups_filepaths]):
-            # Store instantiated ABGrid data class
-            self.abgrid_data = ABGridData(
-                project, project_folder_path, project_filepath, groups_filepaths, ABGridYAML())
-        else:
-            raise FileNotFoundError(f"Some critical files of project {project} are missing")
+        # Store instantiated ABGrid data class
+        self.abgrid_data = ABGridData(
+            project, project_folder_path, project_filepath, groups_filepaths, ABGridYAML())
 
     @staticmethod
     def init_project(project: str, groups: int, members_per_group: int):
@@ -77,7 +63,7 @@ class ABGridMain:
         ABGridMain.generate_group_inputs(project_folder_path, project, groups, members_per_group)
 
     @staticmethod
-    @notify_decorator("creating project")
+    @notify_decorator("create project")
     def generate_project_file(project_folder_path: Path, project: str, groups: int, members_per_group: int):
         """
         Generate the main project YAML file using a template.
@@ -150,7 +136,7 @@ class ABGridMain:
         # Render answer sheets as PDF
         self.render_pdf("answersheet", sheets_data, "")
 
-    @notify_decorator("generatoing reports")
+    @notify_decorator("generate AB-Grid reports")
     def generate_reports(self):
         """
         Generate and render reports for the project groups, and save the data in a JSON format.

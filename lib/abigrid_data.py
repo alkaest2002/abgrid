@@ -1,26 +1,19 @@
 import string
 import datetime
-from typing import Any, Iterable, Tuple, Dict, Optional
+from typing import Any, Tuple, Dict, Optional
 from pathlib import Path
 from lib.abgrid_network import ABGridNetwork
 
 class ABGridData:
     """
     Class for managing and processing project data related to AB grid networks.
-
-    Attributes:
-        project (str): The name of the project.
-        project_path (Path): The directory path containing the project's files.
-        project_filepath (Path): Path to the project's main configuration file.
-        groups_filepaths (List[Path]): List of paths to group-specific data files.
-        data_loader (Any): An object responsible for loading data, expected to implement a specific interface.
     """
 
     def __init__(
         self, project: str, 
         project_path: Path, 
         project_filepath: Path, 
-        groups_filepaths: Iterable[Path], 
+        groups_filepaths: list[Path], 
         data_loader: Any
     ):
         """
@@ -30,7 +23,7 @@ class ABGridData:
             project (str): The name of the project.
             project_path (Path): Path to the project directory.
             project_filepath (Path): Path to the the project's main configuration file.
-            groups_filepaths (Iterable[Path]): Iterable of paths to group-specific data files.
+            groups_filepaths (list[Path]): List of paths to group-specific data files.
             data_loader (Any): Data loading utility for reading and validating YAML configuration files.
         """
         self.project = project
