@@ -19,7 +19,7 @@ class ABGridData:
     def __init__(
         self, project: str, 
         project_path: Path, 
-        project_filepath: Iterable[Path], 
+        project_filepath: Path, 
         groups_filepaths: Iterable[Path], 
         data_loader: Any
     ):
@@ -29,14 +29,14 @@ class ABGridData:
         Args:
             project (str): The name of the project.
             project_path (Path): Path to the project directory.
-            project_filepath (Iterable[Path]): Iterable containing the project's main configuration file path.
+            project_filepath (Path): Path to the the project's main configuration file.
             groups_filepaths (Iterable[Path]): Iterable of paths to group-specific data files.
             data_loader (Any): Data loading utility for reading and validating YAML configuration files.
         """
         self.project = project
         self.project_path = project_path
-        self.project_filepath = next(project_filepath)
-        self.groups_filepaths = list(groups_filepaths)
+        self.project_filepath = project_filepath
+        self.groups_filepaths = groups_filepaths
         self.data_loader = data_loader
 
     def get_answersheets_data(self) -> Tuple[Optional[Dict[str, Any]], Optional[Any]]:

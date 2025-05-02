@@ -15,4 +15,5 @@ if args.action == "init":
         ABGridMain.init_project(args.project, args.groups, args.members_per_group)
 else:
     abgrid_main = ABGridMain(args.project)
-    abgrid_main.generate_answer_sheets() if args.action == "sheets" else  abgrid_main.generate_reports()
+    if abgrid_main.abgrid_data:
+        abgrid_main.generate_answer_sheets() if args.action == "sheets" else  abgrid_main.generate_reports()

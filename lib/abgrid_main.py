@@ -5,7 +5,7 @@ import string
 import json
 import jinja2
 from pathlib import Path
-from typing import Literal, Optional, Tuple, Dict, Any
+from typing import Literal, Dict, Any
 from weasyprint import HTML
 from lib.abgrid_yaml import ABGridYAML
 from lib.abigrid_data import ABGridData
@@ -19,7 +19,8 @@ class ABGridMain:
     """
     Main class to manage project initialization, file generation, and report rendering for a grid-based project.
     """
-
+    
+    @notify_decorator("init project")
     def __init__(self, project: str):
         """
         Initialize the main handler for grid projects by setting up relevant file paths.
@@ -29,11 +30,15 @@ class ABGridMain:
         Raises:
             FileNotFoundError: If necessary project files are missing.
         """
+
+        # Init property
+        self.abgrid_data = None
+
         # Set relevant paths
         project_folder_path = Path("./data") / project
-        project_filepath = project_folder_path.glob(f"{project}.*")
-        groups_filepaths = project_folder_path.glob("*gruppo_*.*")
-
+        project_filepath = next(project_folder_path.glob(f"{project}.*"))
+        groups_filepaths = list(project_folder_path.glob("*gruppo_*.*"))
+       
         # Check whether necessary resources exist
         if all([project_filepath, groups_filepaths]):
             # Store instantiated ABGrid data class
@@ -72,7 +77,7 @@ class ABGridMain:
         ABGridMain.generate_group_inputs(project_folder_path, project, groups, members_per_group)
 
     @staticmethod
-    @notify_decorator("project")
+    @notify_decorator("creating project")
     def generate_project_file(project_folder_path: Path, project: str, groups: int, members_per_group: int):
         """
         Generate the main project YAML file using a template.
@@ -97,7 +102,7 @@ class ABGridMain:
             yaml.dump(yaml_data, fout, sort_keys=False)
 
     @staticmethod
-    @notify_decorator("group")
+    @notify_decorator("generate group inputs files")
     def generate_group_inputs(project_folder_path: Path, project: str, groups: int, members_per_group: int):
         """
         Generate input files for each group based on a Jinja2 HTML template.
@@ -130,7 +135,7 @@ class ABGridMain:
             with open(project_folder_path / f"{project}_gruppo_{group_id}.yaml", "w") as file:
                 file.write(rendered_tpl)
 
-    @notify_decorator("answersheet")
+    @notify_decorator("generate answersheet file")
     def generate_answer_sheets(self):
         """
         Generate and render answer sheets for the project using PDF format.
@@ -145,7 +150,7 @@ class ABGridMain:
         # Render answer sheets as PDF
         self.render_pdf("answersheet", sheets_data, "")
 
-    @notify_decorator("report")
+    @notify_decorator("generatoing reports")
     def generate_reports(self):
         """
         Generate and render reports for the project groups, and save the data in a JSON format.
