@@ -58,7 +58,7 @@ class GroupSchema(BaseModel):
             if any(not part for part in value_parts):
                 raise ValueError(f"Value '{value_str}' contains empty entries due to misplaced commas")
             if not all(len(part) == 1 and part.isalpha() and part.isupper() for part in value_parts):
-                raise ValueError(f"Value '{value_str}' must be comma-separated single uppercase letters and contain no empty parts")
+                raise ValueError(f"Value '{value_str}' must be comma-separated single uppercase letters and contain no empty values")
             if key in value_parts:
                 raise ValueError(f"Key '{key}' cannot be present in its own values")
             if len(value_parts) != len(set(value_parts)):
@@ -82,7 +82,7 @@ class GroupSchema(BaseModel):
 
         # Check if the sets of keys are identical
         if scelte_a_keys != scelte_b_keys:
-            raise ValueError("Keys in scelteA and scelteB must match.")
+            raise ValueError("Keys in scelteA and scelteB are not equal.")
 
         # Ensure all values in scelteA come from scelteA keys
         for choice in self.scelteA:
@@ -93,7 +93,7 @@ class GroupSchema(BaseModel):
             invalid_values = [v for v in value_parts if v not in scelte_a_keys]
             if invalid_values:
                 raise ValueError(
-                    f"Values for key '{key}' in scelteA contain letters not present as keys in scelteA: {', '.join(invalid_values)}")
+                    f"Values for key '{key}' in scelteA contain the following illegal letters: {', '.join(invalid_values)}")
 
         # Ensure all values in scelteB come from scelteB keys
         for choice in self.scelteB:
@@ -104,6 +104,6 @@ class GroupSchema(BaseModel):
             invalid_values = [v for v in value_parts if v not in scelte_b_keys]
             if invalid_values:
                 raise ValueError(
-                    f"Values for key '{key}' in scelteB contain letters not present as keys in scelteB: {', '.join(invalid_values)}")
+                    f"Values for key '{key}' in scelteB contain the following illegal letters: {', '.join(invalid_values)}")
 
         return self
