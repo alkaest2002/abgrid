@@ -18,7 +18,7 @@ def notify_decorator(argument: str) -> Callable:
             Exceptions:
                 Prints an error message if the original function raises an exception.
             """
-            print(f"Operation '{argument}' is being executing.")
+            print(f"Operation '{argument}' is being currently executed.")
             try:
                 result = function(*args, **kwargs)  # Call the original function
                 print(f"Operation '{argument}' was succesfully executed.")
