@@ -3,6 +3,11 @@
 __pycache__
 .DS_Store
 *.pyc
-data/
-!data/demo
-!data/demo/**
+data/2021_periti/
+data/2022_frecce/
+data/2022_periti/
+data/2023_frecce/
+data/2023_rsv/
+data/2024_frecce/
+data/2024_rsv/
+data/2025_rsv/
