@@ -148,10 +148,6 @@ class ABGridMain:
         # Initialize data object for all reports
         all_data = {}
         
-        # Ensure group files are present, raise error if not
-        if len(self.abgrid_data.groups_filepaths) == 0:
-            raise FileNotFoundError(f"Group file(s) for {self.abgrid_data.project} are missing.")
-        
         # Loop through each group file to generate report
         for group_file in self.abgrid_data.groups_filepaths:
         
