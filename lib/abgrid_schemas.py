@@ -24,7 +24,7 @@ class GroupSchema(BaseModel):
     IDGruppo: int = Field(ge=1, le=20)
     scelteA: List[Dict[str, str]]
     scelteB: List[Dict[str, str]]
-    model_config = {"extra": "forbid"}  # Configuration to forbid extra fields
+    model_config = {"extra": "forbid"} # Configuration to forbid extra fields
 
     @field_validator('scelteA', 'scelteB')
     def validate_choices(cls, value: List[Dict[str, str]]) -> List[Dict[str, str]]:
