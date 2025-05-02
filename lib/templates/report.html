@@ -72,6 +72,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta http-equiv="X-UA-Compatible" content="ie=edge">
   <style>
+    
     * {
       margin: 0;
       padding: 0;
@@ -80,8 +81,7 @@
       font-size: 10pt;
       box-sizing: border-box
     }
-  </style>
-  <style>
+  
     @page {
       position: relative;
       width: 210mm;
@@ -97,6 +97,14 @@
     th,
     td {
       text-align: center;
+    }
+
+    .page {
+      width: 210mm;
+      height: 297mm;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
     }
 
     .logo {
@@ -138,8 +146,9 @@
     }
 
     .disclaimer {
-      margin-top: 10px;
+      margin-top: 20px;
       margin-bottom: 40px;
+      text-align: justify;
     }
 
     .hero {
@@ -216,46 +225,45 @@
 
 <body>
   <div class="page">
-    <div class="intro">
-      <div class="logo">
-        <div class="logo-letter letter-A-reversed">A</div>
-        <div class="logo-letter letter-B-reversed">B</div>
-        <div>GRID</div>
+    <div>
+      <div class="intro">
+        <div class="logo">
+          <div class="logo-letter letter-A-reversed">A</div>
+          <div class="logo-letter letter-B-reversed">B</div>
+          <div>GRID</div>
+        </div>
       </div>
-    </div>
-    <div class="disclaimer">
-      <em>
-        Il presente report è stato generato da un computer. La sua interpretazione è riservata agli specialisti HR che
-        hanno frequentato il corso in "Dinamiche di gruppo e introduzione alla Network Analysis".
-      </em>
-    </div>
-    <div class="report-info">
-      <b>
-        <span>{{ assessment_info | upper }} - Gruppo {{ group_id | upper }}</span><br />
-      </b>
-    </div>
-    <table class="report-table">
-      <tr>
-        <td>
-          {{ network("A", ga_question, ga_graph, ga_info, ga_data) }}
-        </td>
-        <td class="no-border"></td>
-        <td>
-          {{ network("B", gb_question, gb_graph, gb_info, gb_data) }}
-        </td>
-      </tr>
-    </table>
-    <div class="legend">
-      <b>NN</b> = Number of Nodes, <b>NE</b> = Number of Edges, <b>NE</b> = Network Centralization, <b>NT</b> =
-      Network Transitivity<br /><b>NP</b> = Network Reciprocity, <b>IC</b> = In-Degree Centrality (rango), <b>PR</b> = PageRank
-      Centrality (rango)<br /><b>BC</b> = Betweenness Centrality (rango), <b>CC</b> = Closenness Centrality
-      (rango)<br /><b>OR</b> = Other Nodes Reachability (%), <b>NI</b> = No In-Degree.
+      <div class="disclaimer">
+        Questo report, generato da un computer, è destinato agli specialisti HR formati in 'Dinamiche di gruppo e introduzione alla Network Analysis.' È uno strumento di supporto e non sostituisce il giudizio di un esperto qualificato.
+        Le informazioni si basano su algoritmi e devono essere interpretate insieme ad altri dati del contesto specifico. Decisioni basate su questo report richiedono ulteriori valutazioni professionali.
+      </div>
+      <div class="report-info">
+        <b>
+          <span>{{ assessment_info | upper }} - Gruppo {{ group_id | upper }}</span><br />
+        </b>
+      </div>
+      <table class="report-table">
+        <tr>
+          <td>
+            {{ network("A", ga_question, ga_graph, ga_info, ga_data) }}
+          </td>
+          <td class="no-border"></td>
+          <td>
+            {{ network("B", gb_question, gb_graph, gb_info, gb_data) }}
+          </td>
+        </tr>
+      </table>
+      <div class="legend">
+        <b>NN</b> = Number of Nodes, <b>NE</b> = Number of Edges, <b>NE</b> = Network Centralization, <b>NT</b> =
+        Network Transitivity<br /><b>NP</b> = Network Reciprocity, <b>IC</b> = In-Degree Centrality (rango), <b>PR</b> = PageRank
+        Centrality (rango)<br /><b>BC</b> = Betweenness Centrality (rango), <b>CC</b> = Closenness Centrality
+        (rango)<br /><b>OR</b> = Other Nodes Reachability (%), <b>NI</b> = No In-Degree.
+      </div>
     </div>
     <div class="footer">
       <p><b>Autori</b>: Dr. Pierpaolo CALANNA, PhD, Dr. Gaetano BUONAIUTO (2021-{{ year }}), <b>Licenza d'uso</b>:
         l'impaginazione del presente report, la personalizzazione dei grafici, nonché la scelta degli indici
-        quantitativi sono regolati da licenza Creative Commons: Attribuzione - Non opere derivate 4.0 Internazionale
-        (https://creativecommons.org/licenses/by-nd/4.0).</p>
+        quantitativi è soggetta a copyright.</p>
     </div>
   </div>
 </body>
