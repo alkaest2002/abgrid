@@ -1,26 +1,7 @@
 from typing import Callable, Any
 
 def notify_decorator(argument: str) -> Callable:
-    """
-    Decorator to add print notifications before and after the execution of a function.
-
-    Args:
-        argument (str): A descriptive string used in the print messages to specify
-                        the type of task being carried out (e.g., "project", "report").
-
-    Returns:
-        Callable: A decorator function that wraps the original function.
-    """
     def decorator(function: Callable) -> Callable:
-        """
-        Inner decorator function that wraps the target function.
-
-        Args:
-            function (Callable): The function to be wrapped.
-
-        Returns:
-            Callable: The wrapped function with added print statements.
-        """
         def wrapper(*args: Any, **kwargs: Any) -> Any:
             """
             Wrapper function executed in place of the original function.
