@@ -71,23 +71,27 @@ class ABGridData:
             Tuple[Optional[Dict[str, Any]], Optional[Any]]: A tuple containing the report data or validation errors.
         """
         # Load project data
-        data, project_validation_errors = self.data_loader.load_data("project", self.project_filepath)
+        project_data, project_validation_errors = self.data_loader.load_data("project", self.project_filepath)
         
-        if data is not None:
+        # If project data was correctly loaded
+        if project_data is not None:
+            
             # Load group data
             group_data, group_validation_errors = self.data_loader.load_data("group", group_filepath)
             
+            # If group data was correctly loaded
             if group_data is not None:
+                
                 # Initialize and compute network statistics
                 ntw = ABGridNetwork((group_data["scelteA"], group_data["scelteB"]))
                 ntw.compute_networks()
                 
                 # Prepare report data
                 report_data: Dict[str, Any] = {
-                    "assessment_info": data["titolo"],
+                    "assessment_info": project_data["titolo"],
                     "group_id": group_data["IDGruppo"],
-                    "ga_question": data["domandaA"],
-                    "gb_question": data["domandaB"],
+                    "ga_question": project_data["domandaA"],
+                    "gb_question": project_data["domandaB"],
                     "edges_a": ntw.edges_a,
                     "edges_b": ntw.edges_b,
                     "year": datetime.datetime.now(datetime.UTC).year,
@@ -98,6 +102,7 @@ class ABGridData:
                     "gb_data": ntw.Gb_data.to_dict("index"),
                     "gb_graph": ntw.graphB
                 }
+                
                 # Return report data
                 return report_data, None
             else:
