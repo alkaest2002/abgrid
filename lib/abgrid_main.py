@@ -104,23 +104,23 @@ class ABGridMain:
         members_per_group_letters = string.ascii_uppercase[:members_per_group]
         
         # Get the group HTML template
-        tpl = jinja_env.get_template("group.html")
+        template = jinja_env.get_template("group.html")
         
         # Loop through each group and generate input files
         for group_id in range(1, groups + 1):
             
             # Prepare data for the template
-            tpl_data = dict(groupId=group_id, members=members_per_group_letters)
+            template_data = dict(groupId=group_id, members=members_per_group_letters)
             
             # Render the current group template with the data
-            rendered_tpl = tpl.render(tpl_data)
+            rendered_template = template.render(template_data)
             
             # Remove any blank lines from rendered template
-            rendered_tpl = "\n".join([line for line in rendered_tpl.split("\n") if len(line) > 0])
+            rendered_template = "\n".join([line for line in rendered_template.split("\n") if len(line) > 0])
             
             # Write the rendered template to a file
             with open(project_folder_path / f"{project}_gruppo_{group_id}.yaml", "w") as file:
-                file.write(rendered_tpl)
+                file.write(rendered_template)
 
     @notify_decorator("generate answersheet file")
     def generate_answer_sheets(self):
@@ -179,10 +179,10 @@ class ABGridMain:
             doc_suffix (str): Suffix to append to the filename.
         """
         # Get the appropriate template for the document type
-        tpl = jinja_env.get_template(f"{doc_type}.html")
+        template = jinja_env.get_template(f"{doc_type}.html")
         
         # Render the template with the provided data
-        rendered_tpl = tpl.render(doc_data)
+        rendered_template = template.render(doc_data)
         
         # Define the directory path where the PDF will be saved
         folder_path = Path(f"./data/{self.abgrid_data.project}/{doc_type}")
@@ -191,11 +191,11 @@ class ABGridMain:
         filename = re.sub("^_|_$", "", f"{self.abgrid_data.project}_{doc_type}_{doc_suffix}")
         
         # Convert the rendered HTML template to a PDF and save it
-        HTML(string=rendered_tpl).write_pdf(folder_path / f"{filename}.pdf")
+        HTML(string=rendered_template).write_pdf(folder_path / f"{filename}.pdf")
         
         # -----------------------------------------------------------------------------------
         # FOR DEBUGGING PURPOSES - Uncomment below to save HTML files for inspection
         # -----------------------------------------------------------------------------------
         # with open(folder_path / f"{filename}.html", "w") as file:
-        #     file.write(rendered_tpl)
+        #     file.write(rendered_template)
         # -----------------------------------------------------------------------------------
