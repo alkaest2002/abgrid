@@ -20,10 +20,11 @@ args = parser.parse_args()
 
 # Handle the 'init' action
 if args.action == "init":
+    
     # Check if both groups and members per group arguments are provided
     if not all([args.groups, args.members_per_group]):
         # Display a message if any required argument is missing
-        print("Please specify the following parameters: project's name (-p), number of groups (-g), number of members per group (-m)")
+        print("Please specify the following parameters: Project's name (-p), Number of groups (-g), Number of members per group (-m)")
     else:
         # Initialize the project with specified parameters
         ABGridMain.init_project(args.project, args.groups, args.members_per_group)
