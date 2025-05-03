@@ -24,7 +24,7 @@ class ProjectSchema(BaseModel):
     domandaA_scelte: constr(min_length=1, max_length=150) # type: ignore
     domandaB: constr(min_length=1, max_length=300) # type: ignore
     domandaB_scelte: constr(min_length=1, max_length=150) # type: ignore
-    model_config = {"extra": "forbid"} # Configuration to forbid extra fields
+    model_config = {"extra": "forbid"}
 
 # Define a Pydantic model for the group schema
 class GroupSchema(BaseModel):
@@ -34,7 +34,7 @@ class GroupSchema(BaseModel):
     IDGruppo: int = Field(ge=1, le=20)
     scelteA: List[Dict[str, str]]
     scelteB: List[Dict[str, str]]
-    model_config = {"extra": "forbid"} # Configuration to forbid extra fields
+    model_config = {"extra": "forbid"}
 
     @field_validator('scelteA', 'scelteB')
     def validate_choices(cls, value: List[Dict[str, str]]) -> List[Dict[str, str]]:
