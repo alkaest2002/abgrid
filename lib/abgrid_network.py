@@ -164,16 +164,16 @@ class ABGridNetwork:
 
     def get_network_stats(self, G: nx.DiGraph) -> Tuple[Dict[str, Union[float, int]], pd.DataFrame]:
         """
-        Generate statistics and rankings for a directed graph.
+        Generate macro-level and micro-level statistics for a graph.
 
         Args:
             G (nx.DiGraph): The directed graph to analyze.
 
         Returns:
-            Tuple[Dict[str, Union[float, int]], pd.DataFrame]: A dictionary with network-wide stats and a DataFrame with node-specific stats.
+            Tuple[Dict[str, Union[float, int]], pd.DataFrame]: A dictionary with macro-level stats and a DataFrame with micro-level stats for each node.
         """
-        # Create a DataFrame with various network centralities and metrics
-        df = pd.concat([
+        # Create a DataFrame with various network centralities and metrics for each node
+        micro_level_stats = pd.concat([
             pd.Series(nx.to_pandas_adjacency(G).apply(lambda x: ", ".join(x[x > 0].index.values), axis=1), name="lns"),
             pd.Series(nx.in_degree_centrality(G), name="ic"),
             pd.Series(nx.pagerank(G, max_iter=1000), name="pr"),
@@ -182,38 +182,38 @@ class ABGridNetwork:
             pd.Series({node: nx.local_reaching_centrality(G, node) for node in G.nodes()}, name="or"),
         ], axis=1)
         
-        # Identify nodes with zero in-degree and add to DataFrame
-        df = df.assign(ni=(lambda x: (x['ic'] == 0).astype(int)))
+        # Identify nodes with zero in-degree and add to micro-level stats DataFrame
+        micro_level_stats = micro_level_stats.assign(ni=(lambda x: (x['ic'] == 0).astype(int)))
         
-        # Rank network metrics
-        ranks = (df.iloc[:, 1:-1].apply(lambda x: x.rank(method="dense", ascending=False)).add_suffix("_r", axis=1))
+        # Rank node-specific metrics
+        ranks = (micro_level_stats.iloc[:, 1:-1].apply(lambda x: x.rank(method="dense", ascending=False)).add_suffix("_r", axis=1))
         
-        # Finalize the DataFrame
-        df = (
-            pd.concat([df, ranks], axis=1)
+        # Finalize the micro-level stats DataFrame
+        micro_level_stats = (
+            pd.concat([micro_level_stats, ranks], axis=1)
             .sort_index()
             .round(3)
             .rename_axis(index="letter")
         )
         
-        # Calculate macro-level statistics for the network
+        # Calculate network-wide (macro-level) statistics
         Gu = G.to_undirected()
         network_nodes = G.number_of_nodes()
         network_edges = G.number_of_edges()
-        network_max_clique = max([ v for _,v in nx.node_clique_number(Gu).items()])
+        network_max_clique = max([v for _, v in nx.node_clique_number(Gu).items()])
         network_centralization = self.get_network_centralization(Gu)
         network_transitivity = round(nx.transitivity(G), 3)
         network_reciprocity = round(nx.overall_reciprocity(G), 3)
         
-        # Create macro_stats object
-        macro_stats = {
+        # Create macro-level stats object
+        macro_level_stats = {
             'network_nodes': network_nodes,
             'network_edges': network_edges,
             'network_max_clique': network_max_clique,
             'network_centralization': network_centralization,
             'network_transitivity': network_transitivity,
-            'network_reciprocity':  network_reciprocity
+            'network_reciprocity': network_reciprocity
         }
         
-        # Return both macro and micro-level statistics
-        return macro_stats, df
+        # Return both macro-level and micro-level statistics
+        return macro_level_stats, micro_level_stats
