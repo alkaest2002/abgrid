@@ -15,7 +15,6 @@ from typing import Tuple, Optional, Dict, Any
 from pydantic import ValidationError
 from lib.abgrid_schemas import ProjectSchema, GroupSchema
 
-# Define the main class to handle loading and validating the YAML
 class ABGridYAML:
     
     def validate(self, yaml_type: str, yaml_data: Dict[str, Any]) -> Tuple[Optional[Dict[str, Any]], Optional[str]]:

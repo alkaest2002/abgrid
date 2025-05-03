@@ -26,6 +26,7 @@ from lib.abgrid_utils import notify_decorator
 jinja_env = jinja2.Environment(
     loader=jinja2.FileSystemLoader(["./lib/templates", "./templates"]))
 
+
 class ABGridMain:
     """
     Main class to manage project initialization, file generation, and report rendering for a grid-based project.
