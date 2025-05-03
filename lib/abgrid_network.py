@@ -148,17 +148,6 @@ class ABGridNetwork:
         The centralization measure indicates how concentrated the network is around its most central node.
         It compares the current network structure to an ideal star network structure.
 
-        The formula for network centralization used here is:
-
-        .. math::
-
-            C = \frac{\sum (C_{max} - C_i)}{(n-1)(n-2)}
-
-        Where:
-        - $$ C_{max} $$ is the centrality of the most central node.
-        - $$ C_i $$ is the centrality of node $$ i $$.
-        - $$ n $$ is the number of nodes in the graph.
-
         Args:
             G (nx.Graph): The graph for which the centralization is calculated.
             number_of_nodes (int): The number of nodes in the graph.
