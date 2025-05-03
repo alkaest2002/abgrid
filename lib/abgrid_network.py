@@ -1,6 +1,6 @@
 """
 Filename: abgrid_network.py
-Description: A module for representing and analyzing directed networks (graphs) for a given set of edges.
+Description: Provides functionality to analyze directed networks (graphs) for a given set of edges.
 
 Author: Pierpaolo Calanna
 Date Created: May 3, 2025
