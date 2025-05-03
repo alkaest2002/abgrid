@@ -1,4 +1,5 @@
 import io
+import numpy as np
 import pandas as pd
 import matplotlib
 import matplotlib.pyplot as plt
@@ -133,25 +134,37 @@ class ABGridNetwork:
         Calculate the centralization of a network.
 
         Args:
-            G (nx.Graph): The undirected graph for which the centralization is calculated.
+            G (nx.Graph): The graph for which the centralization is calculated.
 
         Returns:
-            float: The centralization value of the network.
+            float | np.nan: The centralization value of the network.
         """
-        # Calculate degree centralities
-        centralities = pd.Series(dict(nx.degree(G.to_undirected())))
         
-        # Calculate network centralization
+        # Get number of nodes
         number_of_nodes = G.number_of_nodes()
+        
+        # Ensure minimum number of nodes
+        if number_of_nodes < 3:
+            return np.nan
+        
+        # Ensure G is an undirected graph
+        if G.is_directed():
+            G = G.to_undirected()
+
+        # Init degree centralities
+        centralities = pd.Series(dict(nx.degree(G)))
+        
+        # Compute network centralization
         centralization = (
-            centralities
-            .rsub(centralities.max())  # Difference from the max centrality
-            .sum()
-            / ((number_of_nodes - 1) * (number_of_nodes - 2))
+            pd.Series(dict(nx.degree(G)))
+                .rsub(centralities.max())
+                .sum()
+                / ((number_of_nodes - 1) * (number_of_nodes - 2))
         )
         
         # Return network centralization
-        return centralization
+        return round(centralization, 3)
+
 
     def get_network_stats(self, G: nx.DiGraph) -> Tuple[Dict[str, Union[float, int]], pd.DataFrame]:
         """
@@ -190,11 +203,10 @@ class ABGridNetwork:
         # Calculate macro-level statistics for the network
         network_nodes = G.number_of_nodes()
         network_edges = G.number_of_edges()
-        print([ k for k in list(nx.enumerate_all_cliques(G.to_undirected())) if len(k) > 2])
         network_k_cliques = len([ k for k in list(nx.enumerate_all_cliques(G.to_undirected())) if len(k) > 2])
-        network_centralization = round(self.get_network_centralization(G), 3)
+        network_centralization = self.get_network_centralization(G)
         network_transitivity = round(nx.transitivity(G), 3)
-        network_reciprocity = round(nx.reciprocity(G), 3)
+        network_reciprocity = round(nx.overall_reciprocity(G), 3)
         
         # Create macro_stats object
         macro_stats = {
