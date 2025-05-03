@@ -201,7 +201,6 @@ class ABGridNetwork:
         network_nodes = G.number_of_nodes()
         network_edges = G.number_of_edges()
         network_max_clique = max([ v for _,v in nx.node_clique_number(Gu).items()])
-        print(list(nx.find_cliques(Gu)))
         network_centralization = self.get_network_centralization(Gu)
         network_transitivity = round(nx.transitivity(G), 3)
         network_reciprocity = round(nx.overall_reciprocity(G), 3)
