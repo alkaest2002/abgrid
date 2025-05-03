@@ -141,6 +141,9 @@ class ABGridMain:
     def generate_answer_sheets(self):
         """
         Generate and render answer sheets for the project using PDF format.
+
+        Raises:
+            ValueError: If there are errors in answersheet data validation.
         """
         # Load answer sheet data
         sheets_data, sheets_errors = self.abgrid_data.get_answersheets_data()
