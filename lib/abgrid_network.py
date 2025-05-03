@@ -41,12 +41,12 @@ class ABGridNetwork:
         self.nodes_b = set(sum(map(list, edges[1]), []))
 
         # Initialize data containers for analysis
-        self.Ga_macro: Dict[str, Union[float, int]] = {}
-        self.Ga_micro: pd.DataFrame = pd.DataFrame()
-        self.graphA: Optional[str] = None
-        self.Gb_macro: Dict[str, Union[float, int]] = {}
-        self.Gb_micro: pd.DataFrame = pd.DataFrame()
-        self.graphB: Optional[str] = None
+        self.macro_a: Dict[str, Union[float, int]] = {}
+        self.micro_a: pd.DataFrame = pd.DataFrame()
+        self.graph_a: Optional[str] = None
+        self.macro_b: Dict[str, Union[float, int]] = {}
+        self.micro_b: pd.DataFrame = pd.DataFrame()
+        self.graph_b: Optional[str] = None
 
     def unpack_network_edges(self, packed_edges: List[Dict[str, str]]) -> List[Tuple[str, str]]:
         """
@@ -77,10 +77,10 @@ class ABGridNetwork:
         locb = nx.spring_layout(Gb, k=.3, seed=42)
         
         # Store network statistics and plots
-        self.Ga_macro, self.Ga_micro = self.get_network_stats(Ga)
-        self.Gb_macro, self.Gb_micro = self.get_network_stats(Gb)
-        self.graphA = self.get_network_graph(Ga, loca, graphType="A")
-        self.graphB = self.get_network_graph(Gb, locb, graphType="B")
+        self.macro_a, self.micro_a = self.get_network_stats(Ga)
+        self.macro_b, self.micro_b = self.get_network_stats(Gb)
+        self.graph_a = self.get_network_graph(Ga, loca, graphType="A")
+        self.graph_b = self.get_network_graph(Gb, locb, graphType="B")
 
     def get_network_graph(self, G: nx.DiGraph, loc: Dict[str, Tuple[float, float]], graphType: str = "A") -> str:
         """
@@ -142,10 +142,6 @@ class ABGridNetwork:
         
         # Get number of nodes
         number_of_nodes = G.number_of_nodes()
-        
-        # Ensure minimum number of nodes
-        if number_of_nodes < 3:
-            return np.nan
         
         # Init degree centralities
         centralities = pd.Series(dict(nx.degree(G)))

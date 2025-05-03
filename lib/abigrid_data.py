@@ -46,14 +46,14 @@ class ABGridData:
         if data is not None:
             # Prepare answer sheet data
             answersheet_data: Dict[str, Any] = {
-                "title": data["titolo"],
+                "progect_title": data["titolo"],
                 "groups": list(range(1, data["numero_gruppi"] + 1)),
                 "likert": string.ascii_uppercase[:data["numero_partecipanti_per_gruppo"]],
                 "explanation": data["consegna"],
-                "ga_question": data["domandaA"],
-                "ga_question_hint": data["domandaA_scelte"],
-                "gb_question": data["domandaB"],
-                "gb_question_hint": data["domandaB_scelte"]
+                "question_a": data["domandaA"],
+                "question_a_hint": data["domandaA_scelte"],
+                "question_b": data["domandaB"],
+                "question_b_hint": data["domandaB_scelte"]
             }
             # Return answer sheet data
             return answersheet_data, None
@@ -90,18 +90,18 @@ class ABGridData:
                 # Prepare report data
                 report_data: Dict[str, Any] = {
                     "project_title": project_data["titolo"],
+                    "year": datetime.datetime.now(datetime.UTC).year,
                     "group_id": group_data["IDGruppo"],
-                    "ga_question": project_data["domandaA"],
-                    "gb_question": project_data["domandaB"],
+                    "question_a": project_data["domandaA"],
+                    "question_b": project_data["domandaB"],
                     "edges_a": ntw.edges_a,
                     "edges_b": ntw.edges_b,
-                    "year": datetime.datetime.now(datetime.UTC).year,
-                    "ga_macro": ntw.Ga_macro,
-                    "ga_micro": ntw.Ga_micro.to_dict("index"),
-                    "ga_graph": ntw.graphA,
-                    "gb_macro": ntw.Gb_macro,
-                    "gb_micro": ntw.Gb_micro.to_dict("index"),
-                    "gb_graph": ntw.graphB
+                    "macro_a": ntw.macro_a,
+                    "macro_b": ntw.macro_b,
+                    "micro_a": ntw.micro_a.to_dict("index"),
+                    "micro_b": ntw.micro_b.to_dict("index"),
+                    "graph_a": ntw.graph_a,
+                    "graph_b": ntw.graph_b
                 }
                 
                 # Return report data

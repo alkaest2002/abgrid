@@ -105,19 +105,19 @@
               <h1>AB-Grid</h1>
             </div>
             <div class="participant">
-              <span>Gruppo: {{ group }}, Partecipante: {{ participant }}</span><span>{{ title }}</span>
+              <span>Gruppo: {{ group }}, Partecipante: {{ participant }}</span><span>{{ project_title }}</span>
             </div>
             <div class="explanation">
               <p>{{ explanation }}</p>
             </div>
             <div class="question">
-              <p class="question-a"><b>A. {{ ga_question }}</b></p>
-              <p class="question-hint">{{ ga_question_hint }}</p>
+              <p class="question-a"><b>A. {{ question_a }}</b></p>
+              <p class="question-hint">{{ question_a_hint }}</p>
               {{ get_likert(likert) }}
             </div>
             <div class="question">
-              <p class="question-b"><b>B. {{ gb_question }}</b></p>
-              <p class="question-hint">{{ gb_question_hint }}</p>
+              <p class="question-b"><b>B. {{ question_b }}</b></p>
+              <p class="question-hint">{{ question_b_hint }}</p>
               {{ get_likert(likert) }}
             </div>
           </div>
