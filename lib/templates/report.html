@@ -1,6 +1,6 @@
 {% macro network_macro(macro) %}
 <span>
-  NN {{ macro.network_nodes }}, NE {{ macro.network_edges }}, MC {{ macro.network_max_clique }}, NC {{ (macro.network_centralization * 100)|round|int }}%, NT {{ (macro.network_transitivity * 100)|round|int }}%, NR {{ (macro.network_reciprocity * 100)|round|int }}%
+  NN {{ macro.network_nodes }}, NE {{ macro.network_edges }}, MC {{ macro.network_max_k_clique }}, NC {{ (macro.network_centralization * 100)|round|int }}%, NT {{ (macro.network_transitivity * 100)|round|int }}%, NR {{ (macro.network_reciprocity * 100)|round|int }}%
 </span>
 {% endmacro %}
 
