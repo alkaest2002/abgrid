@@ -1,3 +1,13 @@
+"""
+Filename: abgrid_yaml.py
+Description: Provides functionality to load and validate YAML data using predefined schemas.
+
+Author: Pierpaolo Calanna
+Date Created: May 3, 2025
+
+The code is part of the AB-Grid project and is licensed under the MIT License.
+"""
+
 import yaml
 
 from pathlib import Path

@@ -1,5 +1,14 @@
+"""
+Filename: abgrid_network.py
+Description: A module for representing and analyzing directed networks (graphs) for a given set of edges.
+
+Author: Pierpaolo Calanna
+Date Created: May 3, 2025
+
+The code is part of the AB-Grid project and is licensed under the MIT License.
+"""
+
 import io
-import numpy as np
 import pandas as pd
 import matplotlib
 import matplotlib.pyplot as plt

@@ -1,3 +1,13 @@
+"""
+Filename: abgrid_main.py
+Description: Main module for managing project initialization, file generation, and report rendering.
+
+Author: Pierpaolo Calanna
+Date Created: May 3, 2025
+
+The code is part of the AB-Grid project and is licensed under the MIT License.
+"""
+
 import os
 import yaml
 import re

@@ -1,3 +1,13 @@
+"""
+Filename: abgrid_schema.py
+Description: Defines Pydantic models for project and group schemas, ensuring data integrity and validation.
+
+Author: Pierpaolo Calanna
+Date Created: May 3, 2025
+
+The code is part of the AB-Grid project and is licensed under the MIT License.
+"""
+
 from pydantic import BaseModel, Field, constr, field_validator, model_validator
 from typing import Dict, List, Set
 

@@ -1,3 +1,13 @@
+"""
+Filename: abgrid_utils.py
+Description: Implements a decorator to print notifications for function execution.
+
+Author: Pierpaolo Calanna
+Date Created: May 3, 2025
+
+The code is part of the AB-Grid project and is licensed under the MIT License.
+"""
+
 from typing import Callable, Any
 
 def notify_decorator(argument: str) -> Callable:

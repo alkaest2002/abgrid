@@ -1,3 +1,13 @@
+"""
+Filename: abgrid_data.py
+Description: Manages and processes data related to AB-Grid networks.
+
+Author: Pierpaolo Calanna
+Date Created: May 3, 2025
+
+The code is part of the AB-Grid project and is licensed under the MIT License.
+"""
+
 import string
 import datetime
 
@@ -7,7 +17,7 @@ from lib.abgrid_network import ABGridNetwork
 
 class ABGridData:
     """
-    Class for managing and processing project data related to AB grid networks.
+    Class for managing and processing project data related to AB-Grid networks.
     """
 
     def __init__(
