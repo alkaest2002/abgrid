@@ -89,18 +89,18 @@ class ABGridData:
                 
                 # Prepare report data
                 report_data: Dict[str, Any] = {
-                    "assessment_info": project_data["titolo"],
+                    "project_title": project_data["titolo"],
                     "group_id": group_data["IDGruppo"],
                     "ga_question": project_data["domandaA"],
                     "gb_question": project_data["domandaB"],
                     "edges_a": ntw.edges_a,
                     "edges_b": ntw.edges_b,
                     "year": datetime.datetime.now(datetime.UTC).year,
-                    "ga_info": ntw.Ga_info,
-                    "ga_data": ntw.Ga_data.to_dict("index"),
+                    "ga_macro": ntw.Ga_macro,
+                    "ga_micro": ntw.Ga_micro.to_dict("index"),
                     "ga_graph": ntw.graphA,
-                    "gb_info": ntw.Gb_info,
-                    "gb_data": ntw.Gb_data.to_dict("index"),
+                    "gb_macro": ntw.Gb_macro,
+                    "gb_micro": ntw.Gb_micro.to_dict("index"),
                     "gb_graph": ntw.graphB
                 }
                 

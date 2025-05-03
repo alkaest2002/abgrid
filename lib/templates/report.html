@@ -1,10 +1,10 @@
-{% macro network_info(info) %}
+{% macro network_macro(macro) %}
 <span>
-  NN {{ info.network_nodes }}, NE {{ info.network_edges }}, MC {{ info.network_max_clique }}, NC {{ (info.network_centralization * 100)|round|int }}%, NT {{ (info.network_transitivity * 100)|round|int }}%, NR {{ (info.network_reciprocity * 100)|round|int }}%
+  NN {{ macro.network_nodes }}, NE {{ macro.network_edges }}, MC {{ macro.network_max_clique }}, NC {{ (macro.network_centralization * 100)|round|int }}%, NT {{ (macro.network_transitivity * 100)|round|int }}%, NR {{ (macro.network_reciprocity * 100)|round|int }}%
 </span>
 {% endmacro %}
 
-{% macro network_tabular(type, data) %}
+{% macro network_tabular(type, micro) %}
 <table class="report-table-tabular">
   <tr>
     <th>ID</th>
@@ -16,22 +16,22 @@
     <th>OR</th>
     <th>NI</th>
   </tr>
-  {% for k in data.keys() %}
+  {% for k in micro.keys() %}
   <tr>
     <td>{{ k }}</td>
-    <td>{{ data[k].lns }}</td>
-    <td>{{ data[k].ic_r | int }}</td>
-    <td>{{ data[k].pr_r | int }}</td>
-    <td>{{ data[k].bc_r | int }}</td>
-    <td>{{ data[k].cc_r | int }}</td>
-    <td>{{ '%0.2f'| format(data[k].or | round(2)) }}</td>
-    <td>{% if data[k].ni %}x{% endif%}</td>
+    <td>{{ micro[k].lns }}</td>
+    <td>{{ micro[k].ic_r | int }}</td>
+    <td>{{ micro[k].pr_r | int }}</td>
+    <td>{{ micro[k].bc_r | int }}</td>
+    <td>{{ micro[k].cc_r | int }}</td>
+    <td>{{ '%0.2f'| format(micro[k].or | round(2)) }}</td>
+    <td>{% if micro[k].ni %}x{% endif %}</td>
   </tr>
   {% endfor %}
 </table>
 {% endmacro %}
 
-{% macro network(type, question, graph, info, data) %}
+{% macro network(type, question, graph, macro, micro) %}
 <table class="report-table-graph">
   <tr>
     <td>
@@ -50,14 +50,14 @@
   </tr>
   <tr>
     <td>
-      <p class="g_info">
-        {{ network_info(info) }}
+      <p class="g_macro">
+        {{ network_macro(macro) }}
       </p>
     </td>
   </tr>
   <tr>
     <td style="vertical-align:top">
-      {{ network_tabular(type, data) }}
+      {{ network_tabular(type, micro) }}
     </td>
   </tr>
 </table>
@@ -157,7 +157,7 @@
       padding-bottom: 20px;
     }
 
-    .report-info {
+    .report-macro {
       padding-bottom: 20px;
       border-bottom: 1px solid #000;
     }
@@ -170,7 +170,7 @@
       text-align: left;
     }
 
-    .g_info {
+    .g_macro {
       text-align: left;
       margin-bottom: 10px;
     }
@@ -233,19 +233,19 @@
       <div class="disclaimer">
         Questo report generato elettronicamente è destinato agli specialisti delle risorse umane che hanno completato il corso "Introduzione alle dinamiche di gruppo e alla network analysis". È concepito come strumento di supporto per agevolare il processo decisionale e non sostituisce il giudizio professionale degli esperti di settore. Le interpretazioni tratte dal report dovrebbero essere integrate con altre informazioni relative allo specifico contesto valutativo.
       </div>
-      <div class="report-info">
+      <div class="report-macro">
         <b>
-          <span>{{ assessment_info | upper }} - Gruppo {{ group_id | upper }}</span><br />
+          <span>{{ project_title | upper }} - Gruppo {{ group_id | upper }}</span><br />
         </b>
       </div>
       <table class="report-table">
         <tr>
           <td>
-            {{ network("A", ga_question, ga_graph, ga_info, ga_data) }}
+            {{ network("A", ga_question, ga_graph, ga_macro, ga_micro) }}
           </td>
           <td class="no-border"></td>
           <td>
-            {{ network("B", gb_question, gb_graph, gb_info, gb_data) }}
+            {{ network("B", gb_question, gb_graph, gb_macro, gb_micro) }}
           </td>
         </tr>
       </table>
