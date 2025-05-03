@@ -140,7 +140,7 @@
         "macro_a": {
             "network_nodes": 8,
             "network_edges": 16,
-            "network_max_clique": 3,
+            "network_max_k_clique": 3,
             "network_centralization": 0.429,
             "network_transitivity": 0.688,
             "network_reciprocity": 0.625
@@ -148,7 +148,7 @@
         "macro_b": {
             "network_nodes": 8,
             "network_edges": 16,
-            "network_max_clique": 2,
+            "network_max_k_clique": 2,
             "network_centralization": 0.095,
             "network_transitivity": 0,
             "network_reciprocity": 0.25
@@ -525,7 +525,7 @@
         "macro_a": {
             "network_nodes": 8,
             "network_edges": 16,
-            "network_max_clique": 3,
+            "network_max_k_clique": 3,
             "network_centralization": 0.524,
             "network_transitivity": 0.5,
             "network_reciprocity": 0.375
@@ -533,7 +533,7 @@
         "macro_b": {
             "network_nodes": 8,
             "network_edges": 16,
-            "network_max_clique": 3,
+            "network_max_k_clique": 3,
             "network_centralization": 0.714,
             "network_transitivity": 0.75,
             "network_reciprocity": 0.375
@@ -910,7 +910,7 @@
         "macro_a": {
             "network_nodes": 8,
             "network_edges": 16,
-            "network_max_clique": 3,
+            "network_max_k_clique": 3,
             "network_centralization": 0.524,
             "network_transitivity": 0.438,
             "network_reciprocity": 0.375
@@ -918,7 +918,7 @@
         "macro_b": {
             "network_nodes": 8,
             "network_edges": 16,
-            "network_max_clique": 3,
+            "network_max_k_clique": 3,
             "network_centralization": 0.333,
             "network_transitivity": 0.312,
             "network_reciprocity": 0.375
@@ -1295,7 +1295,7 @@
         "macro_a": {
             "network_nodes": 8,
             "network_edges": 16,
-            "network_max_clique": 4,
+            "network_max_k_clique": 4,
             "network_centralization": 0.286,
             "network_transitivity": 0.562,
             "network_reciprocity": 0.25
@@ -1303,7 +1303,7 @@
         "macro_b": {
             "network_nodes": 8,
             "network_edges": 16,
-            "network_max_clique": 3,
+            "network_max_k_clique": 3,
             "network_centralization": 0.381,
             "network_transitivity": 0.438,
             "network_reciprocity": 0.5
