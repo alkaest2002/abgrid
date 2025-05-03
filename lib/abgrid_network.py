@@ -147,10 +147,6 @@ class ABGridNetwork:
         if number_of_nodes < 3:
             return np.nan
         
-        # Ensure G is an undirected graph
-        if G.is_directed():
-            G = G.to_undirected()
-
         # Init degree centralities
         centralities = pd.Series(dict(nx.degree(G)))
         
@@ -201,10 +197,12 @@ class ABGridNetwork:
         )
         
         # Calculate macro-level statistics for the network
+        Gu = G.to_undirected()
         network_nodes = G.number_of_nodes()
         network_edges = G.number_of_edges()
-        network_k_cliques = len([ k for k in list(nx.enumerate_all_cliques(G.to_undirected())) if len(k) > 2])
-        network_centralization = self.get_network_centralization(G)
+        network_max_clique = max([ v for _,v in nx.node_clique_number(Gu).items()])
+        print(list(nx.find_cliques(Gu)))
+        network_centralization = self.get_network_centralization(Gu)
         network_transitivity = round(nx.transitivity(G), 3)
         network_reciprocity = round(nx.overall_reciprocity(G), 3)
         
@@ -212,7 +210,7 @@ class ABGridNetwork:
         macro_stats = {
             'network_nodes': network_nodes,
             'network_edges': network_edges,
-            'network_k_cliques':network_k_cliques,
+            'network_max_clique': network_max_clique,
             'network_centralization': network_centralization,
             'network_transitivity': network_transitivity,
             'network_reciprocity':  network_reciprocity
