@@ -106,6 +106,7 @@ class ABGridNetwork:
         
         # Draw nodes
         nx.draw_networkx_nodes(G, loc, node_color=color, edgecolors=color, ax=ax)
+        
         # Determine mutual and non-mutual edges
         mutual_edges = [e for e in G.edges if e[::-1] in G.edges]
         non_mutual_edges = [e for e in G.edges if e not in mutual_edges]
@@ -119,15 +120,15 @@ class ABGridNetwork:
         # Draw node labels
         nx.draw_networkx_labels(G, loc, font_color="#FFF", font_weight="normal", font_size=13, ax=ax)
         
-        # Save the figure to the buffer in SVG format
+        # Save & close the figure to the buffer in SVG format
         fig.savefig(buffer, format="svg", bbox_inches='tight', transparent=True, pad_inches=0.05)
-        plt.close(fig)  # Close the figure
+        plt.close(fig) 
         
         # Encode the buffer contents to a base64 string
-        data = b64encode(buffer.getvalue()).decode()
+        base64_econded_string = b64encode(buffer.getvalue()).decode()
         
         # Return the data URI for the SVG
-        return f"data:image/svg+xml;base64,{data}"
+        return f"data:image/svg+xml;base64,{base64_econded_string}"
 
     def get_network_centralization(self, G: nx.Graph) -> float:
         """
@@ -143,19 +144,19 @@ class ABGridNetwork:
         # Get number of nodes
         number_of_nodes = G.number_of_nodes()
         
-        # Init degree centralities
-        centralities = pd.Series(dict(nx.degree(G)))
+        # Compute node centralities
+        node_centralities = pd.Series(dict(nx.degree(G)))
         
         # Compute network centralization
-        centralization = (
-            pd.Series(dict(nx.degree(G)))
-                .rsub(centralities.max())
+        network_centralization = (
+            node_centralities
+                .rsub(node_centralities.max())
                 .sum()
                 / ((number_of_nodes - 1) * (number_of_nodes - 2))
         )
         
         # Return network centralization
-        return round(centralization, 3)
+        return round(network_centralization, 3)
 
 
     def get_network_stats(self, G: nx.DiGraph) -> Tuple[Dict[str, Union[float, int]], pd.DataFrame]:
