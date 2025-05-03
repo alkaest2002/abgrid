@@ -1,7 +1,7 @@
 {% macro network_macro(macro) %}
-<span>
+<p>
   NN {{ macro.network_nodes }}, NE {{ macro.network_edges }}, MC {{ macro.network_max_k_clique }}, NC {{ (macro.network_centralization * 100)|round|int }}%, NT {{ (macro.network_transitivity * 100)|round|int }}%, NR {{ (macro.network_reciprocity * 100)|round|int }}%
-</span>
+</p>
 {% endmacro %}
 
 {% macro network_tabular(type, micro) %}
@@ -49,14 +49,12 @@
     <td class="hero letter-{% if type == 'A' %}A{% else %}B{% endif %}">{{ type }}</td>
   </tr>
   <tr>
-    <td>
-      <p class="g_macro">
-        {{ network_macro(macro) }}
-      </p>
+    <td class="macro">
+      {{ network_macro(macro) }}
     </td>
   </tr>
   <tr>
-    <td style="vertical-align:top">
+    <td class="micro">
       {{ network_tabular(type, micro) }}
     </td>
   </tr>
@@ -144,8 +142,13 @@
 
     .disclaimer {
       margin-top: 20px;
-      margin-bottom: 40px;
+      margin-bottom: 20px;
       text-align: justify;
+    }
+
+    .report-header {
+      padding-bottom: 20px;
+      border-bottom: 1px solid #000;
     }
 
     .hero {
@@ -157,11 +160,6 @@
       padding-bottom: 20px;
     }
 
-    .report-macro {
-      padding-bottom: 20px;
-      border-bottom: 1px solid #000;
-    }
-
     .report-table-graph {
       margin-top: 20px;
     }
@@ -170,9 +168,13 @@
       text-align: left;
     }
 
-    .g_macro {
+    .macro p {
       text-align: left;
       margin-bottom: 10px;
+    }
+
+    .micro {
+      vertical-align: top;
     }
 
     .graph-main {
@@ -211,8 +213,6 @@
     }
 
     .footer {
-      position: relative;
-      top: 40px;
       font-size: 8pt !important;
       color: #acacac;
       text-align: justify;
@@ -233,10 +233,8 @@
       <div class="disclaimer">
         Questo report generato elettronicamente è destinato agli specialisti delle risorse umane che hanno completato il corso "Introduzione alle dinamiche di gruppo e alla network analysis". È concepito come strumento di supporto per agevolare il processo decisionale e non sostituisce il giudizio professionale degli esperti di settore. Le interpretazioni tratte dal report dovrebbero essere integrate con altre informazioni relative allo specifico contesto valutativo.
       </div>
-      <div class="report-macro">
-        <b>
-          <span>{{ project_title | upper }} - Gruppo {{ group_id | upper }}</span><br />
-        </b>
+      <div class="report-header">
+          <span><b>GRUPPO {{ group_id | upper }} - {{ project_title | upper }}</b></span>
       </div>
       <table class="report-table">
         <tr>
