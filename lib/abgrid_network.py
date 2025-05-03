@@ -29,7 +29,7 @@ class ABGridNetwork:
         """
         
         # Unpack network edges for both networks A (choices) and B (refusals)
-        # from {A: B, C} to [(A,B), (A,C)]
+        # i.e., from {"A": "B, C"} to [(A,B), (A,C)]
         self.edges_a = self.unpack_network_edges(edges[0])
         self.edges_b = self.unpack_network_edges(edges[1])
         
@@ -207,12 +207,12 @@ class ABGridNetwork:
         
         # Create macro-level stats object
         macro_level_stats = {
-            'network_nodes': network_nodes,
-            'network_edges': network_edges,
-            'network_max_k_clique': network_max_k_clique,
-            'network_centralization': network_centralization,
-            'network_transitivity': network_transitivity,
-            'network_reciprocity': network_reciprocity
+            "network_nodes": network_nodes,
+            "network_edges": network_edges,
+            "network_max_k_clique": network_max_k_clique,
+            "network_centralization": network_centralization,
+            "network_transitivity": network_transitivity,
+            "network_reciprocity": network_reciprocity
         }
         
         # Return both macro-level and micro-level statistics
