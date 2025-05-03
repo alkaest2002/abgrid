@@ -102,10 +102,15 @@ class ABGridNetwork:
         
         # Create a matplotlib figure
         fig, ax = plt.subplots(constrained_layout=True, figsize=(9 * CM_TO_INCHES, 9 * CM_TO_INCHES))
-        ax.axis('off')  # Hide axis
+        
+        # Hide axis
+        ax.axis('off')  
         
         # Draw nodes
         nx.draw_networkx_nodes(G, loc, node_color=color, edgecolors=color, ax=ax)
+        
+        # Draw node labels
+        nx.draw_networkx_labels(G, loc, font_color="#FFF", font_weight="normal", font_size=13, ax=ax)
         
         # Determine mutual and non-mutual edges
         mutual_edges = [e for e in G.edges if e[::-1] in G.edges]
@@ -116,9 +121,6 @@ class ABGridNetwork:
         
         # Draw non-mutual edges with specic styles
         nx.draw_networkx_edges(G, loc, edgelist=non_mutual_edges, edge_color=color, style="--", arrowstyle='-|>', arrowsize=15, ax=ax)
-        
-        # Draw node labels
-        nx.draw_networkx_labels(G, loc, font_color="#FFF", font_weight="normal", font_size=13, ax=ax)
         
         # Save figure to the buffer in SVG format then close it
         fig.savefig(buffer, format="svg", bbox_inches='tight', transparent=True, pad_inches=0.05)
@@ -133,6 +135,20 @@ class ABGridNetwork:
     def get_network_centralization(self, G: nx.Graph, number_of_nodes: int) -> float:
         """
         Calculate the centralization of a network.
+
+        The centralization measure indicates how concentrated the network is around its most central node.
+        It compares the current network structure to an ideal star network structure.
+
+        The formula for network centralization used here is:
+
+        .. math::
+
+            C = \frac{\sum (C_{max} - C_i)}{(n-1)(n-2)}
+
+        Where:
+        - $$ C_{max} $$ is the centrality of the most central node.
+        - $$ C_i $$ is the centrality of node $$ i $$.
+        - $$ n $$ is the number of nodes in the graph.
 
         Args:
             G (nx.Graph): The graph for which the centralization is calculated.
