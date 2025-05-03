@@ -35,11 +35,15 @@ class ABGridMain:
     def __init__(self, project: str, project_folder_path: Path, project_filepath: Path, groups_filepaths: list[Path]):
         """
         Initialize the main handler for grid projects by setting up relevant file paths.
-        
+
         Args:
-            project (str): Name of the project.
-        Raises:
-            FileNotFoundError: If necessary project files are missing.
+            project (str): The name of the project.
+            project_folder_path (Path): The directory path where the project files are stored.
+            project_filepath (Path): The full path to the main project file.
+            groups_filepaths (list[Path]): A list of Paths to group files that are associated with the project.
+
+        This method sets up the initial configuration for handling grid-related projects by storing these configurations
+        into the `ABGridData` data class instance. The paths provided are essential for accessing and managing project data.
         """
         # Store instantiated ABGrid data class
         self.abgrid_data = ABGridData(
@@ -51,7 +55,7 @@ class ABGridMain:
         Initialize a new project folder structure with necessary files.
         
         Args:
-            project (str): Name of the project.
+            project (str): The name of the project.
             groups (int): Number of groups in the project.
             members_per_group (int): Number of members in each group.
         
@@ -82,7 +86,7 @@ class ABGridMain:
 
         Args:
             project_folder_path (Path): Directory where the project files are stored.
-            project (str): Name of the project.
+            project (str): The name of the project.
             groups (int): Number of groups in the project.
             members_per_group (int): Number of members in each group.
         """
@@ -107,7 +111,7 @@ class ABGridMain:
 
         Args:
             project_folder_path (Path): Directory where the project files are stored.
-            project (str): Name of the project.
+            project (str): The name of the project.
             groups (int): Number of groups in the project.
             members_per_group (int): Number of members in each group.
         """
@@ -154,7 +158,6 @@ class ABGridMain:
         Generate and render reports for the project groups, and save the data in a JSON format.
         
         Raises:
-            FileNotFoundError: If any group file is missing.
             ValueError: If there are errors in report data validation.
         """
         # Initialize data object for all reports
