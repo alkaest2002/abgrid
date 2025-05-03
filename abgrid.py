@@ -43,7 +43,8 @@ else:
         
         # Find all group files, ensuring at least one exists
         if len(groups_filepaths := list(project_folder_path.glob("*gruppo_*.*"))) == 0:
-             raise FileNotFoundError(f"The project folder ({project_folder_path.name}) does not contain any group files")
+            # Raise an error if no group files are found
+            raise FileNotFoundError(f"The project folder ({project_folder_path.name}) does not contain any group files")
 
         # Create an instance of ABGridMain with project details
         abgrid_main = ABGridMain(args.project, project_folder_path, project_filepath, groups_filepaths)
