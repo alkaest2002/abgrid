@@ -5,7 +5,7 @@ import matplotlib
 import matplotlib.pyplot as plt
 import networkx as nx
 
-from typing import Optional, List, Dict, Tuple, Union
+from typing import Literal, List, Dict, Tuple, Union
 from base64 import b64encode
 from functools import reduce
 
@@ -27,26 +27,23 @@ class ABGridNetwork:
             edges (Tuple[List[Dict[str, str]], List[Dict[str, str]]]): 
                 Tuple containing two lists of dictionaries, each representing edges for two networks.
         """
-        # Conversion factor from inches to centimeters
-        self.cm: float = 1 / 2.54
-
-        self.edges = edges
         
-        # Unpack network edges for both networks
+        # Unpack network edges for both networks A (choices) and B (refusals)
+        # from {A: B, C} to [(A,B), (A,C)]
         self.edges_a = self.unpack_network_edges(edges[0])
         self.edges_b = self.unpack_network_edges(edges[1])
         
-        # Extract nodes (unique from edges) for both networks
-        self.nodes_a = set(sum(map(list, edges[0]), []))
-        self.nodes_b = set(sum(map(list, edges[1]), []))
+        # Extract nodes for both networks
+        self.nodes_a = sorted(set([n[0] for n in self.edges_a]))
+        self.nodes_b = sorted(set([n[0] for n in self.edges_b]))
 
         # Initialize data containers for analysis
-        self.macro_a: Dict[str, Union[float, int]] = {}
-        self.micro_a: pd.DataFrame = pd.DataFrame()
-        self.graph_a: Optional[str] = None
-        self.macro_b: Dict[str, Union[float, int]] = {}
-        self.micro_b: pd.DataFrame = pd.DataFrame()
-        self.graph_b: Optional[str] = None
+        self.macro_a = {}
+        self.macro_b = {}
+        self.micro_a = pd.DataFrame()
+        self.micro_b = pd.DataFrame()
+        self.graph_a = ""
+        self.graph_b = ""
 
     def unpack_network_edges(self, packed_edges: List[Dict[str, str]]) -> List[Tuple[str, str]]:
         """
@@ -59,7 +56,7 @@ class ABGridNetwork:
             List[Tuple[str, str]]: List of edge tuples (source, target).
         """
         return reduce(
-            lambda acc, itr: [*acc, *[(node_a, node_b) for node_a, edges in itr.items() for node_b in edges.split(",")]],
+            lambda acc, itr: [*acc, *[(node_from, node_to) for node_from, edges in itr.items() for node_to in edges.split(",")]],
             packed_edges,
             []
         )
@@ -82,7 +79,7 @@ class ABGridNetwork:
         self.graph_a = self.get_network_graph(Ga, loca, graphType="A")
         self.graph_b = self.get_network_graph(Gb, locb, graphType="B")
 
-    def get_network_graph(self, G: nx.DiGraph, loc: Dict[str, Tuple[float, float]], graphType: str = "A") -> str:
+    def get_network_graph(self, G: nx.DiGraph, loc: Dict[str, Tuple[float, float]], graphType: Literal["A","B"] = "A") -> str:
         """
         Generate a graphical representation of a network and return it encoded in base64 SVG format.
 
@@ -94,14 +91,17 @@ class ABGridNetwork:
         Returns:
             str: The SVG data URI of the network plot.
         """
-        # Set color based on graph type
+        # Conversion factor from inches to centimeters
+        CM_TO_INCHES = 1 / 2.54
+
+        # Set color based on graph type (A or B)
         color = "#0000FF" if graphType == "A" else "#FF0000"
         
         # Initialize an in-memory buffer
         buffer = io.BytesIO()
         
         # Create a matplotlib figure
-        fig, ax = plt.subplots(constrained_layout=True, figsize=(9 * self.cm, 9 * self.cm))
+        fig, ax = plt.subplots(constrained_layout=True, figsize=(9 * CM_TO_INCHES, 9 * CM_TO_INCHES))
         ax.axis('off')  # Hide axis
         
         # Draw nodes
@@ -111,16 +111,16 @@ class ABGridNetwork:
         mutual_edges = [e for e in G.edges if e[::-1] in G.edges]
         non_mutual_edges = [e for e in G.edges if e not in mutual_edges]
         
-        # Draw mutual edges
+        # Draw mutual edges with specic styles
         nx.draw_networkx_edges(G, loc, edgelist=mutual_edges, edge_color=color, arrowstyle='-', width=3, ax=ax)
         
-        # Draw non-mutual edges
+        # Draw non-mutual edges with specic styles
         nx.draw_networkx_edges(G, loc, edgelist=non_mutual_edges, edge_color=color, style="--", arrowstyle='-|>', arrowsize=15, ax=ax)
         
         # Draw node labels
         nx.draw_networkx_labels(G, loc, font_color="#FFF", font_weight="normal", font_size=13, ax=ax)
         
-        # Save & close the figure to the buffer in SVG format
+        # Save figure to the buffer in SVG format then close it
         fig.savefig(buffer, format="svg", bbox_inches='tight', transparent=True, pad_inches=0.05)
         plt.close(fig) 
         
@@ -130,19 +130,18 @@ class ABGridNetwork:
         # Return the data URI for the SVG
         return f"data:image/svg+xml;base64,{base64_econded_string}"
 
-    def get_network_centralization(self, G: nx.Graph) -> float:
+    def get_network_centralization(self, G: nx.Graph, number_of_nodes: int) -> float:
         """
         Calculate the centralization of a network.
 
         Args:
             G (nx.Graph): The graph for which the centralization is calculated.
+            number_of_nodes (int): The number of nodes in the graph.
 
         Returns:
-            float | np.nan: The centralization value of the network.
+            float: The centralization value of the network, rounded to three decimal places, or
+            np.nan if the computation is not applicable (e.g., for graphs with fewer than three nodes).
         """
-        
-        # Get number of nodes
-        number_of_nodes = G.number_of_nodes()
         
         # Compute node centralities
         node_centralities = pd.Series(dict(nx.degree(G)))
@@ -183,22 +182,26 @@ class ABGridNetwork:
         micro_level_stats = micro_level_stats.assign(ni=(lambda x: (x['ic'] == 0).astype(int)))
         
         # Rank node-specific metrics
-        ranks = (micro_level_stats.iloc[:, 1:-1].apply(lambda x: x.rank(method="dense", ascending=False)).add_suffix("_r", axis=1))
+        micro_level_stats_ranks = (
+            micro_level_stats.iloc[:, 1:-1]
+                .apply(lambda x: x.rank(method="dense", ascending=False))
+                .add_suffix("_r", axis=1)
+            )
         
         # Finalize the micro-level stats DataFrame
         micro_level_stats = (
-            pd.concat([micro_level_stats, ranks], axis=1)
-            .sort_index()
-            .round(3)
-            .rename_axis(index="letter")
+            pd.concat([micro_level_stats, micro_level_stats_ranks], axis=1)
+                .sort_index()
+                .round(3)
+                .rename_axis(index="letter")
         )
         
         # Calculate network-wide (macro-level) statistics
         Gu = G.to_undirected()
         network_nodes = G.number_of_nodes()
         network_edges = G.number_of_edges()
-        network_max_clique = max([v for _, v in nx.node_clique_number(Gu).items()])
-        network_centralization = self.get_network_centralization(Gu)
+        network_max_k_clique = max([v for _, v in nx.node_clique_number(Gu).items()])
+        network_centralization = self.get_network_centralization(Gu, network_nodes)
         network_transitivity = round(nx.transitivity(G), 3)
         network_reciprocity = round(nx.overall_reciprocity(G), 3)
         
@@ -206,7 +209,7 @@ class ABGridNetwork:
         macro_level_stats = {
             'network_nodes': network_nodes,
             'network_edges': network_edges,
-            'network_max_clique': network_max_clique,
+            'network_max_k_clique': network_max_k_clique,
             'network_centralization': network_centralization,
             'network_transitivity': network_transitivity,
             'network_reciprocity': network_reciprocity
