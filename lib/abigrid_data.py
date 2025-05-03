@@ -45,7 +45,7 @@ class ABGridData:
         
         if data is not None:
             # Prepare answer sheet data
-            answersheet_data: Dict[str, Any] = {
+            answersheet_data = {
                 "progect_title": data["titolo"],
                 "groups": list(range(1, data["numero_gruppi"] + 1)),
                 "likert": string.ascii_uppercase[:data["numero_partecipanti_per_gruppo"]],
@@ -88,7 +88,7 @@ class ABGridData:
                 ntw.compute_networks()
                 
                 # Prepare report data
-                report_data: Dict[str, Any] = {
+                report_data = {
                     "project_title": project_data["titolo"],
                     "year": datetime.datetime.now(datetime.UTC).year,
                     "group_id": group_data["IDGruppo"],
