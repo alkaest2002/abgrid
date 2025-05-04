@@ -168,13 +168,16 @@ class ABGridMain:
         
         # Loop through each group file to generate report
         for group_file in self.abgrid_data.groups_filepaths:
-        
+
             # Load report data for the current group
             report_data, report_errors = self.abgrid_data.get_report_data(group_file)
         
             # Raise error if validation fails
             if report_errors:
                 raise ValueError(report_errors)
+            
+            # Notify
+            print(f"generating report: groupID {report_data['group_id']}")
         
             # Add the current group's data to the collection
             all_data[f"{self.abgrid_data.project}_gruppo_{report_data['group_id']}"] = report_data
