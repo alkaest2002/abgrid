@@ -24,7 +24,7 @@ if args.action == "init":
     # Check if both groups and members per group arguments are provided
     if not all([args.groups, args.members_per_group]):
         # Display a message if any required argument is missing
-        print("Please specify the following parameters: Project's name (-p), Number of groups (-g), Number of members per group (-m)")
+        print("Please specify the following additional parameters: number of groups (-g), number of members per group (-m).")
     else:
         # Initialize the project with specified parameters
         ABGridMain.init_project(args.project, args.groups, args.members_per_group)
@@ -36,7 +36,7 @@ else:
         # Check if the project folder exists
         if not project_folder_path.exists():
             # Raise an error if the project folder does not exist
-            raise FileNotFoundError(f"The project folder ({project_folder_path.name}) does not exist")
+            raise FileNotFoundError(f"The project folder ({project_folder_path.name}) does not exist.")
         
         # Find the project file within the project folder
         project_filepath = next(project_folder_path.glob(f"{args.project}.*"))
@@ -44,7 +44,7 @@ else:
         # Find all group files, ensuring at least one exists
         if len(groups_filepaths := list(project_folder_path.glob("*gruppo_*.*"))) == 0:
             # Raise an error if no group files are found
-            raise FileNotFoundError(f"The project folder ({project_folder_path.name}) does not contain any group files")
+            raise FileNotFoundError(f"The project folder ({project_folder_path.name}) does not contain any group files.")
 
         # Create an instance of ABGridMain with project details
         abgrid_main = ABGridMain(args.project, project_folder_path, project_filepath, groups_filepaths)
