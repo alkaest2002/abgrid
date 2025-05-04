@@ -1,15 +1,33 @@
+import argparse
+
 from pathlib import Path
 from lib.abgrid_main import ABGridMain
 
-data_folder = Path("./data")
-folders = data_folder.glob("*")
+# Set up the argument parser
+parser = argparse.ArgumentParser(prog="ABGrid")
 
-for folder in folders:
-    if folder.is_dir():
-        project = folder.name
-        project_folder_path = data_folder / project
-        print(project_folder_path)
+# Add arguments
+parser.add_argument("-u", "--user", type=str, required=True, help="The username.")
+
+# Parse arguments
+args = parser.parse_args()
+
+# Get user root folder
+data_folder = Path("./data") / args.user
+
+# Glob folders in user root folder
+folders_to_process = data_folder.glob("*")
+
+# Loop through folders to process
+for path in folders_to_process:
+
+    # If current path is a folder
+    if path.is_dir():
+        # Process files
+        project_folder_path = path
+        project = project_folder_path.name
         project_filepath = next(project_folder_path.glob(f"{project}.*"))
         groups_filepaths = list(project_folder_path.glob("*gruppo_*.*"))
         abgrid_main = ABGridMain(project, project_folder_path, project_filepath, groups_filepaths)
         abgrid_main.generate_reports()
+        abgrid_main.generate_answer_sheets()
