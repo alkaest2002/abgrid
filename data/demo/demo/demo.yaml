@@ -1,8 +1,8 @@
-titolo: "Demo"
+progetto: "Demo"
 numero_gruppi: 4
 numero_partecipanti_per_gruppo: 8
 consegna: "Pensa alla prova cha hai appena svolto e rispondi alle seguenti domande."
-domandaA: "Con chi vorresti lavorare?"
-domandaA_scelte: "Indica 2 persone, annerendo per intero la lettera corrispondente"
-domandaB: "Con chi non vorresti lavorare?"
-domandaB_scelte: "Indica 2 persone, annerendo per intero la lettera corrispondente"
+domanda_a: "Con chi vorresti lavorare?"
+domanda_a_scelte: "Indica 2 persone, annerendo per intero la lettera corrispondente"
+domanda_b: "Con chi non vorresti lavorare?"
+domanda_b_scelte: "Indica 2 persone, annerendo per intero la lettera corrispondente"

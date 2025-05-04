@@ -1,5 +1,5 @@
-IDGruppo: 1
-scelteA:
+gruppo: 1
+scelte_a:
   - A: F,H
   - B: F,H
   - C: D,F
@@ -8,7 +8,7 @@ scelteA:
   - F: A,D
   - G: A,E
   - H: A,F
-scelteB:
+scelte_b:
   - A: B,D
   - B: D,G
   - C: B,E
