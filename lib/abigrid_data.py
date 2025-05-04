@@ -22,7 +22,7 @@ class ABGridData:
 
     def __init__(
         self, project: str, 
-        project_path: Path, 
+        project_folderpath: Path, 
         project_filepath: Path, 
         groups_filepaths: list[Path], 
         data_loader: Any
@@ -32,13 +32,13 @@ class ABGridData:
 
         Args:
             project (str): The name of the project.
-            project_path (Path): Path to the project directory.
+            project_folderpath (Path): Path to the project folder.
             project_filepath (Path): Path to the the project's main configuration file.
             groups_filepaths (list[Path]): List of paths to group-specific data files.
             data_loader (Any): Data loading utility for reading and validating YAML configuration files.
         """
         self.project = project
-        self.project_path = project_path
+        self.project_folderpath = project_folderpath
         self.project_filepath = project_filepath
         self.groups_filepaths = groups_filepaths
         self.data_loader = data_loader

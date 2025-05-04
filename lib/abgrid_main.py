@@ -32,13 +32,13 @@ class ABGridMain:
     Main class to manage project initialization, file generation, and report rendering for a grid-based project.
     """
     
-    def __init__(self, project: str, project_folder_path: Path, project_filepath: Path, groups_filepaths: list[Path]):
+    def __init__(self, project: str, project_folderpath: Path, project_filepath: Path, groups_filepaths: list[Path]):
         """
         Initialize the main handler for grid projects by setting up relevant file paths.
 
         Args:
             project (str): The name of the project.
-            project_folder_path (Path): The directory path where the project files are stored.
+            project_folderpath (Path): The folder path where the project files are stored.
             project_filepath (Path): The full path to the main project file.
             groups_filepaths (list[Path]): A list of Paths to group files that are associated with the project.
 
@@ -47,45 +47,38 @@ class ABGridMain:
         """
         # Store instantiated ABGrid data class
         self.abgrid_data = ABGridData(
-            project, project_folder_path, project_filepath, groups_filepaths, ABGridYAML())
+            project, project_folderpath, project_filepath, groups_filepaths, ABGridYAML())
 
     @staticmethod
-    def init_project(project: str, groups: int, members_per_group: int):
+    @notify_decorator("init project")
+    def init_project(project_folderpath: Path, project: str, groups: int, members_per_group: int):
         """
         Initialize a new project folder structure with necessary files.
         
         Args:
+            project_folderpath (Path): The path to the project folder.
             project (str): The name of the project.
             groups (int): Number of groups in the project.
             members_per_group (int): Number of members in each group.
-        
-        Raises:
-            FileExistsError: If a project with the same name already exists.
         """
-        # Set project folder path
-        project_folder_path = Path("./data") / project
-        
-        # Make sure project folder does not already exist
-        if project_folder_path.exists():
-            raise FileExistsError(f"{project} already exists in data folder.")
         
         # Create necessary directories for the project
-        os.makedirs(project_folder_path)
-        os.makedirs(project_folder_path / "reports")
-        os.makedirs(project_folder_path / "answersheets")
+        os.makedirs(project_folderpath)
+        os.makedirs(project_folderpath / "reports")
+        os.makedirs(project_folderpath / "answersheets")
         
         # Generate project-specific files
-        ABGridMain.generate_project_file(project_folder_path, project, groups, members_per_group)
-        ABGridMain.generate_group_inputs(project_folder_path, project, groups, members_per_group)
+        ABGridMain.generate_project_file(project_folderpath, project, groups, members_per_group)
+        ABGridMain.generate_group_inputs(project_folderpath, project, groups, members_per_group)
 
     @staticmethod
     @notify_decorator("create project")
-    def generate_project_file(project_folder_path: Path, project: str, groups: int, members_per_group: int):
+    def generate_project_file(project_folderpath: Path, project: str, groups: int, members_per_group: int):
         """
         Generate the main project YAML file using a template.
 
         Args:
-            project_folder_path (Path): Directory where the project files are stored.
+            project_folderpath (Path): Folder where the project files are stored.
             project (str): The name of the project.
             groups (int): Number of groups in the project.
             members_per_group (int): Number of members in each group.
@@ -100,17 +93,17 @@ class ABGridMain:
         yaml_data["numero_partecipanti_per_gruppo"] = members_per_group
         
         # Write the updated project YAML data to a file
-        with open(project_folder_path / f"{project}.yaml", 'w') as fout:
+        with open(project_folderpath / f"{project}.yaml", 'w') as fout:
             yaml.dump(yaml_data, fout, sort_keys=False)
 
     @staticmethod
     @notify_decorator("generate group inputs files")
-    def generate_group_inputs(project_folder_path: Path, project: str, groups: int, members_per_group: int):
+    def generate_group_inputs(project_folderpath: Path, project: str, groups: int, members_per_group: int):
         """
         Generate input files for each group based on a Jinja2 HTML template.
 
         Args:
-            project_folder_path (Path): Directory where the project files are stored.
+            project_folderpath (Path): Folder where the project files are stored.
             project (str): The name of the project.
             groups (int): Number of groups in the project.
             members_per_group (int): Number of members in each group.
@@ -134,7 +127,7 @@ class ABGridMain:
             rendered_template = "\n".join([line for line in rendered_template.split("\n") if len(line) > 0])
             
             # Write the rendered template to a file
-            with open(project_folder_path / f"{project}_gruppo_{group_id}.yaml", "w") as file:
+            with open(project_folderpath / f"{project}_gruppo_{group_id}.yaml", "w") as file:
                 file.write(rendered_template)
 
     @notify_decorator("generate answersheet file")
@@ -186,7 +179,7 @@ class ABGridMain:
             self.render_pdf("report", report_data, f"gruppo_{report_data['group_id']}")
         
         # Save all collected data to a JSON file
-        with open(Path("./data") / self.abgrid_data.project / f"{self.abgrid_data.project}_data.json", "w") as fout:
+        with open(self.abgrid_data.project_folderpath / f"{self.abgrid_data.project}_data.json", "w") as fout:
             fout.write(json.dumps(all_data, indent=4))
 
     def render_pdf(self, doc_type: Literal["report", "answersheet"], doc_data: Dict[str, Any], doc_suffix: str):
@@ -204,8 +197,8 @@ class ABGridMain:
         # Render the template with the provided data
         rendered_template = template.render(doc_data)
         
-        # Define the directory path where the PDF will be saved
-        folder_path = Path(f"./data/{self.abgrid_data.project}/{doc_type}")
+        # Define the folder path where the PDF will be saved
+        folder_path = self.abgrid_data.project_folderpath / doc_type
         
         # Construct the filename, ensuring no leading/trailing underscores
         filename = re.sub("^_|_$", "", f"{self.abgrid_data.project}_{doc_type}_{doc_suffix}")
