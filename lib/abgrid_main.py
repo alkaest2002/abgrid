@@ -88,7 +88,7 @@ class ABGridMain:
             yaml_data = yaml.safe_load(fin)
         
         # Update YAML data with project-specific information
-        yaml_data["titolo"] = project
+        yaml_data["progetto"] = project
         yaml_data["numero_gruppi"] = groups
         yaml_data["numero_partecipanti_per_gruppo"] = members_per_group
         
@@ -100,7 +100,7 @@ class ABGridMain:
     @notify_decorator("generate group inputs files")
     def generate_group_inputs(project_folderpath: Path, project: str, groups: int, members_per_group: int):
         """
-        Generate input files for each group based on a Jinja2 HTML template.
+        Generate input files for each group.
 
         Args:
             project_folderpath (Path): Folder where the project files are stored.
@@ -112,23 +112,36 @@ class ABGridMain:
         members_per_group_letters = string.ascii_uppercase[:members_per_group]
         
         # Get the group HTML template
-        template = jinja_env.get_template("group.html")
+        group_template = jinja_env.get_template("group.html")
         
+        # Get the subjects HTML template
+        subjects_template = jinja_env.get_template("subjects.html")
+
         # Loop through each group and generate input files
-        for group_id in range(1, groups + 1):
+        for group in range(1, groups + 1):
             
             # Prepare data for the template
-            template_data = dict(groupId=group_id, members=members_per_group_letters)
+            template_data = dict(group=group, members=members_per_group_letters)
             
             # Render the current group template with the data
-            rendered_template = template.render(template_data)
+            rendered_group_template = group_template.render(template_data)
+            
+            # Render the current group template with the data
+            rendered_subjects_template = subjects_template.render(template_data)
             
             # Remove any blank lines from rendered template
-            rendered_template = "\n".join([line for line in rendered_template.split("\n") if len(line) > 0])
+            rendered_group_template = "\n".join([line for line in rendered_group_template.split("\n") if len(line) > 0])
             
-            # Write the rendered template to a file
-            with open(project_folderpath / f"{project}_gruppo_{group_id}.yaml", "w") as file:
-                file.write(rendered_template)
+            # Remove any blank lines from rendered template
+            rendered_subjects_template = "\n".join([line for line in rendered_subjects_template.split("\n") if len(line) > 0])
+            
+            # Write the rendered group template to a file
+            with open(project_folderpath / f"{project}_gruppo_{group}.yaml", "w") as file:
+                file.write(rendered_group_template)
+            
+            # Write the rendered subjects template to a file
+            with open(project_folderpath / f"{project}_gruppo_{group}_subjects.yaml", "w") as file:
+                file.write(rendered_subjects_template)
 
     @notify_decorator("generate answersheet file")
     def generate_answer_sheets(self):
@@ -170,19 +183,19 @@ class ABGridMain:
                 raise ValueError(report_errors)
             
             # Notify
-            print(f"generating report: groupID {report_data['group_id']}")
+            print(f"generating report: group {report_data['group']}")
         
             # Add the current group's data to the collection
-            all_data[f"{self.abgrid_data.project}_gruppo_{report_data['group_id']}"] = report_data
+            all_data[f"{self.abgrid_data.project}_gruppo_{report_data['group']}"] = report_data
         
             # Render the current group's report
-            self.render_pdf("report", report_data, f"gruppo_{report_data['group_id']}")
+            self.render_pdf("report", report_data, f"gruppo_{report_data['group']}")
         
         # Save all collected data to a JSON file
         with open(self.abgrid_data.project_folderpath / f"{self.abgrid_data.project}_data.json", "w") as fout:
             fout.write(json.dumps(all_data, indent=4))
 
-    def render_pdf(self, doc_type: Literal["report", "answersheet"], doc_data: Dict[str, Any], doc_suffix: str):
+    def render_pdf(self, doc_type: Literal["reports", "answersheet"], doc_data: Dict[str, Any], doc_suffix: str):
         """
         Render the document template as a PDF file and save to the specified location.
 

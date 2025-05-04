@@ -23,11 +23,6 @@ args = parser.parse_args()
 # Setup the path to the project folder
 project_folderpath = Path("./data") / args.user / args.project
 
- # Check if the project folder exists
-if not project_folderpath.exists():
-    # Raise an error if the project folder does not exist
-    raise FileNotFoundError(f"The project folder ({project_folderpath.name}) does not exist.")
-
 # Handle the 'init' action
 if args.action == "init":
 
@@ -42,7 +37,13 @@ if args.action == "init":
     else:
         # Initialize the project with specified parameters
         ABGridMain.init_project(project_folderpath, args.project, args.groups, args.members_per_group)
-else:    
+else:
+
+    # Check if the project folder exists
+    if not project_folderpath.exists():
+        # Raise an error if the project folder does not exist
+        raise FileNotFoundError(f"The project folder ({project_folderpath.name}) does not exist.")
+
     try:
         # Find the project file within the project folder
         project_filepath = next(project_folderpath.glob(f"{args.project}.*"))

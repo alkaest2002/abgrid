@@ -1,5 +1,5 @@
 {% macro get_barcode(group, participant) %}
-  <span class="barcode">*{{group}}!{{participant}}*</span>
+  <span class="barcode">*gruppo-{{group}}!partecipante-{{participant}}*</span>
 {% endmacro %}
 
 {% macro get_likert(likert) %}
@@ -41,11 +41,43 @@
         justify-content: space-between;
       }
 
-      .intro h1 {
-        position: relative;
-        font-size: 2em;
-        margin-bottom: 24pt;
-      }
+      .logo {
+      display: flex;
+      align-items: center;
+    }
+
+    .logo>div {
+      font-size: 2em;
+      font-weight: bold;
+    }
+
+    .logo-letter {
+      padding: 10px;
+      border-radius: 4px;
+      margin-right: 4px;
+    }
+
+    .letter-A {
+      color: #0000FF;
+    }
+
+    .letter-B {
+      color: #FF0000;
+    }
+
+    .letter-A-reversed {
+      background-color: #0000FF;
+      color: #fff;
+    }
+
+    .letter-B-reversed {
+      background-color: #FF0000;
+      color: #fff;
+    }
+
+    .intro h1 {
+      font-size: 2em;
+    }
 
       .participant {
         font-size: 1.5em;
@@ -90,7 +122,7 @@
 
       .barcode-wrapper .barcode {
         font-family: "3 of 9 Barcode";
-        font-size: 45pt;
+        font-size: 25pt;
         text-align: center;
       }
 
@@ -102,10 +134,14 @@
         <div class="page">
           <div>
             <div class="intro">
-              <h1>AB-Grid</h1>
+              <div class="logo">
+                <div class="logo-letter letter-A-reversed">A</div>
+                <div class="logo-letter letter-B-reversed">B</div>
+                <div>GRID</div>
+              </div>
             </div>
             <div class="participant">
-              <span>Gruppo: {{ group }}, Partecipante: {{ participant }}</span><span>{{ project_title }}</span>
+              <span>Gruppo: {{ group }}, Partecipante: {{ participant }}</span><span>{{ project }}</span>
             </div>
             <div class="explanation">
               <p>{{ explanation }}</p>

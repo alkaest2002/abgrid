@@ -16,14 +16,14 @@ class ProjectSchema(BaseModel):
     """
     A Pydantic model that represents a project's data schema.
     """
-    titolo: constr(min_length=1, max_length=100) # type: ignore
+    progetto: constr(min_length=1, max_length=100) # type: ignore
     numero_gruppi: int = Field(ge=1, le=20)
     numero_partecipanti_per_gruppo: int = Field(ge=4, le=15)
     consegna: constr(min_length=1, max_length=200) # type: ignore
-    domandaA: constr(min_length=1, max_length=300) # type: ignore
-    domandaA_scelte: constr(min_length=1, max_length=150) # type: ignore
-    domandaB: constr(min_length=1, max_length=300) # type: ignore
-    domandaB_scelte: constr(min_length=1, max_length=150) # type: ignore
+    domanda_a: constr(min_length=1, max_length=300) # type: ignore
+    domanda_a_scelte: constr(min_length=1, max_length=150) # type: ignore
+    domanda_b: constr(min_length=1, max_length=300) # type: ignore
+    domanda_b_scelte: constr(min_length=1, max_length=150) # type: ignore
     model_config = {"extra": "forbid"}
 
 # Define a Pydantic model for the group schema
@@ -31,15 +31,15 @@ class GroupSchema(BaseModel):
     """
     A Pydantic model that represents the schema for a group within a project.
     """
-    IDGruppo: int = Field(ge=1, le=20)
-    scelteA: List[Dict[str, str]]
-    scelteB: List[Dict[str, str]]
+    gruppo: int = Field(ge=1, le=20)
+    scelte_a: List[Dict[str, str]]
+    scelte_b: List[Dict[str, str]]
     model_config = {"extra": "forbid"}
 
-    @field_validator('scelteA', 'scelteB')
+    @field_validator("scelte_a", "scelte_b")
     def validate_choices(cls, value: List[Dict[str, str]]) -> List[Dict[str, str]]:
         """
-        Validator for scelteA and scelteB fields to ensure each choice is well-formed.
+        Validator for scelte_a and scelte_b fields to ensure each choice is well-formed.
 
         Args:
             value: A list of dictionaries representing choices.
@@ -78,24 +78,24 @@ class GroupSchema(BaseModel):
     @model_validator(mode='after')
     def validate_schema_constraints(self) -> 'GroupSchema':
         """
-        Root validator to ensure the logical constraints between scelteA and scelteB are upheld.
+        Root validator to ensure the logical constraints between scelte_a and scelte_b are upheld.
 
         Returns:
             The validated GroupSchema instance.
 
         Raises:
-            ValueError: If any logical constraints between scelteA and scelteB are violated.
+            ValueError: If any logical constraints between scelte_a and scelte_b are violated.
         """
-        # Extract all keys from scelteA and scelteB
-        scelte_a_keys: Set[str] = {next(iter(choice.keys())) for choice in self.scelteA}
-        scelte_b_keys: Set[str] = {next(iter(choice.keys())) for choice in self.scelteB}
+        # Extract all keys from scelte_a and scelte_b
+        scelte_a_keys: Set[str] = {next(iter(choice.keys())) for choice in self.scelte_a}
+        scelte_b_keys: Set[str] = {next(iter(choice.keys())) for choice in self.scelte_b}
 
         # Check if the sets of keys are identical
         if scelte_a_keys != scelte_b_keys:
-            raise ValueError("Keys in scelteA and scelteB are not equal.")
+            raise ValueError("Keys in scelte_a and scelte_b are not equal.")
 
-        # Ensure all values in scelteA come from scelteA keys
-        for choice in self.scelteA:
+        # Ensure all values in scelte_a come from scelte_a keys
+        for choice in self.scelte_a:
             key: str = next(iter(choice.keys()))
             value_str: str = choice[key]
             value_parts: List[str] = value_str.split(',')
@@ -103,10 +103,10 @@ class GroupSchema(BaseModel):
             invalid_values = [v for v in value_parts if v not in scelte_a_keys]
             if invalid_values:
                 raise ValueError(
-                    f"Values for key '{key}' in scelteA contain the following illegal letters: {', '.join(invalid_values)}")
+                    f"Values for key '{key}' in scelte_a contain the following illegal letters: {', '.join(invalid_values)}")
 
-        # Ensure all values in scelteB come from scelteB keys
-        for choice in self.scelteB:
+        # Ensure all values in scelte_b come from scelte_b keys
+        for choice in self.scelte_b:
             key: str = next(iter(choice.keys()))
             value_str: str = choice[key]
             value_parts: List[str] = value_str.split(',')
@@ -114,6 +114,6 @@ class GroupSchema(BaseModel):
             invalid_values = [v for v in value_parts if v not in scelte_b_keys]
             if invalid_values:
                 raise ValueError(
-                    f"Values for key '{key}' in scelteB contain the following illegal letters: {', '.join(invalid_values)}")
+                    f"Values for key '{key}' in scelte_b contain the following illegal letters: {', '.join(invalid_values)}")
 
         return self

@@ -1,16 +1,15 @@
-# ID del gruppo (numero)
-IDGruppo: {{ groupId }}
+gruppo: {{ group }}
 # indica le scelte di ogni partecipante
 # rispetta gli spazi e i trattini
 # es. - A: B,C
-scelteA:
+scelte_a:
 {% for m in members %}
   - {{ m }}: 
 {% endfor %}
 # indica le scelte di ogni partecipante
 # rispetta gli spazi e i trattini
 # es. - A: B,C
-scelteB:
+scelte_b:
 {% for m in members %}
   - {{ m }}: 
 {% endfor %}

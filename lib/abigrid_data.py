@@ -56,14 +56,14 @@ class ABGridData:
         if data is not None:
             # Prepare answer sheet data
             answersheet_data = {
-                "progect_title": data["titolo"],
+                "project": data["progetto"],
                 "groups": list(range(1, data["numero_gruppi"] + 1)),
                 "likert": string.ascii_uppercase[:data["numero_partecipanti_per_gruppo"]],
                 "explanation": data["consegna"],
-                "question_a": data["domandaA"],
-                "question_a_hint": data["domandaA_scelte"],
-                "question_b": data["domandaB"],
-                "question_b_hint": data["domandaB_scelte"]
+                "question_a": data["domanda_a"],
+                "question_a_hint": data["domanda_a_scelte"],
+                "question_b": data["domanda_b"],
+                "question_b_hint": data["domanda_b_scelte"]
             }
             # Return answer sheet data
             return answersheet_data, None
@@ -94,16 +94,16 @@ class ABGridData:
             if group_data is not None:
                 
                 # Initialize and compute network statistics
-                ntw = ABGridNetwork((group_data["scelteA"], group_data["scelteB"]))
+                ntw = ABGridNetwork((group_data["scelte_a"], group_data["scelte_b"]))
                 ntw.compute_networks()
                 
                 # Prepare report data
                 report_data = {
-                    "project_title": project_data["titolo"],
+                    "project": project_data["progetto"],
                     "year": datetime.datetime.now(datetime.UTC).year,
-                    "group_id": group_data["IDGruppo"],
-                    "question_a": project_data["domandaA"],
-                    "question_b": project_data["domandaB"],
+                    "group": group_data["gruppo"],
+                    "question_a": project_data["domanda_a"],
+                    "question_b": project_data["domanda_b"],
                     "edges_a": ntw.edges_a,
                     "edges_b": ntw.edges_b,
                     "macro_a": ntw.macro_a,
