@@ -79,7 +79,7 @@ def notify_decorator(operation_name: str) -> Callable:
                     # Print the current traceback step with information about file, function, and line
                     print(
                         "-->",
-                        Path(traceback.tb_frame.f_code.co_filename),
+                        Path(traceback.tb_frame.f_code.co_filename).name,
                         traceback.tb_frame.f_code.co_name,
                         "line code",
                         traceback.tb_lineno,
