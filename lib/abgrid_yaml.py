@@ -11,13 +11,13 @@ The code is part of the AB-Grid project and is licensed under the MIT License.
 import yaml
 
 from pathlib import Path
-from typing import Tuple, Optional, Dict, Any
+from typing import Literal, Tuple, Optional, Dict, Any
 from pydantic import ValidationError
 from lib.abgrid_schemas import ProjectSchema, GroupSchema
 
 class ABGridYAML:
     
-    def validate(self, yaml_type: str, yaml_data: Dict[str, Any]) -> Tuple[Optional[Dict[str, Any]], Optional[str]]:
+    def validate(self, yaml_type: Literal["project", "group"], yaml_data: Dict[str, Any]) -> Tuple[Optional[Dict[str, Any]], Optional[str]]:
         """
         Validate the YAML data against the specified schema type.
 
