@@ -1,12 +1,54 @@
 {% extends "_base_report.html" %}
 
-{% macro network_macro(macro) %}
-    <p>
-        NN {{ macro.network_nodes }}, NE {{ macro.network_edges }}, NC {{ (macro.network_centralization * 100)|round|int }}%, NT {{ (macro.network_transitivity * 100)|round|int }}%, NR {{ (macro.network_reciprocity * 100)|round|int }}%
-    </p>
+{% macro disclaimer() %}
+<div class="disclaimer">
+    This electronically generated report is intended for human resources specialists who have completed the course 'Introduction to Group Dynamics and Network Analysis.' It is designed as a support tool to facilitate decision-making and does not replace the professional judgment of industry experts. Interpretations drawn from the report should be integrated with other information related to the specific evaluation context.
+</div>
 {% endmacro %}
 
-{% macro network_tabular(graph_type, score_type, micro) %}
+{% macro header_ranks() %}
+<div class="report-header">
+    <span><b>GROUP {{ group | upper }} - {{ project | upper }}</b></span><span>RANKS</span>
+</div>
+{% endmacro %}
+
+{% macro header_raw_scores() %}
+<div class="report-header">
+    <span><b>GROUP {{ group | upper }} - {{ project | upper }}</b></span><span>RAW SCORES</span>
+</div>
+{% endmacro %}
+
+{% macro legend_ranks() %}
+<div class="legend">
+    <b>NN</b> = Number of Nodes, <b>NE</b> = Number of Edges, <b>NC</b> = Network Centralization, <b>NT</b> =
+    Network Transitivity, <b>NR</b> = Network Reciprocity<br /><b>IC</b> = In-Degree Centrality (rank), <b>PR</b> = PageRank
+    Centrality (rank), <b>BC</b> = Betweenness Centrality (rank)<br /><b>CC</b> = Closenness Centrality
+    (rank), <b>OR</b> = Other Nodes Reachability (%), <b>NI</b> = No In-Degree.
+</div>
+{% endmacro %}
+
+{% macro legend_raw_scores() %}
+<div class="legend">
+    <b>NN</b> = Number of Nodes, <b>NE</b> = Number of Edges, <b>NC</b> = Network Centralization, <b>NT</b> =
+    Network Transitivity, <b>NR</b> = Network Reciprocity<br /><b>IC</b> = In-Degree Centrality (raw), <b>PR</b> = PageRank
+    Centrality (raw), <b>BC</b> = Betweenness Centrality (raw)<br /><b>CC</b> = Closenness Centrality
+    (raw), <b>OR</b> = Other Nodes Reachability (%), <b>NI</b> = No In-Degree.
+</div>
+{% endmacro %}
+
+{% macro footer() %}
+<div class="footer">
+    <p><b>Authors</b>: Dr. Pierpaolo CALANNA, PhD, Dr. Gaetano BUONAIUTO (2021-{{ year }}), <b>License of Use</b>: the layout of this report, the customization of charts, as well as the selection of quantitative indices, is subject to copyright.</p>
+</div>
+{% endmacro %}
+
+{% macro network_macro(macro) %}
+<p>
+    NN {{ macro.network_nodes }}, NE {{ macro.network_edges }}, NC {{ (macro.network_centralization * 100)|round|int }}%, NT {{ (macro.network_transitivity * 100)|round|int }}%, NR {{ (macro.network_reciprocity * 100)|round|int }}%
+</p>
+{% endmacro %}
+
+{% macro network_micro(graph_type, score_type, micro) %}
 <table class="report-table-tabular">
     <tr>
         <th>ID</th>
@@ -46,107 +88,6 @@
 </table>
 {% endmacro %}
 
-{% macro network(graph_type, graph, macro, micro, score_type, question) %}
-<table class="report-table-graph">
-    <tr>
-        <td>
-            <p class="question">
-                {{ graph_type }}. {{ question }}
-            </p>
-        </td>
-    </tr>
-    <tr>
-        <td>
-            <img src="{{ graph }}" class="graph-main" />
-        </td>
-    </tr>
-    <tr>
-        <td class="hero letter-{% if type == 'A' %}A{% else %}B{% endif %}">{{ graph_type }}</td>
-    </tr>
-    <tr>
-        <td class="macro">
-            {{ network_macro(macro) }}
-        </td>
-    </tr>
-    <tr>
-        <td class="micro">
-            {{ network_tabular(graph_type, score_type, micro) }}
-        </td>
-    </tr>
-</table>
-{% endmacro %}
-
 {% block body %}
-    <div class="page">
-        <div>
-            <div class="intro">
-                <div class="logo">
-                    <div class="logo-letter letter-A-reversed">A</div>
-                    <div class="logo-letter letter-B-reversed">B</div>
-                    <div>GRID</div>
-                </div>
-            </div>
-            <div class="disclaimer">
-                This electronically generated report is intended for human resources specialists who have completed the course 'Introduction to Group Dynamics and Network Analysis.' It is designed as a support tool to facilitate decision-making and does not replace the professional judgment of industry experts. Interpretations drawn from the report should be integrated with other information related to the specific evaluation context.
-            </div>
-            <div class="report-header">
-                <span><b>GROUP {{ group | upper }} - {{ project | upper }}</b></span><span>RANK SCORES</span>
-            </div>
-            <table class="report-table">
-                <tr>
-                    <td>
-                        {{ network("A", graph_a, macro_a, micro_a, "ranks", question_a) }}
-                    </td>
-                    <td class="no-border"></td>
-                    <td>
-                        {{ network("B", graph_b, macro_b, micro_b, "ranks", question_b) }}
-                    </td>
-                </tr>
-            </table>
-            <div class="legend">
-                <b>NN</b> = Number of Nodes, <b>NE</b> = Number of Edges, <b>NC</b> = Network Centralization, <b>NT</b> =
-                Network Transitivity, <b>NR</b> = Network Reciprocity<br /><b>IC</b> = In-Degree Centrality (rank), <b>PR</b> = PageRank
-                Centrality (rank), <b>BC</b> = Betweenness Centrality (rank)<br /><b>CC</b> = Closenness Centrality
-                (rank), <b>OR</b> = Other Nodes Reachability (%), <b>NI</b> = No In-Degree.
-            </div>
-        </div>
-        <div class="footer">
-            <p><b>Authors</b>: Dr. Pierpaolo CALANNA, PhD, Dr. Gaetano BUONAIUTO (2021-{{ year }}), <b>License of Use</b>: the layout of this report, the customization of charts, as well as the selection of quantitative indices, is subject to copyright.</p>
-        </div>
-    </div>
-    <div class="page">
-      <div>
-          <div class="intro">
-              <div class="logo">
-                  <div class="logo-letter letter-A-reversed">A</div>
-                  <div class="logo-letter letter-B-reversed">B</div>
-                  <div>GRID</div>
-              </div>
-          </div>
-          <div class="disclaimer">
-              This electronically generated report is intended for human resources specialists who have completed the course 'Introduction to Group Dynamics and Network Analysis.' It is designed as a support tool to facilitate decision-making and does not replace the professional judgment of industry experts. Interpretations drawn from the report should be integrated with other information related to the specific evaluation context.
-          </div>
-          <div class="report-header">
-              <span><b>GROUP {{ group | upper }} - {{ project | upper }}</b></span><span>RAW SCORES</span>
-          </div>
-          <table class="report-table">
-              <tr>
-                  <td>
-                        {{ network("A", graph_a, macro_a, micro_a, "raw", question_a) }}
-                  </td>
-                  <td class="no-border"></td>
-                  <td>
-                        {{ network("B", graph_b, macro_b, micro_b, "raw", question_b) }}
-                  </td>
-              </tr>
-          </table>
-          <div class="legend">
-              <b>NN</b> = Number of Nodes, <b>NE</b> = Number of Edges, <b>NC</b> = Network Centralization, <b>NT</b> = Network Transitivity, <b>NR</b> = Network Reciprocity<br /><b>IC</b> = In-Degree Centrality, <b>PR</b> = PageRank
-              Centrality, <b>BC</b> = Betweenness Centrality<br /><b>CC</b> = Closenness Centrality, <b>OR</b> = Other Nodes Reachability (%), <b>NI</b> = No In-Degree.
-          </div>
-      </div>
-      <div class="footer">
-          <p><b>Authors</b>: Dr. Pierpaolo CALANNA, PhD, Dr. Gaetano BUONAIUTO (2021-{{ year }}), <b>License of Use</b>: the layout of this report, the customization of charts, as well as the selection of quantitative indices, is subject to copyright.</p>
-      </div>
-  </div>
+    {{ body() }}
 {% endblock %}

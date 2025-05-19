@@ -1,5 +1,91 @@
 {% extends "_base.html" %}
 
+{% macro network(graph_type, graph, macro, micro, score_type, question) %}
+<table class="report-table-graph">
+    <tr>
+        <td>
+            <p class="question">
+                {{ graph_type }}. {{ question }}
+            </p>
+        </td>
+    </tr>
+    <tr>
+        <td>
+            <img src="{{ graph }}" class="graph-main" />
+        </td>
+    </tr>
+    <tr>
+        <td class="hero letter-{% if type == 'A' %}A{% else %}B{% endif %}">{{ graph_type }}</td>
+    </tr>
+    <tr>
+        <td class="macro">
+            {{ network_macro(macro) }}
+        </td>
+    </tr>
+    <tr>
+        <td class="micro">
+            {{ network_micro(graph_type, score_type, micro) }}
+        </td>
+    </tr>
+</table>
+{% endmacro %}
+
+{% macro body() %}
+<div class="page">
+    <div>
+        <div class="intro">
+            <div class="logo">
+                <div class="logo-letter letter-A-reversed">A</div>
+                <div class="logo-letter letter-B-reversed">B</div>
+                <div>GRID</div>
+            </div>
+        </div>
+        {{ disclaimer() }}
+        {{ header_ranks() }}
+        <table class="report-table">
+            <tr>
+                <td>
+                    {{ network("A", graph_a, macro_a, micro_a, "ranks", question_a) }}
+                </td>
+                <td class="no-border"></td>
+                <td>
+                    {{ network("B", graph_b, macro_b, micro_b, "ranks", question_b) }}
+                </td>
+            </tr>
+        </table>
+        {{ legend_ranks() }}
+    </div>
+    {{ footer() }}
+</div>
+<div class="page">
+    <div>
+        <div class="intro">
+            <div class="logo">
+                <div class="logo-letter letter-A-reversed">A</div>
+                <div class="logo-letter letter-B-reversed">B</div>
+                <div>GRID</div>
+            </div>
+        </div>
+        {{ disclaimer() }}
+        {{ header_raw_scores() }}
+        <table class="report-table">
+            <tr>
+                <td>
+                    {{ network("A", graph_a, macro_a, micro_a, "raw", question_a) }}
+                </td>
+                <td class="no-border"></td>
+                <td>
+                    {{ network("B", graph_b, macro_b, micro_b, "raw", question_b) }}
+                </td>
+            </tr>
+        </table>
+        {{ legend_raw_scores() }}
+    </div>
+    {{ footer() }}
+</div>
+{% endmacro %}
+
+
 {% block style %}
   <style>
     * {
@@ -99,4 +185,8 @@
     }
   </style>
 {% endblock %}
-{% block body %}{% endblock %}
+
+<body>
+{% block body %}     
+{% endblock %}
+</body>
