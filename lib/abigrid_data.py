@@ -8,6 +8,8 @@ Date Created: May 3, 2025
 The code is part of the AB-Grid project and is licensed under the MIT License.
 """
 
+from csv import Error
+import re
 import string
 import datetime
 
@@ -40,8 +42,12 @@ class ABGridData:
         self.project = project
         self.project_folderpath = project_folderpath
         self.project_filepath = project_filepath
-        self.groups_filepaths = groups_filepaths
         self.data_loader = data_loader
+        try:
+            sorted_filepaths = sorted(groups_filepaths, key=lambda x: int(re.search(r'\d+$', x.stem).group()))
+        except:
+            sorted_filepaths = sorted(groups_filepaths)
+        self.groups_filepaths = sorted_filepaths
 
     def get_answersheets_data(self) -> Tuple[Optional[Dict[str, Any]], Optional[Any]]:
         """
