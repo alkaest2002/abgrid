@@ -2,7 +2,7 @@
 
 {% macro network_macro(macro) %}
     <p>
-        NN {{ macro.network_nodes }}, NE {{ macro.network_edges }}, MC {{ macro.network_max_k_clique }}, NC {{ (macro.network_centralization * 100)|round|int }}%, NT {{ (macro.network_transitivity * 100)|round|int }}%, NR {{ (macro.network_reciprocity * 100)|round|int }}%
+        NN {{ macro.network_nodes }}, NE {{ macro.network_edges }}, NC {{ (macro.network_centralization * 100)|round|int }}%, NT {{ (macro.network_transitivity * 100)|round|int }}%, NR {{ (macro.network_reciprocity * 100)|round|int }}%
     </p>
 {% endmacro %}
 
@@ -199,8 +199,8 @@
                 </tr>
             </table>
             <div class="legend">
-                <b>NN</b> = Number of Nodes, <b>NE</b> = Number of Edges, <b>MC</b> = Max K-clique size, <b>NC</b> = Network Centralization, <b>NT</b> =
-                Network Transitivity<br /><b>NR</b> = Network Reciprocity, <b>IC</b> = In-Degree Centrality (rango), <b>PR</b> = PageRank
+                <b>NN</b> = Number of Nodes, <b>NE</b> = Number of Edges, <b>NC</b> = Network Centralization, <b>NT</b> =
+                Network Transitivity, <b>NR</b> = Network Reciprocity<br /><b>IC</b> = In-Degree Centrality (rango), <b>PR</b> = PageRank
                 Centrality (rango), <b>BC</b> = Betweenness Centrality (rango)<br /><b>CC</b> = Closenness Centrality
                 (rango), <b>OR</b> = Other Nodes Reachability (%), <b>NI</b> = No In-Degree.
             </div>
@@ -238,8 +238,8 @@
               </tr>
           </table>
           <div class="legend">
-              <b>NN</b> = Number of Nodes, <b>NE</b> = Number of Edges, <b>MC</b> = Max K-clique size, <b>NC</b> = Network Centralization, <b>NT</b> =
-              Network Transitivity<br /><b>NR</b> = Network Reciprocity, <b>IC</b> = In-Degree Centrality, <b>PR</b> = PageRank
+              <b>NN</b> = Number of Nodes, <b>NE</b> = Number of Edges, <b>NC</b> = Network Centralization, <b>NT</b> =
+              Network Transitivity, <b>NR</b> = Network Reciprocity<br /><b>IC</b> = In-Degree Centrality, <b>PR</b> = PageRank
               Centrality, <b>BC</b> = Betweenness Centrality<br /><b>CC</b> = Closenness Centrality, <b>OR</b> = Other Nodes Reachability (%), <b>NI</b> = No In-Degree.
           </div>
       </div>
