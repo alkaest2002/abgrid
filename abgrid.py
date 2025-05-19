@@ -49,7 +49,7 @@ else:
         project_filepath = next(project_folderpath.glob(f"{args.project}.*"))
         
         # Find all group files, ensuring at least one exists
-        if len(groups_filepaths := sorted(list(project_folderpath.glob("*gruppo_*.*")))) == 0:
+        if len(groups_filepaths := list(project_folderpath.glob("*gruppo_*.*"))) == 0:
             # Raise an error if no group files are found
             raise FileNotFoundError(f"The project folder ({project_folderpath.name}) does not contain any group files.")
 
