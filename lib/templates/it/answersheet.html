@@ -1,58 +1,4 @@
-{% extends "_base.html" %}
-
-{% macro get_barcode(group, participant) %}
-  <span class="barcode">*gruppo-{{group}}!partecipante-{{participant}}*</span>
-{% endmacro %}
-
-{% macro get_likert(likert) %}
-    <div class="bubble">
-        {% for option in likert %}
-            <span>{{ option }}</span>
-        {% endfor %}
-    </div>
-{% endmacro%}
-
-{% block style %}
-    <style>
-        .explanation {
-            margin-bottom: 50px;
-        }
-
-        .question {
-            margin-bottom: 30px;
-            max-width: 15cm;
-        }
-
-        .question-hint {
-            margin-top: 10px;
-            font-size: 10pt;
-            color: #555;
-        }
-
-        .bubble span {
-            display: inline-block;
-            margin-top: 12pt;
-            margin-right: 3pt;
-            font-family: "OMR";
-            font-size: 11pt;
-        }
-
-        .barcode-wrapper {
-            position: relative;
-            display: inline-block;
-            padding: 10px;
-            border: 1px solid #333;
-            border-radius: 6px;
-        }
-
-        .barcode-wrapper .barcode {
-            font-family: "3 of 9 Barcode";
-            font-size: 25pt;
-            text-align: center;
-        }
-
-    </style>
-{% endblock %}
+{% extends "_base_answersheet.html" %}
 
 {% block body %}
     {% for group in groups %}
@@ -66,7 +12,7 @@
                             <div>GRID</div>
                         </div>
                     </div>
-                    <div class="report-header">
+                    <div class="answersheet-header">
                         <span>Gruppo: {{ group }}, Partecipante: {{ participant }}</span><span>{{ project }}</span>
                     </div>
                     <div class="explanation">

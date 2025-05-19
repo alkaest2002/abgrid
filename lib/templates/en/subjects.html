@@ -1,0 +1,7 @@
+# group id (do not change)
+group: {{ group }}
+# indicate the correspondence between letter and participant
+# i.e. - A: Joh Doe
+{% for m in members %}
+  - {{ m }}: 
+{% endfor %}

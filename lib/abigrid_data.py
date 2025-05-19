@@ -62,14 +62,14 @@ class ABGridData:
         if data is not None:
             # Prepare answer sheet data
             answersheet_data = {
-                "project": data["progetto"],
-                "groups": list(range(1, data["numero_gruppi"] + 1)),
-                "likert": string.ascii_uppercase[:data["numero_partecipanti_per_gruppo"]],
-                "explanation": data["consegna"],
-                "question_a": data["domanda_a"],
-                "question_a_hint": data["domanda_a_scelte"],
-                "question_b": data["domanda_b"],
-                "question_b_hint": data["domanda_b_scelte"]
+                "project": data["project"],
+                "groups": list(range(1, data["groups"] + 1)),
+                "likert": string.ascii_uppercase[:data["members_per_group"]],
+                "explanation": data["explanation"],
+                "question_a": data["question_a"],
+                "question_a_hint": data["question_a_choices"],
+                "question_b": data["question_b"],
+                "question_b_hint": data["question_b_choices"]
             }
             # Return answer sheet data
             return answersheet_data, None
@@ -100,16 +100,16 @@ class ABGridData:
             if group_data is not None:
                 
                 # Initialize and compute network statistics
-                ntw = ABGridNetwork((group_data["scelte_a"], group_data["scelte_b"]))
+                ntw = ABGridNetwork((group_data["choices_a"], group_data["choices_b"]))
                 ntw.compute_networks()
                 
                 # Prepare report data
                 report_data = {
-                    "project": project_data["progetto"],
+                    "project": project_data["project"],
                     "year": datetime.datetime.now(datetime.UTC).year,
-                    "group": group_data["gruppo"],
-                    "question_a": project_data["domanda_a"],
-                    "question_b": project_data["domanda_b"],
+                    "group": group_data["group"],
+                    "question_a": project_data["question_a"],
+                    "question_b": project_data["question_b"],
                     "edges_a": ntw.edges_a,
                     "edges_b": ntw.edges_b,
                     "macro_a": ntw.macro_a,

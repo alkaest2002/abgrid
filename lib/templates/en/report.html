@@ -1,4 +1,4 @@
-{% extends "_base.html" %}
+{% extends "_base_report.html" %}
 
 {% macro network_macro(macro) %}
     <p>
@@ -10,7 +10,7 @@
 <table class="report-table-tabular">
     <tr>
         <th>ID</th>
-        <th>{% if graph_type == "A" %}SCELTE{% else %}RIFIUTI{% endif %}</th>
+        <th>{% if graph_type == "A" %}CHOICES{% else %}REJECTS{% endif %}</th>
         <th>IC</th>
         <th>PR</th>
         <th>BC</th>
@@ -76,101 +76,6 @@
 </table>
 {% endmacro %}
 
-{% block style %}
-<style>
-    * {
-      font-size: 10pt;
-    }
-
-    table {
-      border-collapse: collapse;
-      width: 100%;
-    }
-
-    th, td {
-      text-align: center;
-    }
-  
-    .disclaimer {
-      margin-top: 20px;
-      margin-bottom: 20px;
-      text-align: justify;
-    }
-
-    .report-header {
-      padding-bottom: 20px;
-      border-bottom: 1px solid #000;
-    }
-
-    .hero {
-      font-size: 3em;
-      text-align: center;
-      vertical-align: middle;
-      font-weight: bold;
-      padding-top: 20px;
-      padding-bottom: 20px;
-    }
-
-    .report-table-graph {
-      margin-top: 20px;
-    }
-
-    .question {
-      text-align: left;
-    }
-
-    .macro p {
-      text-align: left;
-      margin-bottom: 10px;
-    }
-
-    .micro {
-      vertical-align: top;
-    }
-
-    .graph-main {
-      display: block;
-      margin: auto;
-      height: 280px;
-    }
-
-    .report-table-tabular {
-      border-top: 2px solid #000;
-      border-bottom: 2px solid #000;
-    }
-
-    .report-table-tabular th {
-      padding: 5px 3px;
-      background-color: #ddd;
-      border-bottom: 1px solid #000;
-    }
-
-    .report-table-tabular td {
-      padding: 5px 3px;
-      border-top: 1px solid #ddd;
-    }
-
-    .report-table-tabular tr:nth-child(odd) td {
-      background-color: #eee;
-    }
-
-    .no-border {
-      border: 1px solid transparent;
-      width: 20px;
-    }
-
-    .legend {
-      margin-top: 25px;
-    }
-
-    .footer {
-      font-size: 8pt !important;
-      color: #acacac;
-      text-align: justify;
-    }
-  </style>
-{% endblock %}
-
 {% block body %}
     <div class="page">
         <div>
@@ -182,10 +87,10 @@
                 </div>
             </div>
             <div class="disclaimer">
-                Questo report generato elettronicamente è destinato agli specialisti delle risorse umane che hanno completato il corso "Introduzione alle dinamiche di gruppo e alla network analysis". È concepito come strumento di supporto per agevolare il processo decisionale e non sostituisce il giudizio professionale degli esperti di settore. Le interpretazioni tratte dal report dovrebbero essere integrate con altre informazioni relative allo specifico contesto valutativo.
+                This electronically generated report is intended for human resources specialists who have completed the course 'Introduction to Group Dynamics and Network Analysis.' It is designed as a support tool to facilitate decision-making and does not replace the professional judgment of industry experts. Interpretations drawn from the report should be integrated with other information related to the specific evaluation context.
             </div>
             <div class="report-header">
-                <span><b>GRUPPO {{ group | upper }} - {{ project | upper }}</b></span><span>RANGHI</span>
+                <span><b>GROUP {{ group | upper }} - {{ project | upper }}</b></span><span>RANK SCORES</span>
             </div>
             <table class="report-table">
                 <tr>
@@ -200,15 +105,13 @@
             </table>
             <div class="legend">
                 <b>NN</b> = Number of Nodes, <b>NE</b> = Number of Edges, <b>NC</b> = Network Centralization, <b>NT</b> =
-                Network Transitivity, <b>NR</b> = Network Reciprocity<br /><b>IC</b> = In-Degree Centrality (rango), <b>PR</b> = PageRank
-                Centrality (rango), <b>BC</b> = Betweenness Centrality (rango)<br /><b>CC</b> = Closenness Centrality
-                (rango), <b>OR</b> = Other Nodes Reachability (%), <b>NI</b> = No In-Degree.
+                Network Transitivity, <b>NR</b> = Network Reciprocity<br /><b>IC</b> = In-Degree Centrality (rank), <b>PR</b> = PageRank
+                Centrality (rank), <b>BC</b> = Betweenness Centrality (rank)<br /><b>CC</b> = Closenness Centrality
+                (rank), <b>OR</b> = Other Nodes Reachability (%), <b>NI</b> = No In-Degree.
             </div>
         </div>
         <div class="footer">
-            <p><b>Autori</b>: Dr. Pierpaolo CALANNA, PhD, Dr. Gaetano BUONAIUTO (2021-{{ year }}), <b>Licenza d'uso</b>:
-            l'impaginazione del presente report, la personalizzazione dei grafici, nonché la scelta degli indici
-            quantitativi è soggetta a copyright.</p>
+            <p><b>Authors</b>: Dr. Pierpaolo CALANNA, PhD, Dr. Gaetano BUONAIUTO (2021-{{ year }}), <b>License of Use</b>: the layout of this report, the customization of charts, as well as the selection of quantitative indices, is subject to copyright.</p>
         </div>
     </div>
     <div class="page">
@@ -221,10 +124,10 @@
               </div>
           </div>
           <div class="disclaimer">
-              Questo report generato elettronicamente è destinato agli specialisti delle risorse umane che hanno completato il corso "Introduzione alle dinamiche di gruppo e alla network analysis". È concepito come strumento di supporto per agevolare il processo decisionale e non sostituisce il giudizio professionale degli esperti di settore. Le interpretazioni tratte dal report dovrebbero essere integrate con altre informazioni relative allo specifico contesto valutativo.
+              This electronically generated report is intended for human resources specialists who have completed the course 'Introduction to Group Dynamics and Network Analysis.' It is designed as a support tool to facilitate decision-making and does not replace the professional judgment of industry experts. Interpretations drawn from the report should be integrated with other information related to the specific evaluation context.
           </div>
           <div class="report-header">
-              <span><b>GRUPPO {{ group | upper }} - {{ project | upper }}</b></span><span>VALORI GREZZI</span>
+              <span><b>GROUP {{ group | upper }} - {{ project | upper }}</b></span><span>RAW SCORES</span>
           </div>
           <table class="report-table">
               <tr>
@@ -238,15 +141,12 @@
               </tr>
           </table>
           <div class="legend">
-              <b>NN</b> = Number of Nodes, <b>NE</b> = Number of Edges, <b>NC</b> = Network Centralization, <b>NT</b> =
-              Network Transitivity, <b>NR</b> = Network Reciprocity<br /><b>IC</b> = In-Degree Centrality, <b>PR</b> = PageRank
+              <b>NN</b> = Number of Nodes, <b>NE</b> = Number of Edges, <b>NC</b> = Network Centralization, <b>NT</b> = Network Transitivity, <b>NR</b> = Network Reciprocity<br /><b>IC</b> = In-Degree Centrality, <b>PR</b> = PageRank
               Centrality, <b>BC</b> = Betweenness Centrality<br /><b>CC</b> = Closenness Centrality, <b>OR</b> = Other Nodes Reachability (%), <b>NI</b> = No In-Degree.
           </div>
       </div>
       <div class="footer">
-          <p><b>Autori</b>: Dr. Pierpaolo CALANNA, PhD, Dr. Gaetano BUONAIUTO (2021-{{ year }}), <b>Licenza d'uso</b>:
-          l'impaginazione del presente report, la personalizzazione dei grafici, nonché la scelta degli indici
-          quantitativi è soggetta a copyright.</p>
+          <p><b>Authors</b>: Dr. Pierpaolo CALANNA, PhD, Dr. Gaetano BUONAIUTO (2021-{{ year }}), <b>License of Use</b>: the layout of this report, the customization of charts, as well as the selection of quantitative indices, is subject to copyright.</p>
       </div>
   </div>
 {% endblock %}

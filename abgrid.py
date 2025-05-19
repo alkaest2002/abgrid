@@ -2,6 +2,9 @@ import argparse
 from pathlib import Path
 from lib.abgrid_main import ABGridMain
 
+# Available languages
+LANGUAGES = ["en", "it"]
+
 # Set up the argument parser
 parser = argparse.ArgumentParser(prog="ABGrid")
 
@@ -15,7 +18,9 @@ parser.add_argument("-g", "--groups", type=int, choices=range(1, 21),
 parser.add_argument("-m", "--members_per_group", type=int, choices=range(3, 16), 
                     help="Number of members per group (3 to 15).")
 parser.add_argument("-u", "--user", type=str, required=True, 
-                    help="The username.")
+                    help="Username.")
+parser.add_argument("-l", "--language", choices=LANGUAGES, default="en", 
+                    help="Language used.")
 
 # Parse the arguments
 args = parser.parse_args()
@@ -36,7 +41,7 @@ if args.action == "init":
         print("Please specify the following additional parameters: number of groups (-g), number of members per group (-m).")
     else:
         # Initialize the project with specified parameters
-        ABGridMain.init_project(project_folderpath, args.project, args.groups, args.members_per_group)
+        ABGridMain.init_project(project_folderpath, args.project, args.groups, args.members_per_group, args.language)
 else:
 
     # Check if the project folder exists
@@ -49,7 +54,7 @@ else:
         project_filepath = next(project_folderpath.glob(f"{args.project}.*"))
         
         # Find all group files, ensuring at least one exists
-        if len(groups_filepaths := list(project_folderpath.glob("*gruppo_*.*"))) == 0:
+        if len(groups_filepaths := list(project_folderpath.glob("*_g*.*"))) == 0:
             # Raise an error if no group files are found
             raise FileNotFoundError(f"The project folder ({project_folderpath.name}) does not contain any group files.")
 
@@ -59,10 +64,10 @@ else:
         # Handle 'sheets' and 'reports' action
         if args.action == "sheets":
             # Generate answer sheets
-            abgrid_main.generate_answer_sheets()
+            abgrid_main.generate_answer_sheets(args.language)
         else:
             # Generate reports
-            abgrid_main.generate_reports()
+            abgrid_main.generate_reports(args.language)
 
     # Handle file not found errors
     except FileNotFoundError as error:

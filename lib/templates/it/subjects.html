@@ -1,0 +1,7 @@
+# identificativo gruppo (non cambiare)
+group: {{ group }}
+# indica la corrispondenza tra lettera e partecipante
+# i.e. - A: Mario Rossi
+{% for m in members %}
+  - {{ m }}: 
+{% endfor %}

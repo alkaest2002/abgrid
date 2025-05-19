@@ -1,5 +1,5 @@
-gruppo: 3
-scelte_a:
+group: 3
+choices_a:
   - A: F,H
   - B: C,H
   - C: F,H
@@ -8,7 +8,7 @@ scelte_a:
   - F: C,H
   - G: A,H
   - H: A,G
-scelte_b:
+choices_b:
   - A: D,G
   - B: D,E
   - C: D,E

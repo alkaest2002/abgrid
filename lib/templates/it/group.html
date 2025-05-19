@@ -1,0 +1,16 @@
+# identificativo gruppo (non cambiare)
+group: {{ group }}
+# indica le scelte di ogni partecipante
+# rispetta gli spazi e i trattini
+# es. - A: B,C
+choices_a:
+{% for m in members %}
+  - {{ m }}: 
+{% endfor %}
+# indica le scelte di ogni partecipante
+# rispetta gli spazi e i trattini
+# es. - A: B,C
+choices_b:
+{% for m in members %}
+  - {{ m }}: 
+{% endfor %}

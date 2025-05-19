@@ -16,6 +16,34 @@ from pydantic import ValidationError
 from lib.abgrid_schemas import ProjectSchema, GroupSchema
 
 class ABGridYAML:
+
+    def load_data(self, yaml_type: str, yaml_file_path: Path) -> Tuple[Optional[Dict[str, Any]], Optional[str]]:
+        """
+        Load and validate YAML data from a file.
+
+        Args:
+            yaml_type (str): The type of YAML data being validated ('project' or 'group').
+            yaml_file_path (str): The file path to the YAML file to be loaded.
+
+        Returns:
+            Tuple[Optional[Dict[str, Any]], Optional[str]]: A tuple containing the loaded data and an error message (if any).
+        """
+        try:
+            # Open and read the YAML file
+            with open(yaml_file_path, 'r') as file:
+                # Parse the YAML file using safe_load
+                yaml_data = yaml.safe_load(file)
+                
+            # Validate the parsed YAML data
+            return self.validate(yaml_type, yaml_data)
+        
+        except FileNotFoundError:
+            # Return error for file not found
+            return None, f"Cannot locate YAML file {yaml_file_path.name}."
+        
+        except yaml.YAMLError:
+            # Return error for YAML parsing issues
+            return None, "YAML file {yaml_file_path.name} could not be parsed."
     
     def validate(self, yaml_type: Literal["project", "group"], yaml_data: Dict[str, Any]) -> Tuple[Optional[Dict[str, Any]], Optional[str]]:
         """
@@ -46,32 +74,4 @@ class ABGridYAML:
         except ValidationError as e:
             # Return validation errors if any
             return None, e.errors()
-
-    def load_data(self, yaml_type: str, yaml_file_path: Path) -> Tuple[Optional[Dict[str, Any]], Optional[str]]:
-        """
-        Load and validate YAML data from a file.
-
-        Args:
-            yaml_type (str): The type of YAML data being validated ('project' or 'group').
-            yaml_file_path (str): The file path to the YAML file to be loaded.
-
-        Returns:
-            Tuple[Optional[Dict[str, Any]], Optional[str]]: A tuple containing the loaded data and an error message (if any).
-        """
-        try:
-            # Open and read the YAML file
-            with open(yaml_file_path, 'r') as file:
-                # Parse the YAML file using safe_load
-                yaml_data = yaml.safe_load(file)
-                
-            # Validate the parsed YAML data
-            return self.validate(yaml_type, yaml_data)
-        
-        except FileNotFoundError:
-            # Return error for file not found
-            return None, f"Cannot locate YAML file {yaml_file_path.name}."
-        
-        except yaml.YAMLError:
-            # Return error for YAML parsing issues
-            return None, "YAML file {yaml_file_path.name} could not be parsed."
 

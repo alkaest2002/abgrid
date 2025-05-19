@@ -9,6 +9,7 @@ The code is part of the AB-Grid project and is licensed under the MIT License.
 """
 
 import os
+from matplotlib.pylab import str_
 import yaml
 import re
 import string
@@ -24,7 +25,7 @@ from lib.abgrid_utils import notify_decorator
 
 # Initialize Jinja2 environment with file system loader for templates
 jinja_env = jinja2.Environment(
-    loader=jinja2.FileSystemLoader(["./lib/templates", "./templates"]))
+    loader=jinja2.FileSystemLoader(["./lib/templates"]))
 
 
 class ABGridMain:
@@ -51,7 +52,7 @@ class ABGridMain:
 
     @staticmethod
     @notify_decorator("init project")
-    def init_project(project_folderpath: Path, project: str, groups: int, members_per_group: int):
+    def init_project(project_folderpath: Path, project: str, groups: int, members_per_group: int, language: str):
         """
         Initialize a new project folder structure with necessary files.
         
@@ -68,12 +69,12 @@ class ABGridMain:
         os.makedirs(project_folderpath / "answersheets")
         
         # Generate project-specific files
-        ABGridMain.generate_project_file(project_folderpath, project, groups, members_per_group)
-        ABGridMain.generate_group_inputs(project_folderpath, project, groups, members_per_group)
+        ABGridMain.generate_project_file(project_folderpath, project, groups, members_per_group, language)
+        ABGridMain.generate_group_inputs(project_folderpath, project, groups, members_per_group, language)
 
     @staticmethod
     @notify_decorator("create project")
-    def generate_project_file(project_folderpath: Path, project: str, groups: int, members_per_group: int):
+    def generate_project_file(project_folderpath: Path, project: str, groups: int, members_per_group: int, language: str):
         """
         Generate the main project YAML file using a template.
 
@@ -84,13 +85,13 @@ class ABGridMain:
             members_per_group (int): Number of members in each group.
         """
         # Load the project YAML template
-        with open(Path("./lib/templates/project.yaml"), 'r') as fin:
+        with open(Path(f"./lib/templates/{language}/project.yaml"), 'r') as fin:
             yaml_data = yaml.safe_load(fin)
         
         # Update YAML data with project-specific information
-        yaml_data["progetto"] = project
-        yaml_data["numero_gruppi"] = groups
-        yaml_data["numero_partecipanti_per_gruppo"] = members_per_group
+        yaml_data["project"] = project
+        yaml_data["groups"] = groups
+        yaml_data["members_per_group"] = members_per_group
         
         # Write the updated project YAML data to a file
         with open(project_folderpath / f"{project}.yaml", 'w') as fout:
@@ -98,7 +99,7 @@ class ABGridMain:
 
     @staticmethod
     @notify_decorator("generate group inputs files")
-    def generate_group_inputs(project_folderpath: Path, project: str, groups: int, members_per_group: int):
+    def generate_group_inputs(project_folderpath: Path, project: str, groups: int, members_per_group: int, language: str):
         """
         Generate input files for each group.
 
@@ -112,10 +113,10 @@ class ABGridMain:
         members_per_group_letters = string.ascii_uppercase[:members_per_group]
         
         # Get the group HTML template
-        group_template = jinja_env.get_template("group.html")
+        group_template = jinja_env.get_template(f"/{language}/group.html")
         
         # Get the subjects HTML template
-        subjects_template = jinja_env.get_template("subjects.html")
+        subjects_template = jinja_env.get_template(f"/{language}/subjects.html")
 
         # Loop through each group and generate input files
         for group in range(1, groups + 1):
@@ -136,15 +137,15 @@ class ABGridMain:
             rendered_subjects_template = "\n".join([line for line in rendered_subjects_template.split("\n") if len(line) > 0])
             
             # Write the rendered group template to a file
-            with open(project_folderpath / f"{project}_gruppo_{group}.yaml", "w") as file:
+            with open(project_folderpath / f"{project}_g{group}.yaml", "w") as file:
                 file.write(rendered_group_template)
             
             # Write the rendered subjects template to a file
-            with open(project_folderpath / f"{project}_gruppo_{group}_subjects.yaml", "w") as file:
+            with open(project_folderpath / f"{project}_g{group}_subjects.yaml", "w") as file:
                 file.write(rendered_subjects_template)
 
     @notify_decorator("generate answersheet file")
-    def generate_answer_sheets(self):
+    def generate_answer_sheets(self, language: str):
         """
         Generate and render answer sheets for the project using PDF format.
 
@@ -159,10 +160,10 @@ class ABGridMain:
             raise ValueError(sheets_errors)
         
         # Render answer sheets as PDF
-        self.render_pdf("answersheet", sheets_data, "")
+        self.render_pdf("answersheet", sheets_data, "", language)
 
     @notify_decorator("generate AB-Grid reports")
-    def generate_reports(self):
+    def generate_reports(self, language: str):
         """
         Generate and render reports for the project groups, and save the data in a JSON format.
         
@@ -189,13 +190,13 @@ class ABGridMain:
             all_data[f"{self.abgrid_data.project}_gruppo_{report_data['group']}"] = report_data
         
             # Render the current group's report
-            self.render_pdf("report", report_data, f"gruppo_{report_data['group']}")
+            self.render_pdf("report", report_data, f"g{report_data['group']}", language)
         
         # Save all collected data to a JSON file
         with open(self.abgrid_data.project_folderpath / f"{self.abgrid_data.project}_data.json", "w") as fout:
             fout.write(json.dumps(all_data, indent=4))
 
-    def render_pdf(self, doc_type: Literal["reports", "answersheet"], doc_data: Dict[str, Any], doc_suffix: str):
+    def render_pdf(self, doc_type: Literal["reports", "answersheet"], doc_data: Dict[str, Any], doc_suffix: str, language: str):
         """
         Render the document template as a PDF file and save to the specified location.
 
@@ -205,13 +206,13 @@ class ABGridMain:
             doc_suffix (str): Suffix to append to the filename.
         """
         # Get the appropriate template for the document type
-        template = jinja_env.get_template(f"{doc_type}.html")
+        template = jinja_env.get_template(f"{language}/{doc_type}.html")
         
         # Render the template with the provided data
         rendered_template = template.render(doc_data)
         
         # Define the folder path where the PDF will be saved
-        folder_path = self.abgrid_data.project_folderpath / doc_type
+        folder_path = self.abgrid_data.project_folderpath / f"{doc_type}s"
         
         # Construct the filename, ensuring no leading/trailing underscores
         filename = re.sub("^_|_$", "", f"{self.abgrid_data.project}_{doc_type}_{doc_suffix}")
