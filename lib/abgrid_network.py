@@ -141,7 +141,7 @@ class ABGridNetwork:
         # Return the data URI for the SVG
         return f"data:image/svg+xml;base64,{base64_econded_string}"
 
-    def get_network_centralization(self, G: nx.Graph, number_of_nodes: int) -> float:
+    def get_network_centralization(self, G: nx.Graph) -> float:
         """
         Calculate the centralization of a network.
 
@@ -150,20 +150,25 @@ class ABGridNetwork:
 
         Args:
             G (nx.Graph): The graph for which the centralization is calculated.
-            number_of_nodes (int): The number of nodes in the graph.
 
         Returns:
             float: The centralization value of the network, rounded to three decimal places, or
             np.nan if the computation is not applicable (e.g., for graphs with fewer than three nodes).
         """
         
+        # Get number of nodes
+        number_of_nodes = G.number_of_nodes()
+        
         # Compute node centralities
         node_centralities = pd.Series(dict(nx.degree(G)))
+
+        # Compute Max centrality
+        max_centrality = node_centralities.max()
         
         # Compute network centralization
         network_centralization = (
             node_centralities
-                .rsub(node_centralities.max())
+                .rsub(max_centrality)
                 .sum()
                 / ((number_of_nodes - 1) * (number_of_nodes - 2))
         )
@@ -215,7 +220,7 @@ class ABGridNetwork:
         network_nodes = G.number_of_nodes()
         network_edges = G.number_of_edges()
         network_max_k_clique = max([v for _, v in nx.node_clique_number(Gu).items()])
-        network_centralization = self.get_network_centralization(Gu, network_nodes)
+        network_centralization = self.get_network_centralization(Gu)
         network_transitivity = round(nx.transitivity(G), 3)
         network_reciprocity = round(nx.overall_reciprocity(G), 3)
         
