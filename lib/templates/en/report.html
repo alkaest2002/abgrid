@@ -6,33 +6,17 @@
 </div>
 {% endmacro %}
 
-{% macro header_ranks() %}
+{% macro header(type) %}
 <div class="report-header">
-    <span><b>GROUP {{ group | upper }} - {{ project | upper }}</b></span><span>RANKS</span>
+    <span><b>GROUP {{ group | upper }} - {{ project | upper }}</b></span><span>{% if type == "ranks"%}RANKS{% else %}RAW SCORES{% endif %}</span>
 </div>
 {% endmacro %}
 
-{% macro header_raw_scores() %}
-<div class="report-header">
-    <span><b>GROUP {{ group | upper }} - {{ project | upper }}</b></span><span>RAW SCORES</span>
-</div>
-{% endmacro %}
-
-{% macro legend_ranks() %}
+{% macro legend() %}
 <div class="legend">
     <b>NN</b> = Number of Nodes, <b>NE</b> = Number of Edges, <b>NC</b> = Network Centralization, <b>NT</b> =
-    Network Transitivity, <b>NR</b> = Network Reciprocity<br /><b>IC</b> = In-Degree Centrality (rank), <b>PR</b> = PageRank
-    Centrality (rank), <b>BC</b> = Betweenness Centrality (rank)<br /><b>CC</b> = Closenness Centrality
-    (rank), <b>OR</b> = Other Nodes Reachability (%), <b>NI</b> = No In-Degree.
-</div>
-{% endmacro %}
-
-{% macro legend_raw_scores() %}
-<div class="legend">
-    <b>NN</b> = Number of Nodes, <b>NE</b> = Number of Edges, <b>NC</b> = Network Centralization, <b>NT</b> =
-    Network Transitivity, <b>NR</b> = Network Reciprocity<br /><b>IC</b> = In-Degree Centrality (raw), <b>PR</b> = PageRank
-    Centrality (raw), <b>BC</b> = Betweenness Centrality (raw)<br /><b>CC</b> = Closenness Centrality
-    (raw), <b>OR</b> = Other Nodes Reachability (%), <b>NI</b> = No In-Degree.
+    Network Transitivity, <b>NR</b> = Network Reciprocity<br /><b>IC</b> = In-Degree Centrality, <b>PR</b> = PageRank
+    Centrality, <b>BC</b> = Betweenness Centrality<br /><b>CC</b> = Closenness Centrality, <b>OR</b> = Other Nodes Reachability (%), <b>NI</b> = No In-Degree.
 </div>
 {% endmacro %}
 
