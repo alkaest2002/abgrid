@@ -9,7 +9,6 @@ The code is part of the AB-Grid project and is licensed under the MIT License.
 """
 
 import os
-from matplotlib.pylab import str_
 import yaml
 import re
 import string
@@ -130,11 +129,9 @@ class ABGridMain:
             # Render the current group template with the data
             rendered_subjects_template = subjects_template.render(template_data)
             
-            # Remove any blank lines from rendered template
-            rendered_group_template = "\n".join([line for line in rendered_group_template.split("\n") if len(line) > 0])
-            
-            # Remove any blank lines from rendered template
-            rendered_subjects_template = "\n".join([line for line in rendered_subjects_template.split("\n") if len(line) > 0])
+            # Remove any blank lines from rendered templates
+            for rendered_template in (rendered_group_template, rendered_subjects_template):
+                rendered_template = "\n".join([line for line in rendered_template.split("\n") if len(line) > 0])
             
             # Write the rendered group template to a file
             with open(project_folderpath / f"{project}_g{group}.yaml", "w") as file:
