@@ -62,7 +62,7 @@ class ABGridData:
         if data is not None:
             # Prepare answer sheet data
             answersheet_data = {
-                "project": data["project"],
+                "project_title": data["project_title"],
                 "groups": list(range(1, data["groups"] + 1)),
                 "likert": string.ascii_uppercase[:data["members_per_group"]],
                 "explanation": data["explanation"],
@@ -105,7 +105,7 @@ class ABGridData:
                 
                 # Prepare report data
                 report_data = {
-                    "project": project_data["project"],
+                    "project_title": project_data["project_title"],
                     "year": datetime.datetime.now(datetime.UTC).year,
                     "group": group_data["group"],
                     "question_a": project_data["question_a"],

@@ -16,10 +16,10 @@ class ProjectSchema(BaseModel):
     """
     A Pydantic model that represents a project's data schema.
     """
-    project: constr(min_length=1, max_length=50) # type: ignore
+    project_title: constr(min_length=1, max_length=80) # type: ignore
     groups: int = Field(ge=1, le=20)
     members_per_group: int = Field(ge=4, le=15)
-    explanation: constr(min_length=1, max_length=200) # type: ignore
+    explanation: constr(min_length=1, max_length=500) # type: ignore
     question_a: constr(min_length=1, max_length=300) # type: ignore
     question_a_choices: constr(min_length=1, max_length=150) # type: ignore
     question_b: constr(min_length=1, max_length=300) # type: ignore

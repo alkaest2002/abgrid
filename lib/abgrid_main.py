@@ -89,7 +89,7 @@ class ABGridMain:
             yaml_data = yaml.safe_load(fin)
         
         # Update YAML data with project-specific information
-        yaml_data["project"] = project
+        yaml_data["project_title"] = project
         yaml_data["groups"] = groups
         yaml_data["members_per_group"] = members_per_group
         
