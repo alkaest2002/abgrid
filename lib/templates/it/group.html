@@ -1,5 +1,17 @@
-# identificativo gruppo (non cambiare)
+##################################################################################
+#
+# NON MODIFICARE QUESTI DATI
+#
+##################################################################################
+# identificativo gruppo
 group: {{ group }}
+
+##################################################################################
+#
+# MODIFICA I DATI SEGUENTI SECONDO LE ESIGENZE
+#
+##################################################################################
+
 # indica le scelte di ogni partecipante
 # rispetta gli spazi e i trattini
 # es. - A: B,C
@@ -7,7 +19,8 @@ choices_a:
 {% for m in members %}
   - {{ m }}: 
 {% endfor %}
-# indica le scelte di ogni partecipante
+
+# indica i rifiuti di ogni partecipante
 # rispetta gli spazi e i trattini
 # es. - A: B,C
 choices_b:

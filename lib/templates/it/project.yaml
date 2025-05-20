@@ -1,6 +1,17 @@
-project:
+##################################################################################
+#
+# NON MODIFICARE QUESTI DATI
+#
+##################################################################################
 groups: 
-members_per_group: 
+members_per_group:
+
+##################################################################################
+#
+# MODIFICA I DATI SEGUENTI SECONDO LE ESIGENZE
+#
+##################################################################################
+project: ""
 explanation: "Pensa alla prova cha hai appena svolto e rispondi alle seguenti domande."
 question_a: "Chi vorresti nel tuo gruppo di lavoro ideale?"
 question_a_choices: "Indica 2 persone, annerendo per intero la lettera corrispondente"
