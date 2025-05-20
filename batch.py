@@ -27,7 +27,7 @@ for path in folders_to_process:
         project_folder_path = path
         project = project_folder_path.name
         project_filepath = next(project_folder_path.glob(f"{project}.*"))
-        groups_filepaths = list(project_folder_path.glob("*gruppo_*.*"))
+        groups_filepaths = list(project_folder_path.glob("*_g*.*"))
         abgrid_main = ABGridMain(project, project_folder_path, project_filepath, groups_filepaths)
-        abgrid_main.generate_reports()
-        abgrid_main.generate_answer_sheets()
+        abgrid_main.generate_reports("it")
+        abgrid_main.generate_answer_sheets("it")
