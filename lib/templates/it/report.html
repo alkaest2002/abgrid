@@ -8,7 +8,7 @@
 
 {% macro header(type) %}
 <div class="report-header">
-    <span><b>GROUP {{ group | upper }} - {{ project | upper }}</b></span><span>{% if type == "ranks"%}VALORI DI RANGO{% else %}VALORI GREZZI{% endif %}</span>
+    <span><b>GROUP {{ group | upper }} - {{ project_title | upper }}</b></span><span>{% if type == "ranks"%}VALORI DI RANGO{% else %}VALORI GREZZI{% endif %}</span>
 </div>
 {% endmacro %}
 

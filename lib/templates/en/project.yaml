@@ -1,11 +1,17 @@
 ##################################################################################
 #
+# DO NOT CHANGE THE FOLLOWING DATA
+#
+##################################################################################
+groups: 
+members_per_group:
+
+##################################################################################
+#
 # CHANGE THE FOLLOWING DATA TO SUITE YOUR NEEDS
 #
 ##################################################################################
-project:
-groups: 
-members_per_group: 
+project_title: ""
 explanation: "Think about the test you just took and answer the following questions."
 question_a: "Who would you like in your ideal work group?"
 question_a_choices: "Indicate 2 people by completely filling in the corresponding letter"
