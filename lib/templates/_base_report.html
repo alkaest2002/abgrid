@@ -30,6 +30,35 @@
 </table>
 {% endmacro %}
 
+{% macro network_micro(graph_type, score_type, micro) %}
+<table class="report-table-tabular">
+    {{ table_header() }}
+    {% for k in micro.keys() %}
+      {% if score_type == "ranks" %}
+        <tr>
+            <td>{{ k }}</td>
+            <td>{{ micro[k].lns }}</td>
+            <td>{{ micro[k].ic_r | int }}</td>
+            <td>{{ micro[k].pr_r | int }}</td>
+            <td>{{ micro[k].bc_r | int }}</td>
+            <td>{{ micro[k].cc_r | int }}</td>
+            <td>{% if micro[k].ni %}x{% endif %}</td>
+        </tr>
+      {% else %}
+        <tr>
+          <td>{{ k }}</td>
+          <td>{{ micro[k].lns }}</td>
+          <td>{{ '%0.2f'| format(micro[k].ic | round(2)) }}</td>
+          <td>{{ '%0.2f'| format(micro[k].pr | round(2)) }}</td>
+          <td>{{ '%0.2f'| format(micro[k].bc | round(2)) }}</td>
+          <td>{{ '%0.2f'| format(micro[k].cc | round(2)) }}</td>
+          <td>{% if micro[k].ni %}x{% endif %}</td>
+        </tr>
+      {% endif %}
+    {% endfor %}
+</table>
+{% endmacro %}
+
 {% macro body() %}
 <div class="page">
     <div>

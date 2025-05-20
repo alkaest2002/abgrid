@@ -16,7 +16,7 @@
 <div class="legend">
     <b>NN</b> = Number of Nodes, <b>NE</b> = Number of Edges, <b>NC</b> = Network Centralization, <b>NT</b> =
     Network Transitivity, <b>NR</b> = Network Reciprocity<br /><b>IC</b> = In-Degree Centrality, <b>PR</b> = PageRank
-    Centrality, <b>BC</b> = Betweenness Centrality, <b>CC</b> = Closenness Centrality<br /><b>OR</b> = Other Nodes Reachability (%), <b>NI</b> = No In-Degree.
+    Centrality, <b>BC</b> = Betweenness Centrality, <b>CC</b> = Closenness Centrality, <b>NI</b> = No In-Degree.
 </div>
 {% endmacro %}
 
@@ -32,44 +32,16 @@
 </p>
 {% endmacro %}
 
-{% macro network_micro(graph_type, score_type, micro) %}
-<table class="report-table-tabular">
-    <tr>
-        <th>ID</th>
-        <th>{% if graph_type == "A" %}CHOICES{% else %}REJECTS{% endif %}</th>
-        <th>IC</th>
-        <th>PR</th>
-        <th>BC</th>
-        <th>CC</th>
-        <th>OR</th>
-        <th>NI</th>
-    </tr>
-    {% for k in micro.keys() %}
-      {% if score_type == "ranks" %}
-        <tr>
-            <td>{{ k }}</td>
-            <td>{{ micro[k].lns }}</td>
-            <td>{{ micro[k].ic_r | int }}</td>
-            <td>{{ micro[k].pr_r | int }}</td>
-            <td>{{ micro[k].bc_r | int }}</td>
-            <td>{{ micro[k].cc_r | int }}</td>
-            <td>{{ '%0.2f'| format(micro[k].or | round(2)) }}</td>
-            <td>{% if micro[k].ni %}x{% endif %}</td>
-        </tr>
-      {% else %}
-        <tr>
-          <td>{{ k }}</td>
-          <td>{{ micro[k].lns }}</td>
-          <td>{{ '%0.2f'| format(micro[k].ic | round(2)) }}</td>
-          <td>{{ '%0.2f'| format(micro[k].pr | round(2)) }}</td>
-          <td>{{ '%0.2f'| format(micro[k].bc | round(2)) }}</td>
-          <td>{{ '%0.2f'| format(micro[k].cc | round(2)) }}</td>
-          <td>{{ '%0.2f'| format(micro[k].or | round(2)) }}</td>
-          <td>{% if micro[k].ni %}x{% endif %}</td>
-        </tr>
-      {% endif %}
-    {% endfor %}
-</table>
+{% macro table_header() %}
+<tr>
+    <th>ID</th>
+    <th>{% if graph_type == "A" %}CHOICES{% else %}REJECTS{% endif %}</th>
+    <th>IC</th>
+    <th>PR</th>
+    <th>BC</th>
+    <th>CC</th>
+    <th>NI</th>
+</tr>
 {% endmacro %}
 
 {% block body %}

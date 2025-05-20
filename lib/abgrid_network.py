@@ -194,7 +194,6 @@ class ABGridNetwork:
             pd.Series(nx.pagerank(G, max_iter=1000), name="pr"),
             pd.Series(nx.betweenness_centrality(G), name="bc"),
             pd.Series(nx.closeness_centrality(G), name="cc"),
-            pd.Series({node: nx.local_reaching_centrality(G, node) for node in G.nodes()}, name="or"),
         ], axis=1)
         
         # Identify nodes with zero in-degree and add to micro-level stats DataFrame
