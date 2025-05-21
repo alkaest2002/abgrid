@@ -187,6 +187,7 @@ class ABGridNetwork:
         Returns:
             Tuple[Dict[str, Union[float, int]], pd.DataFrame]: A dictionary with macro-level stats and a DataFrame with micro-level stats for each node.
         """
+
         # Create a DataFrame with various network centralities and metrics for each node
         micro_level_stats = pd.concat([
             pd.Series(nx.to_pandas_adjacency(G).apply(lambda x: ", ".join(x[x > 0].index.values), axis=1), name="lns"),
@@ -194,6 +195,7 @@ class ABGridNetwork:
             pd.Series(nx.pagerank(G, max_iter=1000), name="pr"),
             pd.Series(nx.betweenness_centrality(G), name="bc"),
             pd.Series(nx.closeness_centrality(G), name="cc"),
+            pd.Series(nx.hits(G)[0], name="hu"),
         ], axis=1)
         
         # Identify nodes with zero in-degree and add to micro-level stats DataFrame
