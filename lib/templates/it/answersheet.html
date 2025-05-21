@@ -1,11 +1,11 @@
 {% extends "_base_answersheet.html" %}
 
-{% macro header(group, participant) %}
+{% macro answersheet_header(group, participant) %}
 <div class="answersheet-header">
     <span>Gruppo: {{ group }}, Partecipante: {{ participant }}</span><span>{{ project_title }}</span>
 </div>
 {% endmacro %}
 
 {% block body %}
-    {{ body() }}
+    {{ answersheet_body() }}
 {% endblock %}
