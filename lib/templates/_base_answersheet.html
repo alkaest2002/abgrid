@@ -8,22 +8,16 @@
     </div>
 {% endmacro%}
 
-{% macro get_barcode(group, participant) %}
+{% macro barcode(group, participant) %}
   <span class="barcode">*group-{{group}}!participant-{{participant}}*</span>
 {% endmacro %}
 
-{% macro body() %}
+{% macro answersheet_body() %}
     {% for group in groups %}
         {% for participant in likert %}
             <div class="page">
                 <div class="main-wrapper">
-                    <div class="intro">
-                        <div class="logo">
-                            <div class="logo-letter letter-A-reversed">A</div>
-                            <div class="logo-letter letter-B-reversed">B</div>
-                            <div>GRID</div>
-                        </div>
-                    </div>
+                    {{ logo() }}
                     {{ header(group, participant) }}
                     <div class="explanation">
                         <p>{{ explanation }}</p>
@@ -40,7 +34,7 @@
                     </div>
                     </div>
                 <div class="barcode-wrapper">
-                    <p class="barcode">{{ get_barcode(group, participant) }}</p>
+                    <p class="barcode">{{ barcode(group, participant) }}</p>
                 </div>
             </div>
         {% endfor %}
@@ -48,55 +42,48 @@
 {% endmacro %}
 
 {% block style %}
-    <style>
-
-        .answersheet-header {
-            font-size: 1.5em;
-            margin: 24pt auto;
-            font-weight: bold;
-            padding-bottom: 20px;
-            border-bottom: 1px solid #000;
-            display: flex;
-            justify-content: space-between;
-        }
-        
-        .explanation {
-            margin-bottom: 50px;
-        }
-
-        .question {
-            margin-bottom: 30px;
-            max-width: 15cm;
-        }
-
-        .question-hint {
-            margin-top: 10px;
-            font-size: 10pt;
-            color: #555;
-        }
-
-        .bubble span {
-            display: inline-block;
-            margin-top: 12pt;
-            margin-right: 3pt;
-            font-family: "OMR";
-            font-size: 11pt;
-        }
-
-        .barcode-wrapper {
-            position: relative;
-            display: inline-block;
-            padding: 10px;
-            border: 1px solid #333;
-            border-radius: 6px;
-        }
-
-        .barcode-wrapper .barcode {
-            font-family: "3 of 9 Barcode";
-            font-size: 25pt;
-            text-align: center;
-        }
-    </style>
+<style>
+    .answersheet-header {
+        font-size: 1.5em;
+        margin: 24pt auto;
+        font-weight: bold;
+        padding-bottom: 20px;
+        border-bottom: 1px solid #000;
+        display: flex;
+        justify-content: space-between;
+    }
+    .explanation {
+        margin-bottom: 50px;
+    }
+    .question {
+        margin-bottom: 30px;
+        max-width: 15cm;
+    }
+    .question-hint {
+        margin-top: 10px;
+        font-size: 10pt;
+        color: #555;
+    }
+    .bubble span {
+        display: inline-block;
+        margin-top: 12pt;
+        margin-right: 3pt;
+        font-family: "OMR";
+        font-size: 11pt;
+    }
+    .barcode-wrapper {
+        position: relative;
+        display: inline-block;
+        padding: 10px;
+        border: 1px solid #333;
+        border-radius: 6px;
+    }
+    .barcode-wrapper .barcode {
+        font-family: "3 of 9 Barcode";
+        font-size: 25pt;
+        text-align: center;
+    }
+</style>
 {% endblock %}
 
 {% block body %}

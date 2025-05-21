@@ -1,3 +1,11 @@
+{% macro logo() %}
+<div class="logo">
+    <div class="logo-letter letter-A-reversed">A</div>
+    <div class="logo-letter letter-B-reversed">B</div>
+    <div>GRID</div>
+</div>
+{% endmacro %}
+
 <!DOCTYPE html>
 <html>
     <head>
@@ -29,7 +37,7 @@
                 display: flex;
                 align-items: center;
             }
-            .logo>div {
+            .logo > div {
                 font-size: 2em;
                 font-weight: bold;
             }

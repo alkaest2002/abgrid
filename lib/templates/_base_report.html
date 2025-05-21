@@ -59,16 +59,10 @@
 </table>
 {% endmacro %}
 
-{% macro body() %}
+{% macro report_body() %}
 <div class="page">
     <div>
-        <div class="intro">
-            <div class="logo">
-                <div class="logo-letter letter-A-reversed">A</div>
-                <div class="logo-letter letter-B-reversed">B</div>
-                <div>GRID</div>
-            </div>
-        </div>
+        {{ logo() }}
         {{ disclaimer() }}
         {{ header("ranks") }}
         <table class="report-table">
@@ -89,11 +83,7 @@
 <div class="page">
     <div>
         <div class="intro">
-            <div class="logo">
-                <div class="logo-letter letter-A-reversed">A</div>
-                <div class="logo-letter letter-B-reversed">B</div>
-                <div>GRID</div>
-            </div>
+            {{ logo() }}
         </div>
         {{ disclaimer() }}
         {{ header("raw scores") }}
@@ -116,97 +106,81 @@
 
 
 {% block style %}
-  <style>
+<style>
     * {
-      font-size: 10pt;
+        font-size: 10pt;
     }
-
     table {
-      border-collapse: collapse;
-      width: 100%;
+        border-collapse: collapse;
+        width: 100%;
     }
-
     th, td {
-      text-align: center;
+        text-align: center;
     }
-  
     .disclaimer {
-      margin: 20px 0;
-      text-align: justify;
+        margin: 20px 0;
+        text-align: justify;
     }
-
     .report-header {
-          font-size: 1.5em;
-          margin: 10px 0px;
-          font-weight: bold;
-          padding-bottom: 5px;
-          border-bottom: 1px solid #000;
-          display: flex;
-          justify-content: space-between;
-      }
-
+            font-size: 1.5em;
+            margin: 10px 0px;
+            font-weight: bold;
+            padding-bottom: 5px;
+            border-bottom: 1px solid #000;
+            display: flex;
+            justify-content: space-between;
+        }
     .hero {
-      font-size: 3em;
-      text-align: center;
-      vertical-align: middle;
-      font-weight: bold;
-      padding: 20px 0px 10px 0px;
+        font-size: 3em;
+        text-align: center;
+        vertical-align: middle;
+        font-weight: bold;
+        padding: 20px 0px 10px 0px;
     }
-
     .question {
-      text-align: left;
+        text-align: left;
     }
-
     .macro p {
-      text-align: left;
-      margin-bottom: 10px;
+        text-align: left;
+        margin-bottom: 10px;
     }
-
     .micro {
-      vertical-align: top;
+        vertical-align: top;
     }
-
     .graph-main {
-      display: block;
-      margin: auto;
-      height: 280px;
+        display: block;
+        margin: auto;
+        height: 280px;
     }
-
     .report-table-tabular {
-      border-top: 2px solid #000;
-      border-bottom: 2px solid #000;
+        border-top: 2px solid #000;
+        border-bottom: 2px solid #000;
     }
-
     .report-table-tabular th {
-      padding: 5px 3px;
-      background-color: #ddd;
-      border-bottom: 1px solid #000;
+        padding: 5px 3px;
+        background-color: #ddd;
+        border-bottom: 1px solid #000;
     }
-
     .report-table-tabular td {
-      padding: 5px 3px;
-      border-top: 1px solid #ddd;
+        padding: 5px 3px;
+        border-top: 1px solid #ddd;
     }
-
     .report-table-tabular tr:nth-child(odd) td {
-      background-color: #eee;
+        background-color: #eee;
     }
-
     .no-border {
-      border: 1px solid transparent;
-      width: 20px;
+        border: 1px solid transparent;
+        width: 20px;
     }
-
     .legend {
-      margin-top: 25px;
+        margin-top: 25px;
     }
-
     .footer {
-      font-size: 8pt !important;
-      color: #acacac;
-      text-align: justify;
+        font-size: 8pt !important;
+        color: #acacac;
+        text-align: justify;
     }
-  </style>
+</style>
 {% endblock %}
 
 <body>
