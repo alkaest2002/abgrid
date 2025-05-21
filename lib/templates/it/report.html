@@ -14,9 +14,8 @@
 
 {% macro legend() %}
 <div class="legend">
-    <b>NN</b> = Number of Nodes, <b>NE</b> = Number of Edges, <b>NC</b> = Network Centralization, <b>NT</b> =
-    Network Transitivity, <b>NR</b> = Network Reciprocity<br /><b>IC</b> = In-Degree Centrality, <b>PR</b> = PageRank
-    Centrality, <b>BC</b> = Betweenness Centrality, <b>CC</b> = Closenness Centrality, <b>NI</b> = No In-Degree.
+    <b>NN</b> = Nodes, <b>NE</b> = Edges, <b>NC</b> = Network Centralization, <b>NT</b> = Network Transitivity, <b>NR</b> = Network Reciprocity, <b>IC</b> = In-Degree, <br />
+    <b>PR</b> = PageRank, <b>BC</b> = Betweenness, <b>CC</b> = Closenness, <b>HU</b> = Hub,  <b>NI</b> = No In-Degree.
 </div>
 {% endmacro %}
 
@@ -34,7 +33,7 @@
 </p>
 {% endmacro %}
 
-{% macro table_header() %}
+{% macro table_header(graph_type) %}
 <tr>
     <th>ID</th>
     <th>{% if graph_type == "A" %}SCELTE{% else %}RIFIUTI{% endif %}</th>
@@ -42,6 +41,7 @@
     <th>PR</th>
     <th>BC</th>
     <th>CC</th>
+    <th>HU</th>
     <th>NI</th>
 </tr>
 {% endmacro %}
