@@ -1,25 +1,25 @@
 {% extends "_base_report.html" %}
 
-{% macro disclaimer() %}
+{% macro report_disclaimer() %}
 <div class="disclaimer">
     Questo report generato elettronicamente è destinato agli specialisti delle risorse umane che hanno completato il corso "Introduzione alle dinamiche di gruppo e alla network analysis". È concepito come strumento di supporto per agevolare il processo decisionale e non sostituisce il giudizio professionale degli esperti di settore. Le interpretazioni tratte dal report dovrebbero essere integrate con altre informazioni relative allo specifico contesto valutativo.
 </div>
 {% endmacro %}
 
-{% macro header(type) %}
+{% macro report_header(type) %}
 <div class="report-header">
     <span><b>GROUP {{ group | upper }} - {{ project_title | upper }}</b></span><span>{% if type == "ranks"%}VALORI DI RANGO{% else %}VALORI GREZZI{% endif %}</span>
 </div>
 {% endmacro %}
 
-{% macro legend() %}
+{% macro report_legend() %}
 <div class="legend">
     <b>NN</b> = Nodes, <b>NE</b> = Edges, <b>NC</b> = Network Centralization, <b>NT</b> = Network Transitivity, <b>NR</b> = Network Reciprocity, <b>IC</b> = In-Degree, <br />
     <b>PR</b> = PageRank, <b>BC</b> = Betweenness, <b>CC</b> = Closenness, <b>HU</b> = Hub,  <b>NI</b> = No In-Degree.
 </div>
 {% endmacro %}
 
-{% macro footer() %}
+{% macro report_footer() %}
 <div class="footer">
     <p><b>Autori</b>: Dr. Pierpaolo CALANNA, PhD, Dr. Gaetano BUONAIUTO (2021-{{ year }}), <b>Licenza d'uso</b>:
     l'impaginazione del presente report, la personalizzazione dei grafici, nonché la scelta degli indici
@@ -27,13 +27,7 @@
 </div>
 {% endmacro %}
 
-{% macro network_macro(macro) %}
-<p>
-    NN {{ macro.network_nodes }}, NE {{ macro.network_edges }}, NC {{ (macro.network_centralization * 100)|round|int }}%, NT {{ (macro.network_transitivity * 100)|round|int }}%, NR {{ (macro.network_reciprocity * 100)|round|int }}%
-</p>
-{% endmacro %}
-
-{% macro table_header(graph_type) %}
+{% macro report_table_header(graph_type) %}
 <tr>
     <th>ID</th>
     <th>{% if graph_type == "A" %}SCELTE{% else %}RIFIUTI{% endif %}</th>

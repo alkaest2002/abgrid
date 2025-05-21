@@ -28,15 +28,9 @@
 </table>
 {% endmacro %}
 
-{% macro network_macro(macro) %}
-<p>
-    NN {{ macro.network_nodes }}, NE {{ macro.network_edges }}, NC {{ (macro.network_centralization * 100)|round|int }}%, NT {{ (macro.network_transitivity * 100)|round|int }}%, NR {{ (macro.network_reciprocity * 100)|round|int }}%
-</p>
-{% endmacro %}
-
 {% macro network_micro(graph_type, score_type, micro) %}
 <table class="report-table-tabular">
-    {{ report_table_header(graph_type) }}
+    {{ table_header(graph_type) }}
     {% for k in micro.keys() %}
       {% if score_type == "ranks" %}
         <tr>
@@ -69,8 +63,8 @@
 <div class="page">
     <div>
         {{ logo() }}
-        {{ report_disclaimer() }}
-        {{ report_header("ranks") }}
+        {{ disclaimer() }}
+        {{ header("ranks") }}
         <table class="report-table">
             <tr>
                 <td>
@@ -82,17 +76,17 @@
                 </td>
             </tr>
         </table>
-        {{ report_legend() }}
+        {{ legend() }}
     </div>
-    {{ report_footer() }}
+    {{ footer() }}
 </div>
 <div class="page">
     <div>
         <div class="intro">
             {{ logo() }}
         </div>
-        {{ report_disclaimer() }}
-        {{ report_header("raw scores") }}
+        {{ disclaimer() }}
+        {{ header("raw scores") }}
         <table class="report-table">
             <tr>
                 <td>
@@ -104,9 +98,9 @@
                 </td>
             </tr>
         </table>
-        {{ report_legend() }}
+        {{ legend() }}
     </div>
-    {{ report_footer() }}
+    {{ footer() }}
 </div>
 {% endmacro %}
 
