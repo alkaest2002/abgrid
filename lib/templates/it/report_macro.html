@@ -1,0 +1,37 @@
+{% macro disclaimer() %}
+<div class="report-disclaimer">
+    Questo report generato elettronicamente è destinato agli specialisti delle risorse umane che hanno completato il corso "Introduzione alle dinamiche di gruppo e alla network analysis". È concepito come strumento di supporto per agevolare il processo decisionale e non sostituisce il giudizio professionale degli esperti di settore. Le interpretazioni tratte dal report dovrebbero essere integrate con altre informazioni relative allo specifico contesto valutativo.
+</div>
+{% endmacro %}
+
+{% macro table_header(graph_type) %}
+<tr>
+    <th>ID</th>
+    <th>{% if graph_type == "A" %}SCELTE{% else %}RIFIUTI{% endif %}</th>
+    <th>IC</th>
+    <th>PR</th>
+    <th>BC</th>
+    <th>CC</th>
+    <th>HU</th>
+    <th>NI</th>
+</tr>
+{% endmacro %}
+
+{% macro report_header(score_type, group, project_title) %}
+<div class="report-header">
+    <span><b>GRUPPO {{ group | upper }} - {{ project_title | upper }}</b></span><span>{% if score_type == "ranks"%}PUNTEGGI DI RANGO{% else %}PUNTEGGI GREZZI{% endif %}</span>
+</div>
+{% endmacro %}
+
+{% macro legend() %}
+<div class="report-legend">
+    <b>NN</b> = Nodes, <b>NE</b> = Edges, <b>NC</b> = Network Centralization, <b>NT</b> = Network Transitivity, <b>NR</b> = Network Reciprocity, <b>IC</b> = In-Degree, <br />
+    <b>PR</b> = PageRank, <b>BC</b> = Betweenness, <b>CC</b> = Closenness, <b>HU</b> = Hub, <b>NI</b> = No In-Degree.
+</div>
+{% endmacro %}
+
+{% macro footer() %}
+<div class="report-footer">
+    <p><b>Authors</b>: Dr. Pierpaolo CALANNA, PhD, Dr. Gaetano BUONAIUTO (2021-{{ year }}), <b>Licenza d'uso</b>: l'impaginazione del presente report, la personalizzazione dei grafici, nonché la scelta degli indici quantitativi è soggetta a copyright.</p>
+</div>
+{% endmacro %}
