@@ -15,8 +15,8 @@ parser.add_argument("-p", "--project", required=True,
                     help="Name of the project.")
 parser.add_argument("-g", "--groups", type=int, choices=range(1, 21), 
                     help="Number of groups (1 to 20).")
-parser.add_argument("-m", "--members_per_group", type=int, choices=range(3, 16), 
-                    help="Number of members per group (3 to 15).")
+parser.add_argument("-m", "--members_per_group", type=int, choices=range(4, 37), 
+                    help="Number of members per group (4 to 36).")
 parser.add_argument("-u", "--user", type=str, required=True, 
                     help="Username.")
 parser.add_argument("-l", "--language", choices=LANGUAGES, default="en", 

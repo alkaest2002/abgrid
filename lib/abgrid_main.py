@@ -11,13 +11,13 @@ The code is part of the AB-Grid project and is licensed under the MIT License.
 import os
 import yaml
 import re
-import string
 import json
 import jinja2
 
 from pathlib import Path
 from typing import Literal, Dict, Any
 from weasyprint import HTML
+from lib import SYMBOLS
 from lib.abgrid_yaml import ABGridYAML
 from lib.abigrid_data import ABGridData
 from lib.abgrid_utils import notify_decorator
@@ -108,8 +108,9 @@ class ABGridMain:
             groups (int): Number of groups in the project.
             members_per_group (int): Number of members in each group.
         """
+
         # Build a list of member letters (e.g., for five members: A, B, C, D, E)
-        members_per_group_letters = string.ascii_uppercase[:members_per_group]
+        members_per_group_letters = SYMBOLS[:members_per_group]
         
         # Get the group HTML template
         group_template = jinja_env.get_template(f"/{language}/group.html")
@@ -130,16 +131,13 @@ class ABGridMain:
             rendered_subjects_template = subjects_template.render(template_data)
             
             # Remove any blank lines from rendered templates
-            for rendered_template in (rendered_group_template, rendered_subjects_template):
+            for suffix, rendered_template in (("", rendered_group_template), ("_subjects", rendered_subjects_template)):
+                # Filter empty lines
                 rendered_template = "\n".join([line for line in rendered_template.split("\n") if len(line) > 0])
+                # Write the rendered group template to a file
+                with open(project_folderpath / f"{project}_g{group}{suffix}.yaml", "w") as file:
+                    file.write(rendered_template)
             
-            # Write the rendered group template to a file
-            with open(project_folderpath / f"{project}_g{group}.yaml", "w") as file:
-                file.write(rendered_group_template)
-            
-            # Write the rendered subjects template to a file
-            with open(project_folderpath / f"{project}_g{group}_subjects.yaml", "w") as file:
-                file.write(rendered_subjects_template)
 
     @notify_decorator("generate answersheet file")
     def generate_answer_sheets(self, language: str):

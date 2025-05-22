@@ -8,13 +8,12 @@ Date Created: May 3, 2025
 The code is part of the AB-Grid project and is licensed under the MIT License.
 """
 
-from csv import Error
 import re
-import string
 import datetime
 
 from pathlib import Path
 from typing import Any, Tuple, Dict, Optional
+from lib import SYMBOLS
 from lib.abgrid_network import ABGridNetwork
 
 class ABGridData:
@@ -58,13 +57,14 @@ class ABGridData:
         """
         # Load project data
         data, validation_errors = self.data_loader.load_data("project", self.project_filepath)
-        
+
+        # If project data was correctly loaded
         if data is not None:
             # Prepare answer sheet data
             answersheet_data = {
                 "project_title": data["project_title"],
                 "groups": list(range(1, data["groups"] + 1)),
-                "likert": string.ascii_uppercase[:data["members_per_group"]],
+                "likert": SYMBOLS[:data["members_per_group"]],
                 "explanation": data["explanation"],
                 "question_a": data["question_a"],
                 "question_a_hint": data["question_a_choices"],
