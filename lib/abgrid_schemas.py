@@ -61,13 +61,13 @@ class GroupSchema(BaseModel):
                 raise ValueError("Each choice must be a dictionary")
             if len(choice_dict) != 1:
                 raise ValueError("Each choice must have exactly one key-value pair")
-            if not key.isalpha() or not key.isupper() or len(key) != 1:
+            if not key.isalnum() or not key.isupper() or len(key) != 1:
                 raise ValueError(f"Key '{key}' must be a single uppercase letter")
             if not value_str:
                 raise ValueError(f"Key '{key}' has no values")
             if any(not part for part in value_parts):
                 raise ValueError(f"Value '{value_str}' contains empty entries due to misplaced commas")
-            if not all(len(part) == 1 and part.isalpha() and part.isupper() for part in value_parts):
+            if not all(len(part) == 1 and part.isalnum() and part.isupper() for part in value_parts):
                 raise ValueError(f"Value '{value_str}' must be comma-separated single uppercase letters and contain no empty values")
             if key in value_parts:
                 raise ValueError(f"Key '{key}' cannot be present in its own values")
