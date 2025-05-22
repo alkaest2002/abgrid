@@ -73,6 +73,8 @@ class GroupSchema(BaseModel):
                 raise ValueError(f"Key '{key}' cannot be present in its own values")
             if len(value_parts) != len(set(value_parts)):
                 raise ValueError(f"Values for key '{key}' contain duplicates: {value_str}")
+            
+        # If legit, return the original value
         return value
 
     @model_validator(mode='after')
@@ -116,4 +118,5 @@ class GroupSchema(BaseModel):
                 raise ValueError(
                     f"Values for key '{key}' in choices_b contain the following illegal letters: {', '.join(invalid_values)}")
 
+        # If legit, return self
         return self
