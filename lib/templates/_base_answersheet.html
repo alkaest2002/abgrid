@@ -1,4 +1,5 @@
 {% extends "_base.html" %}
+{% import "./_base_macro.html" as base_macro %}
 
 {% macro answersheet_likert(likert) %}
     <div class="bubble">
@@ -17,7 +18,7 @@
         {% for participant in likert %}
             <div class="page">
                 <div class="main-wrapper">
-                    {{ logo() }}
+                    {{ base_macro.logo() }}
                     {{ answersheet_header(group, participant) }}
                     <div class="explanation">
                         <p>{{ explanation }}</p>

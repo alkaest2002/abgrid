@@ -207,7 +207,7 @@ class ABGridMain:
         match doc_type:
             # Answersheets
             case "answersheet":
-                template = jinja_env.get_template(f"./{language}/answersheets.html")
+                template = jinja_env.get_template(f"./{language}/answersheet.html")
             # Reports with up to 15 members per group
             case "report" if doc_data["members_per_group"] <= 15:
                 template = jinja_env.get_template(f"./{language}/report_single_page.html")
