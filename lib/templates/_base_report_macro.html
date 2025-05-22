@@ -1,0 +1,48 @@
+{% macro question(network_type, question) %}
+<div class="report-question">
+    {{ network_type }}. {{ question }}
+</div>
+{% endmacro %}
+
+{% macro graph(graph) %}
+<div class="network-graph">
+    <img src="{{ graph }}" />
+</div>
+{% endmacro %}
+
+{% macro macro_statistics(macro) %}
+<div class="network-macro">
+    NN {{ macro.network_nodes }}, NE {{ macro.network_edges }}, NC {{ (macro.network_centralization * 100)|round|int }}%, NT {{ (macro.network_transitivity * 100)|round|int }}%, NR {{ (macro.network_reciprocity * 100)|round|int }}%
+</div>
+{% endmacro %}
+
+{% macro micro_statistics(network_type, score_type, micro, table_header) %}
+<table class="network-micro-table">
+    {{ table_header(network_type) }}
+    {% for k in micro.keys() %}
+      {% if score_type == "ranks" %}
+        <tr>
+            <td>{{ k }}</td>
+            <td>{{ micro[k].lns }}</td>
+            <td>{{ micro[k].ic_r | int }}</td>
+            <td>{{ micro[k].pr_r | int }}</td>
+            <td>{{ micro[k].bc_r | int }}</td>
+            <td>{{ micro[k].cc_r | int }}</td>
+            <td>{{ micro[k].hu_r | int }}</td>
+            <td>{% if micro[k].ni %}x{% endif %}</td>
+        </tr>
+      {% else %}
+        <tr>
+          <td>{{ k }}</td>
+          <td>{{ micro[k].lns }}</td>
+          <td>{{ '%0.2f'| format(micro[k].ic | round(2)) }}</td>
+          <td>{{ '%0.2f'| format(micro[k].pr | round(2)) }}</td>
+          <td>{{ '%0.2f'| format(micro[k].bc | round(2)) }}</td>
+          <td>{{ '%0.2f'| format(micro[k].cc | round(2)) }}</td>
+          <td>{{ '%0.2f'| format(micro[k].hu | round(2)) }}</td>
+          <td>{% if micro[k].ni %}x{% endif %}</td>
+        </tr>
+      {% endif %}
+    {% endfor %}
+</table>
+{% endmacro %}

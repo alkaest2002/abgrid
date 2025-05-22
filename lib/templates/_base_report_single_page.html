@@ -1,0 +1,105 @@
+{% extends "_base_report.html" %}
+
+{% block style %}
+<style>
+    * {
+        font-size: 10pt;
+    }
+    table {
+        border-collapse: collapse;
+        width: 100%;
+    }
+    th, td {
+        text-align: center;
+    }
+    .report-disclaimer {
+        margin: 20px 0;
+        text-align: justify;
+    }
+    .report-header {
+        display: flex;
+        justify-content: space-between;
+        font-size: 1.5em;
+        margin: 10px 0px;
+        font-weight: bold;
+        padding-bottom: 5px;
+        border-bottom: 1px solid #000;
+    }
+    .report-content {
+        display: flex;
+        align-items: start;
+    }
+    .report-content > div:first-child {
+        padding-right: 10px;
+    }
+    .report-content > div:last-child {
+        padding-left: 10px;
+    }
+    .network-macro {
+        text-align: left;
+        margin-bottom: 10px;
+    }
+    .network-graph > img {
+        display: block;
+        margin: auto;
+        height: 280px;
+    }
+    .network-micro-table {
+        border-top: 2px solid #000;
+        border-bottom: 2px solid #000;
+    }
+    .network-micro-table th {
+        padding: 5px 3px;
+        background-color: #ddd;
+        border-bottom: 1px solid #000;
+    }
+    .network-micro-table td {
+        padding: 5px 3px;
+        border-top: 1px solid #ddd;
+    }
+    .network-micro-table tr:nth-child(odd) td {
+        background-color: #eee;
+    }
+    .report-legend {
+        margin-top: 12px;
+    }
+    .report-footer {
+        font-size: 8pt !important;
+        color: #acacac;
+        text-align: justify;
+    }
+</style>
+{% endblock %}
+
+{% macro report_body() %}
+    {% for score_type in ["ranks", "raw_scores"] %}
+        <div class="page">
+            <div>
+                <div>
+                    {{ base_macro.logo() }}
+                    {{ report_macro.disclaimer() }}
+                    {{ report_macro.report_header(score_type, group, project_title) }}
+                </div>
+                <div class="report-content">
+                    {% for (network_type, question, graph, macro, micro) in 
+                        [("A", question_a, graph_a, macro_a, micro_a), ("B", question_b, graph_b, macro_b, micro_b)] %}
+                    <div class="report-type">
+                        <div class="report-question">
+                            {{ base_report_macro.question(network_type, question) }}
+                        </div>
+                        <div class="network-graph">
+                            {{ base_report_macro.graph(graph) }}
+                        </div>
+                        <div class="network-table">
+                            {{ base_report_macro.macro_statistics(macro) }}
+                            {{ base_report_macro.micro_statistics(network_type, score_type, micro, report_macro.table_header) }}
+                            {{ report_macro.legend() }}
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            {{ report_macro.footer() }}
+        </div>
+    {% endfor %}
+{% endmacro %}

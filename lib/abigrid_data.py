@@ -108,6 +108,7 @@ class ABGridData:
                     "project_title": project_data["project_title"],
                     "year": datetime.datetime.now(datetime.UTC).year,
                     "group": group_data["group"],
+                    "members_per_group": project_data["members_per_group"],
                     "question_a": project_data["question_a"],
                     "question_b": project_data["question_b"],
                     "edges_a": ntw.edges_a,

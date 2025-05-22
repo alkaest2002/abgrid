@@ -193,7 +193,7 @@ class ABGridMain:
         with open(self.abgrid_data.project_folderpath / f"{self.abgrid_data.project}_data.json", "w") as fout:
             fout.write(json.dumps(all_data, indent=4))
 
-    def render_pdf(self, doc_type: Literal["reports", "answersheet"], doc_data: Dict[str, Any], doc_suffix: str, language: str):
+    def render_pdf(self, doc_type: Literal["report", "answersheet"], doc_data: Dict[str, Any], doc_suffix: str, language: str):
         """
         Render the document template as a PDF file and save to the specified location.
 
@@ -202,8 +202,18 @@ class ABGridMain:
             doc_data (dict): Data dictionary to be used for template rendering.
             doc_suffix (str): Suffix to append to the filename.
         """
+        
         # Get the appropriate template for the document type
-        template = jinja_env.get_template(f"{language}/{doc_type}.html")
+        match doc_type:
+            # Answersheets
+            case "answersheet":
+                template = jinja_env.get_template(f"{language}/answersheets.html")
+            # Reports with up to 15 members per group
+            case "report" if doc_data["members_per_group"] <= 15:
+                template = jinja_env.get_template(f"{language}/report_single_page.html")
+            # Reports with more than 15 members per group
+            case "report" if doc_data["members_per_group"] > 15:
+                template = jinja_env.get_template(f"{language}/report_multi_page.html")
         
         # Render the template with the provided data
         rendered_template = template.render(doc_data)
