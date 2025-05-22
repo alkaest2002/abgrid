@@ -36,10 +36,14 @@
     .network-macro {
         margin-bottom: 10px;
     }
-    .network-graph > img {
-        display: block;
-        margin: auto;
-        height: 280px;
+    .network-graphs {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        flex-grow: 1;
+    }
+    .network-graphs > div {
+        width: 100%;
     }
     .network-micro-table {
         border-top: 2px solid #000;
@@ -68,6 +72,23 @@
 {% endblock %}
 
 {% macro report_body() %}
+    <div class="page">
+        <div>
+            <div>
+                {{ base_macro.logo() }}
+                {{ report_macro.disclaimer() }}
+            </div>
+            <div class="network-graphs">
+                {% for network_type, question, graph in (("A", question_a, graph_a), ("B", question_b, graph_b)) %}
+                    <div>
+                        {{ base_report_macro.question(network_type, question) }}
+                        {{ base_report_macro.graph(graph) }}
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+        {{ report_macro.footer() }}
+    </div>
     {% for score_type in ["ranks", "raw_scores"] %}
         <div class="page">
             <div>
@@ -77,20 +98,13 @@
                     {{ report_macro.report_header(score_type, group, project_title) }}
                 </div>
                 <div class="report-content">
-                    {% for (network_type, question, graph, network_data_macro_level, network_data_micro_level) in 
-                        [("A", question_a, graph_a, macro_a, micro_a), ("B", question_b, graph_b, macro_b, micro_b)] %}
-                        <div class="network-type">
-                            <div class="re port-question">
-                                {{ base_report_macro.question(network_type, question) }}
-                            </div>
-                            <div class="network-graph">
-                                {{ base_report_macro.graph(graph) }}
-                            </div>
-                            <div class="network-table">
-                                {{ base_report_macro.macro_statistics(network_data_macro_level) }}
-                                {{ base_report_macro.micro_statistics(network_type, score_type, network_data_micro_level, report_macro.table_header) }}
-                                {{ report_macro.legend() }}
-                            </div>
+                    {% for (network_type, question, network_data_macro_level, network_data_micro_level) in 
+                        [("A", question_a, macro_a, micro_a), ("B", question_b, macro_b, micro_b)] %}
+                        <div class="network-table">
+                            {{ base_report_macro.question(network_type, question) }}
+                            {{ base_report_macro.macro_statistics(network_data_macro_level) }}
+                            {{ base_report_macro.micro_statistics(network_type, score_type, network_data_micro_level, report_macro.table_header) }}
+                            {{ report_macro.legend() }}
                         </div>
                     {% endfor %}
                 </div>

@@ -134,6 +134,7 @@ class ABGridMain:
             for suffix, rendered_template in (("", rendered_group_template), ("_subjects", rendered_subjects_template)):
                 # Filter empty lines
                 rendered_template = "\n".join([line for line in rendered_template.split("\n") if len(line) > 0])
+                
                 # Write the rendered group template to a file
                 with open(project_folderpath / f"{project}_g{group}{suffix}.yaml", "w") as file:
                     file.write(rendered_template)
@@ -207,10 +208,10 @@ class ABGridMain:
             case "answersheet":
                 template = jinja_env.get_template(f"./{language}/answersheet.html")
             # Reports with up to 15 members per group
-            case "report" if doc_data["members_per_group"] <= 15:
+            case "report" if doc_data["members_per_group"] <= 2:
                 template = jinja_env.get_template(f"./{language}/report_single_page.html")
             # Reports with more than 15 members per group
-            case "report" if doc_data["members_per_group"] > 15:
+            case "report" if doc_data["members_per_group"] > 2:
                 template = jinja_env.get_template(f"./{language}/report_multi_page.html")
         
         # Render the template with the provided data
