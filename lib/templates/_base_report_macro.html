@@ -35,11 +35,11 @@
         <tr>
           <td>{{ k }}</td>
           <td>{{ data[k].lns }}</td>
-          <td>{{ '%0.2f'| format(data[k].ic | round(2)) }}</td>
-          <td>{{ '%0.2f'| format(data[k].pr | round(2)) }}</td>
-          <td>{{ '%0.2f'| format(data[k].bc | round(2)) }}</td>
-          <td>{{ '%0.2f'| format(data[k].cc | round(2)) }}</td>
-          <td>{{ '%0.2f'| format(data[k].hu | round(2)) }}</td>
+          <td>{{ "%0.2f"| format(data[k].ic | round(2)) }}</td>
+          <td>{{ "%0.2f"| format(data[k].pr | round(2)) }}</td>
+          <td>{{ "%0.2f"| format(data[k].bc | round(2)) }}</td>
+          <td>{{ "%0.2f"| format(data[k].cc | round(2)) }}</td>
+          <td>{{ "%0.2f"| format(data[k].hu | round(2)) }}</td>
           <td>{% if data[k].ni %}x{% endif %}</td>
         </tr>
       {% endif %}
