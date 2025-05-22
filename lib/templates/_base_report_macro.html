@@ -10,37 +10,37 @@
 </div>
 {% endmacro %}
 
-{% macro macro_statistics(macro) %}
+{% macro macro_statistics(data) %}
 <div class="network-macro">
-    NN {{ macro.network_nodes }}, NE {{ macro.network_edges }}, NC {{ (macro.network_centralization * 100)|round|int }}%, NT {{ (macro.network_transitivity * 100)|round|int }}%, NR {{ (macro.network_reciprocity * 100)|round|int }}%
+    NN {{ data.network_nodes }}, NE {{ data.network_edges }}, NC {{ (data.network_centralization * 100)|round|int }}%, NT {{ (data.network_transitivity * 100)|round|int }}%, NR {{ (data.network_reciprocity * 100)|round|int }}%
 </div>
 {% endmacro %}
 
-{% macro micro_statistics(network_type, score_type, micro, table_header) %}
+{% macro micro_statistics(network_type, score_type, data, table_header) %}
 <table class="network-micro-table">
     {{ table_header(network_type) }}
-    {% for k in micro.keys() %}
+    {% for k in data.keys() %}
       {% if score_type == "ranks" %}
         <tr>
             <td>{{ k }}</td>
-            <td>{{ micro[k].lns }}</td>
-            <td>{{ micro[k].ic_r | int }}</td>
-            <td>{{ micro[k].pr_r | int }}</td>
-            <td>{{ micro[k].bc_r | int }}</td>
-            <td>{{ micro[k].cc_r | int }}</td>
-            <td>{{ micro[k].hu_r | int }}</td>
-            <td>{% if micro[k].ni %}x{% endif %}</td>
+            <td>{{ data[k].lns }}</td>
+            <td>{{ data[k].ic_r | int }}</td>
+            <td>{{ data[k].pr_r | int }}</td>
+            <td>{{ data[k].bc_r | int }}</td>
+            <td>{{ data[k].cc_r | int }}</td>
+            <td>{{ data[k].hu_r | int }}</td>
+            <td>{% if data[k].ni %}x{% endif %}</td>
         </tr>
       {% else %}
         <tr>
           <td>{{ k }}</td>
-          <td>{{ micro[k].lns }}</td>
-          <td>{{ '%0.2f'| format(micro[k].ic | round(2)) }}</td>
-          <td>{{ '%0.2f'| format(micro[k].pr | round(2)) }}</td>
-          <td>{{ '%0.2f'| format(micro[k].bc | round(2)) }}</td>
-          <td>{{ '%0.2f'| format(micro[k].cc | round(2)) }}</td>
-          <td>{{ '%0.2f'| format(micro[k].hu | round(2)) }}</td>
-          <td>{% if micro[k].ni %}x{% endif %}</td>
+          <td>{{ data[k].lns }}</td>
+          <td>{{ '%0.2f'| format(data[k].ic | round(2)) }}</td>
+          <td>{{ '%0.2f'| format(data[k].pr | round(2)) }}</td>
+          <td>{{ '%0.2f'| format(data[k].bc | round(2)) }}</td>
+          <td>{{ '%0.2f'| format(data[k].cc | round(2)) }}</td>
+          <td>{{ '%0.2f'| format(data[k].hu | round(2)) }}</td>
+          <td>{% if data[k].ni %}x{% endif %}</td>
         </tr>
       {% endif %}
     {% endfor %}
