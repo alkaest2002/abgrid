@@ -111,7 +111,7 @@
                         <div class="network-table">
                             {{ base_report_macro.question(network_type, question) }}
                             {{ base_report_macro.macro_statistics(network_data_macro_level) }}
-                            {{ base_report_macro.micro_statistics(network_type, score_type, network_data_micro_level, report_macro.table_header) }}
+                            {{ base_report_macro.micro_statistics(network_type, score_type, network_data_micro_level, report_macro.choices_label) }}
                             {{ report_macro.legend() }}
                         </div>
                     {% endfor %}

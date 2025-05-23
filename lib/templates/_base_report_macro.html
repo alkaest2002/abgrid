@@ -16,9 +16,18 @@
 </div>
 {% endmacro %}
 
-{% macro micro_statistics(network_type, score_type, data, table_header) %}
+{% macro micro_statistics(network_type, score_type, data, choices_label) %}
 <table class="network-micro-table">
-    {{ table_header() }}
+    <tr>
+        <th>ID</th>
+        <th>{{ choices_label() }}</th>
+        <th>IC</th>
+        <th>PR</th>
+        <th>BC</th>
+        <th>CC</th>
+        <th>HU</th>
+        <th>NI</th>
+    </tr>
     {% for k in data.keys() %}
       {% if score_type == "ranks" %}
         <tr>

@@ -12,26 +12,26 @@
         text-align: center;
     }
     .report-disclaimer {
-        margin: 20px 0;
+        margin: 24px 0;
         text-align: justify;
     }
     .report-header {
         display: flex;
         justify-content: space-between;
         font-size: 1.5em;
-        margin: 10px 0px;
+        margin: 12px 0px;
         font-weight: bold;
-        padding-bottom: 5px;
+        padding-bottom: 6px;
         border-bottom: 1px solid #000;
     }
     .report-content {
         display: flex;
     }
     .report-content > div:first-child {
-        margin-right: 5px;
+        margin-right: 6px;
     }
     .report-content > div:last-child {
-        margin-left: 5px;
+        margin-left: 6px;
     }
     .network-macro {
         margin-bottom: 10px;
@@ -46,12 +46,12 @@
         border-bottom: 2px solid #000;
     }
     .network-micro-table th {
-        padding: 5px 3px;
+        padding: 6px 3px;
         background-color: #ddd;
         border-bottom: 1px solid #555;
     }
     .network-micro-table td {
-        padding: 5px 3px;
+        padding: 6px 3px;
     }
     .network-micro-table tr:nth-child(odd) td {
         background-color: #eee;
@@ -88,7 +88,7 @@
                             </div>
                             <div class="network-table">
                                 {{ base_report_macro.macro_statistics(network_data_macro_level) }}
-                                {{ base_report_macro.micro_statistics(network_type, score_type, network_data_micro_level, report_macro.table_header) }}
+                                {{ base_report_macro.micro_statistics(network_type, score_type, network_data_micro_level, report_macro.choices_label) }}
                                 {{ report_macro.legend() }}
                             </div>
                         </div>
