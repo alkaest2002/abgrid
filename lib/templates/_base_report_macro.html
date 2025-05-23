@@ -6,7 +6,7 @@
 
 {% macro graph(graph) %}
 <div class="network-graph">
-    <img src="{{ graph }}" />
+  <img src="{{ graph }}" />
 </div>
 {% endmacro %}
 
@@ -18,7 +18,7 @@
 
 {% macro micro_statistics(network_type, score_type, data, table_header) %}
 <table class="network-micro-table">
-    {{ table_header(network_type) }}
+    {{ table_header() }}
     {% for k in data.keys() %}
       {% if score_type == "ranks" %}
         <tr>

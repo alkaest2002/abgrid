@@ -28,10 +28,10 @@
         display: flex;
     }
     .report-content > div:first-child {
-        padding-right: 10px;
+        margin-right: 5px;
     }
     .report-content > div:last-child {
-        padding-left: 10px;
+        margin-left: 5px;
     }
     .network-macro {
         margin-bottom: 10px;
@@ -74,7 +74,7 @@
                 <div>
                     {{ base_macro.logo() }}
                     {{ report_macro.disclaimer() }}
-                    {{ report_macro.report_header(score_type, group, project_title) }}
+                    {{ report_macro.report_header(project_title, group, score_type) }}
                 </div>
                 <div class="report-content">
                     {% for (network_type, question, graph, network_data_macro_level, network_data_micro_level) in 

@@ -12,53 +12,58 @@
         text-align: center;
     }
     .report-disclaimer {
-        margin: 20px 0;
+        margin: 24px 0;
         text-align: justify;
     }
     .report-header {
         display: flex;
         justify-content: space-between;
         font-size: 1.5em;
-        margin: 10px 0px;
+        margin: 12px 0px 24px 0px;
         font-weight: bold;
-        padding-bottom: 5px;
         border-bottom: 1px solid #000;
     }
     .report-content {
         display: flex;
     }
     .report-content > div:first-child {
-        padding-right: 10px;
+        margin-right: 6px;
     }
     .report-content > div:last-child {
-        padding-left: 10px;
+        margin-left: 6px;
     }
     .network-macro {
-        margin-bottom: 10px;
+        margin-bottom: 12px;
     }
     .network-graphs {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        flex-grow: 1;
-    }
-    .network-graphs > div {
         width: 100%;
+    }
+    .network-graph {
+        display: flex;
+        justify-content: center;
+        margin-top: 24px;
+    }
+    .network-graph-header {
+        border-bottom: 1px dashed #555;
     }
     .network-micro-table {
         border-top: 2px solid #000;
         border-bottom: 2px solid #000;
     }
     .network-micro-table th {
-        padding: 5px 3px;
+        padding: 6px 3px;
         background-color: #ddd;
         border-bottom: 1px solid #555;
     }
     .network-micro-table td {
-        padding: 5px 3px;
+        padding: 6px 3px;
     }
     .network-micro-table tr:nth-child(odd) td {
         background-color: #eee;
+    }
+    .report-question {
+        margin-bottom: 12px;
+        font-weight: bold;
     }
     .report-legend {
         margin-top: 12px;
@@ -77,11 +82,14 @@
             <div>
                 {{ base_macro.logo() }}
                 {{ report_macro.disclaimer() }}
+                {{ report_macro.report_header(project_title, group, score_type) }}
             </div>
             <div class="network-graphs">
                 {% for network_type, question, graph in (("A", question_a, graph_a), ("B", question_b, graph_b)) %}
                     <div>
-                        {{ base_report_macro.question(network_type, question) }}
+                        <div class="network-graph-header">
+                            {{ base_report_macro.question(network_type, question) }}
+                        </div>
                         {{ base_report_macro.graph(graph) }}
                     </div>
                 {% endfor %}
@@ -95,7 +103,7 @@
                 <div>
                     {{ base_macro.logo() }}
                     {{ report_macro.disclaimer() }}
-                    {{ report_macro.report_header(score_type, group, project_title) }}
+                    {{ report_macro.report_header(project_title, group, score_type) }}
                 </div>
                 <div class="report-content">
                     {% for (network_type, question, network_data_macro_level, network_data_micro_level) in 
