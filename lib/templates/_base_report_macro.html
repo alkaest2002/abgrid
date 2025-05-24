@@ -12,7 +12,7 @@
 
 {% macro macro_statistics(data) %}
 <div class="network-macro">
-    NN {{ data.network_nodes }}, NE {{ data.network_edges }}, NC {{ (data.network_centralization * 100)|round|int }}%, NT {{ (data.network_transitivity * 100)|round|int }}%, NR {{ (data.network_reciprocity * 100)|round|int }}%
+    <b>NN</b> {{ data.network_nodes }}, <b>NE</b> {{ data.network_edges }}, <b>NC</b> {{ (data.network_centralization * 100)|round|int }}%, <b>NT</b> {{ (data.network_transitivity * 100)|round|int }}%, <b>NR</b> {{ (data.network_reciprocity * 100)|round|int }}%
 </div>
 {% endmacro %}
 
@@ -23,33 +23,33 @@
         <th>{{ choices_label() }}</th>
         <th>IC</th>
         <th>PR</th>
-        <th>BC</th>
-        <th>CC</th>
+        <th>BT</th>
+        <th>CL</th>
         <th>HU</th>
-        <th>NI</th>
+        <th>ND</th>
     </tr>
     {% for k in data.keys() %}
       {% if score_type == "ranks" %}
         <tr>
             <td>{{ k }}</td>
-            <td>{{ data[k].lns }}</td>
+            <td>{{ data[k].lns | default("-", boolean=True) }}</td>
             <td>{{ data[k].ic_r | int }}</td>
             <td>{{ data[k].pr_r | int }}</td>
-            <td>{{ data[k].bc_r | int }}</td>
-            <td>{{ data[k].cc_r | int }}</td>
+            <td>{{ data[k].bt_r | int }}</td>
+            <td>{{ data[k].cl_r | int }}</td>
             <td>{{ data[k].hu_r | int }}</td>
-            <td>{% if data[k].ni == 1 %}&larr;{% elif data[k].ni == 2 %}&rarr;{% elif data[k].ni == 3 %}&rlarr;{% endif %}</td>
+            <td>{% if data[k].nd == 1 %}&larr;{% elif data[k].nd == 2 %}&rarr;{% elif data[k].nd == 3 %}&rlarr;{% endif %}</td>
         </tr>
       {% else %}
         <tr>
-          <td>{{ k }}</td>
-          <td>{{ data[k].lns }}</td>
-          <td>{{ "%0.2f"| format(data[k].ic | round(2)) }}</td>
-          <td>{{ "%0.2f"| format(data[k].pr | round(2)) }}</td>
-          <td>{{ "%0.2f"| format(data[k].bc | round(2)) }}</td>
-          <td>{{ "%0.2f"| format(data[k].cc | round(2)) }}</td>
-          <td>{{ "%0.2f"| format(data[k].hu | round(2)) }}</td>
-          <td>{{ data[k].ni }}</td>
+            <td>{{ k }}</td>
+            <td>{{ data[k].lns }}</td>
+            <td>{{ "%0.2f"| format(data[k].ic | round(2)) }}</td>
+            <td>{{ "%0.2f"| format(data[k].pr | round(2)) }}</td>
+            <td>{{ "%0.2f"| format(data[k].bt | round(2)) }}</td>
+            <td>{{ "%0.2f"| format(data[k].cl | round(2)) }}</td>
+            <td>{{ "%0.2f"| format(data[k].hu | round(2)) }}</td>
+            <td>{% if data[k].nd == 1 %}&larr;{% elif data[k].nd == 2 %}&rarr;{% elif data[k].nd == 3 %}&rlarr;{% endif %}</td>
         </tr>
       {% endif %}
     {% endfor %}
