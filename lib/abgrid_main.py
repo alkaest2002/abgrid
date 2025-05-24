@@ -72,7 +72,7 @@ class ABGridMain:
         ABGridMain.generate_group_inputs(project_folderpath, project, groups, members_per_group, language)
 
     @staticmethod
-    @notify_decorator("create project")
+    @notify_decorator("generate project file")
     def generate_project_file(project_folderpath: Path, project: str, groups: int, members_per_group: int, language: str):
         """
         Generate the main project YAML file using a template.
