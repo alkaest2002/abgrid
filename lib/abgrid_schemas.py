@@ -32,8 +32,8 @@ class GroupSchema(BaseModel):
     A Pydantic model that represents the schema for a group within a project.
     """
     group: int = Field(ge=1, le=20)
-    choices_a: List[Dict[str, str]]
-    choices_b: List[Dict[str, str]]
+    choices_a: List[Dict[str, str | None]]
+    choices_b: List[Dict[str, str | None]]
     model_config = {"extra": "forbid"}
 
     @field_validator("choices_a", "choices_b")
@@ -51,10 +51,11 @@ class GroupSchema(BaseModel):
             ValueError: If any validation check fails.
         """
         for choice_dict in value:
+            
             # Get key and its corresponding value string
-            key: str = next(iter(choice_dict.keys()))
-            value_str: str = choice_dict[key]
-            value_parts: List[str] = value_str.split(',')
+            key = next(iter(choice_dict.keys()))
+            value_str = choice_dict[key]
+            value_parts = value_str.split(',') if value_str else []
 
             # Validate each choice
             if not isinstance(choice_dict, dict):
@@ -63,12 +64,10 @@ class GroupSchema(BaseModel):
                 raise ValueError("Each choice must have exactly one key-value pair")
             if not key.isalnum() or not key.isupper() or len(key) != 1:
                 raise ValueError(f"Key '{key}' must be a single uppercase letter")
-            if not value_str:
-                raise ValueError(f"Key '{key}' has no values")
             if any(not part for part in value_parts):
                 raise ValueError(f"Value '{value_str}' contains empty entries due to misplaced commas")
-            if not all(len(part) == 1 and part.isalnum() and part.isupper() for part in value_parts):
-                raise ValueError(f"Value '{value_str}' must be comma-separated single uppercase letters and contain no empty values")
+            if not all(len(part) < 2 and part.isalnum() and part.isupper() for part in value_parts):
+                raise ValueError(f"Value '{value_str}' must be comma-separated single uppercase letters or numbers")
             if key in value_parts:
                 raise ValueError(f"Key '{key}' cannot be present in its own values")
             if len(value_parts) != len(set(value_parts)):
@@ -98,9 +97,9 @@ class GroupSchema(BaseModel):
 
         # Ensure all values in choices_a come from choices_a keys
         for choice in self.choices_a:
-            key: str = next(iter(choice.keys()))
-            value_str: str = choice[key]
-            value_parts: List[str] = value_str.split(',')
+            key = next(iter(choice.keys()))
+            value_str = choice[key]
+            value_parts = value_str.split(',') if value_str else []
 
             invalid_values = [v for v in value_parts if v not in choices_a_keys]
             if invalid_values:
@@ -109,9 +108,9 @@ class GroupSchema(BaseModel):
 
         # Ensure all values in choices_b come from choices_b keys
         for choice in self.choices_b:
-            key: str = next(iter(choice.keys()))
-            value_str: str = choice[key]
-            value_parts: List[str] = value_str.split(',')
+            key = next(iter(choice.keys()))
+            value_str = choice[key]
+            value_parts = value_str.split(',') if value_str else []
 
             invalid_values = [v for v in value_parts if v not in choices_b_keys]
             if invalid_values:

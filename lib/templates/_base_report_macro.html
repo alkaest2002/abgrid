@@ -38,7 +38,7 @@
             <td>{{ data[k].bc_r | int }}</td>
             <td>{{ data[k].cc_r | int }}</td>
             <td>{{ data[k].hu_r | int }}</td>
-            <td>{% if data[k].ni %}x{% endif %}</td>
+            <td>{% if data[k].ni == 1 %}&larr;{% elif data[k].ni == 2 %}&rarr;{% elif data[k].ni == 3 %}&rlarr;{% endif %}</td>
         </tr>
       {% else %}
         <tr>
@@ -49,7 +49,7 @@
           <td>{{ "%0.2f"| format(data[k].bc | round(2)) }}</td>
           <td>{{ "%0.2f"| format(data[k].cc | round(2)) }}</td>
           <td>{{ "%0.2f"| format(data[k].hu | round(2)) }}</td>
-          <td>{% if data[k].ni %}x{% endif %}</td>
+          <td>{{ data[k].ni }}</td>
         </tr>
       {% endif %}
     {% endfor %}

@@ -2,7 +2,7 @@ group: 1
 choices_a:
   - A: F,H
   - B: F,H
-  - C: D,F
+  - C: 
   - D: A,G
   - E: A,D
   - F: A,D

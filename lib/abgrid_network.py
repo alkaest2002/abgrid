@@ -37,14 +37,9 @@ class ABGridNetwork:
                 Tuple containing two lists of dictionaries, each representing edges for two networks.
         """
         
-        # Unpack network edges for both networks A (choices) and B (refusals)
-        # i.e., from {"A": "B, C"} to [(A,B), (A,C)]
-        self.edges_a = self.unpack_network_edges(edges[0])
-        self.edges_b = self.unpack_network_edges(edges[1])
-        
-        # Extract nodes for both networks
-        self.nodes_a = sorted(set([n[0] for n in self.edges_a]))
-        self.nodes_b = sorted(set([n[0] for n in self.edges_b]))
+        # Unpack network nodes and edges
+        self.nodes_a, self.edges_a = self.unpack_network_nodes_and_edges(edges[0])
+        self.nodes_b, self.edges_b = self.unpack_network_nodes_and_edges(edges[1])
 
         # Initialize data containers for analysis
         self.macro_a = {}
@@ -54,21 +49,40 @@ class ABGridNetwork:
         self.graph_a = ""
         self.graph_b = ""
 
-    def unpack_network_edges(self, packed_edges: List[Dict[str, str]]) -> List[Tuple[str, str]]:
+    def unpack_network_nodes_and_edges(self, packed_edges: List[Dict[str, str]]) -> Tuple[List[str], List[Tuple[str, str]]]:
         """
-        Convert a list of edge dictionaries into a list of edge tuples.
+        Convert a list of edge dictionaries into a list of nodes and edge tuples.
 
         Args:
-            packed_edges (List[Dict[str, str]]): List of dictionaries representing edges with comma-separated targets.
+            packed_edges (List[Dict[str, str]]): List of dictionaries where each key is a "source" node and the corresponding value is a comma-separated string of "target" nodes.
 
         Returns:
-            List[Tuple[str, str]]: List of edge tuples (source, target).
+            Tuple[List[str], List[Tuple[str, str]]]: A tuple containing:
+                - A list of nodes (List[str]), sorted and containing unique values.
+                - A list of edge tuples (List[Tuple[str, str]]), where each tuple is (source, target).
         """
-        return reduce(
-            lambda acc, itr: [*acc, *[(node_from, node_to) for node_from, edges in itr.items() for node_to in edges.split(",")]],
+        # Extract unique nodes and sort them
+        nodes = sorted(list(set([
+            node for node_edges in packed_edges for node, _ in node_edges.items()
+        ])))
+            
+        # Extract edges as tuples while ensuring no errors with None values and preserving format
+        edges = reduce(
+            lambda acc, itr: [
+                *acc,
+                *[
+                    (node_from, node_to) 
+                    for node_from, edges in itr.items()
+                    if edges is not None  # Check if edges is not None
+                    for node_to in edges.split(",") if node_to  # Ensure no empty targets are processed
+                ]
+            ],
             packed_edges,
             []
         )
+
+        # Return nodes list and edges list
+        return nodes, edges
 
     def compute_networks(self):
         """
@@ -77,10 +91,18 @@ class ABGridNetwork:
         # Create directed graphs for both networks
         Ga = nx.DiGraph(self.edges_a)
         Gb = nx.DiGraph(self.edges_b)
+
+        # Add nodes without edges
+        nodes_a_without_edges = set(list(Ga)).symmetric_difference(set(self.nodes_a))
+        Ga.add_nodes_from(nodes_a_without_edges)
+        nodes_b_without_edges = set(list(Gb)).symmetric_difference(set(self.nodes_b))
+        Gb.add_nodes_from(nodes_b_without_edges)
         
         # Generate layout positions for network plotting
-        loca = nx.spring_layout(Ga, k=.5, seed=42)
-        locb = nx.spring_layout(Gb, k=.3, seed=42)
+        k_a = .5 if len(nodes_a_without_edges) == 0 else 2
+        loca = nx.spring_layout(Ga, k=k_a , seed=42)
+        k_b = .5 if len(nodes_b_without_edges) == 0 else 2
+        locb = nx.spring_layout(Gb, k=k_b, seed=42)
         
         # Store network statistics and plots
         self.macro_a, self.micro_a = self.get_network_stats(Ga)
@@ -198,8 +220,13 @@ class ABGridNetwork:
             pd.Series(nx.hits(G)[0], name="hu"),
         ], axis=1)
         
-        # Identify nodes with zero in-degree and add to micro-level stats DataFrame
-        micro_level_stats = micro_level_stats.assign(ni=(lambda x: (x['ic'] == 0).astype(int)))
+        # Identify nodes with no in-degree and/or out-degree
+        # 0 = mode has in and out-degree, 1 = node does not have in-degre, 
+        # 2 = node does not have out-degree, 3 = node does not have either in or out-degree
+        micro_level_stats["ni"] = 0
+        micro_level_stats["ni"] += (micro_level_stats["ic"] == 0).astype(int)
+        micro_level_stats["ni"] += (micro_level_stats["lns"].str.len() == 0).astype(int)*2
+
         
         # Rank node-specific metrics
         micro_level_stats_ranks = (
