@@ -100,7 +100,7 @@ class ABGridNetwork:
         
         # Generate layout positions for network plotting
         k_a = .5 if len(nodes_a_without_edges) == 0 else 2
-        loca = nx.spring_layout(Ga, k=k_a , seed=42)
+        loca = nx.spring_layout(Ga, k=k_a, seed=42)
         k_b = .5 if len(nodes_b_without_edges) == 0 else 2
         locb = nx.spring_layout(Gb, k=k_b, seed=42)
         
