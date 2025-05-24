@@ -72,7 +72,7 @@ class ABGridNetwork:
                 *acc,
                 *[
                     (node_from, node_to) for node_from, edges in itr.items() if edges is not None
-                        for node_to in edges.split(",") if node_to 
+                        for node_to in edges.split(",") 
                 ]
             ],
             packed_edges,
@@ -86,23 +86,23 @@ class ABGridNetwork:
         """
         Compute and store graphs, statistics, and plots for both networks.
         """
-        # Create directed graphs for both networks
+        # Create directed graphs for networks A and B
         Ga = nx.DiGraph(self.edges_a)
         Gb = nx.DiGraph(self.edges_b)
 
-        # Add nodes without edges to netwrok a
+        # Add nodes without edges to netwrok A
         nodes_a_without_edges = set(list(Ga)).symmetric_difference(set(self.nodes_a))
         Ga.add_nodes_from(nodes_a_without_edges)
         
-        # Add nodes without edges to netwrok b
+        # Add nodes without edges to netwrok B
         nodes_b_without_edges = set(list(Gb)).symmetric_difference(set(self.nodes_b))
         Gb.add_nodes_from(nodes_b_without_edges)
         
-        # Generate layout positions for network plotting
+        # Generate layout positions for networks A and B
         loca = nx.kamada_kawai_layout(Ga)
         locb = nx.kamada_kawai_layout(Gb)
         
-        # Store network statistics and plots
+        # Store networks A and B statistics and plots
         self.macro_a, self.micro_a = self.get_network_stats(Ga)
         self.macro_b, self.micro_b = self.get_network_stats(Gb)
         self.graph_a = self.get_network_graph(Ga, loca, graphType="A")
@@ -223,7 +223,6 @@ class ABGridNetwork:
         micro_level_stats["nd"] += (micro_level_stats["ic"] == 0).astype(int)
         micro_level_stats["nd"] += (micro_level_stats["lns"].str.len() == 0).astype(int)*2
 
-        
         # Rank node-specific metrics
         micro_level_stats_ranks = (
             micro_level_stats.iloc[:, 1:-1]
