@@ -90,17 +90,17 @@ class ABGridNetwork:
         Ga = nx.DiGraph(self.edges_a)
         Gb = nx.DiGraph(self.edges_b)
 
-        # Add nodes without edges
+        # Add nodes without edges to netwrok a
         nodes_a_without_edges = set(list(Ga)).symmetric_difference(set(self.nodes_a))
         Ga.add_nodes_from(nodes_a_without_edges)
+        
+        # Add nodes without edges to netwrok b
         nodes_b_without_edges = set(list(Gb)).symmetric_difference(set(self.nodes_b))
         Gb.add_nodes_from(nodes_b_without_edges)
         
         # Generate layout positions for network plotting
-        k_a = .5 if len(nodes_a_without_edges) == 0 else 2
-        loca = nx.spring_layout(Ga, k=k_a, seed=42)
-        k_b = .5 if len(nodes_b_without_edges) == 0 else 2
-        locb = nx.spring_layout(Gb, k=k_b, seed=42)
+        loca = nx.kamada_kawai_layout(Ga)
+        locb = nx.kamada_kawai_layout(Gb)
         
         # Store network statistics and plots
         self.macro_a, self.micro_a = self.get_network_stats(Ga)
@@ -135,10 +135,8 @@ class ABGridNetwork:
         # Hide axis
         ax.axis('off')  
         
-        # Draw nodes
-        nx.draw_networkx_nodes(G, loc, node_color=color, edgecolors=color, ax=ax)
-        
-        # Draw node labels
+        # Draw nodes and nodes labels
+        nx.draw_networkx_nodes(G, loc, node_color=color, edgecolors=color, ax=ax)        
         nx.draw_networkx_labels(G, loc, font_color="#FFF", font_weight="normal", font_size=13, ax=ax)
         
         # Determine mutual and non-mutual edges
@@ -213,17 +211,17 @@ class ABGridNetwork:
             pd.Series(nx.to_pandas_adjacency(G).apply(lambda x: ", ".join(x[x > 0].index.values), axis=1), name="lns"),
             pd.Series(nx.in_degree_centrality(G), name="ic"),
             pd.Series(nx.pagerank(G, max_iter=1000), name="pr"),
-            pd.Series(nx.betweenness_centrality(G), name="bc"),
-            pd.Series(nx.closeness_centrality(G), name="cc"),
+            pd.Series(nx.betweenness_centrality(G), name="bt"),
+            pd.Series(nx.closeness_centrality(G), name="cl"),
             pd.Series(nx.hits(G)[0], name="hu"),
         ], axis=1)
         
         # Identify nodes with no in-degree and/or out-degree
         # 0 = mode has in and out-degree, 1 = node does not have in-degre, 
         # 2 = node does not have out-degree, 3 = node does not have either in or out-degree
-        micro_level_stats["ni"] = 0
-        micro_level_stats["ni"] += (micro_level_stats["ic"] == 0).astype(int)
-        micro_level_stats["ni"] += (micro_level_stats["lns"].str.len() == 0).astype(int)*2
+        micro_level_stats["nd"] = 0
+        micro_level_stats["nd"] += (micro_level_stats["ic"] == 0).astype(int)
+        micro_level_stats["nd"] += (micro_level_stats["lns"].str.len() == 0).astype(int)*2
 
         
         # Rank node-specific metrics
