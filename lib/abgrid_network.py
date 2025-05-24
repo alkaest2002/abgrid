@@ -71,10 +71,8 @@ class ABGridNetwork:
             lambda acc, itr: [
                 *acc,
                 *[
-                    (node_from, node_to) 
-                    for node_from, edges in itr.items()
-                    if edges is not None  # Check if edges is not None
-                    for node_to in edges.split(",") if node_to  # Ensure no empty targets are processed
+                    (node_from, node_to) for node_from, edges in itr.items() if edges is not None
+                        for node_to in edges.split(",") if node_to 
                 ]
             ],
             packed_edges,
