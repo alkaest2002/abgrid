@@ -28,7 +28,7 @@ class ABGridNetwork:
     Class to represent and analyze directed networks (graphs) for a given set of edges.
     """
 
-    def __init__(self, edges: Tuple[List[Dict[str, str]], List[Dict[str, str]]]):
+    def __init__(self, packed_edges: Tuple[List[Dict[str, str]], List[Dict[str, str]]]):
         """
         Initialize the network analysis object.
 
@@ -38,8 +38,8 @@ class ABGridNetwork:
         """
         
         # Unpack network nodes and edges
-        self.nodes_a, self.edges_a = self.unpack_network_nodes_and_edges(edges[0])
-        self.nodes_b, self.edges_b = self.unpack_network_nodes_and_edges(edges[1])
+        self.nodes_a, self.edges_a = self.unpack_network_nodes_and_edges(packed_edges[0])
+        self.nodes_b, self.edges_b = self.unpack_network_nodes_and_edges(packed_edges[1])
 
         # Initialize data containers for analysis
         self.macro_a = {}
@@ -61,10 +61,10 @@ class ABGridNetwork:
                 - A list of nodes (List[str]), sorted and containing unique values.
                 - A list of edge tuples (List[Tuple[str, str]]), where each tuple is (source, target).
         """
-        # Extract unique nodes and sort them
-        nodes = sorted(list(set([
+        # Extract nodes and sort them
+        nodes = sorted([
             node for node_edges in packed_edges for node, _ in node_edges.items()
-        ])))
+        ])
             
         # Extract edges as tuples while ensuring no errors with None values and preserving format
         edges = reduce(
@@ -86,7 +86,7 @@ class ABGridNetwork:
         """
         Compute and store graphs, statistics, and plots for both networks.
         """
-        # Create directed graphs for networks A and B
+        # Create directed graphs for network A and B
         Ga = nx.DiGraph(self.edges_a)
         Gb = nx.DiGraph(self.edges_b)
 
@@ -98,15 +98,15 @@ class ABGridNetwork:
         nodes_b_without_edges = set(list(Gb)).symmetric_difference(set(self.nodes_b))
         Gb.add_nodes_from(nodes_b_without_edges)
         
-        # Generate layout positions for networks A and B
+        # Generate layout positions for network A and B
         loca = nx.kamada_kawai_layout(Ga)
         locb = nx.kamada_kawai_layout(Gb)
         
-        # Store networks A and B statistics and plots
+        # Store network A and B statistics and plots
         self.macro_a, self.micro_a = self.get_network_stats(Ga)
         self.macro_b, self.micro_b = self.get_network_stats(Gb)
-        self.graph_a = self.get_network_graph(Ga, loca, graphType="A")
-        self.graph_b = self.get_network_graph(Gb, locb, graphType="B")
+        self.graph_a = self.get_network_graph(Ga, loca, "A")
+        self.graph_b = self.get_network_graph(Gb, locb, "B")
 
     def get_network_graph(self, G: nx.DiGraph, loc: Dict[str, Tuple[float, float]], graphType: Literal["A","B"] = "A") -> str:
         """
@@ -235,7 +235,6 @@ class ABGridNetwork:
             pd.concat([micro_level_stats, micro_level_stats_ranks], axis=1)
                 .sort_index()
                 .round(3)
-                .rename_axis(index="letter")
         )
         
         # Calculate network-wide (macro-level) statistics
