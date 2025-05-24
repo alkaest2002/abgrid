@@ -43,7 +43,7 @@
       {% else %}
         <tr>
             <td>{{ k }}</td>
-            <td>{{ data[k].lns }}</td>
+            <td>{{ data[k].lns | default("-", boolean=True) }}</td>
             <td>{{ "%0.2f"| format(data[k].ic | round(2)) }}</td>
             <td>{{ "%0.2f"| format(data[k].pr | round(2)) }}</td>
             <td>{{ "%0.2f"| format(data[k].bt | round(2)) }}</td>
