@@ -72,41 +72,35 @@
 {% endblock %}
 
 {% macro report_body() %}
-    <div class="page">
-        <div>
-            {{ base_macro.logo() }}
-            {{ report_macro.disclaimer() }}
-            {{ report_macro.report_header(project_title, group, score_type) }}
-            <div class="network-graphs">
-                {% for network_type, question, graph in (("A", question_a, graph_a), ("B", question_b, graph_b)) %}
-                    <div>
-                        {{ base_report_macro.question(network_type, question) }}
-                        {{ base_report_macro.graph(graph) }}
-                    </div>
-                {% endfor %}
-            </div>
-        </div>
-        {{ report_macro.footer() }}
-    </div>
-    {% for score_type in ["ranks", "raw_scores"] %}
+    {% for (network_type, question, graph, network_data_macro_level, network_data_micro_level) in 
+        [("A", question_a, graph_a, macro_a, micro_a), ("B", question_b, graph_b, macro_b, micro_b)] %}
         <div class="page">
             <div>
                 {{ base_macro.logo() }}
                 {{ report_macro.disclaimer() }}
                 {{ report_macro.report_header(project_title, group, score_type) }}
-                <div class="network-tables">
-                    {% for (network_type, question, network_data_macro_level, network_data_micro_level) in 
-                        [("A", question_a, macro_a, micro_a), ("B", question_b, macro_b, micro_b)] %}
+                {{ base_report_macro.question(network_type, question) }}
+                {{ base_report_macro.graph(graph) }}
+            </div>
+            {{ report_macro.footer() }}
+        </div>
+        {% for score_type in ["ranks", "raw_scores"] %}
+            <div class="page">
+                <div>
+                    {{ base_macro.logo() }}
+                    {{ report_macro.disclaimer() }}
+                    {{ report_macro.report_header(project_title, group, score_type) }}
+                    <div class="network-tables">
                         <div class="network-table-container">
                             {{ base_report_macro.question(network_type, question) }}
                             {{ base_report_macro.macro_statistics(network_data_macro_level) }}
                             {{ base_report_macro.micro_statistics(network_type, score_type, network_data_micro_level, report_macro.choices_label) }}
                             {{ report_macro.legend() }}
                         </div>
-                    {% endfor %}
+                    </div>
                 </div>
+                {{ report_macro.footer() }}
             </div>
-            {{ report_macro.footer() }}
-        </div>
+        {% endfor %}
     {% endfor %}
 {% endmacro %}

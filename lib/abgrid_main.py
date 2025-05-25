@@ -208,10 +208,10 @@ class ABGridMain:
             case "answersheet":
                 template = jinja_env.get_template(f"./{language}/answersheet.html")
             # Reports with up to 15 members per group
-            case "report" if doc_data["members_per_group"] <= 2:
+            case "report" if doc_data["members_per_group"] <= 10:
                 template = jinja_env.get_template(f"./{language}/report_single_page.html")
             # Reports with more than 15 members per group
-            case "report" if doc_data["members_per_group"] > 2:
+            case "report" if doc_data["members_per_group"] > 10:
                 template = jinja_env.get_template(f"./{language}/report_multi_page.html")
         
         # Render the template with the provided data
@@ -229,6 +229,6 @@ class ABGridMain:
         # -----------------------------------------------------------------------------------
         # FOR DEBUGGING PURPOSES - Uncomment below to save HTML files for inspection
         # -----------------------------------------------------------------------------------
-        # with open(folder_path / f"{filename}.html", "w") as file:
-        #     file.write(rendered_template)
+        with open(folder_path / f"{filename}.html", "w") as file:
+            file.write(rendered_template)
         # -----------------------------------------------------------------------------------

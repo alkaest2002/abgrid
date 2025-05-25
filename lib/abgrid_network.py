@@ -130,14 +130,14 @@ class ABGridNetwork:
         buffer = io.BytesIO()
         
         # Create a matplotlib figure
-        fig, ax = plt.subplots(constrained_layout=True, figsize=(9 * CM_TO_INCHES, 9 * CM_TO_INCHES))
+        fig, ax = plt.subplots(constrained_layout=True, figsize=(16 * CM_TO_INCHES, 18 * CM_TO_INCHES))
         
         # Hide axis
         ax.axis('off')  
         
         # Draw nodes and nodes labels
         nx.draw_networkx_nodes(G, loc, node_color=color, edgecolors=color, ax=ax)        
-        nx.draw_networkx_labels(G, loc, font_color="#FFF", font_weight="normal", font_size=13, ax=ax)
+        nx.draw_networkx_labels(G, loc, font_color="#FFF", font_weight="normal", font_size=10, ax=ax)
         
         # Determine mutual and non-mutual edges
         mutual_edges = [e for e in G.edges if e[::-1] in G.edges]
