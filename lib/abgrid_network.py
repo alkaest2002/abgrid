@@ -233,7 +233,7 @@ class ABGridNetwork:
         # Finalize the micro-level stats DataFrame
         micro_level_stats = (
             pd.concat([micro_level_stats, micro_level_stats_ranks], axis=1)
-                .sort_index()
+                .sort_index(key=lambda x: x.str.isdigit().astype(str) + x)
                 .round(3)
         )
         
