@@ -1,57 +1,61 @@
 {% macro question(network_type, question) %}
-<div class="report-question">
-    {{ network_type }}. {{ question }}
+<div class="report-question-container">
+   <p><b>{{ network_type }}. {{ question }}</b></p> 
 </div>
 {% endmacro %}
 
 {% macro graph(graph) %}
-<div class="network-graph">
+<div class="network-graph-container">
   <img src="{{ graph }}" />
 </div>
 {% endmacro %}
 
 {% macro macro_statistics(data) %}
-<div class="network-macro">
-    <b>NN</b> {{ data.network_nodes }}, <b>NE</b> {{ data.network_edges }}, <b>NC</b> {{ (data.network_centralization * 100)|round|int }}%, <b>NT</b> {{ (data.network_transitivity * 100)|round|int }}%, <b>NR</b> {{ (data.network_reciprocity * 100)|round|int }}%
+<div class="network-macro-container">
+    <p>
+        <b>NN</b> {{ data.network_nodes }}, <b>NE</b> {{ data.network_edges }}, <b>NC</b> {{ (data.network_centralization * 100)|round|int }}%, <b>NT</b> {{ (data.network_transitivity * 100)|round|int }}%, <b>NR</b> {{ (data.network_reciprocity * 100)|round|int }}%
+    </p>
 </div>
 {% endmacro %}
 
 {% macro micro_statistics(network_type, score_type, data, choices_label) %}
-<table class="network-micro-table">
-    <tr>
-        <th>ID</th>
-        <th>{{ choices_label() }}</th>
-        <th>IC</th>
-        <th>PR</th>
-        <th>BT</th>
-        <th>CL</th>
-        <th>HU</th>
-        <th>ND</th>
-    </tr>
-    {% for k in data.keys() %}
-      {% if score_type == "ranks" %}
+<div class="network-table-container">
+    <table class="network-table">
         <tr>
-            <td>{{ k }}</td>
-            <td>{{ data[k].lns | default("-", boolean=True) }}</td>
-            <td>{{ data[k].ic_r | int }}</td>
-            <td>{{ data[k].pr_r | int }}</td>
-            <td>{{ data[k].bt_r | int }}</td>
-            <td>{{ data[k].cl_r | int }}</td>
-            <td>{{ data[k].hu_r | int }}</td>
-            <td>{% if data[k].nd == 1 %}&larr;{% elif data[k].nd == 2 %}&rarr;{% elif data[k].nd == 3 %}&rlarr;{% endif %}</td>
+            <th>ID</th>
+            <th>{{ choices_label() }}</th>
+            <th>IC</th>
+            <th>PR</th>
+            <th>BT</th>
+            <th>CL</th>
+            <th>HU</th>
+            <th>ND</th>
         </tr>
-      {% else %}
-        <tr>
-            <td>{{ k }}</td>
-            <td>{{ data[k].lns | default("-", boolean=True) }}</td>
-            <td>{{ "%0.2f"| format(data[k].ic | round(2)) }}</td>
-            <td>{{ "%0.2f"| format(data[k].pr | round(2)) }}</td>
-            <td>{{ "%0.2f"| format(data[k].bt | round(2)) }}</td>
-            <td>{{ "%0.2f"| format(data[k].cl | round(2)) }}</td>
-            <td>{{ "%0.2f"| format(data[k].hu | round(2)) }}</td>
-            <td>{% if data[k].nd == 1 %}&larr;{% elif data[k].nd == 2 %}&rarr;{% elif data[k].nd == 3 %}&rlarr;{% endif %}</td>
-        </tr>
-      {% endif %}
-    {% endfor %}
-</table>
+        {% for k in data.keys() %}
+          {% if score_type == "ranks" %}
+            <tr>
+                <td>{{ k }}</td>
+                <td>{{ data[k].lns | default("-", boolean=True) }}</td>
+                <td>{{ data[k].ic_r | int }}</td>
+                <td>{{ data[k].pr_r | int }}</td>
+                <td>{{ data[k].bt_r | int }}</td>
+                <td>{{ data[k].cl_r | int }}</td>
+                <td>{{ data[k].hu_r | int }}</td>
+                <td>{% if data[k].nd == 1 %}&larr;{% elif data[k].nd == 2 %}&rarr;{% elif data[k].nd == 3 %}&rlarr;{% endif %}</td>
+            </tr>
+          {% else %}
+            <tr>
+                <td>{{ k }}</td>
+                <td>{{ data[k].lns | default("-", boolean=True) }}</td>
+                <td>{{ "%0.2f"| format(data[k].ic | round(2)) }}</td>
+                <td>{{ "%0.2f"| format(data[k].pr | round(2)) }}</td>
+                <td>{{ "%0.2f"| format(data[k].bt | round(2)) }}</td>
+                <td>{{ "%0.2f"| format(data[k].cl | round(2)) }}</td>
+                <td>{{ "%0.2f"| format(data[k].hu | round(2)) }}</td>
+                <td>{% if data[k].nd == 1 %}&larr;{% elif data[k].nd == 2 %}&rarr;{% elif data[k].nd == 3 %}&rlarr;{% endif %}</td>
+            </tr>
+          {% endif %}
+        {% endfor %}
+    </table>
+</div>
 {% endmacro %}

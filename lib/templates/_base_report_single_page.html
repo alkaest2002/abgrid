@@ -5,14 +5,8 @@
     * {
         font-size: 10pt;
     }
-    table {
-        width: 100%;
-    }
-    th, td {
-        text-align: center;
-    }
     .report-disclaimer {
-        margin: 24px 0;
+        margin: 24px 0px;
         text-align: justify;
     }
     .report-header {
@@ -28,32 +22,36 @@
         display: flex;
     }
     .report-content > div:first-child {
-        margin-right: 6px;
+        padding-right: 12px;
     }
     .report-content > div:last-child {
-        margin-left: 6px;
+        padding-left: 12px;
     }
-    .network-macro {
-        margin-bottom: 10px;
+    .report-question-container {
+        margin: 24px 0px 12px 0;
+        padding-bottom: 6px;
+        border-bottom: 1px dashed #555;
     }
-    .network-graph > img {
-        display: block;
-        margin: auto;
-        height: 280px;
+    .network-macro-container {
+        margin: 12px 0px;
     }
-    .network-micro-table {
+    .network-table {
+        width: 100%;
         border-top: 2px solid #000;
         border-bottom: 2px solid #000;
     }
-    .network-micro-table th {
+    .network-table table th, .network-table table td {
+        text-align: center;
+    } 
+    .network-table th {
         padding: 6px 3px;
         background-color: #ddd;
         border-bottom: 1px solid #555;
     }
-    .network-micro-table td {
+    .network-table td {
         padding: 6px 3px;
     }
-    .network-micro-table tr:nth-child(odd) td {
+    .network-table tr:nth-child(odd) td {
         background-color: #eee;
     }
     .report-legend  {
@@ -88,17 +86,11 @@
                     {% for (network_type, question, graph, network_data_macro_level, network_data_micro_level) in 
                         [("A", question_a, graph_a, macro_a, micro_a), ("B", question_b, graph_b, macro_b, micro_b)] %}
                         <div class="network-type">
-                            <div class="re port-question">
-                                {{ base_report_macro.question(network_type, question) }}
-                            </div>
-                            <div class="network-graph">
-                                {{ base_report_macro.graph(graph) }}
-                            </div>
-                            <div class="network-table">
+                            {{ base_report_macro.question(network_type, question) }}
+                            {{ base_report_macro.graph(graph) }}
                                 {{ base_report_macro.macro_statistics(network_data_macro_level) }}
                                 {{ base_report_macro.micro_statistics(network_type, score_type, network_data_micro_level, report_macro.choices_label) }}
                                 {{ report_macro.legend() }}
-                            </div>
                         </div>
                     {% endfor %}
                 </div>
