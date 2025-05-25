@@ -229,6 +229,6 @@ class ABGridMain:
         # -----------------------------------------------------------------------------------
         # FOR DEBUGGING PURPOSES - Uncomment below to save HTML files for inspection
         # -----------------------------------------------------------------------------------
-        with open(folder_path / f"{filename}.html", "w") as file:
-            file.write(rendered_template)
+        # with open(folder_path / f"{filename}.html", "w") as file:
+        #     file.write(rendered_template)
         # -----------------------------------------------------------------------------------
