@@ -8,6 +8,7 @@ Date Created: May 3, 2025
 The code is part of the AB-Grid project and is licensed under the MIT License.
 """
 
+from curses.ascii import isupper
 from pydantic import BaseModel, Field, constr, field_validator, model_validator
 from typing import Dict, List, Set
 
@@ -62,11 +63,11 @@ class GroupSchema(BaseModel):
                 raise ValueError("Each choice must be a dictionary")
             if len(choice_dict) != 1:
                 raise ValueError("Each choice must have exactly one key-value pair")
-            if not key.isalnum() or not key.isupper() or len(key) != 1:
-                raise ValueError(f"Key '{key}' must be a single uppercase letter")
+            if not ((key.isnumeric() and len(key) == 1) or (key.isalpha() and key.isupper() and len(key) == 1)):
+                raise ValueError(f"Key '{key}' must be a single uppercase letter or number")
             if any(not part for part in value_parts):
                 raise ValueError(f"Value '{value_str}' contains empty entries due to misplaced commas")
-            if not all(len(part) < 2 and part.isalnum() and part.isupper() for part in value_parts):
+            if not all(len(part) < 2 and part.isalnum() for part in value_parts):
                 raise ValueError(f"Value '{value_str}' must be comma-separated single uppercase letters or numbers")
             if key in value_parts:
                 raise ValueError(f"Key '{key}' cannot be present in its own values")
