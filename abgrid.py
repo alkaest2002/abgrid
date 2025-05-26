@@ -43,7 +43,7 @@ try:
         else:
             
             # Create project folder
-            ABGridMain.init_project(project_folderpath, args.project, args.language)
+            ABGridMain.init_project(args.project, project_folderpath, args.language)
 
     # Handle other actions (i.e., groups, sheets, reports)
     else:

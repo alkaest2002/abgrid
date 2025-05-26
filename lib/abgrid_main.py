@@ -51,13 +51,13 @@ class ABGridMain:
 
     @staticmethod
     @notify_decorator("init project")
-    def init_project(project_folderpath: Path, project: str, language: str):
+    def init_project(project: str, project_folderpath: Path, language: str):
         """
         Initialize a new project folder structure with necessary files.
         
         Args:
-            project_folderpath (Path): The path to the project folder.
             project (str): The name of the project.
+            project_folderpath (Path): The path to the project folder.
             language (str): The language in which the answer sheets should be rendered.
         """
         
@@ -66,20 +66,6 @@ class ABGridMain:
         os.makedirs(project_folderpath / "reports")
         os.makedirs(project_folderpath / "answersheets")
         
-        # Generate project file
-        ABGridMain.generate_project_file(project_folderpath, project, language)
-
-    @staticmethod
-    @notify_decorator("generate project file")
-    def generate_project_file(project_folderpath: Path, project: str, language: str):
-        """
-        Generate the main project YAML file using a template.
-
-        Args:
-            project_folderpath (Path): Folder where the project files are stored.
-            members_per_group (int): Number of members in each group.
-            language (str): The language in which the answer sheets should be rendered.
-        """
         # Load the project YAML template
         with open(Path(f"./lib/templates/{language}/project.yaml"), 'r') as fin:
             yaml_data = yaml.safe_load(fin)
@@ -118,7 +104,7 @@ class ABGridMain:
             rendered_group_template = group_template.render(template_data)
             rendered_group_template = "\n".join([line for line in rendered_group_template.split("\n") if len(line) > 0])
                 
-            # Write the rendered group template to a file
+            # Persiste the rendered group template to disk
             with open(self.abgrid_data.project_folderpath / f"{self.abgrid_data.project}_g{group}.yaml", "w") as file:
                 file.write(rendered_group_template)
             
@@ -145,19 +131,16 @@ class ABGridMain:
          # Loop through each group file to generate report
         for group_file in self.abgrid_data.groups_filepaths:
 
-            # Extract number from group filename
-            group = int(re.search(r'(\d+)$', group_file.stem).group(0))
-            
             # Load report data for the current group
-            report_data, report_errors = self.abgrid_data.get_report_data(group_file)
+            group_data, group_errors = self.abgrid_data.get_group_data(group_file)
 
             # Notify on error
-            if report_errors:
-                raise ValueError(report_errors)
+            if group_errors:
+                raise ValueError(group_errors)
 
             # Add relevant data to sheets data
-            sheets_data["group"] = group
-            sheets_data["likert"] = SYMBOLS[:report_data["members_per_group"]]
+            sheets_data["group"] = int(re.search(r'(\d+)$', group_file.stem).group(0))
+            sheets_data["likert"] = SYMBOLS[:len(group_data["choices_a"])]
 
             # Notify
             print(f"generating answersheet: {group_file.name}")

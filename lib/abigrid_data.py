@@ -66,6 +66,39 @@ class ABGridData:
         else:
             # Return validation errors if loading failed
             return None, validation_errors
+        
+    def get_group_data(self, group_filepath: Path) -> Tuple[Optional[Dict[str, Any]], Optional[Any]]:
+        """
+        Load and validate group data from the specified file path.
+
+        This method attempts to load data specific to a group from the given file path
+        and performs validation on the loaded data. It returns the group data if successful,
+        or validation errors if any issues are encountered during the loading process.
+
+        Args:
+            group_filepath (Path): A Path object representing the file path to the group data file.
+
+        Returns:
+            Tuple[Optional[Dict[str, Any]], Optional[Any]]: 
+                - If group data is successfully loaded and validated, a tuple containing the group data dictionary and None for errors.
+                - If loading fails, a tuple containing None for the group data and the validation errors encountered.
+
+        Raises:
+            None explicitly, but relies on `self.data_loader.load_data` to handle exceptions internally.
+        """
+
+        # Load group data
+        group_data, group_validation_errors = self.data_loader.load_data("group", group_filepath)
+
+         # If group data was correctly loaded
+        if group_data is not None:
+
+            # Return group data
+            return group_data, None
+        else:
+            # Return validation errors if project data loading failed
+            return None, group_validation_errors
+
 
     def get_report_data(self, group_filepath: Path) -> Tuple[Optional[Dict[str, Any]], Optional[Any]]:
         """
