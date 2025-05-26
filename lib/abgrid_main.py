@@ -51,15 +51,14 @@ class ABGridMain:
 
     @staticmethod
     @notify_decorator("init project")
-    def init_project(project_folderpath: Path, project: str, groups: int, members_per_group: int, language: str):
+    def init_project(project_folderpath: Path, project: str, language: str):
         """
         Initialize a new project folder structure with necessary files.
         
         Args:
             project_folderpath (Path): The path to the project folder.
             project (str): The name of the project.
-            groups (int): Number of groups in the project.
-            members_per_group (int): Number of members in each group.
+            language (str): The language in which the answer sheets should be rendered.
         """
         
         # Create necessary directories for the project
@@ -67,21 +66,19 @@ class ABGridMain:
         os.makedirs(project_folderpath / "reports")
         os.makedirs(project_folderpath / "answersheets")
         
-        # Generate project-specific files
-        ABGridMain.generate_project_file(project_folderpath, project, groups, members_per_group, language)
-        ABGridMain.generate_group_inputs(project_folderpath, project, groups, members_per_group, language)
+        # Generate project file
+        ABGridMain.generate_project_file(project_folderpath, project, language)
 
     @staticmethod
     @notify_decorator("generate project file")
-    def generate_project_file(project_folderpath: Path, project: str, groups: int, members_per_group: int, language: str):
+    def generate_project_file(project_folderpath: Path, project: str, language: str):
         """
         Generate the main project YAML file using a template.
 
         Args:
             project_folderpath (Path): Folder where the project files are stored.
-            project (str): The name of the project.
-            groups (int): Number of groups in the project.
             members_per_group (int): Number of members in each group.
+            language (str): The language in which the answer sheets should be rendered.
         """
         # Load the project YAML template
         with open(Path(f"./lib/templates/{language}/project.yaml"), 'r') as fin:
@@ -89,55 +86,41 @@ class ABGridMain:
         
         # Update YAML data with project-specific information
         yaml_data["project_title"] = project
-        yaml_data["groups"] = groups
-        yaml_data["members_per_group"] = members_per_group
         
         # Write the updated project YAML data to a file
         with open(project_folderpath / f"{project}.yaml", 'w') as fout:
             yaml.dump(yaml_data, fout, sort_keys=False)
 
-    @staticmethod
     @notify_decorator("generate group inputs files")
-    def generate_group_inputs(project_folderpath: Path, project: str, groups: int, members_per_group: int, language: str):
+    def generate_group_inputs(self, groups: range, members_per_group: int, language: str):
         """
         Generate input files for each group.
 
         Args:
-            project_folderpath (Path): Folder where the project files are stored.
-            project (str): The name of the project.
-            groups (int): Number of groups in the project.
+            groups (range): groups to creaate
             members_per_group (int): Number of members in each group.
+            language (str): The language in which the answer sheets should be rendered.
         """
 
-        # Build a list of member letters (e.g., for five members: A, B, C, D, E)
-        members_per_group_letters = SYMBOLS[:members_per_group]
-        
         # Get the group HTML template
         group_template = jinja_env.get_template(f"/{language}/group.html")
         
-        # Get the subjects HTML template
-        subjects_template = jinja_env.get_template(f"/{language}/subjects.html")
-
+        # Build a list of member letters (e.g., for five members: A, B, C, D, E)
+        members_per_group_letters = SYMBOLS[:members_per_group]
+        
         # Loop through each group and generate input files
-        for group in range(1, groups + 1):
+        for group in groups:
             
-            # Prepare data for the template
+            # Prepare data for the group template
             template_data = dict(group=group, members=members_per_group_letters)
             
-            # Render the current group template with the data
+            # Render the current group template with the data (remove blank lines)
             rendered_group_template = group_template.render(template_data)
-            
-            # Render the current group template with the data
-            rendered_subjects_template = subjects_template.render(template_data)
-            
-            # Remove any blank lines from rendered templates
-            for suffix, rendered_template in (("", rendered_group_template), ("_subjects", rendered_subjects_template)):
-                # Filter empty lines
-                rendered_template = "\n".join([line for line in rendered_template.split("\n") if len(line) > 0])
+            rendered_group_template = "\n".join([line for line in rendered_group_template.split("\n") if len(line) > 0])
                 
-                # Write the rendered group template to a file
-                with open(project_folderpath / f"{project}_g{group}{suffix}.yaml", "w") as file:
-                    file.write(rendered_template)
+            # Write the rendered group template to a file
+            with open(self.abgrid_data.project_folderpath / f"{self.abgrid_data.project}_g{group}.yaml", "w") as file:
+                file.write(rendered_group_template)
             
 
     @notify_decorator("generate answersheet file")
@@ -145,18 +128,43 @@ class ABGridMain:
         """
         Generate and render answer sheets for the project using PDF format.
 
+        Args:
+            language (str): The language in which the answer sheets should be rendered.
+
         Raises:
-            ValueError: If there are errors in answersheet data validation.
+            ValueError: 
+                If there are errors in the answersheet data validation.
+                If there are errors in report data validation for any group.
         """
-        # Load answer sheet data
+        # Load sheets data
         sheets_data, sheets_errors = self.abgrid_data.get_answersheets_data()
-        
+
         # Notify on error
         if sheets_errors:
             raise ValueError(sheets_errors)
-        
-        # Render answer sheets as PDF
-        self.render_pdf("answersheet", sheets_data, "", language)
+
+         # Loop through each group file to generate report
+        for group_file in self.abgrid_data.groups_filepaths:
+
+            # Extract number from group filename
+            group = re.search(r'(\d+)$', group_file.stem).group(0)
+            
+            # Load report data for the current group
+            report_data, report_errors = self.abgrid_data.get_report_data(group_file)
+
+            # Notify on error
+            if report_errors:
+                raise ValueError(report_errors)
+
+            # Add relevant data to sheets data
+            sheets_data["group"] = group
+            sheets_data["likert"] = SYMBOLS[:report_data["members_per_group"]]
+
+            # Notify
+            print(f"generating answersheet: {group_file.name}")
+            
+            # Render answer sheets as PDF
+            self.render_pdf("answersheet", sheets_data, group_file.stem, language)
 
     @notify_decorator("generate AB-Grid reports")
     def generate_reports(self, language: str):
@@ -178,15 +186,15 @@ class ABGridMain:
             # Raise error if validation fails
             if report_errors:
                 raise ValueError(report_errors)
-            
-            # Notify
-            print(f"generating report: group {report_data['group']}")
         
             # Add the current group's data to the collection
-            all_data[f"{self.abgrid_data.project}_gruppo_{report_data['group']}"] = report_data
+            all_data[f"{self.abgrid_data.project}_{group_file.stem}"] = report_data
+
+            # Notify
+            print(f"generating report: {group_file.name}")
         
             # Render the current group's report
-            self.render_pdf("report", report_data, f"g{report_data['group']}", language)
+            self.render_pdf("report", report_data, group_file.stem, language)
         
         # Save all collected data to a JSON file
         with open(self.abgrid_data.project_folderpath / f"{self.abgrid_data.project}_data.json", "w") as fout:

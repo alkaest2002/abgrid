@@ -1,3 +1,4 @@
+import re
 import argparse
 from pathlib import Path
 from lib.abgrid_main import ABGridMain
@@ -9,14 +10,14 @@ LANGUAGES = ["en", "it"]
 parser = argparse.ArgumentParser(prog="ABGrid")
 
 # Define expected command-line arguments
-parser.add_argument("-a", "--action", required=True, choices=["init", "sheets", "reports"], 
-                    help="Action to perform: 'init', 'sheets', or 'reports'.")
+parser.add_argument("-a", "--action", required=True, choices=["init", "groups", "sheets", "reports"], 
+                    help="Action to perform: 'init', 'groups', 'sheets', or 'reports'.")
 parser.add_argument("-p", "--project", required=True, 
                     help="Name of the project.")
-parser.add_argument("-g", "--groups", type=int, choices=range(1, 21), 
+parser.add_argument("-g", "--groups", type=int, choices=range(1, 21), default=1,
                     help="Number of groups (1 to 20).")
-parser.add_argument("-m", "--members_per_group", type=int, choices=range(4, 37), 
-                    help="Number of members per group (4 to 36).")
+parser.add_argument("-m", "--members_per_group", type=int, choices=range(6, 36), 
+                    help="Number of members per group (6 to 35).")
 parser.add_argument("-u", "--user", type=str, required=True, 
                     help="Username.")
 parser.add_argument("-l", "--language", choices=LANGUAGES, default="en", 
@@ -25,54 +26,61 @@ parser.add_argument("-l", "--language", choices=LANGUAGES, default="en",
 # Parse the arguments
 args = parser.parse_args()
 
-# Setup the path to the project folder
-project_folderpath = Path("./data") / args.user / args.project
+try:
 
-# Handle the 'init' action
-if args.action == "init":
+    # Setup the path to the project folder
+    project_folderpath = Path("./data") / args.user / args.project
 
-    # Make sure project folder does not already exist
-    if project_folderpath.exists():
-        raise FileExistsError(f"{args.project} already exists.")
-    
-    # Check if both groups and members per group arguments are provided
-    if not all([args.groups, args.members_per_group]):
-        # Display a message if any required argument is missing
-        print("Please specify the following additional parameters: number of groups (-g), number of members per group (-m).")
+    # Handle init action
+    if args.action == "init":
+
+        # Make sure project folder does not already exist
+        if project_folderpath.exists():
+            raise FileExistsError(f"{args.project} already exists.")
+        
+        # If project folder can be created
+        else:
+            # Create project folder
+            ABGridMain.init_project(project_folderpath, args.project, args.language)
+
+    # Handle other actions (i.e., groups, answersheets, reports)
     else:
-        # Initialize the project with specified parameters
-        ABGridMain.init_project(project_folderpath, args.project, args.groups, args.members_per_group, args.language)
-else:
-
-    # Check if the project folder exists
-    if not project_folderpath.exists():
-        # Raise an error if the project folder does not exist
-        raise FileNotFoundError(f"The project folder ({project_folderpath.name}) does not exist.")
-
-    try:
         # Find the project file within the project folder
         project_filepath = next(project_folderpath.glob(f"{args.project}.*"))
-        
-        # Find all group files, ensuring at least one exists
-        if len(groups_filepaths := list(project_folderpath.glob("*_g*.*"))) == 0:
-            # Raise an error if no group files are found
-            raise FileNotFoundError(f"The project folder ({project_folderpath.name}) does not contain any group files.")
 
-        # Create an instance of ABGridMain with project details
+        # Determine how many group files were already created
+        groups_filepaths = [ path for path in project_folderpath.glob("*_g*.*") if re.search(r"_g\d+\.yaml$", path.name) ]
+        groups_already_created = len(groups_filepaths)
+        
+        # Determine how many group files to be created
+        groups_to_create = range(groups_already_created +1, groups_already_created + args.groups +1)
+        
+        # Create an instance of ABGridMain 
         abgrid_main = ABGridMain(args.project, project_folderpath, project_filepath, groups_filepaths)
         
-        # Handle 'sheets' and 'reports' action
-        if args.action == "sheets":
-            # Generate answer sheets
-            abgrid_main.generate_answer_sheets(args.language)
-        else:
-            # Generate reports
-            abgrid_main.generate_reports(args.language)
+        # handle actions
+        match args.action:
+            
+            case "groups":
+                # Create group files
+                abgrid_main.generate_group_inputs(groups_to_create, args.members_per_group, args.language)
 
-    # Handle file not found errors
-    except FileNotFoundError as error:
-        print(error)
-    
-    # Handle cases where no project file is found
-    except StopIteration as error:
-        print(error)
+            case "sheets":
+                # Generate asnwershexets
+                abgrid_main.generate_answer_sheets(args.language)
+            
+            case "reports":
+                # Generate reports
+                abgrid_main.generate_reports(args.language)
+
+# Hande file already exists error
+except FileExistsError as error:
+    print(error)
+
+# Handle cases where no project file is found
+except StopIteration as error:
+    print(error)
+
+# Handle residual cases
+except Exception as error:
+    print(error)

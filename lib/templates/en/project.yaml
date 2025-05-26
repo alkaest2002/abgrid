@@ -1,16 +1,3 @@
-##################################################################################
-#
-# DO NOT CHANGE THE FOLLOWING DATA
-#
-##################################################################################
-groups: 
-members_per_group:
-
-##################################################################################
-#
-# CHANGE THE FOLLOWING DATA TO SUITE YOUR NEEDS
-#
-##################################################################################
 project_title: ""
 explanation: "Think about the test you just took and answer the following questions."
 question_a: "Who would you like in your ideal work group?"

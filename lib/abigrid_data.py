@@ -60,19 +60,9 @@ class ABGridData:
 
         # If project data was correctly loaded
         if data is not None:
-            # Prepare answer sheet data
-            answersheet_data = {
-                "project_title": data["project_title"],
-                "groups": list(range(1, data["groups"] + 1)),
-                "likert": SYMBOLS[:data["members_per_group"]],
-                "explanation": data["explanation"],
-                "question_a": data["question_a"],
-                "question_a_hint": data["question_a_choices"],
-                "question_b": data["question_b"],
-                "question_b_hint": data["question_b_choices"]
-            }
+            
             # Return answer sheet data
-            return answersheet_data, None
+            return data, None
         else:
             # Return validation errors if loading failed
             return None, validation_errors
@@ -107,8 +97,8 @@ class ABGridData:
                 report_data = {
                     "project_title": project_data["project_title"],
                     "year": datetime.datetime.now(datetime.UTC).year,
-                    "group": group_data["group"],
-                    "members_per_group": project_data["members_per_group"],
+                    "group": re.search(r'(\d+)$', group_filepath.stem).group(0),
+                    "members_per_group": len(group_data["choices_a"]),
                     "question_a": project_data["question_a"],
                     "question_b": project_data["question_b"],
                     "edges_a": ntw.edges_a,

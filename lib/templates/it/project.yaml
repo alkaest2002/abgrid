@@ -1,16 +1,3 @@
-##################################################################################
-#
-# NON MODIFICARE QUESTI DATI
-#
-##################################################################################
-groups: 
-members_per_group:
-
-##################################################################################
-#
-# MODIFICA I DATI SEGUENTI SECONDO LE ESIGENZE
-#
-##################################################################################
 project_title: ""
 explanation: "Pensa alla prova cha hai appena svolto e rispondi alle seguenti domande."
 question_a: "Chi vorresti nel tuo gruppo di lavoro ideale?"
