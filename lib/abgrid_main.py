@@ -66,14 +66,14 @@ class ABGridMain:
         os.makedirs(project_folderpath / "reports")
         os.makedirs(project_folderpath / "answersheets")
         
-        # Load the project YAML template
+        # Load the project data from template
         with open(Path(f"./lib/templates/{language}/project.yaml"), 'r') as fin:
             yaml_data = yaml.safe_load(fin)
         
-        # Update YAML data with project-specific information
+        # Update project data with project title
         yaml_data["project_title"] = project
         
-        # Write the updated project YAML data to a file
+        # Persist project data to disk
         with open(project_folderpath / f"{project}.yaml", 'w') as fout:
             yaml.dump(yaml_data, fout, sort_keys=False)
 
@@ -88,7 +88,7 @@ class ABGridMain:
             language (str): The language in which the answer sheets should be rendered.
         """
 
-        # Get the group HTML template
+        # Get group template
         group_template = jinja_env.get_template(f"/{language}/group.html")
         
         # Build a list of member letters (e.g., for five members: A, B, C, D, E)
@@ -97,14 +97,14 @@ class ABGridMain:
         # Loop through each group and generate input files
         for group in groups:
             
-            # Prepare data for the group template
+            # Prepare data for current group
             template_data = dict(group=group, members=members_per_group_letters)
             
-            # Render the current group template with the data (remove blank lines)
+            # Render current group with the data (+ remove blank lines)
             rendered_group_template = group_template.render(template_data)
             rendered_group_template = "\n".join([line for line in rendered_group_template.split("\n") if len(line) > 0])
                 
-            # Persiste the rendered group template to disk
+            # Persist current group to disk
             with open(self.abgrid_data.project_folderpath / f"{self.abgrid_data.project}_g{group}.yaml", "w") as file:
                 file.write(rendered_group_template)
             
@@ -122,30 +122,30 @@ class ABGridMain:
                 If there are errors in report data validation for any group.
         """
         # Load sheets data
-        sheets_data, sheets_errors = self.abgrid_data.get_answersheets_data()
+        sheets_data, sheets_data_errors = self.abgrid_data.get_answersheets_data()
 
-        # Notify on error
-        if sheets_errors:
-            raise ValueError(sheets_errors)
+        # Notify on sheets data errors
+        if sheets_data_errors:
+            raise ValueError(sheets_data_errors)
 
-         # Loop through each group file to generate report
+        # Loop through each group file and generate answersheet
         for group_file in self.abgrid_data.groups_filepaths:
 
             # Load report data for the current group
-            group_data, group_errors = self.abgrid_data.get_group_data(group_file)
+            group_data, group_data_errors = self.abgrid_data.get_group_data(group_file)
 
-            # Notify on error
-            if group_errors:
-                raise ValueError(group_errors)
+            # Notify on group data errors
+            if group_data_errors:
+                raise ValueError(group_data_errors)
 
             # Add relevant data to sheets data
             sheets_data["group"] = int(re.search(r'(\d+)$', group_file.stem).group(0))
             sheets_data["likert"] = SYMBOLS[:len(group_data["choices_a"])]
 
-            # Notify
+            # Notify user
             print(f"generating answersheet: {group_file.name}")
             
-            # Render answer sheets as PDF
+            # Persist answersheet as PDF to disk
             self.render_pdf("answersheet", sheets_data, group_file.stem, language)
 
     @notify_decorator("generate AB-Grid reports")
@@ -165,20 +165,20 @@ class ABGridMain:
             # Load report data for the current group
             report_data, report_errors = self.abgrid_data.get_report_data(group_file)
         
-            # Raise error if validation fails
+            # Notify on report data errors
             if report_errors:
                 raise ValueError(report_errors)
         
-            # Add the current group's data to the collection
+            # Add current group data to the collection
             all_data[f"{self.abgrid_data.project}_{group_file.stem}"] = report_data
 
-            # Notify
+            # Notify user
             print(f"generating report: {group_file.name}")
         
-            # Render the current group's report
+            # Persist current group report to disk
             self.render_pdf("report", report_data, group_file.stem, language)
         
-        # Save all collected data to a JSON file
+        # Persist all collected data as a JSON file to disk
         with open(self.abgrid_data.project_folderpath / f"{self.abgrid_data.project}_data.json", "w") as fout:
             fout.write(json.dumps(all_data, indent=4))
 
@@ -194,26 +194,29 @@ class ABGridMain:
         
         # Get the appropriate template for the document type
         match doc_type:
-            # Answersheets
+            
+            # Document type is answersheet
             case "answersheet":
                 template = jinja_env.get_template(f"./{language}/answersheet.html")
-            # Reports with up to 15 members per group
+            
+            # Document type is report with up to 10 members per group
             case "report" if doc_data["members_per_group"] <= 10:
                 template = jinja_env.get_template(f"./{language}/report_single_page.html")
-            # Reports with more than 15 members per group
+            
+            # Document type is report with more than 10 members per group
             case "report" if doc_data["members_per_group"] > 10:
                 template = jinja_env.get_template(f"./{language}/report_multi_page.html")
         
-        # Render the template with the provided data
+        # Render report
         rendered_template = template.render(doc_data)
         
-        # Define the folder path where the PDF will be saved
+        # Define the folder path where report will be saved
         folder_path = self.abgrid_data.project_folderpath / f"{doc_type}s"
         
         # Construct the filename, ensuring no leading/trailing underscores
         filename = re.sub("^_|_$", "", f"{self.abgrid_data.project}_{doc_type}_{doc_suffix}")
         
-        # Convert the rendered HTML template to a PDF and save it
+        # Persist report as a PDF file to disk
         HTML(string=rendered_template).write_pdf(folder_path / f"{filename}.pdf")
         
         # -----------------------------------------------------------------------------------
