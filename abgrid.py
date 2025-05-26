@@ -23,9 +23,10 @@ parser.add_argument("-u", "--user", type=str, required=True,
 parser.add_argument("-l", "--language", choices=LANGUAGES, default="en", 
                     help="Language used.")
 
-# Parse the arguments
+# Parse arguments
 args = parser.parse_args()
 
+# catch errors
 try:
 
     # Setup the path to the project folder
@@ -38,17 +39,19 @@ try:
         if project_folderpath.exists():
             raise FileExistsError(f"{args.project} already exists.")
         
-        # If project folder can be created
+        # If project folder does not exists
         else:
+            
             # Create project folder
             ABGridMain.init_project(project_folderpath, args.project, args.language)
 
-    # Handle other actions (i.e., groups, answersheets, reports)
+    # Handle other actions (i.e., groups, sheets, reports)
     else:
+        
         # Find the project file within the project folder
         project_filepath = next(project_folderpath.glob(f"{args.project}.*"))
 
-        # Determine how many group files were already created
+        # Determine how many group files are already created
         groups_filepaths = [ path for path in project_folderpath.glob("*_g*.*") if re.search(r"_g\d+\.\w+$", path.name) ]
         groups_already_created = len(groups_filepaths)
         
@@ -62,25 +65,25 @@ try:
         match args.action:
             
             case "groups":
-                # Create group files
+                # Generate group files
                 abgrid_main.generate_group_inputs(groups_to_create, args.members_per_group, args.language)
 
             case "sheets":
-                # Generate asnwershexets
+                # Generate answersheets
                 abgrid_main.generate_answer_sheets(args.language)
             
             case "reports":
                 # Generate reports
                 abgrid_main.generate_reports(args.language)
 
-# Hande file already exists error
+# File already exists error
 except FileExistsError as error:
     print(error)
 
-# Handle cases where no project file is found
+# No project file is found
 except StopIteration as error:
     print(error)
 
-# Handle residual cases
+# Residual cases
 except Exception as error:
     print(error)
