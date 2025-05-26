@@ -97,7 +97,7 @@ class ABGridData:
                 report_data = {
                     "project_title": project_data["project_title"],
                     "year": datetime.datetime.now(datetime.UTC).year,
-                    "group": re.search(r'(\d+)$', group_filepath.stem).group(0),
+                    "group": int(re.search(r'(\d+)$', group_filepath.stem).group(0)),
                     "members_per_group": len(group_data["choices_a"]),
                     "question_a": project_data["question_a"],
                     "question_b": project_data["question_b"],

@@ -146,7 +146,7 @@ class ABGridMain:
         for group_file in self.abgrid_data.groups_filepaths:
 
             # Extract number from group filename
-            group = re.search(r'(\d+)$', group_file.stem).group(0)
+            group = int(re.search(r'(\d+)$', group_file.stem).group(0))
             
             # Load report data for the current group
             report_data, report_errors = self.abgrid_data.get_report_data(group_file)
