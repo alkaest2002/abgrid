@@ -9,7 +9,7 @@ The code is part of the AB-Grid project and is licensed under the MIT License.
 """
 
 from pydantic import BaseModel, Field, constr, field_validator, model_validator
-from typing import Dict, List, Set
+from typing import Dict, List
 
 # Define a Pydantic model for the project schema
 class ProjectSchema(BaseModel):
@@ -60,12 +60,16 @@ class GroupSchema(BaseModel):
                 raise ValueError("Each choice must be a dictionary")
             if len(choice_dict) != 1:
                 raise ValueError("Each choice must have exactly one key-value pair")
-            if not ((key.isnumeric() and len(key) == 1) or (key.isalpha() and key.isupper() and len(key) == 1)):
-                raise ValueError(f"Key '{key}' must be a single uppercase letter or number")
+            if len(key) != 1:
+                raise ValueError(f"Key '{key}' must be a single letter or number")
+            if not key.isalnum():
+                raise ValueError(f"Key '{key}' must be a single letter or number")
             if any(not part for part in value_parts):
                 raise ValueError(f"Value '{value_str}' contains empty entries due to misplaced commas")
-            if not all(len(part) < 2 and part.isalnum() for part in value_parts):
-                raise ValueError(f"Value '{value_str}' must be comma-separated single uppercase letters or numbers")
+            if any(len(part) != 1 for part in value_parts):
+                raise ValueError(f"Value '{value_str}' must be a list of single letters or numbers")
+            if any(not part.isalnum() for part in value_parts):
+                raise ValueError(f"Value '{value_str}' must be a list of single letters or numbers")
             if key in value_parts:
                 raise ValueError(f"Key '{key}' cannot be present in its own values")
             if len(value_parts) != len(set(value_parts)):
@@ -86,34 +90,23 @@ class GroupSchema(BaseModel):
             ValueError: If any logical constraints between choices_a and choices_b are violated.
         """
         # Extract all keys from choices_a and choices_b
-        choices_a_keys: Set[str] = {next(iter(choice.keys())) for choice in self.choices_a}
-        choices_b_keys: Set[str] = {next(iter(choice.keys())) for choice in self.choices_b}
+        choices_a_keys = {next(iter(choice.keys())) for choice in self.choices_a}
+        choices_b_keys = {next(iter(choice.keys())) for choice in self.choices_b}
 
         # Check if the sets of keys are identical
         if choices_a_keys != choices_b_keys:
             raise ValueError("Keys in choices_a and choices_b are not equal.")
 
-        # Ensure all values in choices_a come from choices_a keys
-        for choice in self.choices_a:
-            key = next(iter(choice.keys()))
-            value_str = choice[key]
-            value_parts = value_str.split(',') if value_str else []
-
-            invalid_values = [v for v in value_parts if v not in choices_a_keys]
-            if invalid_values:
-                raise ValueError(
-                    f"Values for key '{key}' in choices_a contain the following illegal letters: {', '.join(invalid_values)}")
-
-        # Ensure all values in choices_b come from choices_b keys
-        for choice in self.choices_b:
-            key = next(iter(choice.keys()))
-            value_str = choice[key]
-            value_parts = value_str.split(',') if value_str else []
-
-            invalid_values = [v for v in value_parts if v not in choices_b_keys]
-            if invalid_values:
-                raise ValueError(
-                    f"Values for key '{key}' in choices_b contain the following illegal letters: {', '.join(invalid_values)}")
+        # Ensure all values in choices_a come from choices_a and choices_b keys
+        for choices_type, choices_list in (("a", self.choices_a), ("b", self.choices_b)):
+            for choice in choices_list:
+                key = next(iter(choice.keys()))
+                value_str = choice[key]
+                value_parts = value_str.split(',') if value_str else []
+                invalid_values = [v for v in value_parts if v not in choices_a_keys]
+                if invalid_values:
+                    raise ValueError(
+                        f"Values for key '{key}' in choices_{choices_type} contain the following illegal characters: {', '.join(invalid_values)}")
 
         # If legit, return self
         return self

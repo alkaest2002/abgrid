@@ -68,32 +68,27 @@ def notify_decorator(operation_name: str) -> Callable:
             except Exception as error:
                 
                 # Notify error
-                print(f"Error while executing operation '{operation_name}'. Error details: {error}")
+                print(f"Error while executing operation '{operation_name}'.\n{error}")
                 
                 # Retrieve the traceback object from the exception
                 traceback = error.__traceback__
 
-                # Set skipfirst line
-                skip_first = True
-                
                 # Walk through each step in the traceback chain
                 while traceback is not None:
 
-                    # Skip first error step
-                    if skip_first:
-                        skip_first = False
-                        continue
+                    # Skip 
+                    if Path(traceback.tb_frame.f_code.co_filename).name != "abgrid_utils.py":
                     
-                    # Print the current traceback step with information about file, function, and line
-                    print(
-                        "-->",
-                        Path(traceback.tb_frame.f_code.co_filename).name,
-                        traceback.tb_frame.f_code.co_name,
-                        "line code",
-                        traceback.tb_lineno,
-                        end="\n"
-                    )
-                    
+                        # Print the current traceback step with information about file, function, and line
+                        print(
+                            "-->",
+                            Path(traceback.tb_frame.f_code.co_filename).name,
+                            traceback.tb_frame.f_code.co_name,
+                            "line code",
+                            traceback.tb_lineno,
+                            end="\n"
+                        )
+                        
                     # Proceed to the next traceback step
                     traceback = traceback.tb_next
                 
