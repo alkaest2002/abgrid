@@ -14,10 +14,10 @@ parser.add_argument("-a", "--action", required=True, choices=["init", "groups", 
                     help="Action to perform: 'init', 'groups', 'sheets', or 'reports'.")
 parser.add_argument("-p", "--project", required=True, 
                     help="Name of the project.")
-parser.add_argument("-g", "--groups", type=int, choices=range(1, 21), default=1,
-                    help="Number of groups (1 to 20).")
-parser.add_argument("-m", "--members_per_group", type=int, choices=range(6, 36),  default=8,
-                    help="Number of members per group (6 to 35).")
+parser.add_argument("-g", "--groups", type=int, choices=range(1, 61), default=1,
+                    help="Number of groups (1 to 60).")
+parser.add_argument("-m", "--members_per_group", type=int, choices=range(6, 61), default=8,
+                    help="Number of members per group (6 to 60).")
 parser.add_argument("-u", "--user", type=str, required=True, 
                     help="Username.")
 parser.add_argument("-l", "--language", choices=LANGUAGES, default="en", 
