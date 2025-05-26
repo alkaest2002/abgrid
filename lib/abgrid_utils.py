@@ -72,9 +72,17 @@ def notify_decorator(operation_name: str) -> Callable:
                 
                 # Retrieve the traceback object from the exception
                 traceback = error.__traceback__
+
+                # Set skipfirst line
+                skip_first = True
                 
                 # Walk through each step in the traceback chain
                 while traceback is not None:
+
+                    # Skip first error step
+                    if skip_first:
+                        skip_first = False
+                        continue
                     
                     # Print the current traceback step with information about file, function, and line
                     print(
