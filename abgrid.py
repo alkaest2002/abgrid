@@ -49,7 +49,7 @@ try:
         project_filepath = next(project_folderpath.glob(f"{args.project}.*"))
 
         # Determine how many group files were already created
-        groups_filepaths = [ path for path in project_folderpath.glob("*_g*.*") if re.search(r"_g\d+\.yaml$", path.name) ]
+        groups_filepaths = [ path for path in project_folderpath.glob("*_g*.*") if re.search(r"_g\d+\.\w+$", path.name) ]
         groups_already_created = len(groups_filepaths)
         
         # Determine how many group files to be created

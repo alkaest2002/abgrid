@@ -122,7 +122,6 @@ class ABGridMain:
             with open(self.abgrid_data.project_folderpath / f"{self.abgrid_data.project}_g{group}.yaml", "w") as file:
                 file.write(rendered_group_template)
             
-
     @notify_decorator("generate answersheet file")
     def generate_answer_sheets(self, language: str):
         """
