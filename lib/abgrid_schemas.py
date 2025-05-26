@@ -8,7 +8,6 @@ Date Created: May 3, 2025
 The code is part of the AB-Grid project and is licensed under the MIT License.
 """
 
-from curses.ascii import isupper
 from pydantic import BaseModel, Field, constr, field_validator, model_validator
 from typing import Dict, List, Set
 
