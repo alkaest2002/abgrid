@@ -33,7 +33,7 @@ class ABGridNetwork:
         Initialize the network analysis object.
 
         Args:
-            edges (Tuple[List[Dict[str, str]], List[Dict[str, str]]]): 
+            packed_edges (Tuple[List[Dict[str, str]], List[Dict[str, str]]]): 
                 Tuple containing two lists of dictionaries, each representing edges for two networks.
         """
         
