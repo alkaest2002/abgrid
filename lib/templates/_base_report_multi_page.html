@@ -4,6 +4,7 @@
 <style>
     * {
         font-size: 10pt;
+        line-height: 12pt;
     }
     .report-disclaimer {
         margin: 24px 0px;
@@ -43,20 +44,31 @@
     } 
     .network-table th {
         padding: 3px;
-        background-color: #ddd;
-        border-bottom: 1px solid #555;
+        background-color: #DDDDDD;
+        border-bottom: 1px solid #555555;
     }
     .network-table td {
         padding: 3px;
+        border-top: 1px dashed #999999;
+        position: relative;
     }
-    .network-table tr:nth-child(odd) td {
-        background-color: #eee;
+    .network-table td > div {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        
     }
-    .network-table td.low {
-        background-color: yellow !important;
+    .network-table td.low > div > div {
+        height: 12pt;
+        flex-grow: 1;
+        background-color: #960245;
+        color: #FFFFFF;
     }
-    .network-table td.high {
-        background-color: greenyellow !important;
+    .network-table td.high > div > div {
+        height: 12pt;
+        flex-grow: 1;
+        background: #00874a;
+        color: #FFFFFF;
     }
     .report-legend  {
         margin-top: 12px;

@@ -36,11 +36,21 @@
             <tr>
                 <td>{{ k }}</td>
                 <td>{{ data[k].lns | default("-", boolean=True) }}</td>
-                <td class="{% if data[k].ic_rank_pctile <= 2/10 %}high{% elif data[k].ic_rank_pctile >= 8/10 %}low{% endif %}">{{ data[k].ic_rank | int }} </td>
-                <td class="{% if data[k].pr_rank_pctile <= 2/10 %}high{% elif data[k].pr_rank_pctile >= 8/10 %}low{% endif %}">{{ data[k].pr_rank | int }} </td>
-                <td class="{% if data[k].bt_rank_pctile <= 2/10 %}high{% elif data[k].bt_rank_pctile >= 8/10 %}low{% endif %}">{{ data[k].bt_rank | int }} </td>
-                <td class="{% if data[k].cl_rank_pctile <= 2/10 %}high{% elif data[k].cl_rank_pctile >= 8/10 %}low{% endif %}">{{ data[k].cl_rank | int }} </td>
-                <td class="{% if data[k].hu_rank_pctile <= 2/10 %}high{% elif data[k].hu_rank_pctile >= 8/10 %}low{% endif %}">{{ data[k].hu_rank | int }} </td>
+                <td class="{% if data[k].ic_rank_pctile <= 2/10 %}high{% elif data[k].ic_rank_pctile >= 8/10 %}low{% endif %}">
+                  <div><div>{{ data[k].ic_rank | int }}</div></div>
+                </td>
+                <td class="{% if data[k].pr_rank_pctile <= 2/10 %}high{% elif data[k].pr_rank_pctile >= 8/10 %}low{% endif %}">
+                  <div><div>{{ data[k].pr_rank | int }}</div></div>
+                </td>
+                <td class="{% if data[k].bt_rank_pctile <= 2/10 %}high{% elif data[k].bt_rank_pctile >= 8/10 %}low{% endif %}">
+                  <div><div>{{ data[k].bt_rank | int }}</div></div>
+                </td>
+                <td class="{% if data[k].cl_rank_pctile <= 2/10 %}high{% elif data[k].cl_rank_pctile >= 8/10 %}low{% endif %}">
+                  <div><div>{{ data[k].cl_rank | int }}</div></div>
+                </td>
+                <td class="{% if data[k].hu_rank_pctile <= 2/10 %}high{% elif data[k].hu_rank_pctile >= 8/10 %}low{% endif %}">
+                  <div><span>{{ data[k].hu_rank | int }}</span></div>
+                </td>
                 <td >{% if data[k].nd == 1 %}&larr;{% elif data[k].nd == 2 %}&rarr;{% elif data[k].nd == 3 %}&rlarr;{% endif %}</td>
             </tr>
           {% else %}
