@@ -122,7 +122,7 @@ class ABGridMain:
                 If there are errors in report data validation for any group.
         """
         # Load sheets data
-        sheets_data, sheets_data_errors = self.abgrid_data.get_answersheets_data()
+        sheets_data, sheets_data_errors = self.abgrid_data.get_project_data()
 
         # Notify on sheets data errors
         if sheets_data_errors:
