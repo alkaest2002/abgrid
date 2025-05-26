@@ -227,16 +227,29 @@ class ABGridNetwork:
         micro_level_stats["nd"] += (micro_level_stats["ic"] == 0).astype(int)
         micro_level_stats["nd"] += (micro_level_stats["lns"].str.len() == 0).astype(int)*2
 
-        # Rank node-specific metrics
+        # Compute ranks of node-specific metrics
         micro_level_stats_ranks = (
             micro_level_stats.iloc[:, 1:-1]
                 .apply(lambda x: x.rank(method="dense", ascending=False))
                 .add_suffix("_r", axis=1)
             )
         
+        # Compute percentiles of node-specific metrics
+        micro_level_stats_pct = (
+            micro_level_stats.iloc[:, 1:-1]
+                .apply(lambda x: x.rank(pct=True))
+                .add_suffix("_p", axis=1)
+            )
+        
+        # discretize percentiles
+        # 0 = between .2 and .8, -1 = below .2, +1 = above .8
+        micro_level_stats_pct = micro_level_stats_pct.apply(lambda x: x.case_when([
+            (x.le(.2), -1), (x.ge(.8), 1), (x.between(.2, .8, inclusive="neither"), 0)
+        ]))
+
         # Finalize the micro-level stats DataFrame
         micro_level_stats = (
-            pd.concat([micro_level_stats, micro_level_stats_ranks], axis=1)
+            pd.concat([micro_level_stats, micro_level_stats_ranks, micro_level_stats_pct], axis=1)
                 .sort_index(key=lambda x: x.str.isdigit().astype(str) + x)
                 .round(3)
         )
