@@ -14,31 +14,29 @@
 {% endmacro %}
 
 {% macro answersheet_body() %}
-    {% for group in groups %}
-        {% for participant in likert %}
-            <div class="page">
-                <div class="main-wrapper">
-                    {{ base_macro.logo() }}
-                    {{ answersheet_header(group, participant) }}
-                    <div class="explanation">
-                        <p>{{ explanation }}</p>
-                    </div>
-                    <div class="question">
-                        <p class="question-a"><b>A. {{ question_a }}</b></p>
-                        <p class="question-hint">{{ question_a_hint }}</p>
-                        {{ answersheet_likert(likert) }}
-                    </div>
-                    <div class="question">
-                        <p class="question-b"><b>B. {{ question_b }}</b></p>
-                        <p class="question-hint">{{ question_b_hint }}</p>
-                        {{ answersheet_likert(likert) }}
-                    </div>
-                    </div>
-                <div class="barcode-wrapper">
-                    <p class="barcode">{{ answersheet_barcode(group, participant) }}</p>
+    {% for participant in likert %}
+        <div class="page">
+            <div class="main-wrapper">
+                {{ base_macro.logo() }}
+                {{ answersheet_header(group, participant) }}
+                <div class="explanation">
+                    <p>{{ explanation }}</p>
                 </div>
+                <div class="question">
+                    <p class="question-a"><b>A. {{ question_a }}</b></p>
+                    <p class="question-hint">{{ question_a_hint }}</p>
+                    {{ answersheet_likert(likert) }}
+                </div>
+                <div class="question">
+                    <p class="question-b"><b>B. {{ question_b }}</b></p>
+                    <p class="question-hint">{{ question_b_hint }}</p>
+                    {{ answersheet_likert(likert) }}
+                </div>
+                </div>
+            <div class="barcode-wrapper">
+                <p class="barcode">{{ answersheet_barcode(group, participant) }}</p>
             </div>
-        {% endfor %}
+        </div>
     {% endfor %}
 {% endmacro %}
 
