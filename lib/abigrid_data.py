@@ -13,7 +13,6 @@ import datetime
 
 from pathlib import Path
 from typing import Any, Tuple, Dict, Optional
-from lib import SYMBOLS
 from lib.abgrid_network import ABGridNetwork
 
 class ABGridData:
@@ -48,12 +47,14 @@ class ABGridData:
             sorted_filepaths = sorted(groups_filepaths)
         self.groups_filepaths = sorted_filepaths
 
-    def get_answersheets_data(self) -> Tuple[Optional[Dict[str, Any]], Optional[Any]]:
+    def get_project_data(self) -> Tuple[Optional[Dict[str, Any]], Optional[Any]]:
         """
         Load and prepare data for generating answer sheets.
 
         Returns:
-            Tuple[Optional[Dict[str, Any]], Optional[Any]]: A tuple containing answer sheet data or validation errors.
+            Tuple[Optional[Dict[str, Any]], Optional[Any]]: 
+                - If answersheet data is successfully loaded, a tuple containing the answersheet data and None for errors.
+                - If loading fails, a tuple containing None for the answersheet data and the errors encountered.
         """
         # Load project data
         data, validation_errors = self.data_loader.load_data("project", self.project_filepath)
@@ -63,28 +64,22 @@ class ABGridData:
             
             # Return answer sheet data
             return data, None
+        
         else:
             # Return validation errors if loading failed
             return None, validation_errors
-        
+
     def get_group_data(self, group_filepath: Path) -> Tuple[Optional[Dict[str, Any]], Optional[Any]]:
         """
         Load and validate group data from the specified file path.
-
-        This method attempts to load data specific to a group from the given file path
-        and performs validation on the loaded data. It returns the group data if successful,
-        or validation errors if any issues are encountered during the loading process.
 
         Args:
             group_filepath (Path): A Path object representing the file path to the group data file.
 
         Returns:
             Tuple[Optional[Dict[str, Any]], Optional[Any]]: 
-                - If group data is successfully loaded and validated, a tuple containing the group data dictionary and None for errors.
-                - If loading fails, a tuple containing None for the group data and the validation errors encountered.
-
-        Raises:
-            None explicitly, but relies on `self.data_loader.load_data` to handle exceptions internally.
+                - If group data is successfully loaded, a tuple containing the group data and None for errors.
+                - If loading fails, a tuple containing None for the group data and the errors encountered.
         """
 
         # Load group data
@@ -95,11 +90,11 @@ class ABGridData:
 
             # Return group data
             return group_data, None
+        
         else:
             # Return validation errors if project data loading failed
             return None, group_validation_errors
-
-
+        
     def get_report_data(self, group_filepath: Path) -> Tuple[Optional[Dict[str, Any]], Optional[Any]]:
         """
         Load and prepare data for generating a group's report.
@@ -108,7 +103,9 @@ class ABGridData:
             group_filepath (Path): Path to the group-specific data file.
 
         Returns:
-            Tuple[Optional[Dict[str, Any]], Optional[Any]]: A tuple containing the report data or validation errors.
+           Tuple[Optional[Dict[str, Any]], Optional[Any]]: 
+                - If report data is successfully loaded, a tuple containing the report data and None for errors.
+                - If loading fails, a tuple containing None for the report data and the errors encountered.
         """
         # Load project data
         project_data, project_validation_errors = self.data_loader.load_data("project", self.project_filepath)
