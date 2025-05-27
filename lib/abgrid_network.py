@@ -241,12 +241,13 @@ class ABGridNetwork:
                 .add_suffix("_pctile")
             )
         
-        # Compute "order of arrival" (ooa) of nodes relative to ranks
-        nodes_sorted_by_rank = (
-            micro_level_stats_ranks
-                .apply(lambda x: pd.Series(x.index.values, index=x.values).sort_index().values)
-                .add_suffix("_ooa")
-            )
+        # Init "order of arrival" (ooa) list
+        nodes_by_ooa = {}
+        
+        # Compute ooa relative to node ranks scores for each metric
+        for rank, data in micro_level_stats_ranks.items():
+            table = pd.Series(data.index.values, index=data.values, name=f"{rank}_ooa").sort_index()
+            nodes_by_ooa[rank] = pd.Series(table.index.astype(int).values, index=table.values, name=f"{rank}_ooa").to_dict()
         
         # Finalize the micro-level stats DataFrame
         micro_level_stats = (
@@ -279,4 +280,4 @@ class ABGridNetwork:
         }
         
         # Return both macro-level and micro-level statistics
-        return macro_level_stats, micro_level_stats, nodes_sorted_by_rank
+        return macro_level_stats, micro_level_stats, nodes_by_ooa
