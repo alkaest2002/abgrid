@@ -8,6 +8,10 @@
 CHOICES
 {% endmacro %}
 
+{% macro rank_label() %}
+RANK
+{% endmacro %}
+
 {% macro report_header(project_title, group, score_type) %}
 <div class="report-header">
     <span><b>GROUP {{ group | upper }} - {{ project_title | upper }}</b></span><span>{% if score_type == "ranks" %}RANK SCORES{% elif score_type == "raw_scores" %}RAW SCORES{% endif %}</span>

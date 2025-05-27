@@ -87,35 +87,27 @@
 </div>
 {% endmacro %}
 
-{% macro nodes_sorted_by_rank(data) %}
-<div class="network-table-container">
-    <table class="network-table">
-        <tr>
-            <th>IC</th>
-            <th>PR</th>
-            <th>BT</th>
-            <th>CL</th>
-            <th>HU</th>
-        </tr>
-        {% for k in data.keys() %}
-            <tr>
-                <td>
-                  <div><div>{{ data[k].ic_rank_ooa }}</div></div>
-                </td>
-                <td>
-                  <div><div>{{ data[k].pr_rank_ooa }}</div></div>
-                </td>
-                <td>
-                  <div><div>{{ data[k].bt_rank_ooa }}</div></div>
-                </td>
-                <td>
-                  <div><div>{{ data[k].cl_rank_ooa }}</div></div>
-                </td>
-                <td>
-                  <div><div>{{ data[k].hu_rank_ooa }}</div></div>
-                </td>
-            </tr>
-        {% endfor %}
-    </table>
+{% macro nodes_sorted_by_rank(ooa_ranks, rank_label) %}
+<div class="ooa-tables-container">
+    {% for metric, data in ooa_ranks.items() %}
+        <div style="width: 20%; padding-right: 9px;">
+            <table class="network-table">
+                <tr>
+                    <th>{{ rank_label() }}</th>
+                    <th>{{ metric[:2] | upper }}</th>
+                </tr>
+                {% for letter, rank in data.items() %}
+                    <tr>
+                        <td>
+                            <div><div>{{ rank }}</div></div>
+                        </td>
+                        <td>
+                            <div><div>{{ letter }}</div></div>
+                        </td>
+                    </tr>
+                {% endfor %}
+            </table>
+        </div>
+    {% endfor %}
 </div>
 {% endmacro %}

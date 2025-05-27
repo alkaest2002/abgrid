@@ -89,6 +89,18 @@
         height: 10pt;
         width: 10pt;
     }
+    .ooa-tables-container {
+        display: flex;
+    }
+    .ooa-tables-container > div {
+        padding-right: 9px;
+    }
+    .ooa-tables-container > div:last-child {
+        padding-right: 0px;
+    }
+    .ooa-tables-container > div > table {
+        width: fit-content !important;
+    }
     .report-legend  {
         margin-top: 12px;
         font-size: 8pt !important;
@@ -147,7 +159,7 @@
                 <div class="network-tables">
                     <div class="network-table-container">
                         {{ base_report_macro.question(network_type, question) }}
-                        {{ base_report_macro.nodes_sorted_by_rank(nodes_by_rank) }}
+                        {{ base_report_macro.nodes_sorted_by_rank(nodes_by_rank, report_macro.rank_label) }}
                         {{ report_macro.legend(show_macro=False, show_arrows=False, show_pctiles=False) }}
                     </div>
                 </div>
