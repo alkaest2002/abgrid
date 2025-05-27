@@ -222,7 +222,7 @@ class ABGridNetwork:
         ], axis=1)
         
         # Identify nodes with no in-degree and/or out-degree
-        # 0 = mode has in and out-degree, 1 = node does not have in-degre, 
+        # 0 = mode has in and out-degree, 1 = node does not have in-degree, 
         # 2 = node does not have out-degree, 3 = node does not have either in or out-degree
         micro_level_stats["nd"] = 0
         micro_level_stats["nd"] += (micro_level_stats["ic"] == 0).astype(int)
