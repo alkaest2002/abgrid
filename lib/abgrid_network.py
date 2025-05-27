@@ -228,14 +228,14 @@ class ABGridNetwork:
         micro_level_stats["nd"] += (micro_level_stats["ic"] == 0).astype(int)
         micro_level_stats["nd"] += (micro_level_stats["lns"].str.len() == 0).astype(int)*2
 
-        # Compute node ranks relative to each metric
+        # Compute node ranks relative to each network centrality metric
         micro_level_stats_ranks = (
             micro_level_stats.iloc[:, 1:-1] # omit first column (LNS) and last column (ND)
                 .apply(lambda x: x.rank(method="dense", ascending=False))
                 .add_suffix("_rank")
             )
         
-        # Compute node percentiles relative to each metric
+        # Compute node percentiles relative to each network centrality metric
         micro_level_stats_pct = (
             micro_level_stats_ranks
                 .apply(lambda x: x.rank(pct=True))
@@ -243,10 +243,10 @@ class ABGridNetwork:
             )
         
         # Init nodes_ordered_by_rank dict
-        # for each metric, nodes will be ordered by the relative rank
+        # for each metric, nodes will be ordered by their relative rank
         nodes_ordered_by_rank = {}
         
-        # Compute ooa relative to node ranks scores for each metric
+        # Compute order relative to ranks scores for each network centrality metric
         for rank_label, rank_data in micro_level_stats_ranks.items():
             series = rank_data.to_frame().reset_index().sort_values(by=[rank_label, "index"]).set_index("index").squeeze()
             series.name = f"{rank_label}_ooa"
