@@ -60,25 +60,34 @@
         align-items: center;
         
     }
-    .network-table td.low > div > div,
-    .network-table td.very-low > div > div,
-    .network-table td.very-high > div > div,
-    .network-table td.high > div > div {
+    .network-table td > div > div {
         height: 12pt;
         flex-grow: 1;
+    }
+    .network-table td > div > div.very-low,
+    .network-table td > div > div.low,
+    .network-table td > div > div.high,
+    .network-table td > div > div.very-high {
         color: #FFFFFF;
     }
-    .network-table td.very-low > div > div {
+    .very-low {
         background-color: #515095;
     }
-    .network-table td.low > div > div {
+    .low {
         background-color: #716fcd;
     }
-    .network-table td.very-high > div > div {
+    .very-high {
         background: #00874a;
     }
-    .network-table td.high > div > div {
+    .high {
         background: #06cd73;
+    }
+    .square {
+        display: inline-block;
+        position: relative;
+        top: 2px;
+        height: 10pt;
+        width: 10pt;
     }
     .report-legend  {
         margin-top: 12px;

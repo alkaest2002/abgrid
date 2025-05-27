@@ -53,20 +53,20 @@
             <tr>
                 <td>{{ k }}</td>
                 <td>{{ data[k].lns | default("-", boolean=True) }}</td>
-                <td class="{{ mark_pctile(data[k].ic_rank_pctile) }}">
-                  <div><div>{{ data[k].ic_rank | int }}</div></div>
+                <td>
+                  <div><div class="{{ mark_pctile(data[k].ic_rank_pctile) }}">{{ data[k].ic_rank | int }}</div></div>
                 </td>
-                <td class="{{ mark_pctile(data[k].pr_rank_pctile) }}">
-                  <div><div>{{ data[k].pr_rank | int }}</div></div>
+                <td>
+                  <div><div class="{{ mark_pctile(data[k].pr_rank_pctile) }}">{{ data[k].pr_rank | int }}</div></div>
                 </td>
-                <td class="{{ mark_pctile(data[k].bt_rank_pctile) }}">
-                  <div><div>{{ data[k].bt_rank | int }}</div></div>
+                <td>
+                  <div><div class="{{ mark_pctile(data[k].bt_rank_pctile) }}">{{ data[k].bt_rank | int }}</div></div>
                 </td>
-                <td class="{{ mark_pctile(data[k].cl_rank_pctile) }}">
-                  <div><div>{{ data[k].cl_rank | int }}</div></div>
+                <td>
+                  <div><div class="{{ mark_pctile(data[k].cl_rank_pctile) }}">{{ data[k].cl_rank | int }}</div></div>
                 </td>
-                <td class="{{ mark_pctile(data[k].hu_rank_pctile) }}">
-                  <div><span>{{ data[k].hu_rank | int }}</span></div>
+                <td>
+                  <div><div class="{{ mark_pctile(data[k].hu_rank_pctile) }}">{{ data[k].hu_rank | int }}</div></div>
                 </td>
                 <td >{% if data[k].nd == 1 %}&larr;{% elif data[k].nd == 2 %}&rarr;{% elif data[k].nd == 3 %}&rlarr;{% endif %}</td>
             </tr>
