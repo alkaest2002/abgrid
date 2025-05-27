@@ -103,8 +103,8 @@ class ABGridNetwork:
         locb = nx.kamada_kawai_layout(Gb)
         
         # Store network A and B statistics and plots
-        self.macro_a, self.micro_a = self.get_network_stats(Ga)
-        self.macro_b, self.micro_b = self.get_network_stats(Gb)
+        self.macro_a, self.micro_a, self.nodes_a_by_rank = self.get_network_stats(Ga)
+        self.macro_b, self.micro_b, self.nodes_b_by_rank = self.get_network_stats(Gb)
         self.graph_a = self.get_network_graph(Ga, loca, "A")
         self.graph_b = self.get_network_graph(Gb, locb, "B")
 
@@ -231,20 +231,31 @@ class ABGridNetwork:
         micro_level_stats_ranks = (
             micro_level_stats.iloc[:, 1:-1]
                 .apply(lambda x: x.rank(method="dense", ascending=False))
-                .add_suffix("_rank", axis=1)
+                .add_suffix("_rank")
             )
         
         # Compute percentiles of node-specific metrics
         micro_level_stats_pct = (
             micro_level_stats_ranks
                 .apply(lambda x: x.rank(pct=True))
-                .add_suffix("_pctile", axis=1)
+                .add_suffix("_pctile")
+            )
+        
+        # Compute "order of arrival" (ooa) of nodes relative to ranks
+        nodes_sorted_by_rank = (
+            micro_level_stats_ranks
+                .apply(lambda x: pd.Series(x.index.values, index=x.values).sort_index().values)
+                .add_suffix("_ooa")
             )
         
         # Finalize the micro-level stats DataFrame
         micro_level_stats = (
-            pd.concat([micro_level_stats, micro_level_stats_ranks, micro_level_stats_pct], axis=1)
-                .sort_index(key=lambda x: x.str.isdigit().astype(str) + x)
+            pd.concat([
+                micro_level_stats, 
+                micro_level_stats_ranks, 
+                micro_level_stats_pct,
+            ], axis=1)
+                .sort_index()
                 .round(3)
         )
         
@@ -268,4 +279,4 @@ class ABGridNetwork:
         }
         
         # Return both macro-level and micro-level statistics
-        return macro_level_stats, micro_level_stats
+        return macro_level_stats, micro_level_stats, nodes_sorted_by_rank
