@@ -155,6 +155,8 @@ class ABGridData:
                     "macro_b": ntw.macro_b,
                     "micro_a": ntw.micro_a.to_dict("index"),
                     "micro_b": ntw.micro_b.to_dict("index"),
+                    "nodes_a_by_rank": ntw.nodes_a_by_rank.to_dict("index"),
+                    "nodes_b_by_rank": ntw.nodes_b_by_rank.to_dict("index"),
                     "graph_a": ntw.graph_a,
                     "graph_b": ntw.graph_b
                 }
