@@ -18,6 +18,23 @@
 </div>
 {% endmacro %}
 
+{% macro mark_pctile(pctile) %}
+    {% if  pctile <= 2/10 %}
+        {% if pctile <= 1/10 %}
+            very-high
+        {% else %}
+            high
+        {% endif %}
+    {% endif %}
+    {% if  pctile >= 8/10 %}
+        {% if pctile >= 9/10 %}
+            very-low
+        {% else %}
+            low
+        {% endif %}
+    {% endif %}
+{% endmacro %}
+
 {% macro micro_statistics(network_type, score_type, data, choices_label) %}
 <div class="network-table-container">
     <table class="network-table">
@@ -36,19 +53,19 @@
             <tr>
                 <td>{{ k }}</td>
                 <td>{{ data[k].lns | default("-", boolean=True) }}</td>
-                <td class="{% if data[k].ic_rank_pctile <= 2/10 %}high{% elif data[k].ic_rank_pctile >= 8/10 %}low{% endif %}">
+                <td class="{{ mark_pctile(data[k].ic_rank_pctile) }}">
                   <div><div>{{ data[k].ic_rank | int }}</div></div>
                 </td>
-                <td class="{% if data[k].pr_rank_pctile <= 2/10 %}high{% elif data[k].pr_rank_pctile >= 8/10 %}low{% endif %}">
+                <td class="{{ mark_pctile(data[k].pr_rank_pctile) }}">
                   <div><div>{{ data[k].pr_rank | int }}</div></div>
                 </td>
-                <td class="{% if data[k].bt_rank_pctile <= 2/10 %}high{% elif data[k].bt_rank_pctile >= 8/10 %}low{% endif %}">
+                <td class="{{ mark_pctile(data[k].bt_rank_pctile) }}">
                   <div><div>{{ data[k].bt_rank | int }}</div></div>
                 </td>
-                <td class="{% if data[k].cl_rank_pctile <= 2/10 %}high{% elif data[k].cl_rank_pctile >= 8/10 %}low{% endif %}">
+                <td class="{{ mark_pctile(data[k].cl_rank_pctile) }}">
                   <div><div>{{ data[k].cl_rank | int }}</div></div>
                 </td>
-                <td class="{% if data[k].hu_rank_pctile <= 2/10 %}high{% elif data[k].hu_rank_pctile >= 8/10 %}low{% endif %}">
+                <td class="{{ mark_pctile(data[k].hu_rank_pctile) }}">
                   <div><span>{{ data[k].hu_rank | int }}</span></div>
                 </td>
                 <td >{% if data[k].nd == 1 %}&larr;{% elif data[k].nd == 2 %}&rarr;{% elif data[k].nd == 3 %}&rlarr;{% endif %}</td>

@@ -49,8 +49,10 @@
     }
     .network-table td {
         padding: 3px;
-        border-top: 1px dashed #999999;
         position: relative;
+    }
+    .network-table tr:nth-child(odd) {
+        background-color: #EEEEEE;
     }
     .network-table td > div {
         display: flex;
@@ -58,17 +60,25 @@
         align-items: center;
         
     }
-    .network-table td.low > div > div {
-        height: 12pt;
-        flex-grow: 1;
-        background-color: #960245;
-        color: #FFFFFF;
-    }
+    .network-table td.low > div > div,
+    .network-table td.very-low > div > div,
+    .network-table td.very-high > div > div,
     .network-table td.high > div > div {
         height: 12pt;
         flex-grow: 1;
-        background: #00874a;
         color: #FFFFFF;
+    }
+    .network-table td.very-low > div > div {
+        background-color: #515095;
+    }
+    .network-table td.low > div > div {
+        background-color: #716fcd;
+    }
+    .network-table td.very-high > div > div {
+        background: #00874a;
+    }
+    .network-table td.high > div > div {
+        background: #06cd73;
     }
     .report-legend  {
         margin-top: 12px;
