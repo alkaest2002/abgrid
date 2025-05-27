@@ -218,7 +218,7 @@ class ABGridNetwork:
             pd.Series(nx.pagerank(G, max_iter=1000), name="pr"),
             pd.Series(nx.betweenness_centrality(G), name="bt"),
             pd.Series(nx.closeness_centrality(G), name="cl"),
-            pd.Series(nx.hits(G)[0], name="hu"),
+            pd.Series(nx.hits(G)[0], name="hu").abs(),
         ], axis=1)
         
         # Identify nodes with no in-degree and/or out-degree
