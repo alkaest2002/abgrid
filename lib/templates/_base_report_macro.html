@@ -1,17 +1,17 @@
 {% macro question(network_type, question) %}
-<div class="report-question-container">
+<div class="question-container">
    <p><b>{{ network_type }}. {{ question }}</b></p> 
 </div>
 {% endmacro %}
 
 {% macro graph(graph) %}
-<div class="network-graph-container">
+<div class="graph-container">
   <img src="{{ graph }}" />
 </div>
 {% endmacro %}
 
 {% macro macro_statistics(data) %}
-<div class="network-macro-container">
+<div class="macro-container">
     <p>
         <b>NN</b> {{ data.network_nodes }}, <b>NE</b> {{ data.network_edges }}, <b>NC</b> {{ (data.network_centralization * 100)|round|int }}%, <b>NT</b> {{ (data.network_transitivity * 100)|round|int }}%, <b>NR</b> {{ (data.network_reciprocity * 100)|round|int }}%
     </p>
@@ -36,8 +36,8 @@
 {% endmacro %}
 
 {% macro micro_statistics(network_type, score_type, data, choices_label) %}
-<div class="network-table-container">
-    <table class="network-table">
+<div>
+    <table class="report-table table_bordered table_striped full-width">
         <tr>
             <th>ID</th>
             <th>{{ choices_label() }}</th>
@@ -91,7 +91,7 @@
 <div class="ooa-tables-container">
     {% for metric, data in ooa_ranks.items() %}
         <div>
-            <table class="network-table">
+            <table class="report-table table_bordered table_striped full-width">
                 <tr>
                     <th>{{ rank_label() }}</th>
                     <th>{{ metric[:2] | upper }}</th>

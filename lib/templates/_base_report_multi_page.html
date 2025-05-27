@@ -1,98 +1,13 @@
 {% extends "_base_report.html" %}
 
-{% block style %}
+{% block report_multi_style %}
 <style>
-    * {
-        font-size: 10pt;
-        line-height: 12pt;
-    }
-    .report-disclaimer {
-        margin: 24px 0px;
-        text-align: justify;
-    }
-    .report-header {
-        display: flex;
-        justify-content: space-between;
-        font-size: 1.5em;
-        margin: 12px 0px;
-        font-weight: bold;
-        border-bottom: 1px solid #000;
-    }
-    .report-question-container {
-        margin: 24px 0px 12px 0;
-        padding-bottom: 6px;
-        border-bottom: 1px dashed #555;
-    }
-    .network-graphs {
-        width: 100%;
-    }
-    .network-graph-container {
+    .graph-container {
         display: flex;
         justify-content: center;
-        margin-bottom: 36px;
     }
-    .network-macro-container {
-        margin-bottom: 12px;
-    }
-    .network-table {
-        width: 100%;
-        border-top: 2px solid #000;
-        border-bottom: 2px solid #000;
-    }
-    .network-table tr:nth-child(odd) td {
-        background-color: #eeeeee;
-    }
-    .network-table th, .network-table td {
-        text-align: center;
-    } 
-    .network-table th {
-        padding: 3px;
-        background-color: #dddddd;
-        border-bottom: 1px solid #555555;
-    }
-    .network-table td {
-        padding: 3px;
-        position: relative;
-    }
-    .network-table td:nth-last-child(-n+6) {
-        width: 70px;
-    }
-    
-    .network-table td > div {
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        
-    }
-    .network-table td > div > div {
-        height: 12pt;
-        flex-grow: 1;
-        text-align: center;
-    }
-    .network-table td > div > div.very-low,
-    .network-table td > div > div.low,
-    .network-table td > div > div.high,
-    .network-table td > div > div.very-high {
-        color: #ffffff;
-    }
-    .very-low {
-        background-color: Purple;
-    }
-    .low {
-        background-color: Plum;
-    }
-    .very-high {
-        background: DarkGreen;
-    }
-    .high {
-        background: MediumSeaGreen;
-    }
-    .square {
-        display: inline-block;
-        position: relative;
-        top: 2px;
-        height: 10pt;
-        width: 10pt;
+    .report-table td:nth-last-child(-n+6) {
+        width: 80px;
     }
     .ooa-tables-container {
         display: flex;
@@ -103,25 +18,6 @@
     }
     .ooa-tables-container > div:last-child {
         padding-right: 0px;
-    }
-    .ooa-tables-container > div > table {
-        width: fit-content !important;
-    }
-    .report-legend  {
-        margin-top: 12px;
-        font-size: 8pt !important;
-        text-align: justify;
-    }
-    .report-legend b  {
-        font-size: 8pt !important;
-    }
-    .report-footer {
-        font-size: 8pt !important;
-        color: #acacac;
-        text-align: justify;
-    }
-    .report-footer b  {
-        font-size: 8pt !important;
     }
 </style>
 {% endblock %}
@@ -135,6 +31,7 @@
                 {{ report_macro.disclaimer() }}
                 {{ report_macro.report_header(project_title, group, score_type) }}
                 {{ base_report_macro.question(network_type, question) }}
+                {{ base_report_macro.macro_statistics(network_data_macro_level) }}
                 {{ base_report_macro.graph(graph) }}
             </div>
             {{ report_macro.footer() }}
@@ -144,14 +41,9 @@
                 {{ base_macro.logo() }}
                 {{ report_macro.disclaimer() }}
                 {{ report_macro.report_header(project_title, group, "raw_scores") }}
-                <div class="network-tables">
-                    <div class="network-table-container">
-                        {{ base_report_macro.question(network_type, question) }}
-                        {{ base_report_macro.macro_statistics(network_data_macro_level) }}
-                        {{ base_report_macro.micro_statistics(network_type, "raw_scores", network_data_micro_level, report_macro.choices_label) }}
-                        {{ report_macro.legend(show_pctiles=False) }}
-                    </div>
-                </div>
+                {{ base_report_macro.question(network_type, question) }}
+                {{ base_report_macro.micro_statistics(network_type, "raw_scores", network_data_micro_level, report_macro.choices_label) }}
+                {{ report_macro.legend(show_pctiles=False) }}
             </div>
             {{ report_macro.footer() }}
         </div>
@@ -160,14 +52,9 @@
                 {{ base_macro.logo() }}
                 {{ report_macro.disclaimer() }}
                 {{ report_macro.report_header(project_title, group, "ranks") }}
-                <div class="network-tables">
-                    <div class="network-table-container">
-                        {{ base_report_macro.question(network_type, question) }}
-                        {{ base_report_macro.macro_statistics(network_data_macro_level) }}
-                        {{ base_report_macro.micro_statistics(network_type, "ranks", network_data_micro_level, report_macro.choices_label) }}
-                        {{ report_macro.legend(show_pctiles=True) }}
-                    </div>
-                </div>
+                {{ base_report_macro.question(network_type, question) }}
+                {{ base_report_macro.micro_statistics(network_type, "ranks", network_data_micro_level, report_macro.choices_label) }}
+                {{ report_macro.legend(show_pctiles=True) }}
             </div>
             {{ report_macro.footer() }}
         </div>
@@ -176,14 +63,9 @@
                 {{ base_macro.logo() }}
                 {{ report_macro.disclaimer() }}
                 {{ report_macro.report_header(project_title, group) }}
-                <div class="network-tables">
-                    <div class="network-table-container">
-                        {{ base_report_macro.question(network_type, question) }}
-                        {{ base_report_macro.macro_statistics(network_data_macro_level) }}
-                        {{ base_report_macro.nodes_sorted_by_rank(nodes_by_rank, report_macro.rank_label) }}
-                        {{ report_macro.legend(show_macro=False, show_arrows=False, show_pctiles=False) }}
-                    </div>
-                </div>
+                {{ base_report_macro.question(network_type, question) }}
+                {{ base_report_macro.nodes_sorted_by_rank(nodes_by_rank, report_macro.rank_label) }}
+                {{ report_macro.legend(show_macro=False, show_arrows=False, show_pctiles=False) }}
             </div>
             {{ report_macro.footer() }}
         </div>

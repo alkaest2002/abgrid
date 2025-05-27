@@ -1,3 +1,88 @@
 {% extends "_base.html" %}
 {% import "./_base_macro.html" as base_macro %}
 {% import "./_base_report_macro.html" as base_report_macro %}
+
+{% block base_report_style %}
+<style>
+    * {
+        font-size: 10pt;
+        line-height: 12pt;
+    }
+    .report-disclaimer {
+        margin: 24px 0px;
+        text-align: justify;
+    }
+    .report-header {
+        display: flex;
+        justify-content: space-between;
+        font-size: 1.5em;
+        font-weight: bold;
+        margin: 12px 0px;
+        padding-bottom: 6px;
+        border-bottom: 1px solid #000;
+    }
+    .question-container {
+        margin: 24px 0px 12px 0;
+        padding-bottom: 6px;
+        border-bottom: 1px dashed #555;
+    }
+    .macro-container {
+        margin: 12px 0px;
+    }
+    .report-table th {
+        padding: 6px 3px;
+        background-color: #ddd;
+        border-bottom: 1px solid #555;
+    }
+    .report-table td {
+        padding: 3px;
+    }
+    .report-table th, .report-table td {
+        text-align: center;
+    } 
+    .report-table td > div > div {
+        height: 12pt;
+    }
+    .report-table td > div > div.very-low,
+    .report-table td > div > div.low,
+    .report-table td > div > div.high,
+    .report-table td > div > div.very-high {
+        color: #ffffff;
+    }
+    .very-low {
+        background-color: Purple;
+    }
+    .low {
+        background-color: Plum;
+    }
+    .very-high {
+        background: DarkGreen;
+    }
+    .high {
+        background: MediumSeaGreen;
+    }
+    .square {
+        display: inline-block;
+        position: relative;
+        top: 2px;
+        height: 10pt;
+        width: 10pt;
+    }
+    .report-legend  {
+        margin-top: 12px;
+        font-size: 8pt !important;
+        text-align: justify;
+    }
+    .report-legend b  {
+        font-size: 8pt !important;
+    }
+    .report-footer {
+        font-size: 8pt !important;
+        color: #acacac;
+        text-align: justify;
+    }
+    .report-footer b  {
+        font-size: 8pt !important;
+    }
+</style>
+{% endblock %}

@@ -63,8 +63,24 @@
             table {
                 border-collapse: collapse;
             }
+            .table_bordered {
+                border-top: 2px solid #000;
+                border-bottom: 2px solid #000;
+            }
+            .table_striped tr:nth-child(odd) td {
+                background-color: #eee;
+            }
         </style>
-        {% block style %}
+        {% block base_report_style %}
+        {% endblock %}
+
+        {% block report_single_style %}
+        {% endblock %}
+
+        {% block report_multi_style %}
+        {% endblock %}
+        
+        {% block base_answersheet_style %}
         {% endblock %}
     </head>
     <body>
