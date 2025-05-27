@@ -19,7 +19,7 @@
 {% endmacro %}
 
 {% macro mark_pctile(pctile) %}
-    {% if  pctile <= 2/10 %}
+    {% if pctile <= 2/10 %}
         {% if pctile <= 1/10 %}
             very-high
         {% else %}
@@ -82,6 +82,39 @@
                 <td>{% if data[k].nd == 1 %}&larr;{% elif data[k].nd == 2 %}&rarr;{% elif data[k].nd == 3 %}&rlarr;{% endif %}</td>
             </tr>
           {% endif %}
+        {% endfor %}
+    </table>
+</div>
+{% endmacro %}
+
+{% macro nodes_sorted_by_rank(data) %}
+<div class="network-table-container">
+    <table class="network-table">
+        <tr>
+            <th>IC</th>
+            <th>PR</th>
+            <th>BT</th>
+            <th>CL</th>
+            <th>HU</th>
+        </tr>
+        {% for k in data.keys() %}
+            <tr>
+                <td>
+                  <div><div>{{ data[k].ic_rank_ooa }}</div></div>
+                </td>
+                <td>
+                  <div><div>{{ data[k].pr_rank_ooa }}</div></div>
+                </td>
+                <td>
+                  <div><div>{{ data[k].bt_rank_ooa }}</div></div>
+                </td>
+                <td>
+                  <div><div>{{ data[k].cl_rank_ooa }}</div></div>
+                </td>
+                <td>
+                  <div><div>{{ data[k].hu_rank_ooa }}</div></div>
+                </td>
+            </tr>
         {% endfor %}
     </table>
 </div>

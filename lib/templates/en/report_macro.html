@@ -14,9 +14,9 @@ CHOICES
 </div>
 {% endmacro %}
 
-{% macro legend() %}
+{% macro legend(show_macro=True, show_micro=True, show_arrows=True, show_pctiles=True) %}
 <div class="report-legend">
-    <b>NN</b> = Nodes, <b>NE</b> = Edges, <b>NC</b> = Network Centralization, <b>NT</b> = Network Transitivity, <b>NR</b> = Network Reciprocity, <b>IC</b> = In-Degree, <b>PR</b> = PageRank, <b>BT</b> = Betweenness, <b>CL</b> = Closenness, <b>HU</b> = Hub, <b>ND</b> = No In-Degree (&larr; ) No Out-Degree (&rarr;) No In or Out-Degree (&rlarr;), <span class="square very-low"></span> 0-10%, <span class="square low"></span> 10-20%, <span class="square high"></span> 80-90%, <span class="square very-high"></span> < 90-100%.
+    {% if show_macro %}<b>NN</b> = Nodes <b>NE</b> = Edges <b>NC</b> = Network Centralization <b>NT</b> = Network Transitivity <b>NR</b> = Network Reciprocity {% endif %}{% if show_micro%}<b>IC</b> = In-Degree <b>PR</b> = PageRank <b>BT</b> = Betweenness <b>CL</b> = Closenness <b>HU</b> = Hub {% endif %}{% if show_arrows %}<b>ND</b> = No In-Degree (&larr; ) No Out-Degree (&rarr;) No In or Out-Degree (&rlarr;) {% endif %}{% if show_pctiles %}<span class="square very-low"></span> 0-10% <span class="square low"></span> 10-20% <span class="square high"></span> 80-90% <span class="square very-high"></span> 90-100%{% endif %}.
 </div>
 {% endmacro %}
 

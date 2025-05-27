@@ -109,8 +109,8 @@
 {% endblock %}
 
 {% macro report_body() %}
-    {% for (network_type, question, graph, network_data_macro_level, network_data_micro_level) in 
-        [("A", question_a, graph_a, macro_a, micro_a), ("B", question_b, graph_b, macro_b, micro_b)] %}
+    {% for (network_type, question, graph, network_data_macro_level, network_data_micro_level, nodes_by_rank) in 
+        [("A", question_a, graph_a, macro_a, micro_a, nodes_a_by_rank), ("B", question_b, graph_b, macro_b, micro_b, nodes_b_by_rank)] %}
         <div class="page">
             <div>
                 {{ base_macro.logo() }}
@@ -121,7 +121,7 @@
             </div>
             {{ report_macro.footer() }}
         </div>
-        {% for score_type in ["ranks", "raw_scores"] %}
+        {% for score_type, show_pctiles in [("ranks", True), ("raw_scores", False)] %}
             <div class="page">
                 <div>
                     {{ base_macro.logo() }}
@@ -132,12 +132,27 @@
                             {{ base_report_macro.question(network_type, question) }}
                             {{ base_report_macro.macro_statistics(network_data_macro_level) }}
                             {{ base_report_macro.micro_statistics(network_type, score_type, network_data_micro_level, report_macro.choices_label) }}
-                            {{ report_macro.legend() }}
+                            {{ report_macro.legend(show_pctiles=show_pctiles) }}
                         </div>
                     </div>
                 </div>
                 {{ report_macro.footer() }}
             </div>
         {% endfor %}
+        <div class="page">
+            <div>
+                {{ base_macro.logo() }}
+                {{ report_macro.disclaimer() }}
+                {{ report_macro.report_header(project_title, group, score_type) }}
+                <div class="network-tables">
+                    <div class="network-table-container">
+                        {{ base_report_macro.question(network_type, question) }}
+                        {{ base_report_macro.nodes_sorted_by_rank(nodes_by_rank) }}
+                        {{ report_macro.legend(show_macro=False, show_arrows=False, show_pctiles=False) }}
+                    </div>
+                </div>
+            </div>
+            {{ report_macro.footer() }}
+        </div>
     {% endfor %}
 {% endmacro %}
