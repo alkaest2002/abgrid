@@ -39,21 +39,25 @@
         border-top: 2px solid #000;
         border-bottom: 2px solid #000;
     }
+    .network-table tr:nth-child(odd) td {
+        background-color: #eeeeee;
+    }
     .network-table th, .network-table td {
         text-align: center;
     } 
     .network-table th {
         padding: 3px;
-        background-color: #DDDDDD;
+        background-color: #dddddd;
         border-bottom: 1px solid #555555;
     }
     .network-table td {
         padding: 3px;
         position: relative;
     }
-    .network-table tr:nth-child(odd) {
-        background-color: #EEEEEE;
+    .network-table td:nth-last-child(-n+6) {
+        width: 70px;
     }
+    
     .network-table td > div {
         display: flex;
         justify-content: center;
@@ -63,24 +67,25 @@
     .network-table td > div > div {
         height: 12pt;
         flex-grow: 1;
+        text-align: center;
     }
     .network-table td > div > div.very-low,
     .network-table td > div > div.low,
     .network-table td > div > div.high,
     .network-table td > div > div.very-high {
-        color: #FFFFFF;
+        color: #ffffff;
     }
     .very-low {
-        background-color: #515095;
+        background-color: Purple;
     }
     .low {
-        background-color: #716fcd;
+        background-color: Plum;
     }
     .very-high {
-        background: #00874a;
+        background: DarkGreen;
     }
     .high {
-        background: #06cd73;
+        background: MediumSeaGreen;
     }
     .square {
         display: inline-block;
