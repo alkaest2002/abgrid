@@ -19,20 +19,24 @@
         font-weight: bold;
         margin: 12px 0px;
         padding-bottom: 6px;
-        border-bottom: 1px solid #000;
+        border-bottom: 1px solid #333333;
     }
     .question-container {
-        margin: 24px 0px 12px 0;
+        margin: 24px 0px 12px 0px;
         padding-bottom: 6px;
-        border-bottom: 1px dashed #555;
+        border-bottom: 1px dashed #555555;
+    }
+    .graph-container {
+        display: flex;
+        justify-content: center;
     }
     .macro-container {
         margin: 12px 0px;
     }
     .report-table th {
         padding: 6px 3px;
-        background-color: #ddd;
-        border-bottom: 1px solid #555;
+        background-color: #dddddd;
+        border-bottom: 1px solid #555555;
     }
     .report-table td {
         padding: 3px;
@@ -65,24 +69,20 @@
         display: inline-block;
         position: relative;
         top: 2px;
-        height: 10pt;
-        width: 10pt;
+        height: 8pt;
+        width: 8pt;
     }
-    .report-legend  {
+    .report-legend, .report-legend b {
         margin-top: 12px;
-        font-size: 8pt !important;
         text-align: justify;
-    }
-    .report-legend b  {
         font-size: 8pt !important;
+        line-height: 10pt !important;
     }
-    .report-footer {
+    .report-footer, .report-footer b {
         font-size: 8pt !important;
+        line-height: 10pt !important;
+        text-align: justify;
         color: #acacac;
-        text-align: justify;
-    }
-    .report-footer b  {
-        font-size: 8pt !important;
     }
 </style>
 {% endblock %}

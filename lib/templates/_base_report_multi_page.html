@@ -2,10 +2,6 @@
 
 {% block report_multi_style %}
 <style>
-    .graph-container {
-        display: flex;
-        justify-content: center;
-    }
     .report-table td:nth-last-child(-n+6) {
         width: 80px;
     }
@@ -34,7 +30,7 @@
                 {{ base_report_macro.macro_statistics(network_data_macro_level) }}
                 {{ base_report_macro.graph(graph) }}
             </div>
-            {{ report_macro.footer() }}
+            {{ report_macro.footer(year) }}
         </div>
         <div class="page">
             <div>
@@ -45,7 +41,7 @@
                 {{ base_report_macro.micro_statistics(network_type, "raw_scores", network_data_micro_level, report_macro.choices_label) }}
                 {{ report_macro.legend(show_pctiles=False) }}
             </div>
-            {{ report_macro.footer() }}
+            {{ report_macro.footer(year) }}
         </div>
         <div class="page">
             <div>
@@ -56,7 +52,7 @@
                 {{ base_report_macro.micro_statistics(network_type, "ranks", network_data_micro_level, report_macro.choices_label) }}
                 {{ report_macro.legend(show_pctiles=True) }}
             </div>
-            {{ report_macro.footer() }}
+            {{ report_macro.footer(year) }}
         </div>
         <div class="page">
             <div>
@@ -67,7 +63,7 @@
                 {{ base_report_macro.nodes_sorted_by_rank(nodes_by_rank, report_macro.rank_label) }}
                 {{ report_macro.legend(show_macro=False, show_arrows=False, show_pctiles=False) }}
             </div>
-            {{ report_macro.footer() }}
+            {{ report_macro.footer(year) }}
         </div>
     {% endfor %}
 {% endmacro %}

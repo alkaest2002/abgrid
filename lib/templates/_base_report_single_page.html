@@ -2,6 +2,12 @@
 
 {% block report_single_style %}
 <style>
+    .report-table td {
+        padding: 6px 3px;
+    }
+    .report-table td:nth-last-child(-n+6) {
+        width: 30px;
+    }
     .single-report-content {
         display: flex;
     }
@@ -10,9 +16,6 @@
     }
     .single-report-content > div:last-child {
         padding-left: 12px;
-    }
-    .report-table td:nth-last-child(-n+6) {
-        width: 30px;
     }
 </style>
 {% endblock %}
@@ -31,14 +34,14 @@
                     <div>
                         {{ base_report_macro.question(network_type, question) }}
                         {{ base_report_macro.graph(graph) }}
-                            {{ base_report_macro.macro_statistics(network_data_macro_level) }}
-                            {{ base_report_macro.micro_statistics(network_type, "ranks", network_data_micro_level, report_macro.choices_label) }}
-                            {{ report_macro.legend() }}
+                        {{ base_report_macro.macro_statistics(network_data_macro_level) }}
+                        {{ base_report_macro.micro_statistics(network_type, "ranks", network_data_micro_level, report_macro.choices_label) }}
+                        {{ report_macro.legend() }}
                     </div>
                 {% endfor %}
             </div>
         </div>
-        {{ report_macro.footer() }}
+        {{ report_macro.footer(year) }}
     </div>
     <div class="page">
         <div>
@@ -47,19 +50,19 @@
                 {{ report_macro.disclaimer() }}
                 {{ report_macro.report_header(project_title, group, "raw_scores") }}
             </div>
-            <div class="report-content">
+            <div class="single-report-content">
                 {% for (network_type, question, graph, network_data_macro_level, network_data_micro_level) in 
                     [("A", question_a, graph_a, macro_a, micro_a), ("B", question_b, graph_b, macro_b, micro_b)] %}
-                    <div class="network-type">
+                    <div>
                         {{ base_report_macro.question(network_type, question) }}
                         {{ base_report_macro.graph(graph) }}
-                            {{ base_report_macro.macro_statistics(network_data_macro_level) }}
-                            {{ base_report_macro.micro_statistics(network_type, "raw_scores", network_data_micro_level, report_macro.choices_label) }}
-                            {{ report_macro.legend(show_pctiles=False) }}
+                        {{ base_report_macro.macro_statistics(network_data_macro_level) }}
+                        {{ base_report_macro.micro_statistics(network_type, "raw_scores", network_data_micro_level, report_macro.choices_label) }}
+                        {{ report_macro.legend(show_pctiles=False) }}
                     </div>
                 {% endfor %}
             </div>
         </div>
-        {{ report_macro.footer() }}
+        {{ report_macro.footer(year) }}
     </div>
 {% endmacro %}
