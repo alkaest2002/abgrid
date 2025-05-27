@@ -9,6 +9,7 @@ The code is part of the AB-Grid project and is licensed under the MIT License.
 """
 
 import io
+from networkx import dfs_postorder_nodes
 import pandas as pd
 import matplotlib
 import matplotlib.pyplot as plt
@@ -199,15 +200,15 @@ class ABGridNetwork:
         return round(network_centralization, 3)
 
 
-    def get_network_stats(self, G: nx.DiGraph) -> Tuple[Dict[str, Union[float, int]], pd.DataFrame]:
+    def get_network_stats(self, G: nx.DiGraph) -> Tuple[Dict[str, Union[float, int]], pd.DataFrame, list[Dict[str, Union[int, str]]]]:
         """
-        Generate macro-level and micro-level statistics for a graph.
+        Generate statistics for a graph.
 
         Args:
             G (nx.DiGraph): The directed graph to analyze.
 
         Returns:
-            Tuple[Dict[str, Union[float, int]], pd.DataFrame]: A dictionary with macro-level stats and a DataFrame with micro-level stats for each node.
+            Tuple[Dict[str, Union[float, int]], pd.DataFrame, list[Dict[str, Union[int, str]]]]: A tuple with macro-level stats dictionary, a DataFrame with micro-level stats for each node and a list of dicts containing nodes ordered by ranks for each metric.
         """
 
         # Create a DataFrame with various network centralities and metrics for each node
@@ -227,27 +228,30 @@ class ABGridNetwork:
         micro_level_stats["nd"] += (micro_level_stats["ic"] == 0).astype(int)
         micro_level_stats["nd"] += (micro_level_stats["lns"].str.len() == 0).astype(int)*2
 
-        # Compute ranks of node-specific metrics
+        # Compute node ranks relative to each metric
         micro_level_stats_ranks = (
-            micro_level_stats.iloc[:, 1:-1]
+            micro_level_stats.iloc[:, 1:-1] # omit first column (LNS) and last column (ND)
                 .apply(lambda x: x.rank(method="dense", ascending=False))
                 .add_suffix("_rank")
             )
         
-        # Compute percentiles of node-specific metrics
+        # Compute node percentiles relative to each metric
         micro_level_stats_pct = (
             micro_level_stats_ranks
                 .apply(lambda x: x.rank(pct=True))
                 .add_suffix("_pctile")
             )
         
-        # Init "order of arrival" (ooa) list
-        nodes_by_ooa = {}
+        # Init nodes_ordered_by_rank dict
+        # for each metric, nodes will be ordered by the relative rank
+        nodes_ordered_by_rank = {}
         
         # Compute ooa relative to node ranks scores for each metric
-        for rank, data in micro_level_stats_ranks.items():
-            table = pd.Series(data.index.values, index=data.values, name=f"{rank}_ooa").sort_index()
-            nodes_by_ooa[rank] = pd.Series(table.index.astype(int).values, index=table.values, name=f"{rank}_ooa").to_dict()
+        for rank_label, rank_data in micro_level_stats_ranks.items():
+            series = rank_data.to_frame().reset_index().sort_values(by=[rank_label, "index"]).set_index("index").squeeze()
+            series.name = f"{rank_label}_ooa"
+            series = pd.to_numeric(series, downcast="integer")
+            nodes_ordered_by_rank[rank_label] = series.to_dict()
         
         # Finalize the micro-level stats DataFrame
         micro_level_stats = (
@@ -280,4 +284,4 @@ class ABGridNetwork:
         }
         
         # Return both macro-level and micro-level statistics
-        return macro_level_stats, micro_level_stats, nodes_by_ooa
+        return macro_level_stats, micro_level_stats, nodes_ordered_by_rank
