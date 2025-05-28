@@ -66,7 +66,7 @@ class ABGridNetwork:
             node for node_edges in packed_edges for node, _ in node_edges.items()
         ])
             
-        # Extract edges as tuples while ensuring no errors with None values and preserving format
+        # Extract edges as tuples while ensuring no errors with None values
         edges = reduce(
             lambda acc, itr: [
                 *acc,
