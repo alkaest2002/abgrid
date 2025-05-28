@@ -19,27 +19,27 @@
 {% endmacro %}
 
 {% macro mark_pctile(pctile, rank, last_rank) %}
-    {% set no_high_highlight = True %}
-    {% set no_low_highlight = True %}
+    {% set no_low_pctile = True %}
+    {% set no_high_pctile = True %}
     {% if pctile <= 15/100 %}
-        {% set no_high_highlight = False %}
+        {% set no_low_pctile = False %}
         {% if pctile <= 10/100 %}
             very-high
         {% else %}
             high
         {% endif %}
     {% elif pctile >= 85/100 %}
-        {% set no_low_highlight = False %}
+        {% set no_high_pctile = False %}
         {% if pctile >= 90/100 %}
             very-low
         {% else %}
             low
         {% endif %}
     {% endif %}
-    {% if no_low_highlight and rank == last_rank %}
+    {% if no_high_pctile and rank == last_rank %}
         low
     {% endif %}
-    {% if no_high_highlight and rank == 1 %}
+    {% if no_low_pctile and rank == 1 %}
         high
     {% endif %}
 {% endmacro %}
