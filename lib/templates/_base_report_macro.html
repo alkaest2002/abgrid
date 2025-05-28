@@ -19,15 +19,15 @@
 {% endmacro %}
 
 {% macro mark_pctile(pctile) %}
-    {% if pctile <= 2/10 %}
-        {% if pctile <= 1/10 %}
+    {% if pctile <= 15/100 %}
+        {% if pctile <= 10/100 %}
             very-high
         {% else %}
             high
         {% endif %}
     {% endif %}
-    {% if  pctile >= 8/10 %}
-        {% if pctile >= 9/10 %}
+    {% if  pctile >= 85/100 %}
+        {% if pctile >= 90/100 %}
             very-low
         {% else %}
             low

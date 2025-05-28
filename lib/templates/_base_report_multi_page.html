@@ -15,6 +15,11 @@
     .ooa-tables-container > div:last-child {
         padding-right: 0px;
     }
+    .report-legend:first-of-type {
+        padding-top: 6px;
+        margin-bottom: 24px;
+        border-top: 1px solid var(--base-border-color);
+    }
 </style>
 {% endblock %}
 
@@ -25,12 +30,15 @@
             <div>
                 {{ base_macro.logo() }}
                 {{ report_macro.disclaimer() }}
-                {{ report_macro.report_header(project_title, group, score_type) }}
+                {{ report_macro.report_header(project_title, group, "graph") }}
                 {{ base_report_macro.question(network_type, question) }}
                 {{ base_report_macro.macro_statistics(network_data_macro_level) }}
                 {{ base_report_macro.graph(graph) }}
             </div>
-            {{ report_macro.footer(year) }}
+            <div>
+                {{ report_macro.legend(show_micro=False, show_arrows=False, show_pctiles=False) }}
+                {{ report_macro.footer(year) }}
+            </div>
         </div>
         <div class="page">
             <div>
@@ -39,7 +47,7 @@
                 {{ report_macro.report_header(project_title, group, "raw_scores") }}
                 {{ base_report_macro.question(network_type, question) }}
                 {{ base_report_macro.micro_statistics(network_type, "raw_scores", network_data_micro_level, report_macro.choices_label) }}
-                {{ report_macro.legend(show_pctiles=False) }}
+                {{ report_macro.legend(show_macro=False, show_pctiles=False) }}
             </div>
             {{ report_macro.footer(year) }}
         </div>
@@ -50,7 +58,7 @@
                 {{ report_macro.report_header(project_title, group, "ranks") }}
                 {{ base_report_macro.question(network_type, question) }}
                 {{ base_report_macro.micro_statistics(network_type, "ranks", network_data_micro_level, report_macro.choices_label) }}
-                {{ report_macro.legend(show_pctiles=True) }}
+                {{ report_macro.legend(show_macro=False, show_pctiles=True) }}
             </div>
             {{ report_macro.footer(year) }}
         </div>
@@ -58,7 +66,7 @@
             <div>
                 {{ base_macro.logo() }}
                 {{ report_macro.disclaimer() }}
-                {{ report_macro.report_header(project_title, group) }}
+                {{ report_macro.report_header(project_title, group, "ordered_nodes") }}
                 {{ base_report_macro.question(network_type, question) }}
                 {{ base_report_macro.nodes_sorted_by_rank(nodes_by_rank, report_macro.rank_label) }}
                 {{ report_macro.legend(show_macro=False, show_arrows=False, show_pctiles=False) }}

@@ -15,28 +15,29 @@
     .report-header {
         display: flex;
         justify-content: space-between;
-        font-size: 1.5em;
-        font-weight: bold;
         margin: 12px 0px;
         padding-bottom: 6px;
-        border-bottom: 1px solid #333333;
+        font-size: 1.5em;
+        font-weight: bold;
+        border-bottom: 1px solid var(--base-border-color);
     }
     .question-container {
         margin: 24px 0px 12px 0px;
         padding-bottom: 6px;
-        border-bottom: 1px dashed #555555;
+        border-bottom: 1px dashed var(--base-border-color);
     }
     .graph-container {
         display: flex;
         justify-content: center;
+        align-items: center;
     }
     .macro-container {
         margin: 12px 0px;
     }
     .report-table th {
         padding: 6px 3px;
-        background-color: #dddddd;
-        border-bottom: 1px solid #555555;
+        background-color: var(--base-background-color-dark);
+        border-bottom: 1px solid var(--base-border-color);
     }
     .report-table td {
         padding: 3px;
@@ -51,19 +52,19 @@
     .report-table td > div > div.low,
     .report-table td > div > div.high,
     .report-table td > div > div.very-high {
-        color: #ffffff;
+        color: var(--abgrid-white);
     }
     .very-low {
-        background-color: Purple;
+        background-color: var(--highlight-very-low-values);
     }
     .low {
-        background-color: Plum;
+        background-color: var(--highlight-low-values);
     }
     .very-high {
-        background: DarkGreen;
+        background: var(--highlight-very-high-values);
     }
     .high {
-        background: MediumSeaGreen;
+        background: var(--highlight-high-values);
     }
     .square {
         display: inline-block;

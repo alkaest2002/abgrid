@@ -5,6 +5,18 @@
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <meta http-equiv="X-UA-Compatible" content="ie=edge">
         <style>
+            :root {
+                --abgrid-blue: #0000ff;
+                --abgrid-red: #ff0000;
+                --abgrid-white: #ffffff;
+                --base-border-color: #333333;
+                --base-background-color-light: #eeeeee;
+                --base-background-color-dark: #dddddd;
+                --highlight-very-high-values: DarkGreen ;
+                --highlight-high-values: MediumSeaGreen;
+                --highlight-low-values: Plum;
+                --highlight-very-low-values: Purple;
+            }
             * {
                 padding: 0;
                 font-size: 12pt;
@@ -42,33 +54,33 @@
                 font-weight: bold;
             }
             .logo-letter {
-                padding: 10px;
-                border-radius: 4px;
-                margin-right: 4px;
+                padding: 12px 9px;
+                margin-right: 3px;
+                border-radius: 6px;
             }
             .letter-A {
-                color: #0000FF;
+                color: var(--abgrid-blue);
             }
             .letter-B {
-                color: #FF0000;
+                color: var(--abgrid-red);
             }
             .letter-A-reversed {
-                background-color: #0000FF;
-                color: #fff;
+                background-color: var(--abgrid-blue);
+                color: var(--abgrid-white);
             }
             .letter-B-reversed {
-                background-color: #FF0000;
-                color: #fff;
+                background-color: var(--abgrid-red);
+                color: var(--abgrid-white);
             }
             table {
                 border-collapse: collapse;
             }
             .table_bordered {
-                border-top: 2px solid #000;
-                border-bottom: 2px solid #000;
+                border-top: 2px solid var(--base-border-color);
+                border-bottom: 2px solid var(--base-border-color);
             }
             .table_striped tr:nth-child(odd) td {
-                background-color: #eee;
+                background-color: var(--base-background-color-light);
             }
         </style>
         {% block base_report_style %}
