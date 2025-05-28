@@ -1,16 +1,21 @@
 {% extends "_base.html" %}
 {% import "./_base_macro.html" as base_macro %}
 
-{% macro answersheet_likert(likert) %}
-    <div class="bubble">
+{% macro answersheet_likert(likert, participant) %}
+    <div class="likert-container">
         {% for option in likert %}
-            <span>{{ option }}</span>
+            {% if option != participant %}
+                <div class="likert">
+                    <div class="likert-option">{{ option }}</div>
+                    <div class="likert-bubble"></div>
+                </div>
+            {% endif %}
         {% endfor %}
     </div>
 {% endmacro%}
 
 {% macro answersheet_barcode(group, participant) %}
-  <span class="barcode">*group-{{group}}!participant-{{participant}}*</span>
+  <span class="barcode">*group-{{ group }}!participant-{{ participant }}*</span>
 {% endmacro %}
 
 {% macro answersheet_body() %}
@@ -24,13 +29,13 @@
                 </div>
                 <div class="question">
                     <p class="question-a"><b>A. {{ question_a }}</b></p>
-                    <p class="question-hint">{{ question_a_hint }}</p>
-                    {{ answersheet_likert(likert) }}
+                    <p class="question-hint">{{ question_a_choices }}</p>
+                    {{ answersheet_likert(likert, participant) }}
                 </div>
                 <div class="question">
                     <p class="question-b"><b>B. {{ question_b }}</b></p>
-                    <p class="question-hint">{{ question_b_hint }}</p>
-                    {{ answersheet_likert(likert) }}
+                    <p class="question-hint">{{ question_b_choices }}</p>
+                    {{ answersheet_likert(likert, participant) }}
                 </div>
             </div>
             <div class="barcode-wrapper">
@@ -56,17 +61,24 @@
     }
     .question {
         margin-bottom: 28px;
-        max-width: 15cm;
     }
     .question-hint {
-        margin-top: 12px;
+        margin-top: 6px;
         font-size: 10pt;
         color: var(--base-font-color-light);
     }
-    .bubble span {
+    .likert-container {
+        margin-top: 24px;
+    }
+    .likert {
         display: inline-block;
-        margin-top: 12pt;
-        margin-right: 3pt;
+        margin-right: 24px;
+        margin-bottom: 24px;
+    }
+    .likert-option {
+        text-align: center;
+    }
+    .likert-bubble {
         font-family: "OMR";
         font-size: 11pt;
     }
