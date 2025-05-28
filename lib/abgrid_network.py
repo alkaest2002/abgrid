@@ -131,8 +131,8 @@ class ABGridNetwork:
         buffer = io.BytesIO()
 
         # Determine dimensions of matplotlib graph based upon number of nodes
-        fig_size = (8 * CM_TO_INCHES, 6 * CM_TO_INCHES)\
-            if G.number_of_nodes() <= 12 else (17 * CM_TO_INCHES, 19 * CM_TO_INCHES)
+        fig_size = (8 * CM_TO_INCHES, 8 * CM_TO_INCHES)\
+            if G.number_of_nodes() <= 10 else (17 * CM_TO_INCHES, 19 * CM_TO_INCHES)
         
         # Create a matplotlib figure
         fig, ax = plt.subplots(constrained_layout=True, figsize=fig_size)
