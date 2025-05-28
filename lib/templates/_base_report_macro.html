@@ -18,20 +18,29 @@
 </div>
 {% endmacro %}
 
-{% macro mark_pctile(pctile) %}
+{% macro mark_pctile(pctile, rank, last_rank) %}
+    {% set no_high_highlight = True %}
+    {% set no_low_highlight = True %}
     {% if pctile <= 15/100 %}
+        {% set no_high_highlight = False %}
         {% if pctile <= 10/100 %}
             very-high
         {% else %}
             high
         {% endif %}
-    {% endif %}
-    {% if  pctile >= 85/100 %}
+    {% elif pctile >= 85/100 %}
+        {% set no_low_highlight = False %}
         {% if pctile >= 90/100 %}
             very-low
         {% else %}
             low
         {% endif %}
+    {% endif %}
+    {% if no_low_highlight and rank == last_rank %}
+        low
+    {% endif %}
+    {% if no_high_highlight and rank == 1 %}
+        high
     {% endif %}
 {% endmacro %}
 
@@ -48,40 +57,65 @@
             <th>HU</th>
             <th>ND</th>
         </tr>
+        {% set last_rank_ic = data.values()|map(attribute='ic_rank') | max  %}
+        {% set last_rank_pr = data.values()|map(attribute='pr_rank') | max  %}
+        {% set last_rank_bt = data.values()|map(attribute='bt_rank') | max  %}
+        {% set last_rank_cl = data.values()|map(attribute='cl_rank') | max  %}
+        {% set last_rank_hu = data.values()|map(attribute='hu_rank') | max  %}
         {% for k in data.keys() %}
-          {% if score_type == "ranks" %}
-            <tr>
-                <td>{{ k }}</td>
-                <td>{{ data[k].lns | default("-", boolean=True) }}</td>
-                <td>
-                  <div><div class="{{ mark_pctile(data[k].ic_rank_pctile) }}">{{ data[k].ic_rank | int }}</div></div>
-                </td>
-                <td>
-                  <div><div class="{{ mark_pctile(data[k].pr_rank_pctile) }}">{{ data[k].pr_rank | int }}</div></div>
-                </td>
-                <td>
-                  <div><div class="{{ mark_pctile(data[k].bt_rank_pctile) }}">{{ data[k].bt_rank | int }}</div></div>
-                </td>
-                <td>
-                  <div><div class="{{ mark_pctile(data[k].cl_rank_pctile) }}">{{ data[k].cl_rank | int }}</div></div>
-                </td>
-                <td>
-                  <div><div class="{{ mark_pctile(data[k].hu_rank_pctile) }}">{{ data[k].hu_rank | int }}</div></div>
-                </td>
-                <td >{% if data[k].nd == 1 %}&larr;{% elif data[k].nd == 2 %}&rarr;{% elif data[k].nd == 3 %}&rlarr;{% endif %}</td>
-            </tr>
-          {% else %}
-            <tr>
-                <td>{{ k }}</td>
-                <td>{{ data[k].lns | default("-", boolean=True) }}</td>
-                <td>{{ "%0.2f"| format(data[k].ic | round(2)) }}</td>
-                <td>{{ "%0.2f"| format(data[k].pr | round(2)) }}</td>
-                <td>{{ "%0.2f"| format(data[k].bt | round(2)) }}</td>
-                <td>{{ "%0.2f"| format(data[k].cl | round(2)) }}</td>
-                <td>{{ "%0.2f"| format(data[k].hu | round(2)) }}</td>
-                <td>{% if data[k].nd == 1 %}&larr;{% elif data[k].nd == 2 %}&rarr;{% elif data[k].nd == 3 %}&rlarr;{% endif %}</td>
-            </tr>
-          {% endif %}
+            {% if score_type == "ranks" %}
+                <tr>
+                    <td>{{ k }}</td>
+                    <td>{{ data[k].lns | default("-", boolean=True) }}</td>
+                    <td>
+                        <div>
+                            <div class="{{ mark_pctile(data[k].ic_rank_pctile, data[k].ic_rank, last_rank_ic) }}">
+                                {{ data[k].ic_rank | int }}
+                            </div>
+                        </div>
+                    </td>
+                    <td>
+                        <div>
+                            <div class="{{ mark_pctile(data[k].pr_rank_pctile, data[k].pr_rank, last_rank_pr) }}">
+                                {{ data[k].pr_rank | int }}
+                            </div>
+                        </div>
+                    </td>
+                    <td>
+                        <div>
+                            <div class="{{ mark_pctile(data[k].bt_rank_pctile, data[k].bt_rank, last_rank_bt) }}">
+                                {{ data[k].bt_rank | int }}
+                            </div>
+                        </div>
+                    </td>
+                    <td>
+                        <div>
+                            <div class="{{ mark_pctile(data[k].cl_rank_pctile, data[k].cl_rank, last_rank_cl) }}">
+                                {{ data[k].cl_rank | int }}
+                            </div>
+                        </div>
+                    </td>
+                    <td>
+                        <div>
+                            <div class="{{ mark_pctile(data[k].hu_rank_pctile, data[k].hu_rank, last_rank_hu) }}">
+                                {{ data[k].hu_rank | int }}
+                            </div>
+                        </div>
+                    </td>
+                    <td >{% if data[k].nd == 1 %}&larr;{% elif data[k].nd == 2 %}&rarr;{% elif data[k].nd == 3 %}&rlarr;{% endif %}</td>
+                </tr>
+            {% else %}
+                <tr>
+                    <td>{{ k }}</td>
+                    <td>{{ data[k].lns | default("-", boolean=True) }}</td>
+                    <td>{{ "%0.2f"| format(data[k].ic | round(2)) }}</td>
+                    <td>{{ "%0.2f"| format(data[k].pr | round(2)) }}</td>
+                    <td>{{ "%0.2f"| format(data[k].bt | round(2)) }}</td>
+                    <td>{{ "%0.2f"| format(data[k].cl | round(2)) }}</td>
+                    <td>{{ "%0.2f"| format(data[k].hu | round(2)) }}</td>
+                    <td>{% if data[k].nd == 1 %}&larr;{% elif data[k].nd == 2 %}&rarr;{% elif data[k].nd == 3 %}&rlarr;{% endif %}</td>
+                </tr>
+            {% endif %}
         {% endfor %}
     </table>
 </div>

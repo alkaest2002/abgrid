@@ -6,7 +6,7 @@
         padding: 6px 3px;
     }
     .report-table td:nth-last-child(-n+6) {
-        width: 30px;
+        width: 36px;
     }
     .single-report-content {
         display: flex;
@@ -23,11 +23,9 @@
 {% macro report_body() %}
     <div class="page">
         <div>
-            <div>
-                {{ base_macro.logo() }}
-                {{ report_macro.disclaimer() }}
-                {{ report_macro.report_header(project_title, group, "ranks") }}
-            </div>
+            {{ base_macro.logo() }}
+            {{ report_macro.disclaimer() }}
+            {{ report_macro.report_header(project_title, group, "ranks") }}
             <div class="single-report-content">
                 {% for (network_type, question, graph, network_data_macro_level, network_data_micro_level) in 
                     [("A", question_a, graph_a, macro_a, micro_a), ("B", question_b, graph_b, macro_b, micro_b)] %}
@@ -45,11 +43,9 @@
     </div>
     <div class="page">
         <div>
-            <div>
-                {{ base_macro.logo() }}
-                {{ report_macro.disclaimer() }}
-                {{ report_macro.report_header(project_title, group, "raw_scores") }}
-            </div>
+            {{ base_macro.logo() }}
+            {{ report_macro.disclaimer() }}
+            {{ report_macro.report_header(project_title, group, "raw_scores") }}
             <div class="single-report-content">
                 {% for (network_type, question, graph, network_data_macro_level, network_data_micro_level) in 
                     [("A", question_a, graph_a, macro_a, micro_a), ("B", question_b, graph_b, macro_b, micro_b)] %}
