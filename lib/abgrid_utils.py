@@ -75,7 +75,6 @@ def notify_decorator(operation_name: str) -> Callable:
 
                 # Walk through each step in the traceback chain
                 while traceback is not None:
-
                     # Skip 
                     if Path(traceback.tb_frame.f_code.co_filename).name != "abgrid_utils.py":
                     
@@ -88,7 +87,6 @@ def notify_decorator(operation_name: str) -> Callable:
                             traceback.tb_lineno,
                             end="\n"
                         )
-                        
                     # Proceed to the next traceback step
                     traceback = traceback.tb_next
                 
