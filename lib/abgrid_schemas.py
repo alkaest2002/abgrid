@@ -11,7 +11,6 @@ The code is part of the AB-Grid project and is licensed under the MIT License.
 from pydantic import BaseModel, Field, constr, field_validator, model_validator
 from typing import Dict, List
 
-# Define a Pydantic model for the project schema
 class ProjectSchema(BaseModel):
     """
     A Pydantic model that represents a project's data schema.
@@ -24,7 +23,6 @@ class ProjectSchema(BaseModel):
     question_b_choices: constr(min_length=1, max_length=150) # type: ignore
     model_config = {"extra": "forbid"}
 
-# Define a Pydantic model for the group schema
 class GroupSchema(BaseModel):
     """
     A Pydantic model that represents the schema for a group within a project.
