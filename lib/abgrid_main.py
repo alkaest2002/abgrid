@@ -145,7 +145,7 @@ class ABGridMain:
             # Notify user
             print(f"generating answersheet: {group_file.name}")
             
-            # Persist answersheet as PDF to disk
+            # Persist answersheet to disk
             self.render_pdf("answersheet", sheets_data, group_file.stem, language)
 
     @notify_decorator("generate AB-Grid reports")
@@ -178,7 +178,7 @@ class ABGridMain:
             # Persist current group report to disk
             self.render_pdf("report", report_data, group_file.stem, language)
         
-        # Persist all collected data as a JSON file to disk
+        # Persist all collected to disk
         with open(self.abgrid_data.project_folderpath / f"{self.abgrid_data.project}_data.json", "w") as fout:
             fout.write(json.dumps(all_data, indent=4))
 
@@ -199,11 +199,11 @@ class ABGridMain:
             case "answersheet":
                 template = jinja_env.get_template(f"./{language}/answersheet.html")
             
-            # Document type is report with up to 10 members per group
+            # Document type is report and group has up to 10 members
             case "report" if doc_data["members_per_group"] <= 10:
                 template = jinja_env.get_template(f"./{language}/report_single_page.html")
             
-            # Document type is report with more than 10 members per group
+            # Document type is report and group ahs more than 10 members
             case "report" if doc_data["members_per_group"] > 10:
                 template = jinja_env.get_template(f"./{language}/report_multi_page.html")
         
@@ -216,7 +216,7 @@ class ABGridMain:
         # Construct the filename, ensuring no leading/trailing underscores
         filename = re.sub("^_|_$", "", f"{self.abgrid_data.project}_{doc_type}_{doc_suffix}")
         
-        # Persist report as a PDF file to disk
+        # Persist report to disk
         HTML(string=rendered_template).write_pdf(folder_path / f"{filename}.pdf")
         
         # -----------------------------------------------------------------------------------
