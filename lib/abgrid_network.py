@@ -9,7 +9,6 @@ The code is part of the AB-Grid project and is licensed under the MIT License.
 """
 
 import io
-from networkx import dfs_postorder_nodes
 import pandas as pd
 import matplotlib
 import matplotlib.pyplot as plt
