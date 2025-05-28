@@ -61,15 +61,15 @@ class GroupSchema(BaseModel):
             if len(choice_dict) != 1:
                 raise ValueError("Each choice must have exactly one key-value pair")
             if len(key) != 1:
-                raise ValueError(f"Key '{key}' must be a single letter or number")
-            if not key.isalnum():
-                raise ValueError(f"Key '{key}' must be a single letter or number")
+                raise ValueError(f"Key '{key}' must be a single letter")
+            if not key.isalpha():
+                raise ValueError(f"Key '{key}' must be a letter")
             if any(not part for part in value_parts):
                 raise ValueError(f"Value '{value_str}' contains empty entries due to misplaced commas")
             if any(len(part) != 1 for part in value_parts):
-                raise ValueError(f"Value '{value_str}' must be a list of single letters or numbers")
-            if any(not part.isalnum() for part in value_parts):
-                raise ValueError(f"Value '{value_str}' must be a list of single letters or numbers")
+                raise ValueError(f"Value '{value_str}' must be a list of single letters")
+            if any(not part.isalpha() for part in value_parts):
+                raise ValueError(f"Value '{value_str}' must be a list of single letters")
             if key in value_parts:
                 raise ValueError(f"Key '{key}' cannot be present in its own values")
             if len(value_parts) != len(set(value_parts)):
