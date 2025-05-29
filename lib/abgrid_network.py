@@ -380,14 +380,12 @@ class ABGridNetwork:
         nx.draw_networkx_nodes(G, loc, node_color=color, edgecolors=color, ax=ax)        
         nx.draw_networkx_labels(G, loc, font_color="#FFF", font_weight="normal", font_size=10, ax=ax)
         
-        # Determine mutual and non-mutual edges
+        # Draw reciprocal edges with specific style
         reciprocal_edges = [e for e in G.edges if e[::-1] in G.edges]
-        non_reciprocal_edges = [e for e in G.edges if e not in reciprocal_edges]
-        
-        # Draw mutual edges with specic styles
         nx.draw_networkx_edges(G, loc, edgelist=reciprocal_edges, edge_color=color, arrowstyle='-', width=3, ax=ax)
-        
-        # Draw non-mutual edges with specic styles
+                
+        # Draw non reciprocal edges with specific style
+        non_reciprocal_edges = [e for e in G.edges if e not in reciprocal_edges]
         nx.draw_networkx_edges(G, loc, edgelist=non_reciprocal_edges, edge_color=color, style="--", arrowstyle='-|>', arrowsize=15, ax=ax)
         
         # Save figure to the buffer in SVG format then close it
