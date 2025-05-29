@@ -5,27 +5,47 @@
 {% endmacro %}
 
 {% macro choices_label() %}
-CHOICES
+    <span>CHOICES</span>
 {% endmacro %}
 
 {% macro rank_label() %}
-RANK
+    <span>RANK</span>
 {% endmacro %}
 
-{% macro edges_types_label(type) %}
-    {% if type == "type_i" %}
-        <p><b>Type I</b></p>
-        <p class="dimmed-text small-text">Same network: A &rarr; B and B &rarr; A</p>
-    {% elif type == "type_ii" %}
-        <p><b>Type II</b></p>
-        <p class="dimmed-text small-text">Same network: A &rarr; B, but not B &rarr; A</p>
-    {% elif type == "type_iii" %}
-        <p><b>Type III</b></p>
-        <p class="dimmed-text small-text">A &rarr; B in one network, A &rarr; B in other network</p>
-    {% elif type == "type_iv" %}
-        <p><b>Type IV</b></p>
-        <p class="dimmed-text small-text">A &rarr; B in one network, B &rarr; A in other network</p>
+{% macro edges_types_label(network_type, edge_type) %}
+    {% if edge_type == "type_i" %}
+        <p><b>Type I - Reciprocal edges</b></p>
+        {% if network_type == "A" %}
+            <p class="dimmed-text small-text">X &rarr; Y in network A &middot; Y &rarr; X in network A</p>
+        {% else %}
+            <p class="dimmed-text small-text">X &rarr; Y in network B &middot; Y &rarr; X in network B</p>
+        {% endif %}
+    {% elif edge_type == "type_ii" %}
+        <p><b>Type II - Non reciprocal edges</b></p>
+        {% if network_type == "A" %}
+            <p class="dimmed-text small-text">X &rarr; Y in network A &middot; not Y &rarr; X in network B</p>
+        {% else %}
+            <p class="dimmed-text small-text">X &rarr; Y in network B &middot; not Y &rarr; X in network A</p>
+        {% endif %}
+    {% elif edge_type == "type_iii" %}
+        <p><b>Type III - Symmetrical edges</b></p>
+        {% if network_type == "A" %}
+            <p class="dimmed-text small-text">X &rarr; Y in network A &middot; X &rarr; Y in network B</p>
+        {% else %}
+            <p class="dimmed-text small-text">X &rarr; Y in network B &middot; X &rarr; Y in network A</p>
+        {% endif %}
+    {% elif edge_type == "type_iv" %}
+        <p><b>Type IV - Reversed symmetrical edges</b></p>
+        {% if network_type == "A" %}
+            <p class="dimmed-text small-text">X &rarr; Y in network A &middot; Y &rarr; X in network B</p>
+        {% else %}
+            <p class="dimmed-text small-text">X &rarr; Y in network B &middot; Y &rarr; X in network A</p>
+        {% endif %}
     {% endif %}
+{% endmacro %}
+
+{% macro edges_type_empty_list() %}
+    <span>No edge of this type</span>
 {% endmacro %}
 
 {% macro report_header(project_title, group, type) %}
