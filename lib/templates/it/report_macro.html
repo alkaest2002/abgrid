@@ -14,35 +14,35 @@
 
 {% macro edges_types_label(network_type, edge_type) %}
     {% if edge_type == "type_i" %}
-        <p><b>Type I - Legami reciproci</b></p>
-        {% if network_type == "A" %}
-            <p class="dimmed-text small-text">X &rarr; Y nella rete A &middot; Y &rarr; X nella rete A</p>
-        {% else %}
-            <p class="dimmed-text small-text">X &rarr; Y nella rete B &middot; Y &rarr; X nella rete B</p>
-        {% endif %}
-    {% elif edge_type == "type_ii" %}
-        <p><b>Type II - Legami non reciproci</b></p>
+        <p><b>Tipo I - Legami non reciproci</b></p>
         {% if network_type == "A" %}
             <p class="dimmed-text small-text">X &rarr; Y nella rete A &middot; not Y &rarr; X nella rete B</p>
         {% else %}
             <p class="dimmed-text small-text">X &rarr; Y nella rete B &middot; not Y &rarr; X nella rete A</p>
         {% endif %}
+    {% elif edge_type == "type_ii" %}
+        <p><b>Tipo II - Legami reciproci</b></p>
+        {% if network_type == "A" %}
+            <p class="dimmed-text small-text">X &rarr; Y nella rete A &middot; Y &rarr; X nella rete A</p>
+        {% else %}
+            <p class="dimmed-text small-text">X &rarr; Y nella rete B &middot; Y &rarr; X nella rete B</p>
+        {% endif %}
     {% elif edge_type == "type_iii" %}
-        <p><b>Type III - Legami simmetrici</b></p>
+        <p><b>Tipo III - Legami simmetrici semplici</b></p>
         {% if network_type == "A" %}
             <p class="dimmed-text small-text">X &rarr; Y nella rete A &middot; X &rarr; Y nella rete B</p>
         {% else %}
             <p class="dimmed-text small-text">X &rarr; Y nella rete B &middot; X &rarr; Y nella rete A</p>
         {% endif %}
     {% elif edge_type == "type_iv" %}
-        <p><b>Type IV - Legami simmetrici inversi</b></p>
+        <p><b>Tipo IV - Legami simmetrici inversi</b></p>
         {% if network_type == "A" %}
             <p class="dimmed-text small-text">X &rarr; Y nella rete A &middot; Y &rarr; X nella rete B</p>
         {% else %}
             <p class="dimmed-text small-text">X &rarr; Y nella rete B &middot; Y &rarr; X nella rete A</p>
         {% endif %}
     {% elif edge_type == "type_v" %}
-        <p><b>Type V - Full symmetrical edges</b></p>
+        <p><b>Tipo V - Legami simmetrici completi</b></p>
         {% if network_type == "A" %}
             <p class="dimmed-text small-text">X &rarr; Y, Y &rarr; X nella rete A &middot; X &rarr; Y, Y &rarr; X nella rete B</p>
         {% else %}
