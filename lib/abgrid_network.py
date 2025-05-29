@@ -306,36 +306,41 @@ class ABGridNetwork:
         adj_ref_df = nx.to_pandas_adjacency(G_ref, nodelist=sorted(G.nodes))
 
         # Compute type I edges,
-        # i.e. same network: if A -> B, then B -> A
+        # i.e. same network: A -> B and B -> A
         type_i = (
             pd.DataFrame(np.triu(adj_df) * np.tril(adj_df).T, index=adj_df.index, columns=adj_df.columns)
                 .stack().loc[lambda x: x == 1].index.tolist()
         )
 
         # Compute type II edges,
-        # i.e. same network: if A -> B, then B /-> A
+        # i.e. same network: A -> B and not B -> A
         type_ii = [edge for edge in edges if edge not in type_i]
 
         # Compute type III edges,
-        # i.e. if A -> B in network G, then A -> B in network G_ref
+        # i.e. A -> B in network G and A -> B in network G_ref
         type_iii = (
             pd.DataFrame(np.triu(adj_df) * np.triu(adj_ref_df), index=adj_df.index, columns=adj_df.columns)
                 .stack().loc[lambda x: x == 1].index.tolist()
         )
 
         # Compute type IV edges,
-        # i.e. if A -> B in network G, then B -> A in network G_ref
+        # i.e. A -> B in network G and B -> A in network G_ref
         type_iv = (
             pd.DataFrame(np.triu(adj_df) * np.tril(adj_ref_df).T, index=adj_df.index, columns=adj_df.columns)
                 .stack().loc[lambda x: x == 1].index.tolist()
         )
 
+        # Compute type V edges
+        # i.e. A -> B, B -> A in network G and A -> B, B -> A in network G_ref
+        type_v = [ edge for edge in type_i if edge in type_iii and edge in type_iv]
+
         # Return edges types
         return {
             "type_i": type_i,
             "type_ii": type_ii,
-            "type_iii": type_iii,
-            "type_iv": type_iv,
+            "type_iii": [ edge for edge in type_iii if edge not in type_v],
+            "type_iv": [ edge for edge in type_iv if edge not in type_v],
+            "type_v": type_v
         }
 
     def get_network_graph(self, G: nx.DiGraph, loc: Dict[str, Tuple[float, float]], graphType: Literal["A","B"] = "A") -> str:
