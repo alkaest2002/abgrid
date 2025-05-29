@@ -305,34 +305,34 @@ class ABGridNetwork:
         adj_df = nx.to_pandas_adjacency(G, nodelist=sorted(G.nodes))
         adj_ref_df = nx.to_pandas_adjacency(G_ref, nodelist=sorted(G.nodes))
 
-        # Compute type I edges,
+        # Compute type I edges, non reciprocal
+        # i.e. same network: A -> B and not B -> A
+        type_i = [ edge for edge in edges if edge[::-1] not in edges ]
+  
+        # Compute type II edges, reciprocal
         # i.e. same network: A -> B and B -> A
-        type_i = (
+        type_ii = (
             pd.DataFrame(np.triu(adj_df) * np.tril(adj_df).T, index=adj_df.index, columns=adj_df.columns)
                 .stack().loc[lambda x: x == 1].index.tolist()
         )
 
-        # Compute type II edges,
-        # i.e. same network: A -> B and not B -> A
-        type_ii = [edge for edge in edges if edge not in type_i]
-
-        # Compute type III edges,
+        # Compute type III edges, half simmetrical
         # i.e. A -> B in network G and A -> B in network G_ref
         type_iii = (
             pd.DataFrame(np.triu(adj_df) * np.triu(adj_ref_df), index=adj_df.index, columns=adj_df.columns)
                 .stack().loc[lambda x: x == 1].index.tolist()
         )
 
-        # Compute type IV edges,
+        # Compute type IV edges, half reversed simmetrical
         # i.e. A -> B in network G and B -> A in network G_ref
         type_iv = (
             pd.DataFrame(np.triu(adj_df) * np.tril(adj_ref_df).T, index=adj_df.index, columns=adj_df.columns)
                 .stack().loc[lambda x: x == 1].index.tolist()
         )
 
-        # Compute type V edges
+        # Compute type V edges, full simmetrical
         # i.e. A -> B, B -> A in network G and A -> B, B -> A in network G_ref
-        type_v = [ edge for edge in type_i if edge in type_iii and edge in type_iv]
+        type_v = [ edge for edge in type_ii if edge in type_iii and edge in type_iv]
 
         # Return edges types
         return {
