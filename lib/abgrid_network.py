@@ -283,11 +283,12 @@ class ABGridNetwork:
         Classify edges in a directed network graph into various types based on their relationships
         within the network and with respect to a reference network.
 
-        This method computes and classifies edges into four types:
-        - Type I: Edges where if node A is connected to node B, then node B is also connected to node A in the same network.
-        - Type II: Edges where if node A is connected to node B, then node B is not connected to node A in the same network.
-        - Type III: Edges that exist in both the original network and a reference network in the same direction.
-        - Type IV: Edges that exist in the original network but are reversed in the reference network.
+        This method computes and classifies edges into five types:
+        - Type I: Non-reciprocal edges, where if node A is connected to node B, node B is not connected to node A in the same network.
+        - Type II: Reciprocal edges, where node A is connected to node B and node B is also connected to node A in the same network.
+        - Type III: Half-symmetrical edges, where if node A is connected to node B in the original network, node A is also connected to node B in the reference network.
+        - Type IV: Half-reversed symmetrical edges, where if node A is connected to node B in the original network, node B is connected to node A in the reference network.
+        - Type V: Fully symmetrical edges, where node A and node B are reciprocally connected in both the original and reference networks.
 
         Args:
             G (nx.DiGraph): The main directed graph containing the edges to be classified.
@@ -295,11 +296,12 @@ class ABGridNetwork:
             G_ref (nx.DiGraph): A reference directed graph used for comparison in classification.
 
         Returns:
-            Dict[str, List[Tuple[str, str]]]: A dictionary classifying edges into four categories:
-                - "type_i": List of type I edges.
-                - "type_ii": List of type II edges.
-                - "type_iii": List of type III edges.
-                - "type_iv": List of type IV edges.
+            Dict[str, List[Tuple[str, str]]]: A dictionary classifying edges into five categories:
+                - "type_i": List of type I edges (non-reciprocal).
+                - "type_ii": List of type II edges (reciprocal).
+                - "type_iii": List of type III edges (half-symmetrical, non-fully symmetrical).
+                - "type_iv": List of type IV edges (half-reversed symmetrical, non-fully symmetrical).
+                - "type_v": List of type V edges (fully symmetrical).
         """
         # Compute ordered adjacency list for both networks
         adj_df = nx.to_pandas_adjacency(G, nodelist=sorted(G.nodes))
@@ -308,7 +310,7 @@ class ABGridNetwork:
         # Compute type I edges, non reciprocal
         # i.e. same network: A -> B and not B -> A
         type_i = [ edge for edge in edges if edge[::-1] not in edges ]
-  
+
         # Compute type II edges, reciprocal
         # i.e. same network: A -> B and B -> A
         type_ii = (
