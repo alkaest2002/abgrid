@@ -57,77 +57,58 @@
             <div>
                 {{ base_macro.logo() }}
                 {{ report_macro.disclaimer() }}
-                {{ report_macro.report_header(project_title, group, "graph") }}
+                {{ report_macro.render_report_header(project_title, group, "graph") }}
                 {{ base_report_macro.question(network_type, question) }}
-                {{ base_report_macro.macro_statistics(macro_stats) }}
+                {{ base_report_macro.render_macro_statistics(macro_stats) }}
                 {{ base_report_macro.graph(graph) }}
             </div>
             <div>
-                {{ report_macro.legend(show_micro=False, show_arrows=False, show_pctiles=False) }}
-                {{ report_macro.footer(year) }}
+                {{ report_macro.render_legend(show_micro=False, show_arrows=False, show_pctiles=False) }}
+                {{ report_macro.render_footer(year) }}
             </div>
         </div>
         <div class="page">
             <div>
                 {{ base_macro.logo() }}
                 {{ report_macro.disclaimer() }}
-                {{ report_macro.report_header(project_title, group, "raw_scores") }}
+                {{ report_macro.render_report_header(project_title, group, "raw_scores") }}
                 {{ base_report_macro.question(network_type, question) }}
-                {{ base_report_macro.micro_statistics(network_type, "raw_scores", micro_stats, report_macro.choices_label) }}
-                {{ report_macro.legend(show_macro=False, show_pctiles=False) }}
+                {{ base_report_macro.render_micro_statistics(network_type, "raw_scores", micro_stats, report_macro.render_choices_label) }}
+                {{ report_macro.render_legend(show_macro=False, show_pctiles=False) }}
             </div>
-            {{ report_macro.footer(year) }}
+            {{ report_macro.render_footer(year) }}
         </div>
         <div class="page">
             <div>
                 {{ base_macro.logo() }}
                 {{ report_macro.disclaimer() }}
-                {{ report_macro.report_header(project_title, group, "ranks") }}
+                {{ report_macro.render_report_header(project_title, group, "ranks") }}
                 {{ base_report_macro.question(network_type, question) }}
-                {{ base_report_macro.micro_statistics(network_type, "ranks", micro_stats, report_macro.choices_label) }}
-                {{ report_macro.legend(show_macro=False, show_pctiles=True) }}
+                {{ base_report_macro.render_micro_statistics(network_type, "ranks", micro_stats, report_macro.render_choices_label) }}
+                {{ report_macro.render_legend(show_macro=False, show_pctiles=True) }}
             </div>
-            {{ report_macro.footer(year) }}
+            {{ report_macro.render_footer(year) }}
         </div>
         <div class="page">
             <div>
                 {{ base_macro.logo() }}
                 {{ report_macro.disclaimer() }}
-                {{ report_macro.report_header(project_title, group, "ordered_nodes") }}
+                {{ report_macro.render_report_header(project_title, group, "ordered_nodes") }}
                 {{ base_report_macro.question(network_type, question) }}
-                {{ base_report_macro.nodes_sorted_by_rank(nodes_rankings, report_macro.rank_label) }}
-                {{ report_macro.legend(show_macro=False, show_arrows=False, show_pctiles=False) }}
+                {{ base_report_macro.render_nodes_sorted_by_rank(nodes_rankings, report_macro.render_rank_label) }}
+                {{ report_macro.render_legend(show_macro=False, show_arrows=False, show_pctiles=False) }}
             </div>
-            {{ report_macro.footer(year) }}
+            {{ report_macro.render_footer(year) }}
         </div>
         <div class="page">
             <div>
                 {{ base_macro.logo() }}
                 {{ report_macro.disclaimer() }}
-                {{ report_macro.report_header(project_title, group, "edges_types") }}
+                {{ report_macro.render_report_header(project_title, group, "edges_types") }}
                 {{ base_report_macro.question(network_type, question) }}
-                <div class="edges_types">
-                    {% for edges_type, edges in edges_types.items() %}
-                        <div class="edges-type">
-                            <div class="edges-type-label">{{ report_macro.edges_types_label(network_type, edges_type) }}</div>
-                            <div class="edges-list">
-                                {% if  edges | length > 0 %}
-                                    {% for edge in edges %}
-                                        <div class="edge">     
-                                            {% for node in edge %}
-                                                <span>{{ node }}</span>{% if loop.index == 0 %} &middot;{% endif %}
-                                            {% endfor %}
-                                        </div>
-                                    {% endfor %}
-                                {% else %}
-                                {{report_macro.edges_type_empty_list()  }}
-                            {% endif %}
-                            </div>
-                        </div>
-                    {% endfor %}
-                </div>
+                {{ base_report_macro.render_edges_type(edges_types, report_macro.render_edges_types_label, report_macro.render_edges_type_empty_list ) }}
             </div>
-            {{ report_macro.footer(year) }}
+            {{ report_macro.render_footer(year) }}
         </div>
     {% endfor %}
 {% endmacro %}

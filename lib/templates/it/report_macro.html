@@ -4,15 +4,15 @@
 </div>
 {% endmacro %}
 
-{% macro choices_label() %}
+{% macro render_choices_label() %}
     <span>SCELTE</span>
 {% endmacro %}
 
-{% macro rank_label() %}
+{% macro render_rank_label() %}
     <span>RANGO</span>
 {% endmacro %}
 
-{% macro edges_types_label(network_type, edge_type) %}
+{% macro render_edges_types_label(network_type, edge_type) %}
     {% if edge_type == "type_i" %}
         <p><b>Tipo I - Legami non reciproci</b></p>
         {% if network_type == "A" %}
@@ -51,29 +51,29 @@
     {% endif %}
 {% endmacro %}
 
-{% macro edges_type_empty_list() %}
+{% macro render_edges_type_empty_list() %}
     <span>Nessun legame di questo tipo</span>
 {% endmacro %}
 
-{% macro report_header(project_title, group, score_type) %}
+{% macro render_report_header(project_title, group, score_type) %}
 <div class="report-header">
     <span><b>GRUPPO {{ group | upper }} - {{ project_title | upper }}</b></span><span>{% if score_type == "ranks" %}PUNTEGGI DI RANGO{% elif score_type == "raw_scores" %}PUNTEGGI GREZZI{% endif %}</span>
 </div>
 {% endmacro %}
 
-{% macro report_header(project_title, group, type) %}
+{% macro render_report_header(project_title, group, type) %}
 <div class="report-header">
     <span><b>GRUPPO {{ group | upper }} - {{ project_title | upper }}</b></span><span>{% if type == "graph" %}GRAFICO DELLA RETE{% elif type == "raw_scores" %}PUNTEGGI GREZZI{% elif type == "ranks" %}PUNTEGGI DI RANGO{% elif type == "ordered_nodes" %}NODI ORDINATI PER PUNTEGGI DI RANGO{% elif type == "edges_types" %}TIPOLOGIA DI LEGAMI{% endif %}</span>
 </div>
 {% endmacro %}
 
-{% macro legend(show_macro=True, show_micro=True, show_arrows=True, show_pctiles=True) %}
+{% macro render_legend(show_macro=True, show_micro=True, show_arrows=True, show_pctiles=True) %}
 <div class="report-legend">
     {% if show_macro %}<b>NN</b> = Nodi <b>NE</b> = Legami <b>ND</b> = Densità rete <b>NC</b> = Centralizzazione rete <b>NT</b> = Transitività rete <b>NR</b> = Reciprocità rete {% endif %}{% if show_micro%}<b>IC</b> = In-Degree <b>PR</b> = PageRank <b>BT</b> = Betweenness <b>CL</b> = Closenness <b>HU</b> = Hub {% endif %}{% if show_arrows %}<b>ND</b> = Nessun In-Degree (&larr; ) Nessun Out-Degree (&rarr;) Nessun In or Out-Degree (&rlarr;) {% endif %}{% if show_pctiles %}<span class="square very-low"></span> Molto basso <span class="square low"></span> Basso <span class="square high"></span> Alto <span class="square very-high"></span> Molto alto{% endif %}
 </div>
 {% endmacro %}
 
-{% macro footer(year) %}
+{% macro render_footer(year) %}
 <div class="report-footer dimmed-text small-text">
     <b>Autori</b>: Dr. Pierpaolo CALANNA, PhD, Dr. Gaetano BUONAIUTO (2021-{{ year }}), <b>Licenza d'uso</b>: l'impaginazione del report, la personalizzazione dei grafici, nonché la scelta degli indici quantitativi è soggetta a copyright.
 </div>

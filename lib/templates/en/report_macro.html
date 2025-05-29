@@ -4,15 +4,15 @@
 </div>
 {% endmacro %}
 
-{% macro choices_label() %}
+{% macro render_choices_label() %}
     <span>CHOICES</span>
 {% endmacro %}
 
-{% macro rank_label() %}
+{% macro render_rank_label() %}
     <span>RANK</span>
 {% endmacro %}
 
-{% macro edges_types_label(network_type, edge_type) %}
+{% macro render_edges_types_label(network_type, edge_type) %}
     {% if edge_type == "type_i" %}
         <p><b>Type I - Non reciprocal edges</b></p>
         {% if network_type == "A" %}
@@ -51,23 +51,23 @@
     {% endif %}
 {% endmacro %}
 
-{% macro edges_type_empty_list() %}
+{% macro render_edges_type_empty_list() %}
     <span>No edge of this type</span>
 {% endmacro %}
 
-{% macro report_header(project_title, group, type) %}
+{% macro render_report_header(project_title, group, type) %}
 <div class="report-header">
     <span><b>GROUP {{ group | upper }} - {{ project_title | upper }}</b></span><span>{% if type == "graph" %}NETWORK GRAPH{% elif type == "raw_scores" %}RAW SCORES{% elif type == "ranks" %}RANK SCORES{% elif type == "ordered_nodes" %}NODES ORDERED BY RANK SCORES{% elif type == "edges_types" %}TYPES OF EDGES{% endif %}</span>
 </div>
 {% endmacro %}
 
-{% macro legend(show_macro=True, show_micro=True, show_arrows=True, show_pctiles=True) %}
+{% macro render_legend(show_macro=True, show_micro=True, show_arrows=True, show_pctiles=True) %}
 <div class="report-legend">
     {% if show_macro %}<b>NN</b> = Nodes <b>NE</b> = Edges <b>ND</b> = Network density <b>NC</b> = Network Centralization <b>NT</b> = Network Transitivity <b>NR</b> = Network Reciprocity {% endif %}{% if show_micro %}<b>IC</b> = In-Degree <b>PR</b> = PageRank <b>BT</b> = Betweenness <b>CL</b> = Closenness <b>HU</b> = Hub {% endif %}{% if show_arrows %}<b>ND</b> = No In-Degree (&larr; ) No Out-Degree (&rarr;) No In or Out-Degree (&rlarr;) {% endif %}{% if show_pctiles %}<span class="square very-low"></span> Very low <span class="square low"></span> Low <span class="square high"></span> High <span class="square very-high"></span> Very high{% endif %}
 </div>
 {% endmacro %}
 
-{% macro footer(year) %}
+{% macro render_footer(year) %}
 <div class="report-footer dimmed-text small-text">
     <b>Authors</b>: Dr. Pierpaolo CALANNA, PhD, Dr. Gaetano BUONAIUTO (2021-{{ year }}), <b>License of use</b>: the layout of this report, the customization of charts, as well as the selection of quantitative indices, are subject to copyright.
 </div>
