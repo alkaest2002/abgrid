@@ -86,6 +86,8 @@ class ABGridNetwork:
         self.nodes_b_rankings = self.get_nodes_rankings(self.micro_stats_b)
         self.edges_a_types = self.get_edges_types(Ga, self.edges_a, Gb)
         self.edges_b_types = self.get_edges_types(Gb, self.edges_b, Ga)
+        self.components_a = self.get_network_components(Ga)
+        self.components_b = self.get_network_components(Gb)
         self.graph_a = self.get_network_graph(Ga, loc_a, "A")
         self.graph_b = self.get_network_graph(Gb, loc_b, "B")
 
@@ -346,6 +348,33 @@ class ABGridNetwork:
             "type_iii": [ edge for edge in type_iii if edge not in type_v],
             "type_iv": [ edge for edge in type_iv if edge not in type_v],
             "type_v": type_v
+        }
+    
+    def get_network_components(self, G: nx.DiGraph):
+        """
+        Identify and return the connected components of a directed graph.
+        This method calculates both the strongly connected and weakly connected components
+        of the given NetworkX directed graph. Strongly connected components are subgraphs
+        where there is a path between any two nodes in both directions, while weakly connected
+        components are subgraphs that are connected when the direction of edges is ignored.
+
+        Args:
+            G (nx.DiGraph): A directed graph represented using NetworkX's DiGraph class.
+
+        Returns:
+            Dict[str, List[Set]]: A dictionary containing:
+                - "strongly_connected": A list of sets, each set contains nodes that form a strongly connected component, 
+                                        sorted by size in descending order.
+                - "weakly_connected": A list of sets, each set contains nodes that form a weakly connected component, 
+                                        sorted by size in descending order.
+        """
+        return {
+            "strongly_connected": [
+                sorted(list(c)) for c in sorted(nx.strongly_connected_components(G), key=len, reverse=True) if len(c) > 2
+            ],
+            "weakly_connected": [
+                sorted(list(c)) for c in sorted(nx.weakly_connected_components(G), key=len, reverse=True) if len(c) > 2
+            ]
         }
 
     def get_network_graph(self, G: nx.DiGraph, loc: Dict[str, Tuple[float, float]], graphType: Literal["A","B"] = "A") -> str:

@@ -159,6 +159,8 @@ class ABGridData:
                     "nodes_b_rankings": ntw.nodes_b_rankings,
                     "edges_a_types": ntw.edges_a_types,
                     "edges_b_types": ntw.edges_b_types,
+                    "components_a":ntw.components_a,
+                    "components_b":ntw.components_b,
                     "graph_a": ntw.graph_a,
                     "graph_b": ntw.graph_b
                 }
