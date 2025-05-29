@@ -41,6 +41,13 @@
         {% else %}
             <p class="dimmed-text small-text">X &rarr; Y in network B &middot; Y &rarr; X in network A</p>
         {% endif %}
+    {% elif edge_type == "type_v" %}
+        <p><b>Type V - Full symmetrical edges</b></p>
+        {% if network_type == "A" %}
+            <p class="dimmed-text small-text">X &rarr; Y, Y &rarr; X in network A &middot; X &rarr; Y, Y &rarr; X in network B</p>
+        {% else %}
+            <p class="dimmed-text small-text">X &rarr; Y, Y &rarr; X in network B &middot; X &rarr; Y, Y &rarr; X in network A</p>
+        {% endif %}
     {% endif %}
 {% endmacro %}
 
