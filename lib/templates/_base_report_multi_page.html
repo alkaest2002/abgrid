@@ -20,19 +20,40 @@
         margin-bottom: 24px;
         border-top: 1px solid var(--base-border-color);
     }
+    .edges-type {
+        margin-bottom: 24px;
+    }
+    .edges-type-label {
+        margin-bottom: 12px;
+    }
+    .edges-list {
+        display: flex;
+        flex-wrap: wrap;
+    }
+    .edge {
+        border: 1px solid var(--base-border-color);
+        border-radius: 6px;
+        padding: 3px 6px;
+        margin-right: 6px;
+        margin-bottom: 6px;
+    }
 </style>
 {% endblock %}
 
 {% macro report_body() %}
-    {% for (network_type, question, graph, network_data_macro_level, network_data_micro_level, nodes_by_rank) in 
-        [("A", question_a, graph_a, macro_a, micro_a, nodes_a_by_rank), ("B", question_b, graph_b, macro_b, micro_b, nodes_b_by_rank)] %}
+    {% for (network_type, question, graph, macro_stats, micro_stats, nodes_rankings, edges_types) in 
+        [
+            ("A", question_a, graph_a, macro_stats_a, micro_stats_a, nodes_a_rankings, edges_a_types), 
+            ("B", question_b, graph_b, macro_stats_b, micro_stats_b, nodes_b_rankings, edges_b_types)
+        ] 
+    %}
         <div class="page">
             <div>
                 {{ base_macro.logo() }}
                 {{ report_macro.disclaimer() }}
                 {{ report_macro.report_header(project_title, group, "graph") }}
                 {{ base_report_macro.question(network_type, question) }}
-                {{ base_report_macro.macro_statistics(network_data_macro_level) }}
+                {{ base_report_macro.macro_statistics(macro_stats) }}
                 {{ base_report_macro.graph(graph) }}
             </div>
             <div>
@@ -46,7 +67,7 @@
                 {{ report_macro.disclaimer() }}
                 {{ report_macro.report_header(project_title, group, "raw_scores") }}
                 {{ base_report_macro.question(network_type, question) }}
-                {{ base_report_macro.micro_statistics(network_type, "raw_scores", network_data_micro_level, report_macro.choices_label) }}
+                {{ base_report_macro.micro_statistics(network_type, "raw_scores", micro_stats, report_macro.choices_label) }}
                 {{ report_macro.legend(show_macro=False, show_pctiles=False) }}
             </div>
             {{ report_macro.footer(year) }}
@@ -57,7 +78,7 @@
                 {{ report_macro.disclaimer() }}
                 {{ report_macro.report_header(project_title, group, "ranks") }}
                 {{ base_report_macro.question(network_type, question) }}
-                {{ base_report_macro.micro_statistics(network_type, "ranks", network_data_micro_level, report_macro.choices_label) }}
+                {{ base_report_macro.micro_statistics(network_type, "ranks", micro_stats, report_macro.choices_label) }}
                 {{ report_macro.legend(show_macro=False, show_pctiles=True) }}
             </div>
             {{ report_macro.footer(year) }}
@@ -68,8 +89,33 @@
                 {{ report_macro.disclaimer() }}
                 {{ report_macro.report_header(project_title, group, "ordered_nodes") }}
                 {{ base_report_macro.question(network_type, question) }}
-                {{ base_report_macro.nodes_sorted_by_rank(nodes_by_rank, report_macro.rank_label) }}
+                {{ base_report_macro.nodes_sorted_by_rank(nodes_rankings, report_macro.rank_label) }}
                 {{ report_macro.legend(show_macro=False, show_arrows=False, show_pctiles=False) }}
+            </div>
+            {{ report_macro.footer(year) }}
+        </div>
+        <div class="page">
+            <div>
+                {{ base_macro.logo() }}
+                {{ report_macro.disclaimer() }}
+                {{ report_macro.report_header(project_title, group, "edges_types") }}
+                {{ base_report_macro.question(network_type, question) }}
+                <div class="edges_types">
+                    {% for type, edges in edges_types.items() %}
+                    <div class="edges-type">
+                        <div class="edges-type-label">{{ report_macro.edges_types_label(type) }}</div>
+                        <div class="edges-list">
+                            {% for edge in edges %}
+                                <div class="edge">     
+                                    {% for node in edge %}
+                                        <span>{{ node }}</span>{% if loop.index == 0 %} &middot;{% endif %}
+                                    {% endfor %}
+                                </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
             </div>
             {{ report_macro.footer(year) }}
         </div>

@@ -12,6 +12,22 @@ SCELTE
 RANGO
 {% endmacro %}
 
+{% macro edges_types_label(type) %}
+    {% if type == "type_i" %}
+        <p><b>Type I</b></p>
+        <p class="dimmed-text small-text">Same network: A &rarr; B and B &rarr; A</p>
+    {% elif type == "type_ii" %}
+        <p><b>Type II</b></p>
+        <p class="dimmed-text small-text">Same network: A &rarr; B, but not B &rarr; A</p>
+    {% elif type == "type_iii" %}
+        <p><b>Type III</b></p>
+        <p class="dimmed-text small-text">A &rarr; B in one network, A &rarr; B in other network A</p>
+    {% elif type == "type_iv" %}
+        <p><b>Type IV</b></p>
+        <p class="dimmed-text small-text">A &rarr; B in one network, B &rarr; A in other network</p>
+    {% endif %}
+{% endmacro %}
+
 {% macro report_header(project_title, group, score_type) %}
 <div class="report-header">
     <span><b>GRUPPO {{ group | upper }} - {{ project_title | upper }}</b></span><span>{% if score_type == "ranks" %}PUNTEGGI DI RANGO{% elif score_type == "raw_scores" %}PUNTEGGI GREZZI{% endif %}</span>
@@ -20,7 +36,7 @@ RANGO
 
 {% macro report_header(project_title, group, type) %}
 <div class="report-header">
-    <span><b>GRUPPO {{ group | upper }} - {{ project_title | upper }}</b></span><span>{% if type == "graph" %}GRAFICO DELLA RETE{% elif type == "raw_scores" %}PUNTEGGI GREZZI{% elif type == "ranks" %}PUNTEGGI DI RANGO{% elif type == "ordered_nodes" %}NODI ORDINATI PER PUNTEGGI DI RANGO{% endif %}</span>
+    <span><b>GRUPPO {{ group | upper }} - {{ project_title | upper }}</b></span><span>{% if type == "graph" %}GRAFICO DELLA RETE{% elif type == "raw_scores" %}PUNTEGGI GREZZI{% elif type == "ranks" %}PUNTEGGI DI RANGO{% elif type == "ordered_nodes" %}NODI ORDINATI PER PUNTEGGI DI RANGO{% elif type == "edges_types" %}TIPOLOGIA DI LEGAMI{% endif %}</span>
 </div>
 {% endmacro %}
 
@@ -31,7 +47,7 @@ RANGO
 {% endmacro %}
 
 {% macro footer(year) %}
-<div class="report-footer">
+<div class="report-footer dimmed-text small-text">
     <b>Autori</b>: Dr. Pierpaolo CALANNA, PhD, Dr. Gaetano BUONAIUTO (2021-{{ year }}), <b>Licenza d'uso</b>: l'impaginazione del report, la personalizzazione dei grafici, nonché la scelta degli indici quantitativi è soggetta a copyright.
 </div>
 {% endmacro %}
