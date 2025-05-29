@@ -22,7 +22,7 @@
     {% for participant in likert %}
         <div class="page">
             <div class="main-wrapper">
-                {{ base_macro.logo() }}
+                {{ base_macro.render_logo() }}
                 {{ render_answersheet_header(group, participant) }}
                 <div class="explanation">
                     <p>{{ explanation }}</p>

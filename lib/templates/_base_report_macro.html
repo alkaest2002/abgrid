@@ -1,4 +1,4 @@
-{% macro question(network_type, question) %}
+{% macro render_question(network_type, question) %}
 <div class="question-container">
    <p><b>{{ network_type }}. {{ question }}</b></p> 
 </div>
@@ -166,5 +166,14 @@
             </div>
         </div>
     {% endfor %}
+</div>
+{% endmacro %}
+
+{% macro render_components(render_components_empty_list) %}
+<div class="strongly-connected-components components">
+    {{ render_components_empty_list() }}
+</div>
+<div class="weakly-connected-components components">
+    {{ render_components_empty_list() }}
 </div>
 {% endmacro %}

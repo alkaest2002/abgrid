@@ -55,10 +55,10 @@
     %}
         <div class="page">
             <div>
-                {{ base_macro.logo() }}
-                {{ report_macro.disclaimer() }}
+                {{ base_macro.render_logo() }}
+                {{ report_macro.render_disclaimer() }}
                 {{ report_macro.render_report_header(project_title, group, "graph") }}
-                {{ base_report_macro.question(network_type, question) }}
+                {{ base_report_macro.render_question(network_type, question) }}
                 {{ base_report_macro.render_macro_statistics(macro_stats) }}
                 {{ base_report_macro.graph(graph) }}
             </div>
@@ -69,10 +69,10 @@
         </div>
         <div class="page">
             <div>
-                {{ base_macro.logo() }}
-                {{ report_macro.disclaimer() }}
+                {{ base_macro.render_logo() }}
+                {{ report_macro.render_disclaimer() }}
                 {{ report_macro.render_report_header(project_title, group, "raw_scores") }}
-                {{ base_report_macro.question(network_type, question) }}
+                {{ base_report_macro.render_question(network_type, question) }}
                 {{ base_report_macro.render_micro_statistics(network_type, "raw_scores", micro_stats, report_macro.render_choices_label) }}
                 {{ report_macro.render_legend(show_macro=False, show_pctiles=False) }}
             </div>
@@ -80,10 +80,10 @@
         </div>
         <div class="page">
             <div>
-                {{ base_macro.logo() }}
-                {{ report_macro.disclaimer() }}
+                {{ base_macro.render_logo() }}
+                {{ report_macro.render_disclaimer() }}
                 {{ report_macro.render_report_header(project_title, group, "ranks") }}
-                {{ base_report_macro.question(network_type, question) }}
+                {{ base_report_macro.render_question(network_type, question) }}
                 {{ base_report_macro.render_micro_statistics(network_type, "ranks", micro_stats, report_macro.render_choices_label) }}
                 {{ report_macro.render_legend(show_macro=False, show_pctiles=True) }}
             </div>
@@ -91,10 +91,10 @@
         </div>
         <div class="page">
             <div>
-                {{ base_macro.logo() }}
-                {{ report_macro.disclaimer() }}
+                {{ base_macro.render_logo() }}
+                {{ report_macro.render_disclaimer() }}
                 {{ report_macro.render_report_header(project_title, group, "ordered_nodes") }}
-                {{ base_report_macro.question(network_type, question) }}
+                {{ base_report_macro.render_question(network_type, question) }}
                 {{ base_report_macro.render_nodes_sorted_by_rank(nodes_rankings, report_macro.render_rank_label) }}
                 {{ report_macro.render_legend(show_macro=False, show_arrows=False, show_pctiles=False) }}
             </div>
@@ -102,11 +102,21 @@
         </div>
         <div class="page">
             <div>
-                {{ base_macro.logo() }}
-                {{ report_macro.disclaimer() }}
+                {{ base_macro.render_logo() }}
+                {{ report_macro.render_disclaimer() }}
                 {{ report_macro.render_report_header(project_title, group, "edges_types") }}
-                {{ base_report_macro.question(network_type, question) }}
+                {{ base_report_macro.render_question(network_type, question) }}
                 {{ base_report_macro.render_edges_type(edges_types, report_macro.render_edges_types_label, report_macro.render_edges_type_empty_list ) }}
+            </div>
+            {{ report_macro.render_footer(year) }}
+        </div>
+        <div class="page">
+            <div>
+                {{ base_macro.render_logo() }}
+                {{ report_macro.render_disclaimer() }}
+                {{ report_macro.render_report_header(project_title, group, "components") }}
+                {{ base_report_macro.render_question(network_type, question) }}
+                {{ base_report_macro.render_components(report_macro.render_components_empty_list) }}
             </div>
             {{ report_macro.render_footer(year) }}
         </div>

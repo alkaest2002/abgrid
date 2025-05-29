@@ -1,4 +1,4 @@
-{% macro disclaimer() %}
+{% macro render_disclaimer() %}
 <div class="report-disclaimer">
     Questo report è stato concepito come strumento per agevolare il processo decisionale e non sostituisce il giudizio degli esperti di settore. Le interpretazioni che se ne ricavano devono essere integrate con altre informazioni relative al contesto valutativo.
 </div>
@@ -52,7 +52,11 @@
 {% endmacro %}
 
 {% macro render_edges_type_empty_list() %}
-    <span>Nessun legame di questo tipo</span>
+    <span class="italic">Nessun legame di questo tipo</span>
+{% endmacro %}
+
+{% macro render_components_empty_list() %}
+    <span class="italic">Nessun component di questo tipo</span>
 {% endmacro %}
 
 {% macro render_report_header(project_title, group, score_type) %}
@@ -63,7 +67,7 @@
 
 {% macro render_report_header(project_title, group, type) %}
 <div class="report-header">
-    <span><b>GRUPPO {{ group | upper }} - {{ project_title | upper }}</b></span><span>{% if type == "graph" %}GRAFICO DELLA RETE{% elif type == "raw_scores" %}PUNTEGGI GREZZI{% elif type == "ranks" %}PUNTEGGI DI RANGO{% elif type == "ordered_nodes" %}NODI ORDINATI PER PUNTEGGI DI RANGO{% elif type == "edges_types" %}TIPOLOGIA DI LEGAMI{% endif %}</span>
+    <span><b>GRUPPO {{ group | upper }} - {{ project_title | upper }}</b></span><span>{% if type == "graph" %}GRAFICO RETE{% elif type == "raw_scores" %}PUNTEGGI GREZZI{% elif type == "ranks" %}PUNTEGGI DI RANGO{% elif type == "ordered_nodes" %}NODI ORDINATI PER PUNTEGGI DI RANGO{% elif type == "edges_types" %}TIPOLOGIA LEGAMI{% elif type == "components" %}COMPONENTI RETE{% endif %}</span>
 </div>
 {% endmacro %}
 
