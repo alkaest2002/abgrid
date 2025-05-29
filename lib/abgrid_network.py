@@ -141,26 +141,28 @@ class ABGridNetwork:
     
     def get_network_macro_stats(self, G: nx.DiGraph) -> Dict[str, Any]:
         """
-        Calculate and return macro-level statistics for a directed network graph.
+        Calculate and return macro-level statistics for a directed network.
 
-        This method computes several statistics about the structure and connectivity of the given
-        NetworkX directed graph `G`, including the number of nodes, the number of edges, 
-        centralization, transitivity, and reciprocity.
+        This method computes several statistics about the structure of the given
+        network `G`, including the number of nodes, the number of edges, 
+        density, centralization, transitivity, and reciprocity.
 
         Args:
             G (nx.DiGraph): A directed graph represented using NetworkX's DiGraph class.
 
         Returns:
             Dict[str, Any]: A dictionary containing the following macro-level statistics:
-                - "network_nodes": int, the total number of nodes in the graph.
-                - "network_edges": int, the total number of edges in the graph.
-                - "network_centralization": float, the centralization of the undirected version of the graph.
-                - "network_transitivity": float, the transitivity of the graph rounded to three decimal places.
-                - "network_reciprocity": float, the reciprocity of the graph rounded to three decimal places.
+                - "network_nodes": int, the total number of nodes in the network.
+                - "network_edges": int, the total number of edges in the network.
+                - "density": float, the density of the network rounded to three decimal places.
+                - "network_centralization": float, the centralization of the undirected version of the network.
+                - "network_transitivity": float, the transitivity of the network rounded to three decimal places.
+                - "network_reciprocity": float, the reciprocity of the network rounded to three decimal places.
         """
         # Compute macro-level statistics
         network_nodes = G.number_of_nodes()
         network_edges = G.number_of_edges()
+        network_density = round(nx.density(G), 3)
         network_centralization = self.get_network_centralization(G.to_undirected())
         network_transitivity = round(nx.transitivity(G), 3)
         network_reciprocity = round(nx.overall_reciprocity(G), 3)
@@ -169,6 +171,7 @@ class ABGridNetwork:
         return {
             "network_nodes": network_nodes,
             "network_edges": network_edges,
+            "network_density": network_density,
             "network_centralization": network_centralization,
             "network_transitivity": network_transitivity,
             "network_reciprocity": network_reciprocity,
