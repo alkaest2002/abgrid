@@ -178,11 +178,16 @@
             <div class="component">
                 {% if not current.length or current.length != (component | length) %}
                     {% set current.length = (component | length) %}
-                    <span class="component-length">{{ current.length }}
-                {% endif %}
-                {% for node in component %}
-                    </span><span>{{ node }}</span>{% if not loop.last %} &middot;{% endif %}
-                {% endfor %}
+                    <span class="component-length">{{ current.length }}</span>
+                    {% for node in component %}
+                        <span>{{ node }}</span>{% if not loop.last %} &middot;{% endif %}
+                    {% endfor %}
+                {% else %}
+                    {% for node in component %}
+                        <span {% if loop.first%}style="margin-left:6px"{% endif %}>
+                            {{ node }}</span>{% if not loop.last %} &middot;{% endif %}
+                    {% endfor %}
+                {% endif %}           
             </div>
         {% endfor %}
     {% else %}
