@@ -173,12 +173,12 @@
 <div class="components">
     {% if components | length > 0 %}
         {{ render_components_label() }}
-        {% set current_length = namespace(total=None) %}
+        {% set current = namespace(length=None) %}
         {% for component in components %}
             <div class="component">
-                {% if not current_length.total or current_length.total != (component | length) %}
-                    {% set current_length.total = (component | length) %}
-                    <span class="component-length">{{ current_length.total }}
+                {% if not current.length or current.length != (component | length) %}
+                    {% set current.length = (component | length) %}
+                    <span class="component-length">{{ current.length }}
                 {% endif %}
                 {% for node in component %}
                     </span><span>{{ node }}</span>{% if not loop.last %} &middot;{% endif %}
