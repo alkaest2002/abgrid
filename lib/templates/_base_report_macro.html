@@ -175,8 +175,9 @@
         {{ render_components_label() }}
         {% for component in components %}
             <div class="component">
+                <span class="component-length">{{ component | length }}
                 {% for node in component %}
-                    <span>{{ node }}</span>{% if not loop.last %} &middot;{% endif %}
+                    </span><span>{{ node }}</span>{% if not loop.last %} &middot;{% endif %}
                 {% endfor %}
             </div>
         {% endfor %}

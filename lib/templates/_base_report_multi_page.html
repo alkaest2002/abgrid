@@ -37,11 +37,11 @@
         flex-wrap: wrap;
     }
     .edge {
-        border: 1px solid var(--base-border-color);
-        border-radius: 6px;
         padding: 3px 6px;
         margin-right: 6px;
         margin-bottom: 6px;
+        border: 1px solid var(--base-border-color);
+        border-radius: 6px;
     }
     .components {
         margin-top: 24px;
@@ -49,13 +49,27 @@
     .components p {
         margin-bottom: 12px;
     }
+    .component-length {
+        display: inline-block;
+        height: 12pt;
+        width: 12pt;
+        margin-right: 6px;
+        text-align: center;
+        font-size: 8pt;
+        border-radius: 3px;
+        background-color: var(--base-font-color-light);
+        color: var(--abgrid-white);
+    }
     .component {
         display: inline-block;
-        margin-right: 6px;
-        padding: 3px 6px;
-        margin-bottom: 12px;
+        padding: 3px;
+        margin-right: 3px;
+        margin-bottom: 6px;
         border: 1px solid var(--base-border-color);
         border-radius: 6px;
+    }
+    .component span:last-of-type {
+        margin-right: 6px;
     }
 </style>
 {% endblock %}
