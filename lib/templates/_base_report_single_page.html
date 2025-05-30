@@ -28,12 +28,12 @@
             {{ report_macro.render_report_header(project_title, group, "ranks") }}
             <div class="single-report-content">
                 {% for (network_type, question, graph, network_data_macro_level, network_data_micro_level) in 
-                    [("A", question_a, graph_a, macro_a, micro_a), ("B", question_b, graph_b, macro_b, micro_b)] %}
+                    [("A", question_a, graph_a, macro_stats_a, micro_stats_a), ("B", question_b, graph_b, macro_stats_b, micro_stats_b)] %}
                     <div>
                         {{ base_report_macro.render_question(network_type, question) }}
                         {{ base_report_macro.graph(graph) }}
                         {{ base_report_macro.render_macro_statistics(network_data_macro_level) }}
-                        {{ base_report_macro.render_micro_statistics(network_type, "ranks", network_data_micro_level, report_macro.choices_label) }}
+                        {{ base_report_macro.render_micro_statistics(network_type, "ranks", network_data_micro_level, report_macro.render_choices_label) }}
                         {{ report_macro.render_legend() }}
                     </div>
                 {% endfor %}
@@ -48,12 +48,12 @@
             {{ report_macro.render_report_header(project_title, group, "raw_scores") }}
             <div class="single-report-content">
                 {% for (network_type, question, graph, network_data_macro_level, network_data_micro_level) in 
-                    [("A", question_a, graph_a, macro_a, micro_a), ("B", question_b, graph_b, macro_b, micro_b)] %}
+                    [("A", question_a, graph_a, macro_stats_a, micro_stats_a), ("B", question_b, graph_b, macro_stats_b, micro_stats_b)] %}
                     <div>
                         {{ base_report_macro.render_question(network_type, question) }}
                         {{ base_report_macro.graph(graph) }}
                         {{ base_report_macro.render_macro_statistics(network_data_macro_level) }}
-                        {{ base_report_macro.render_micro_statistics(network_type, "raw_scores", network_data_micro_level, report_macro.choices_label) }}
+                        {{ base_report_macro.render_micro_statistics(network_type, "raw_scores", network_data_micro_level, report_macro.render_choices_label) }}
                         {{ report_macro.render_legend(show_pctiles=False) }}
                     </div>
                 {% endfor %}
