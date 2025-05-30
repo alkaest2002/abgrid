@@ -350,32 +350,34 @@ class ABGridNetwork:
             "type_v": type_v
         }
     
-    def get_network_components(self, G: nx.DiGraph):
+    def get_network_components(self, G: nx.DiGraph) -> List[str]:
         """
-        Identify and return the connected components of a directed graph.
-        This method calculates both the strongly connected and weakly connected components
-        of the given NetworkX directed graph. Strongly connected components are subgraphs
-        where there is a path between any two nodes in both directions, while weakly connected
-        components are subgraphs that are connected when the direction of edges is ignored.
+        Identify and return the unique and significant components of a directed graph as strings.
+
+        This method calculates and returns components of the given NetworkX directed graph, including:
+        - Strongly connected components: Subsets in which each node is reachable from any other node in the same subset.
+        - Weakly connected components: Subsets connected without considering the direction of edges.
+        - Cliques (from the undirected version of the graph): Subsets where each node is directly connected to every other node in the subset.
+
+        Components of each type are filtered to include only those with more than two nodes for connected components and 
+        more than three nodes for cliques. The nodes in each component are concatenated into a single string after being 
+        sorted. The function returns a unique list of these strings, sorted by their length in descending order.
 
         Args:
             G (nx.DiGraph): A directed graph represented using NetworkX's DiGraph class.
 
         Returns:
-            Dict[str, List[Set]]: A dictionary containing:
-                - "strongly_connected": A list of sets, each set contains nodes that form a strongly connected component, 
-                                        sorted by size in descending order.
-                - "weakly_connected": A list of sets, each set contains nodes that form a weakly connected component, 
-                                        sorted by size in descending order.
+            List[str]: A list of strings, where each string represents a unique component with its nodes concatenated
+            in sorted order. The list is sorted in descending order of string length.
         """
-        return {
-            "strongly_connected": [
-                sorted(list(c)) for c in sorted(nx.strongly_connected_components(G), key=len, reverse=True) if len(c) > 2
-            ],
-            "weakly_connected": [
-                sorted(list(c)) for c in sorted(nx.weakly_connected_components(G), key=len, reverse=True) if len(c) > 2
-            ]
-        }
+        components = [
+            *["".join(sorted(list(c))) for c in sorted(nx.kosaraju_strongly_connected_components(G), key=len, reverse=True) if len(c) > 2],
+            *["".join(sorted(list(c))) for c in sorted(nx.weakly_connected_components(G), key=len, reverse=True) if len(c) > 2],
+            *["".join(sorted(list(c))) for c in sorted(nx.find_cliques(G.to_undirected()), key=len, reverse=True) if len(c) > 2]
+        ]
+        
+        # Ensure unique components and sort by length in descending order
+        return sorted(list(set(components)), key=len, reverse=True)
 
     def get_network_graph(self, G: nx.DiGraph, loc: Dict[str, Tuple[float, float]], graphType: Literal["A","B"] = "A") -> str:
         """
