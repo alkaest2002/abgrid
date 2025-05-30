@@ -355,12 +355,12 @@ class ABGridNetwork:
         Identify and return the unique and significant components of a directed graph as strings.
 
         This method calculates and returns components of the given NetworkX directed graph, including:
-        - Strongly connected components: Subsets in which each node is reachable from any other node in the same subset.
+        - Strongly connected components: Subsets in which each node is reachable from any other node respecting edges direction.
         - Weakly connected components: Subsets connected without considering the direction of edges.
         - Cliques (from the undirected version of the graph): Subsets where each node is directly connected to every other node in the subset.
 
-        Components of each type are filtered to include only those with more than two nodes for connected components and 
-        more than three nodes for cliques. The nodes in each component are concatenated into a single string after being 
+        Components of each type are filtered to include only those with more than two nodes. 
+        The nodes in each component are concatenated into a single string after being 
         sorted. The function returns a unique list of these strings, sorted by their length in descending order.
 
         Args:
