@@ -169,11 +169,19 @@
 </div>
 {% endmacro %}
 
-{% macro render_components(render_components_empty_list) %}
-<div class="strongly-connected-components components">
-    {{ render_components_empty_list() }}
-</div>
-<div class="weakly-connected-components components">
-    {{ render_components_empty_list() }}
+{% macro render_components(components, render_components_label, render_components_empty_list) %}
+<div class="components">
+    {% if components | length > 0 %}
+        {{ render_components_label() }}
+        {% for component in components %}
+            <div class="component">
+                {% for node in component %}
+                    <span>{{ node }}</span>{% if not loop.last %} &middot;{% endif %}
+                {% endfor %}
+            </div>
+        {% endfor %}
+    {% else %}
+        {{ render_components_empty_list() }}
+    {% endif %}
 </div>
 {% endmacro %}

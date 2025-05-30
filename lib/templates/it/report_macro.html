@@ -12,6 +12,10 @@
     <span>RANGO</span>
 {% endmacro %}
 
+{% macro render_components_label() %}
+    <p><b>Componenti della rete</b></p>
+{% endmacro %}
+
 {% macro render_edges_types_label(network_type, edge_type) %}
     {% if edge_type == "type_i" %}
         <p><b>Tipo I - Legami non reciproci</b></p>

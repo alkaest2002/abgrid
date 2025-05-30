@@ -43,14 +43,28 @@
         margin-right: 6px;
         margin-bottom: 6px;
     }
+    .components {
+        margin-top: 24px;
+    }
+    .components p {
+        margin-bottom: 12px;
+    }
+    .component {
+        display: inline-block;
+        margin-right: 6px;
+        padding: 3px 6px;
+        margin-bottom: 12px;
+        border: 1px solid var(--base-border-color);
+        border-radius: 6px;
+    }
 </style>
 {% endblock %}
 
 {% macro report_body() %}
-    {% for (network_type, question, graph, macro_stats, micro_stats, nodes_rankings, edges_types) in 
+    {% for (network_type, question, graph, macro_stats, micro_stats, nodes_rankings, edges_types, components) in 
         [
-            ("A", question_a, graph_a, macro_stats_a, micro_stats_a, nodes_a_rankings, edges_a_types), 
-            ("B", question_b, graph_b, macro_stats_b, micro_stats_b, nodes_b_rankings, edges_b_types)
+            ("A", question_a, graph_a, macro_stats_a, micro_stats_a, nodes_a_rankings, edges_a_types, components_a), 
+            ("B", question_b, graph_b, macro_stats_b, micro_stats_b, nodes_b_rankings, edges_b_types, components_b)
         ] 
     %}
         <div class="page">
@@ -116,7 +130,7 @@
                 {{ report_macro.render_disclaimer() }}
                 {{ report_macro.render_report_header(project_title, group, "components") }}
                 {{ base_report_macro.render_question(network_type, question) }}
-                {{ base_report_macro.render_components(report_macro.render_components_empty_list) }}
+                {{ base_report_macro.render_components(components, report_macro.render_components_label, report_macro.render_components_empty_list) }}
             </div>
             {{ report_macro.render_footer(year) }}
         </div>

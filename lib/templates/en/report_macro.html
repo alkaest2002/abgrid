@@ -12,6 +12,14 @@
     <span>RANK</span>
 {% endmacro %}
 
+{% macro render_components_label() %}
+    <p><b>Connected components</b></p>
+{% endmacro %}
+
+{% macro render_weak_components_label(type) %}
+   
+{% endmacro %}
+
 {% macro render_edges_types_label(network_type, edge_type) %}
     {% if edge_type == "type_i" %}
         <p><b>Type I - Non reciprocal edges</b></p>
