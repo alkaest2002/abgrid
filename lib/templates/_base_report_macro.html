@@ -36,6 +36,12 @@
         {% set last_rank_bt = data.values()|map(attribute='bt_rank') | max  %}
         {% set last_rank_cl = data.values()|map(attribute='cl_rank') | max  %}
         {% set last_rank_hu = data.values()|map(attribute='hu_rank') | max  %}
+        {% set highlight_values = [
+            (0, 5/100, "very-high"),
+            (5/100, 10/100, "high"),
+            (85/100, 95/100, "low"),
+            (95/100, 1, "very-low"),
+            ] %}
         {% for k in data.keys() %}
             {% if score_type == "ranks" %}
                 <tr>
@@ -43,35 +49,45 @@
                     <td>{{ data[k].lns | default("-", boolean=True) }}</td>
                     <td>
                         <div>
-                            <div class="{{ highlight_pctile(data[k].ic_rank_pctile, data[k].ic_rank, last_rank_ic) }}">
+                            {% set value = data[k].ic_rank_pctile %}
+                            {% set rank = data[k].ic_rank %}
+                            <div class="{{ highlight_value(value, highlight_values, rank == 1, rank == last_rank_ic) }}">
                                 {{ data[k].ic_rank | int }}
                             </div>
                         </div>
                     </td>
                     <td>
                         <div>
-                            <div class="{{ highlight_pctile(data[k].pr_rank_pctile, data[k].pr_rank, last_rank_pr) }}">
+                            {% set value = data[k].pr_rank_pctile %}
+                            {% set rank = data[k].pr_rank %}
+                            <div class="{{ highlight_value(value, highlight_values, rank == 1, rank == last_rank_pr) }}">
                                 {{ data[k].pr_rank | int }}
                             </div>
                         </div>
                     </td>
                     <td>
                         <div>
-                            <div class="{{ highlight_pctile(data[k].bt_rank_pctile, data[k].bt_rank, last_rank_bt) }}">
+                            {% set value = data[k].bt_rank_pctile %}
+                            {% set rank = data[k].bt_rank %}
+                            <div class="{{ highlight_value(value, highlight_values, rank == 1, rank == last_rank_bt) }}">
                                 {{ data[k].bt_rank | int }}
                             </div>
                         </div>
                     </td>
                     <td>
                         <div>
-                            <div class="{{ highlight_pctile(data[k].cl_rank_pctile, data[k].cl_rank, last_rank_cl) }}">
+                            {% set value = data[k].cl_rank_pctile %}
+                            {% set rank = data[k].cl_rank %}
+                            <div class="{{ highlight_value(value, highlight_values, rank == 1, rank == last_rank_cl) }}">
                                 {{ data[k].cl_rank | int }}
                             </div>
                         </div>
                     </td>
                     <td>
                         <div>
-                            <div class="{{ highlight_pctile(data[k].hu_rank_pctile, data[k].hu_rank, last_rank_hu) }}">
+                            {% set value = data[k].hu_rank_pctile %}
+                            {% set rank = data[k].hu_rank %}
+                            <div class="{{ highlight_value(value, highlight_values, rank == 1, rank == last_rank_hu) }}">
                                 {{ data[k].hu_rank | int }}
                             </div>
                         </div>
@@ -95,30 +111,19 @@
 </div>
 {% endmacro %}
 
-{% macro highlight_pctile(pctile, rank, last_rank) %}
-    {% set no_low_pctile = True %}
-    {% set no_high_pctile = True %}
-    {% if pctile <= 15/100 %}
-        {% set no_low_pctile = False %}
-        {% if pctile <= 10/100 %}
-            very-high
-        {% else %}
-            high
+{% macro highlight_value(value, highlight_values, is_first, is_last) %}
+    {% set highlight = namespace(value=False) %}
+    {% for (min, max, label) in highlight_values %}
+        {% if value > min and value <= max %}
+            {% set highlight.value = True %}
+            {{ label }}
         {% endif %}
-    {% elif pctile >= 85/100 %}
-        {% set no_high_pctile = False %}
-        {% if pctile >= 90/100 %}
-            very-low
-        {% else %}
-            low
-        {% endif %}
+    {% endfor %}
+    {% if not highlight.value %}
+        {% if is_first %}high{% endif %}
+        {% if is_last %}low{% endif %}
     {% endif %}
-    {% if no_high_pctile and rank == last_rank %}
-        low
-    {% endif %}
-    {% if no_low_pctile and rank == 1 %}
-        high
-    {% endif %}
+   
 {% endmacro %}
 
 {% macro render_nodes_sorted_by_rank(ooa_ranks, render_rank_label) %}
@@ -161,8 +166,8 @@
                         </div>
                     {% endfor %}
                 {% else %}
-                {{ edges_type_empty_list()  }}
-            {% endif %}
+                    {{ edges_type_empty_list()  }}
+                {% endif %}
             </div>
         </div>
     {% endfor %}
