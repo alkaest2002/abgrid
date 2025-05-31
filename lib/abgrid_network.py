@@ -533,9 +533,11 @@ class ABGridNetwork:
         return round(network_centralization, 3)
     
     def get_sociogram(self, network_a: nx.DiGraph, network_b: nx.DiGraph) -> pd.DataFrame:
-        preferences = pd.Series(dict(network_a.in_degree()), name="preferences")
-        rejects = pd.Series(dict(network_b.in_degree()), name="rejections")
-        socio_df = pd.concat([preferences, rejects], axis=1)
+        out_preferences = pd.Series(dict(network_a.out_degree()), name="given_preferences")
+        out_rejects = pd.Series(dict(network_b.out_degree()), name="given_rejections")
+        in_preferences = pd.Series(dict(network_a.in_degree()), name="received_preferences")
+        in_rejects = pd.Series(dict(network_b.in_degree()), name="received_rejections")
+        socio_df = pd.concat([in_preferences, in_rejects, out_preferences, out_rejects], axis=1)
         socio_df["mutual_preferences"] = pd.Series(
             [ sum([ network_a.has_edge(x,n) for x in network_a.successors(n) ]) 
                 for n in network_a.nodes() ], index=network_a.nodes()
@@ -544,13 +546,13 @@ class ABGridNetwork:
             [ sum([ network_b.has_edge(x,n) for x in network_b.successors(n) ]) 
                 for n in network_b.nodes() ], index=network_b.nodes()
         )        
-        socio_df["orientation"] = (socio_df["preferences"]
-            .sub(socio_df["rejections"])
-            .div(socio_df["preferences"].add(socio_df["rejections"]))
+        socio_df["orientation"] = (socio_df["given_preferences"]
+            .sub(socio_df["given_rejections"])
+            .div(socio_df["given_preferences"].add(socio_df["given_rejections"]))
             .fillna(0)
             .round(3)
         )
-        socio_df["impact"] = socio_df["preferences"].add(socio_df["rejections"])
-        socio_df["status"] = socio_df["preferences"].sub(socio_df["rejections"])
+        socio_df["impact"] = socio_df["received_preferences"].add(socio_df["received_rejections"])
+        socio_df["status"] = socio_df["received_preferences"].sub(socio_df["received_rejections"])
         return socio_df
 
