@@ -475,7 +475,7 @@ class ABGridNetwork:
                     direction = rand_vertex - centroid
                     direction /= np.linalg.norm(direction)
                     # Scale the direction to move outward
-                    scale = np.random.uniform(0.1, 0.2)  # scale from 0.1 to 0.2 to push outward
+                    scale = np.random.uniform(0.15, 0.15) # scale to push outward
                     candidate = rand_vertex + direction * scale
                     # Check if the candidate point is outside the convex hull
                     if Delaunay(coordinates).find_simplex(candidate) == -1:
