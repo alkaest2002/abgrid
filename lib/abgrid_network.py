@@ -18,6 +18,7 @@ import networkx as nx
 from typing import Any, Literal, List, Dict, Tuple
 from base64 import b64encode
 from functools import reduce
+from scipy.spatial import ConvexHull
 
 # Customize matplotlib settings
 matplotlib.rc('font', **{'size': 8})
@@ -65,16 +66,33 @@ class ABGridNetwork:
         Ga = nx.DiGraph(self.edges_a)
         Gb = nx.DiGraph(self.edges_b)
 
-        # Process networks
-        for G, nodes in [(Ga, self.nodes_a), (Gb, self.nodes_b)]:  
-            
+        # Add nodes without edges to both networks A and B
+        for network, nodes in [(Ga, self.nodes_a), (Gb, self.nodes_b)]:  
             # Add nodes without edges to network A
-            nodes_without_edges = set(list(G)).symmetric_difference(set(nodes))
-            G.add_nodes_from(nodes_without_edges)
+            nodes_without_edges = set(list(network)).symmetric_difference(set(nodes))
+            network.add_nodes_from(nodes_without_edges)
            
         # Generate layout positions for network A and B
         loc_a = nx.kamada_kawai_layout(Ga)
-        loc_b = nx.kamada_kawai_layout(Gb)   
+        loc_b = nx.kamada_kawai_layout(Gb)
+
+        # try to push isolates away from network
+        for network, loc in [(Ga, Gb), (loc_a,loc_b)]:
+
+            # Compute the convex hull of the set of nodes
+            coordinates = pd.DataFrame(loc).T
+            hull = ConvexHull(coordinates)
+
+            # Extract the vertices for the hull
+            hull_points = coordinates.iloc[hull.vertices]
+            xmin, ymin = np.min(hull_points, axis=0)
+            xmax, ymax = np.max(hull_points, axis=0)
+
+            # Loop through isolates
+            for isolate in nx.isolates(network):
+                x = np.random.uniform(xmin - .05, xmax + .05)
+                y = np.random.uniform(ymin - .05, ymax + .05)
+                loc[isolate] = (x,y)
         
         # Store network A and B statistics and plots
         self.macro_stats_a = self.get_network_macro_stats(Ga)
@@ -409,7 +427,7 @@ class ABGridNetwork:
         # Hide axis
         ax.axis('off')  
         
-        # Draw nodes (in black draw isolates)
+        # Draw nodes
         nx.draw_networkx_nodes(G, loc, node_color=color, edgecolors=color, ax=ax)
         nx.draw_networkx_nodes(nx.isolates(G), loc, node_color="#000", edgecolors="#000", ax=ax)
 
