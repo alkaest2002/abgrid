@@ -459,7 +459,7 @@ class ABGridNetwork:
 
         # Adjust layout by pushing isolated nodes away
         if isolates := list(nx.isolates(network)):
-            # Convert current coordinates to dataframe (drop isolates)
+            # Convert current coordinates to dataframe, drop isolates
             coordinates = pd.DataFrame(loc).T.drop(isolates)
             # Compute convex hull
             hull = ConvexHull(coordinates)
@@ -471,15 +471,17 @@ class ABGridNetwork:
                 for _ in range(10): # max 10 attempts
                     # Choose a random hull vertex
                     rand_vertex = coordinates.iloc[np.random.choice(hull.vertices)]
-                    # Create a unit vector pointing outward from the centroid
+                    # Create a unit vector pointing outward from the hull centroid
                     direction = rand_vertex - centroid
                     direction /= np.linalg.norm(direction)
-                    # Scale the direction to move outward
-                    scale = np.random.uniform(0.15, 0.15) # scale to push outward
-                    candidate = rand_vertex + direction * scale
-                    # Check if the candidate point is outside the convex hull
-                    if Delaunay(coordinates).find_simplex(candidate) == -1:
-                        loc[isolate] = candidate
+                    # Define scaling factore to move outward a bit
+                    scale = np.random.uniform(0.15, 0.15)
+                    # Compute candidate position
+                    candidate_pos = rand_vertex + direction * scale
+                    # Check if candidate position is outside the convex hull
+                    if Delaunay(coordinates).find_simplex(candidate_pos) == -1:
+                        # Update isolate position and exit loop
+                        loc[isolate] = candidate_pos
                         break
 
     def get_network_centralization(self, network: nx.Graph) -> float:
