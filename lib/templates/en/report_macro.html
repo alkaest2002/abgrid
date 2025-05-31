@@ -75,7 +75,7 @@
 
 {% macro render_legend(show_macro=True, show_micro=True, show_arrows=True, show_pctiles=True) %}
 <div class="report-legend">
-    {% if show_macro %}<b>NN</b> = Nodes <b>NE</b> = Edges <b>ND</b> = Network density <b>NC</b> = Network Centralization <b>NT</b> = Network Transitivity <b>NR</b> = Network Reciprocity {% endif %}{% if show_micro %}<b>IC</b> = In-Degree <b>PR</b> = PageRank <b>BT</b> = Betweenness <b>CL</b> = Closenness <b>HU</b> = Hub {% endif %}{% if show_arrows %}<b>ND</b> = No In-Degree (&larr; ) No Out-Degree (&rarr;) No In or Out-Degree (&rlarr;) {% endif %}{% if show_pctiles %}<span class="square very-low"></span> Very low <span class="square low"></span> Low <span class="square high"></span> High <span class="square very-high"></span> Very high{% endif %}
+    {% if show_macro %}<b>NN</b> Nodes <b>NE</b> Edges <b>ND</b> Density <b>NC</b> Centralization <b>NT</b> Transitivity <b>NR</b> Reciprocity {% endif %}{% if show_micro %}<b>IC</b> In-Degree <b>PR</b> PageRank <b>BT</b> Betweenness <b>CL</b> Closenness <b>HU</b> Hub {% endif %}{% if show_arrows %}<b>ND</b> No In-Degree (&larr; ) No Out-Degree (&rarr;) No In or Out-Degree (&rlarr;) {% endif %}{% if show_pctiles %}<span class="square very-low"></span> Very low <span class="square low"></span> Low <span class="square high"></span> High <span class="square very-high"></span> Very high{% endif %}
 </div>
 {% endmacro %}
 
