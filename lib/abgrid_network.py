@@ -18,7 +18,7 @@ import networkx as nx
 from typing import Any, Literal, List, Dict, Tuple
 from base64 import b64encode
 from functools import reduce
-from scipy.spatial import ConvexHull
+from scipy.spatial import ConvexHull, Delaunay
 
 # Customize matplotlib settings
 matplotlib.rc('font', **{'size': 8})
@@ -63,50 +63,36 @@ class ABGridNetwork:
         """
         
         # Create network A and B
-        Ga = nx.DiGraph(self.edges_a)
-        Gb = nx.DiGraph(self.edges_b)
+        network_a = nx.DiGraph(self.edges_a)
+        network_b = nx.DiGraph(self.edges_b)
 
-        # Add nodes without edges to both networks A and B
-        for network, nodes in [(Ga, self.nodes_a), (Gb, self.nodes_b)]:  
-            # Add nodes without edges to network A
-            nodes_without_edges = set(list(network)).symmetric_difference(set(nodes))
-            network.add_nodes_from(nodes_without_edges)
+        # Loop through networks
+        for network, nodes in [(network_a, self.nodes_a), (network_b, self.nodes_b)]:  
+            # Add isolated nodes to current network
+            isolated_nodes = set(list(network)).symmetric_difference(set(nodes))
+            network.add_nodes_from(isolated_nodes)
            
-        # Generate layout positions for network A and B
-        loc_a = nx.kamada_kawai_layout(Ga)
-        loc_b = nx.kamada_kawai_layout(Gb)
+        # Generate layout for network A and B
+        loc_a = nx.kamada_kawai_layout(network_a)
+        loc_b = nx.kamada_kawai_layout(network_b)
 
-        # try to push isolates away from network
-        for network, loc in [(Ga, Gb), (loc_a,loc_b)]:
-
-            # Compute the convex hull of the set of nodes
-            coordinates = pd.DataFrame(loc).T
-            hull = ConvexHull(coordinates)
-
-            # Extract the vertices for the hull
-            hull_points = coordinates.iloc[hull.vertices]
-            xmin, ymin = np.min(hull_points, axis=0)
-            xmax, ymax = np.max(hull_points, axis=0)
-
-            # Loop through isolates
-            for isolate in nx.isolates(network):
-                x = np.random.uniform(xmin - .05, xmax + .05)
-                y = np.random.uniform(ymin - .05, ymax + .05)
-                loc[isolate] = (x,y)
-        
+        # try to push isolated nodes (if any) away from other nodes
+        self.handle_isolated_nodes(network_a, self.nodes_a, loc_a)
+        self.handle_isolated_nodes(network_b, self.nodes_b, loc_b)
+                    
         # Store network A and B statistics and plots
-        self.macro_stats_a = self.get_network_macro_stats(Ga)
-        self.macro_stats_b = self.get_network_macro_stats(Gb)
-        self.micro_stats_a = self.get_network_micro_stats(Ga)
-        self.micro_stats_b = self.get_network_micro_stats(Gb)
+        self.macro_stats_a = self.get_network_macro_stats(network_a)
+        self.macro_stats_b = self.get_network_macro_stats(network_b)
+        self.micro_stats_a = self.get_network_micro_stats(network_a)
+        self.micro_stats_b = self.get_network_micro_stats(network_b)
         self.nodes_a_rankings = self.get_nodes_rankings(self.micro_stats_a)
         self.nodes_b_rankings = self.get_nodes_rankings(self.micro_stats_b)
-        self.edges_a_types = self.get_edges_types(Ga, self.edges_a, Gb)
-        self.edges_b_types = self.get_edges_types(Gb, self.edges_b, Ga)
-        self.components_a = self.get_network_components(Ga)
-        self.components_b = self.get_network_components(Gb)
-        self.graph_a = self.get_network_graph(Ga, loc_a, "A")
-        self.graph_b = self.get_network_graph(Gb, loc_b, "B")
+        self.edges_a_types = self.get_edges_types(network_a, self.edges_a, network_b)
+        self.edges_b_types = self.get_edges_types(network_b, self.edges_b, network_a)
+        self.components_a = self.get_network_components(network_a)
+        self.components_b = self.get_network_components(network_b)
+        self.graph_a = self.get_network_graph(network_a, loc_a, "A")
+        self.graph_b = self.get_network_graph(network_b, loc_b, "B")
 
     def unpack_network_edges(self, packed_edges: List[Dict[str, str]]) -> List[Tuple[str, str]]:
         """
@@ -158,16 +144,16 @@ class ABGridNetwork:
             node for node_edges in packed_edges for node, _ in node_edges.items()
         ])
     
-    def get_network_macro_stats(self, G: nx.DiGraph) -> Dict[str, Any]:
+    def get_network_macro_stats(self, network: nx.DiGraph) -> Dict[str, Any]:
         """
         Calculate and return macro-level statistics for a directed network.
 
         This method computes several statistics about the structure of the given
-        network `G`, including the number of nodes, the number of edges, 
+        network , including the number of nodes, the number of edges, 
         density, centralization, transitivity, and reciprocity.
 
         Args:
-            G (nx.DiGraph): A directed graph represented using NetworkX's DiGraph class.
+            network (nx.DiGraph): A directed graph represented using NetworkX's DiGraph class.
 
         Returns:
             Dict[str, Any]: A dictionary containing the following macro-level statistics:
@@ -179,12 +165,12 @@ class ABGridNetwork:
                 - "network_reciprocity": float, the reciprocity of the network rounded to three decimal places.
         """
         # Compute macro-level statistics
-        network_nodes = G.number_of_nodes()
-        network_edges = G.number_of_edges()
-        network_density = round(nx.density(G), 3)
-        network_centralization = self.get_network_centralization(G.to_undirected())
-        network_transitivity = round(nx.transitivity(G), 3)
-        network_reciprocity = round(nx.overall_reciprocity(G), 3)
+        network_nodes = network.number_of_nodes()
+        network_edges = network.number_of_edges()
+        network_density = round(nx.density(network), 3)
+        network_centralization = self.get_network_centralization(network.to_undirected())
+        network_transitivity = round(nx.transitivity(network), 3)
+        network_reciprocity = round(nx.overall_reciprocity(network), 3)
         
         # Return macro-level statistics
         return {
@@ -196,17 +182,17 @@ class ABGridNetwork:
             "network_reciprocity": network_reciprocity,
         }
     
-    def get_network_micro_stats(self, G: nx.DiGraph) -> pd.DataFrame:
+    def get_network_micro_stats(self, network: nx.DiGraph) -> pd.DataFrame:
         """
         Calculate and return micro-level statistics for each node in a directed network graph.
 
         This method computes several node-specific centrality metrics for a given NetworkX directed
-        graph `G` and organizes them into a pandas DataFrame. Additionally, it identifies nodes
+        graph and organizes them into a pandas DataFrame. Additionally, it identifies nodes
         without incoming or outgoing connections and calculates relative ranks and percentiles for each
         centrality measure.
 
         Args:
-            G (nx.DiGraph): A directed graph represented using NetworkX's DiGraph class.
+            network (nx.DiGraph): A directed graph represented using NetworkX's DiGraph class.
 
         Returns:
             pd.DataFrame: A DataFrame containing micro-level statistics for each node, including:
@@ -224,12 +210,12 @@ class ABGridNetwork:
         """
         # Create a DataFrame with micro-level statistics
         micro_level_stats = pd.concat([
-            pd.Series(nx.to_pandas_adjacency(G).apply(lambda x: ", ".join(x[x > 0].index.values), axis=1), name="lns"),
-            pd.Series(nx.in_degree_centrality(G), name="ic"),
-            pd.Series(nx.pagerank(G, max_iter=1000), name="pr"),
-            pd.Series(nx.betweenness_centrality(G), name="bt"),
-            pd.Series(nx.closeness_centrality(G), name="cl"),
-            pd.Series(nx.hits(G)[0], name="hu").abs(),
+            pd.Series(nx.to_pandas_adjacency(network).apply(lambda x: ", ".join(x[x > 0].index.values), axis=1), name="lns"),
+            pd.Series(nx.in_degree_centrality(network), name="ic"),
+            pd.Series(nx.pagerank(network, max_iter=1000), name="pr"),
+            pd.Series(nx.betweenness_centrality(network), name="bt"),
+            pd.Series(nx.closeness_centrality(network), name="cl"),
+            pd.Series(nx.hits(network)[0], name="hu").abs(),
         ], axis=1)
         
         # Identify nodes with no in-degree and/or out-degree
@@ -298,9 +284,8 @@ class ABGridNetwork:
         
         # Return the dictionary of nodes ordered by their rank for each metric
         return nodes_ordered_by_rank
-
-           
-    def get_edges_types(self, G: nx.DiGraph, edges: List[Tuple[str, str]], G_ref: nx.DiGraph) -> Dict[str, List[Tuple[str, str]]]:
+        
+    def get_edges_types(self, network: nx.DiGraph, edges: List[Tuple[str, str]], network_ref: nx.DiGraph) -> Dict[str, List[Tuple[str, str]]]:
         """
         Classify edges in a directed network graph into various types based on their relationships
         within the network and with respect to a reference network.
@@ -313,9 +298,9 @@ class ABGridNetwork:
         - Type V: Fully symmetrical edges, where node A and node B are reciprocally connected in both the original and reference networks.
 
         Args:
-            G (nx.DiGraph): The main directed graph containing the edges to be classified.
-            edges (List[Tuple[str, str]]): A list of edges (tuples) in the graph `G` to be classified.
-            G_ref (nx.DiGraph): A reference directed graph used for comparison in classification.
+            network (nx.DiGraph): The main directed graph containing the edges to be classified.
+            edges (List[Tuple[str, str]]): A list of edges (tuples) in the graph `network` to be classified.
+            network_ref (nx.DiGraph): A reference directed graph used for comparison in classification.
 
         Returns:
             Dict[str, List[Tuple[str, str]]]: A dictionary classifying edges into five categories:
@@ -326,8 +311,8 @@ class ABGridNetwork:
                 - "type_v": List of type V edges (fully symmetrical).
         """
         # Compute ordered adjacency list for both networks
-        adj_df = nx.to_pandas_adjacency(G, nodelist=sorted(G.nodes))
-        adj_ref_df = nx.to_pandas_adjacency(G_ref, nodelist=sorted(G.nodes))
+        adj_df = nx.to_pandas_adjacency(network, nodelist=sorted(network.nodes))
+        adj_ref_df = nx.to_pandas_adjacency(network_ref, nodelist=sorted(network.nodes))
 
         # Compute type I edges, non reciprocal
         # i.e. same network: A -> B and not B -> A
@@ -341,21 +326,21 @@ class ABGridNetwork:
         )
 
         # Compute type III edges, half simmetrical
-        # i.e. A -> B in network G and A -> B in network G_ref
+        # i.e. A -> B in network network and A -> B in network G_ref
         type_iii = (
             pd.DataFrame(np.triu(adj_df) * np.triu(adj_ref_df), index=adj_df.index, columns=adj_df.columns)
                 .stack().loc[lambda x: x == 1].index.tolist()
         )
 
         # Compute type IV edges, half reversed simmetrical
-        # i.e. A -> B in network G and B -> A in network G_ref
+        # i.e. A -> B in network network and B -> A in network G_ref
         type_iv = (
             pd.DataFrame(np.triu(adj_df) * np.tril(adj_ref_df).T, index=adj_df.index, columns=adj_df.columns)
                 .stack().loc[lambda x: x == 1].index.tolist()
         )
 
         # Compute type V edges, full simmetrical
-        # i.e. A -> B, B -> A in network G and A -> B, B -> A in network G_ref
+        # i.e. A -> B, B -> A in network network and A -> B, B -> A in network G_ref
         type_v = [ edge for edge in type_ii if edge in type_iii and edge in type_iv]
 
         # Return edges types
@@ -367,7 +352,7 @@ class ABGridNetwork:
             "type_v": type_v
         }
     
-    def get_network_components(self, G: nx.DiGraph) -> List[str]:
+    def get_network_components(self, network: nx.DiGraph) -> List[str]:
         """
         Identify and return the unique and significant components of a directed graph as strings.
 
@@ -381,27 +366,27 @@ class ABGridNetwork:
         sorted. The function returns a unique list of these strings, sorted by their length in descending order.
 
         Args:
-            G (nx.DiGraph): A directed graph represented using NetworkX's DiGraph class.
+            network (nx.DiGraph): A directed graph represented using NetworkX's DiGraph class.
 
         Returns:
             List[str]: A list of strings, where each string represents a unique component with its nodes concatenated
             in sorted order. The list is sorted in descending order of string length.
         """
         components = [
-            *["".join(sorted(list(c))) for c in sorted(nx.kosaraju_strongly_connected_components(G), key=len, reverse=True) if len(c) > 2],
-            *["".join(sorted(list(c))) for c in sorted(nx.weakly_connected_components(G), key=len, reverse=True) if len(c) > 2],
-            *["".join(sorted(list(c))) for c in sorted(nx.find_cliques(G.to_undirected()), key=len, reverse=True) if len(c) > 2]
+            *["".join(sorted(list(c))) for c in sorted(nx.kosaraju_strongly_connected_components(network), key=len, reverse=True) if len(c) > 2],
+            *["".join(sorted(list(c))) for c in sorted(nx.weakly_connected_components(network), key=len, reverse=True) if len(c) > 2],
+            *["".join(sorted(list(c))) for c in sorted(nx.find_cliques(network.to_undirected()), key=len, reverse=True) if len(c) > 2]
         ]
         
         # Ensure unique components and sort by length in descending order
         return sorted(list(set(components)), key=len, reverse=True)
 
-    def get_network_graph(self, G: nx.DiGraph, loc: Dict[str, Tuple[float, float]], graphType: Literal["A","B"] = "A") -> str:
+    def get_network_graph(self, network: nx.DiGraph, loc: Dict[str, Tuple[float, float]], graphType: Literal["A","B"] = "A") -> str:
         """
         Generate a graphical representation of a network and return it encoded in base64 SVG format.
 
         Args:
-            G (nx.DiGraph): The directed graph to plot.
+            network (nx.DiGraph): The directed graph to plot.
             loc (Dict[str, Tuple[float, float]]): Node positions for layout.
             graphType (str): Type of the network ('A' or 'B'), used to determine node colors.
 
@@ -419,7 +404,7 @@ class ABGridNetwork:
 
         # Determine dimensions of matplotlib graph based upon number of nodes
         fig_size = (8 * CM_TO_INCHES, 8 * CM_TO_INCHES)\
-            if G.number_of_nodes() <= 10 else (17 * CM_TO_INCHES, 19 * CM_TO_INCHES)
+            if network.number_of_nodes() <= 10 else (17 * CM_TO_INCHES, 19 * CM_TO_INCHES)
         
         # Create a matplotlib figure
         fig, ax = plt.subplots(constrained_layout=True, figsize=fig_size)
@@ -428,19 +413,19 @@ class ABGridNetwork:
         ax.axis('off')  
         
         # Draw nodes
-        nx.draw_networkx_nodes(G, loc, node_color=color, edgecolors=color, ax=ax)
-        nx.draw_networkx_nodes(nx.isolates(G), loc, node_color="#000", edgecolors="#000", ax=ax)
+        nx.draw_networkx_nodes(network, loc, node_color=color, edgecolors=color, ax=ax)
+        nx.draw_networkx_nodes(nx.isolates(network), loc, node_color="#000", edgecolors="#000", ax=ax)
 
         # Draw nodes labels
-        nx.draw_networkx_labels(G, loc, font_color="#FFF", font_weight="normal", font_size=10, ax=ax)
+        nx.draw_networkx_labels(network, loc, font_color="#FFF", font_weight="normal", font_size=10, ax=ax)
         
         # Draw reciprocal edges with specific style
-        reciprocal_edges = [e for e in G.edges if e[::-1] in G.edges]
-        nx.draw_networkx_edges(G, loc, edgelist=reciprocal_edges, edge_color=color, arrowstyle='-', width=3, ax=ax)
+        reciprocal_edges = [e for e in network.edges if e[::-1] in network.edges]
+        nx.draw_networkx_edges(network, loc, edgelist=reciprocal_edges, edge_color=color, arrowstyle='-', width=3, ax=ax)
                 
         # Draw non reciprocal edges with specific style
-        non_reciprocal_edges = [e for e in G.edges if e not in reciprocal_edges]
-        nx.draw_networkx_edges(G, loc, edgelist=non_reciprocal_edges, edge_color=color, style="--", arrowstyle='-|>', arrowsize=15, ax=ax)
+        non_reciprocal_edges = [e for e in network.edges if e not in reciprocal_edges]
+        nx.draw_networkx_edges(network, loc, edgelist=non_reciprocal_edges, edge_color=color, style="--", arrowstyle='-|>', arrowsize=15, ax=ax)
         
         # Save figure to the buffer in SVG format then close it
         fig.savefig(buffer, format="svg", bbox_inches='tight', transparent=True, pad_inches=0.05)
@@ -451,8 +436,53 @@ class ABGridNetwork:
         
         # Return the data URI for the SVG
         return f"data:image/svg+xml;base64,{base64_econded_string}"
+    
+    def handle_isolated_nodes(self, network: nx.DiGraph, nodes: Any, loc: Dict[Any, np.ndarray]):
+        """
+        Add isolated nodes to the network and adjust their positions to appear marginal.
 
-    def get_network_centralization(self, G: nx.Graph) -> float:
+        This function first identifies isolated nodes by comparing the network nodes 
+        to a provided list of node identifiers. It adds these isolated nodes to the 
+        network. Then, for visualization purposes, it adjusts the positions of these 
+        isolated nodes to appear outside the convex hull of the main node cluster 
+        so that they are perceptually distant and marginal.
+
+        Args:
+            network (nx.DiGraph): The directed graph where isolated nodes are managed.
+            nodes (Any): A collection of node identifiers that should be present in the network.
+            loc (Dict[Any, np.ndarray]): A dictionary representing the layout of nodes.
+
+        """
+        # Identify and add isolated nodes
+        isolated_nodes = set(network).symmetric_difference(set(nodes))
+        network.add_nodes_from(isolated_nodes)
+
+        # Adjust layout by pushing isolated nodes away
+        if isolates := list(nx.isolates(network)):
+            # Convert current coordinates to dataframe (drop isolates)
+            coordinates = pd.DataFrame(loc).T.drop(isolates)
+            # Compute convex hull
+            hull = ConvexHull(coordinates)
+            # Compute centroid of convex hull
+            centroid = np.mean(coordinates, axis=0)
+
+            # Loop through isolates
+            for isolate in isolates:
+                for _ in range(10): # max 10 attempts
+                    # Choose a random hull vertex
+                    rand_vertex = coordinates.iloc[np.random.choice(hull.vertices)]
+                    # Create a unit vector pointing outward from the centroid
+                    direction = rand_vertex - centroid
+                    direction /= np.linalg.norm(direction)
+                    # Scale the direction to move outward
+                    scale = np.random.uniform(0.1, 0.2)  # scale from 0.1 to 0.2 to push outward
+                    candidate = rand_vertex + direction * scale
+                    # Check if the candidate point is outside the convex hull
+                    if Delaunay(coordinates).find_simplex(candidate) == -1:
+                        loc[isolate] = candidate
+                        break
+
+    def get_network_centralization(self, network: nx.Graph) -> float:
         """
         Calculate the centralization of a network.
 
@@ -460,17 +490,17 @@ class ABGridNetwork:
         It compares the current network structure to an ideal star network structure.
 
         Args:
-            G (nx.Graph): The graph for which the centralization is calculated.
+            network (nx.Graph): The graph for which the centralization is calculated.
 
         Returns:
             float: The centralization value of the network, rounded to three decimal places, or
         """
         
         # Get number of nodes
-        number_of_nodes = G.number_of_nodes()
+        number_of_nodes = network.number_of_nodes()
         
         # Compute node centralities
-        node_centralities = pd.Series(dict(nx.degree(G)))
+        node_centralities = pd.Series(dict(nx.degree(network)))
 
         # Compute Max centrality
         max_centrality = node_centralities.max()
