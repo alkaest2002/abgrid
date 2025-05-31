@@ -64,18 +64,17 @@ class ABGridNetwork:
         # Create network A and B
         Ga = nx.DiGraph(self.edges_a)
         Gb = nx.DiGraph(self.edges_b)
-        
-        # Add nodes without edges to network A
-        nodes_a_without_edges = set(list(Ga)).symmetric_difference(set(self.nodes_a))
-        Ga.add_nodes_from(nodes_a_without_edges)
-        
-        # Add nodes without edges to network B
-        nodes_b_without_edges = set(list(Gb)).symmetric_difference(set(self.nodes_b))
-        Gb.add_nodes_from(nodes_b_without_edges)
-        
+
+        # Process networks
+        for G, nodes in [(Ga, self.nodes_a), (Gb, self.nodes_b)]:  
+            
+            # Add nodes without edges to network A
+            nodes_without_edges = set(list(G)).symmetric_difference(set(nodes))
+            G.add_nodes_from(nodes_without_edges)
+           
         # Generate layout positions for network A and B
         loc_a = nx.kamada_kawai_layout(Ga)
-        loc_b = nx.kamada_kawai_layout(Gb)
+        loc_b = nx.kamada_kawai_layout(Gb)   
         
         # Store network A and B statistics and plots
         self.macro_stats_a = self.get_network_macro_stats(Ga)
@@ -410,8 +409,11 @@ class ABGridNetwork:
         # Hide axis
         ax.axis('off')  
         
-        # Draw nodes and nodes labels
-        nx.draw_networkx_nodes(G, loc, node_color=color, edgecolors=color, ax=ax)        
+        # Draw nodes (in black draw isolates)
+        nx.draw_networkx_nodes(G, loc, node_color=color, edgecolors=color, ax=ax)
+        nx.draw_networkx_nodes(nx.isolates(G), loc, node_color="#000", edgecolors="#000", ax=ax)
+
+        # Draw nodes labels
         nx.draw_networkx_labels(G, loc, font_color="#FFF", font_weight="normal", font_size=10, ax=ax)
         
         # Draw reciprocal edges with specific style
