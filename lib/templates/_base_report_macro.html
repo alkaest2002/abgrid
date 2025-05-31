@@ -1,4 +1,4 @@
-{% macro highlight_value(value, highlight_values, is_first, is_last) %}
+{% macro highlight_value(value, highlight_values, is_min, is_max) %}
     {% set highlight = namespace(value=False) %}
     {% for (min, max, label) in highlight_values %}
         {% if value > min and value <= max %}
@@ -7,8 +7,8 @@
         {% endif %}
     {% endfor %}
     {% if not highlight.value %}
-        {% if is_first %}high{% endif %}
-        {% if is_last %}low{% endif %}
+        {% if is_min[0] %}{{ is_min[1] }}{% endif %}
+        {% if is_max[0] %}{{ is_max[0] }}{% endif %}
     {% endif %}
 {% endmacro %}
 
@@ -33,6 +33,17 @@
 {% endmacro %}
 
 {% macro render_micro_statistics(network_type, score_type, data, render_choices_label) %}
+{% set last_rank_ic = data.values()|map(attribute='ic_rank') | max  %}
+{% set last_rank_pr = data.values()|map(attribute='pr_rank') | max  %}
+{% set last_rank_bt = data.values()|map(attribute='bt_rank') | max  %}
+{% set last_rank_cl = data.values()|map(attribute='cl_rank') | max  %}
+{% set last_rank_hu = data.values()|map(attribute='hu_rank') | max  %}
+{% set highlight_values = [
+    (0, 5/100, "very-high"),
+    (5/100, 10/100, "high"),
+    (85/100, 95/100, "low"),
+    (95/100, 1, "very-low"),
+    ] %}
 <div>
     <table class="report-table table_bordered table_striped full-width">
         <tr>
@@ -45,17 +56,6 @@
             <th>HU</th>
             <th>ND</th>
         </tr>
-        {% set last_rank_ic = data.values()|map(attribute='ic_rank') | max  %}
-        {% set last_rank_pr = data.values()|map(attribute='pr_rank') | max  %}
-        {% set last_rank_bt = data.values()|map(attribute='bt_rank') | max  %}
-        {% set last_rank_cl = data.values()|map(attribute='cl_rank') | max  %}
-        {% set last_rank_hu = data.values()|map(attribute='hu_rank') | max  %}
-        {% set highlight_values = [
-            (0, 5/100, "very-high"),
-            (5/100, 10/100, "high"),
-            (85/100, 95/100, "low"),
-            (95/100, 1, "very-low"),
-            ] %}
         {% for k in data.keys() %}
             {% if score_type == "ranks" %}
                 <tr>
@@ -65,7 +65,9 @@
                         <div>
                             {% set value = data[k].ic_rank_pctile %}
                             {% set rank = data[k].ic_rank %}
-                            <div class="{{ highlight_value(value, highlight_values, rank == 1, rank == last_rank_ic) }}">
+                            {% set is_first = (rank == 1, "high") %}
+                            {% set is_last = (rank == last_rank_ic, "low") %}
+                            <div class="{{ highlight_value(value, highlight_values, is_first, is_last) }}">
                                 {{ data[k].ic_rank | int }}
                             </div>
                         </div>
@@ -74,7 +76,9 @@
                         <div>
                             {% set value = data[k].pr_rank_pctile %}
                             {% set rank = data[k].pr_rank %}
-                            <div class="{{ highlight_value(value, highlight_values, rank == 1, rank == last_rank_pr) }}">
+                            {% set is_first = (rank == 1, "high") %}
+                            {% set is_last = (rank == last_rank_pr, "low") %}
+                            <div class="{{ highlight_value(value, highlight_values, is_first, is_last) }}">
                                 {{ data[k].pr_rank | int }}
                             </div>
                         </div>
@@ -83,7 +87,9 @@
                         <div>
                             {% set value = data[k].bt_rank_pctile %}
                             {% set rank = data[k].bt_rank %}
-                            <div class="{{ highlight_value(value, highlight_values, rank == 1, rank == last_rank_bt) }}">
+                            {% set is_first = (rank == 1, "high") %}
+                            {% set is_last = (rank == last_rank_bt, "low") %}
+                            <div class="{{ highlight_value(value, highlight_values, is_first, is_last) }}">
                                 {{ data[k].bt_rank | int }}
                             </div>
                         </div>
@@ -92,7 +98,9 @@
                         <div>
                             {% set value = data[k].cl_rank_pctile %}
                             {% set rank = data[k].cl_rank %}
-                            <div class="{{ highlight_value(value, highlight_values, rank == 1, rank == last_rank_cl) }}">
+                            {% set is_first = (rank == 1, "high") %}
+                            {% set is_last = (rank == last_rank_cl, "low") %}
+                            <div class="{{ highlight_value(value, highlight_values, is_first, is_last) }}">
                                 {{ data[k].cl_rank | int }}
                             </div>
                         </div>
@@ -101,7 +109,9 @@
                         <div>
                             {% set value = data[k].hu_rank_pctile %}
                             {% set rank = data[k].hu_rank %}
-                            <div class="{{ highlight_value(value, highlight_values, rank == 1, rank == last_rank_hu) }}">
+                            {% set is_first = (rank == 1, "high") %}
+                            {% set is_last = (rank == last_rank_hu, "low") %}
+                            <div class="{{ highlight_value(value, highlight_values, is_first, is_last) }}">
                                 {{ data[k].hu_rank | int }}
                             </div>
                         </div>
