@@ -138,8 +138,10 @@ class ABGridData:
             # If group data was correctly loaded
             if group_data is not None:
                 
-                # Initialize and compute network statistics
+                # Initialize ABGrid network
                 ntw = ABGridNetwork((group_data["choices_a"], group_data["choices_b"]))
+                
+                # Compute network statistics
                 ntw.compute_networks(with_sociogram)
                 
                 # Prepare report data

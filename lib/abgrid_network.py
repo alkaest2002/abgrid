@@ -8,6 +8,7 @@ Date Created: May 3, 2025
 The code is part of the AB-Grid project and is licensed under the MIT License.
 """
 
+from cmath import nan
 import io
 from xmlrpc.client import Boolean
 import numpy as np
@@ -100,7 +101,7 @@ class ABGridNetwork:
         self.graph_a = self.get_network_graph(network_a, loc_a, "A")
         self.graph_b = self.get_network_graph(network_b, loc_b, "B")
 
-        # Add sociogram
+        # Add sociogram if requested
         if with_sociogram:
             self.sociogram = self.get_sociogram(network_a, network_b)
 
@@ -532,9 +533,20 @@ class ABGridNetwork:
         return round(network_centralization, 3)
     
     def get_sociogram(self, network_a: nx.DiGraph, network_b: nx.DiGraph) -> pd.DataFrame:
-        preferences = pd.Series({ k:v for k,v in nx.degree(network_a) }, name="preferences")
-        rejects = pd.Series({ k:v for k,v in nx.degree(network_b) }, name="rejections")
+        preferences = pd.Series(dict(network_a.in_degree()), name="preferences")
+        rejects = pd.Series(dict(network_b.in_degree()), name="rejections")
         socio_df = pd.concat([preferences, rejects], axis=1)
-        socio_df["social_pref"] = socio_df["preferences"].sub(socio_df["rejections"])
+        socio_df["mutual_preferences"] = pd.Series(
+            [ sum([ network_a.has_edge(x,n) for x in network_a.successors(n) ]) 
+                for n in network_a.nodes() ], index=network_a.nodes()
+        )
+        socio_df["status"] = socio_df["preferences"].sub(socio_df["rejections"])
+        socio_df["impact"] = socio_df["preferences"].add(socio_df["rejections"])
+        socio_df["orientation"] = (socio_df["preferences"]
+            .sub(socio_df["rejections"])
+            .div(socio_df["preferences"].add(socio_df["rejections"]))
+            .fillna(0)
+            .round(3)
+        )
         return socio_df
 
