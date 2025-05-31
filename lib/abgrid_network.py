@@ -540,13 +540,17 @@ class ABGridNetwork:
             [ sum([ network_a.has_edge(x,n) for x in network_a.successors(n) ]) 
                 for n in network_a.nodes() ], index=network_a.nodes()
         )
-        socio_df["status"] = socio_df["preferences"].sub(socio_df["rejections"])
-        socio_df["impact"] = socio_df["preferences"].add(socio_df["rejections"])
+        socio_df["mutual_rejections"] = pd.Series(
+            [ sum([ network_b.has_edge(x,n) for x in network_b.successors(n) ]) 
+                for n in network_b.nodes() ], index=network_b.nodes()
+        )        
         socio_df["orientation"] = (socio_df["preferences"]
             .sub(socio_df["rejections"])
             .div(socio_df["preferences"].add(socio_df["rejections"]))
             .fillna(0)
             .round(3)
         )
+        socio_df["impact"] = socio_df["preferences"].add(socio_df["rejections"])
+        socio_df["status"] = socio_df["preferences"].sub(socio_df["rejections"])
         return socio_df
 
