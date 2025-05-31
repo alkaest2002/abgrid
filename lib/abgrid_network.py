@@ -8,7 +8,6 @@ Date Created: May 3, 2025
 The code is part of the AB-Grid project and is licensed under the MIT License.
 """
 
-from cmath import nan
 import io
 from xmlrpc.client import Boolean
 import numpy as np
@@ -533,26 +532,71 @@ class ABGridNetwork:
         return round(network_centralization, 3)
     
     def get_sociogram(self, network_a: nx.DiGraph, network_b: nx.DiGraph) -> pd.DataFrame:
+        """
+        Computes a sociogram DataFrame based on two directed graphs representing 
+        social network data for preferences and rejections.
+
+        Parameters:
+        - network_a (nx.DiGraph): A directed graph where edges represent preferences given.
+        - network_b (nx.DiGraph): A directed graph where edges represent rejections given.
+
+        Returns:
+        - pd.DataFrame: A DataFrame with sociometric indices for each node
+        """
+        
+        # Compute basic data for sociogram
         out_preferences = pd.Series(dict(network_a.out_degree()), name="given_preferences")
         out_rejects = pd.Series(dict(network_b.out_degree()), name="given_rejections")
         in_preferences = pd.Series(dict(network_a.in_degree()), name="received_preferences")
         in_rejects = pd.Series(dict(network_b.in_degree()), name="received_rejections")
+        
+        # Assemble sociogram dataframe
         socio_df = pd.concat([in_preferences, in_rejects, out_preferences, out_rejects], axis=1)
+        
+        # Add mutual preferences
         socio_df["mutual_preferences"] = pd.Series(
             [ sum([ network_a.has_edge(x,n) for x in network_a.successors(n) ]) 
                 for n in network_a.nodes() ], index=network_a.nodes()
         )
+
+        # Add mutual rejections
         socio_df["mutual_rejections"] = pd.Series(
             [ sum([ network_b.has_edge(x,n) for x in network_b.successors(n) ]) 
                 for n in network_b.nodes() ], index=network_b.nodes()
-        )        
+        )
+
+        # Add orientation       
         socio_df["orientation"] = (socio_df["given_preferences"]
             .sub(socio_df["given_rejections"])
             .div(socio_df["given_preferences"].add(socio_df["given_rejections"]))
             .fillna(0)
             .round(3)
         )
+
+        # Add impact
         socio_df["impact"] = socio_df["received_preferences"].add(socio_df["received_rejections"])
-        socio_df["status"] = socio_df["received_preferences"].sub(socio_df["received_rejections"])
-        return socio_df
+        
+        # Add balance
+        socio_df["balance"] = socio_df["received_preferences"].sub(socio_df["received_rejections"])
+        
+        # Add leadership index
+        socio_df["leadership"] = socio_df["received_preferences"].add(socio_df["mutual_preferences"])
+        
+        # Compute sociogram status
+        # Start by computing with z scores of relevat data
+        z_impact = socio_df["impact"].sub(socio_df["impact"].mean()).div(socio_df["impact"].std())
+        z_balance = socio_df["balance"].sub(socio_df["balance"].mean()).div(socio_df["balance"].std())
+
+        # status is average, unless otherwise specified
+        socio_df["status"] = "average"
+        socio_df.loc[z_impact < -1, "status"] = "highly negleted"
+        socio_df.loc[z_impact.between(-.5, -1), "status"] = "negleted"
+        socio_df.loc[np.logical_and(z_impact > 0, z_balance > .5), "status"] = "popular"
+        socio_df.loc[np.logical_and(z_impact > 0, z_balance < -.5), "status"] = "rejected"
+        socio_df.loc[np.logical_and(z_impact > .5, z_balance.between(-.5, .5)), "status"] = "controversial"
+        socio_df.loc[np.logical_and(z_impact > 1, z_balance > 1), "status"] = "highly popular"
+        socio_df.loc[np.logical_and(z_impact > 1, z_balance < -1), "status"] = "highly rejected"
+        
+        # return sociogram dataframe, ordered by node
+        return socio_df.sort_index()
 
