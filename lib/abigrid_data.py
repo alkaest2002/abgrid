@@ -113,12 +113,13 @@ class ABGridData:
             # Return no group data with errors
             return None, self.pydantic_errors_messages(validation_errors)
         
-    def get_report_data(self, group_filepath: Path) -> Tuple[Optional[Dict[str, Any]], Optional[Any]]:
+    def get_report_data(self, group_filepath: Path, with_sociogram: bool = False) -> Tuple[Optional[Dict[str, Any]], Optional[Any]]:
         """
         Load and prepare data for generating a group's report.
 
         Args:
             group_filepath (Path): Path to the group-specific data file.
+            with_sociogram (bool): A flag indicating whether to include sociograms in the reports.
 
         Returns:
            Tuple[Optional[Dict[str, Any]], Optional[Any]]: 
@@ -139,7 +140,7 @@ class ABGridData:
                 
                 # Initialize and compute network statistics
                 ntw = ABGridNetwork((group_data["choices_a"], group_data["choices_b"]))
-                ntw.compute_networks()
+                ntw.compute_networks(with_sociogram)
                 
                 # Prepare report data
                 report_data = {
@@ -162,7 +163,8 @@ class ABGridData:
                     "components_a":ntw.components_a,
                     "components_b":ntw.components_b,
                     "graph_a": ntw.graph_a,
-                    "graph_b": ntw.graph_b
+                    "graph_b": ntw.graph_b,
+                    "sociogram": ntw.sociogram.to_dict("index")
                 }
                 
                 # Return report data with no errors

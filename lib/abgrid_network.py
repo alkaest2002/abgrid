@@ -9,6 +9,7 @@ The code is part of the AB-Grid project and is licensed under the MIT License.
 """
 
 import io
+from xmlrpc.client import Boolean
 import numpy as np
 import pandas as pd
 import matplotlib
@@ -56,10 +57,15 @@ class ABGridNetwork:
         self.edges_b_types = []
         self.graph_a = ""
         self.graph_b = ""
+        self.sociogram = pd.DataFrame()
 
-    def compute_networks(self):
+    def compute_networks(self, with_sociogram: Boolean = False):
         """
-        Compute and store graphs, statistics, and plots for both networks.
+        Compute and store graphs, statistics, and visualization layouts for two networks.
+
+        Args:
+            sociogram (bool): A flag indicating whether to generate sociograms for the networks.
+                          Defaults to False.
         """
         
         # Create network A and B
@@ -76,7 +82,7 @@ class ABGridNetwork:
         loc_a = nx.kamada_kawai_layout(network_a)
         loc_b = nx.kamada_kawai_layout(network_b)
 
-        # try to push isolated nodes (if any) away from other nodes
+        # Try to push isolated nodes (if any) away from other nodes
         self.handle_isolated_nodes(network_a, self.nodes_a, loc_a)
         self.handle_isolated_nodes(network_b, self.nodes_b, loc_b)
                     
@@ -93,6 +99,10 @@ class ABGridNetwork:
         self.components_b = self.get_network_components(network_b)
         self.graph_a = self.get_network_graph(network_a, loc_a, "A")
         self.graph_b = self.get_network_graph(network_b, loc_b, "B")
+
+        # Add sociogram
+        if with_sociogram:
+            self.sociogram = self.get_sociogram(network_a, network_b)
 
     def unpack_network_edges(self, packed_edges: List[Dict[str, str]]) -> List[Tuple[str, str]]:
         """
@@ -216,6 +226,7 @@ class ABGridNetwork:
             pd.Series(nx.betweenness_centrality(network), name="bt"),
             pd.Series(nx.closeness_centrality(network), name="cl"),
             pd.Series(nx.hits(network)[0], name="hu").abs(),
+
         ], axis=1)
         
         # Identify nodes with no in-degree and/or out-degree
@@ -519,3 +530,11 @@ class ABGridNetwork:
         
         # Return network centralization
         return round(network_centralization, 3)
+    
+    def get_sociogram(self, network_a: nx.DiGraph, network_b: nx.DiGraph) -> pd.DataFrame:
+        preferences = pd.Series({ k:v for k,v in nx.degree(network_a) }, name="preferences")
+        rejects = pd.Series({ k:v for k,v in nx.degree(network_b) }, name="rejections")
+        socio_df = pd.concat([preferences, rejects], axis=1)
+        socio_df["social_pref"] = socio_df["preferences"].sub(socio_df["rejections"])
+        return socio_df
+

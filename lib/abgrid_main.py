@@ -149,12 +149,19 @@ class ABGridMain:
             self.render_pdf("answersheet", sheets_data, group_file.stem, language)
 
     @notify_decorator("generate AB-Grid reports")
-    def generate_reports(self, language: str):
+    def generate_reports(self, language: str, with_sociogram: bool = False):
         """
-        Generate and render reports for the project groups, and save the data in a JSON format.
-        
+        Generate and render reports for project groups, and save the summarized data 
+        in a JSON format.
+
+        Args:
+            language (str): The language in which the reports should be rendered.
+            with_sociogram (bool): A flag indicating whether to include sociograms in the reports.
+
         Raises:
-            ValueError: If there are errors in report data validation.
+            ValueError: If any errors occur during report data validation, such as missing 
+            or invalid data, the process is halted and a ValueError is raised with 
+            specific error information.
         """
         # Initialize data object for all reports
         all_data = {}
@@ -163,7 +170,7 @@ class ABGridMain:
         for group_file in self.abgrid_data.groups_filepaths:
 
             # Load report data for the current group
-            report_data, report_errors = self.abgrid_data.get_report_data(group_file)
+            report_data, report_errors = self.abgrid_data.get_report_data(group_file, with_sociogram)
         
             # Notify on report data errors
             if report_errors:

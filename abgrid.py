@@ -19,9 +19,11 @@ parser.add_argument("-g", "--groups", type=int, choices=range(1, 51), default=1,
 parser.add_argument("-m", "--members_per_group", type=int, choices=range(6, 51), default=8,
                     help="Number of members per group (6 to 50).")
 parser.add_argument("-u", "--user", type=str, required=True, 
-                    help="Username.")
+                    help="Root folder where data is stored.")
 parser.add_argument("-l", "--language", choices=LANGUAGES, default="en", 
-                    help="Language used.")
+                    help="Language used for generating documents.")
+parser.add_argument("-s", "--with-sociogram", action='store_true',
+                    help="Output sociogram")
 
 # Parse arguments
 args = parser.parse_args()
@@ -74,7 +76,7 @@ try:
             
             case "reports":
                 # Generate reports
-                abgrid_main.generate_reports(args.language)
+                abgrid_main.generate_reports(args.language, args.with_sociogram)
 
 # File already exists error
 except FileExistsError as error:
