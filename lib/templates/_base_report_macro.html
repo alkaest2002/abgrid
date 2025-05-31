@@ -1,10 +1,24 @@
+{% macro highlight_value(value, highlight_values, is_first, is_last) %}
+    {% set highlight = namespace(value=False) %}
+    {% for (min, max, label) in highlight_values %}
+        {% if value > min and value <= max %}
+            {% set highlight.value = True %}
+            {{ label }}
+        {% endif %}
+    {% endfor %}
+    {% if not highlight.value %}
+        {% if is_first %}high{% endif %}
+        {% if is_last %}low{% endif %}
+    {% endif %}
+{% endmacro %}
+
 {% macro render_question(network_type, question) %}
 <div class="question-container">
    <p><b>{{ network_type }}. {{ question }}</b></p> 
 </div>
 {% endmacro %}
 
-{% macro graph(graph) %}
+{% macro render_graph(graph) %}
 <div class="graph-container">
   <img src="{{ graph }}" />
 </div>
@@ -109,21 +123,6 @@
         {% endfor %}
     </table>
 </div>
-{% endmacro %}
-
-{% macro highlight_value(value, highlight_values, is_first, is_last) %}
-    {% set highlight = namespace(value=False) %}
-    {% for (min, max, label) in highlight_values %}
-        {% if value > min and value <= max %}
-            {% set highlight.value = True %}
-            {{ label }}
-        {% endif %}
-    {% endfor %}
-    {% if not highlight.value %}
-        {% if is_first %}high{% endif %}
-        {% if is_last %}low{% endif %}
-    {% endif %}
-   
 {% endmacro %}
 
 {% macro render_nodes_sorted_by_rank(ooa_ranks, render_rank_label) %}
