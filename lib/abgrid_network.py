@@ -318,12 +318,7 @@ class ABGridNetwork:
             edges_ref (List[Tuple[str, str]]): A list of edges (tuples) in the graph used for comparison in classification.
 
         Returns:
-            Dict[str, List[Tuple[str, str]]]: A dictionary classifying edges into five categories:
-                - "type_i": List of type I edges (non-reciprocal).
-                - "type_ii": List of type II edges (reciprocal).
-                - "type_iii": List of type III edges (half-symmetrical, non-fully symmetrical).
-                - "type_iv": List of type IV edges (half-reversed symmetrical, non-fully symmetrical).
-                - "type_v": List of type V edges (fully symmetrical).
+            Dict[str, List[Tuple[str, str]]]: A dictionary classifying edges into the five categories:
         """
         # Compute ordered adjacency list for both networks
         adj_df = nx.to_pandas_adjacency(network, nodelist=sorted(network.nodes))
