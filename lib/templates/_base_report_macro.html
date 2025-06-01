@@ -1,16 +1,16 @@
-{% macro highlight_value(value, highlight_values, is_min, is_max) %}
-    {% set highlight = namespace(value=False) %}
-    {% for (min, max, label) in highlight_values %}
-        {% if value > min and value <= max %}
-            {% set highlight.value = True %}
+{%- macro highlight_value(value, highlight_values, is_min, is_max) %}
+    {%- set highlight = namespace(value=False) %}
+    {%- for (min, max, label) in highlight_values %}
+        {%- if value > min and value <= max %}
+            {%- set highlight.value = True %}
             {{ label }}
-        {% endif %}
-    {% endfor %}
-    {% if not highlight.value %}
-        {% if is_min[0] %}{{ is_min[1] }}{% endif %}
-        {% if is_max[0] %}{{ is_max[0] }}{% endif %}
-    {% endif %}
-{% endmacro %}
+        {%- endif %}
+    {%- endfor %}
+    {%- if not highlight.value %}
+        {%- if is_min[0] %}{{ is_min[1] }}{% endif %}
+        {%- if is_max[0] %}{{ is_max[1] }}{% endif %}
+    {%- endif %}
+{%- endmacro %}
 
 {% macro render_question(network_type, question) %}
 <div class="question-container">
