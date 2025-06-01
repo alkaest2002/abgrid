@@ -166,7 +166,10 @@ class ABGridData:
                     "components_b":ntw.components_b,
                     "graph_a": ntw.graph_a,
                     "graph_b": ntw.graph_b,
-                    "sociogram": ntw.sociogram.to_dict("index")
+                    "sociogram": {
+                        "micro_stats": ntw.sociogram["micro_stats"].to_dict("index"),
+                        "macro_stats": ntw.sociogram["macro_stats"].to_dict("index")
+                    }
                 }
                 
                 # Return report data with no errors
