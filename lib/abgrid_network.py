@@ -583,20 +583,20 @@ class ABGridNetwork:
         # Add balance
         sociogram_micro_df["balance"] = sociogram_micro_df["received_preferences"].sub(sociogram_micro_df["received_rejections"])
         
-        # Add friendship iq
-        friendship_index = sociogram_micro_df["balance"].add(sociogram_micro_df["mutual_preferences"])
-        sociogram_micro_df["friendship_iq"] = (
-            friendship_index
-                .sub(friendship_index.mean())
-                .div(friendship_index.std())
+        # Add followership coefficient
+        followership_index = sociogram_micro_df["balance"].add(sociogram_micro_df["mutual_preferences"])
+        sociogram_micro_df["followership_coeff"] = (
+            followership_index
+                .sub(followership_index.mean())
+                .div(followership_index.std())
                 .mul(10)
                 .add(100)
                 .astype(int)
         )
 
-        # Add leadership iq
+        # Add leadership coefficient
         leadership_index = sociogram_micro_df["received_preferences"].add(sociogram_micro_df["mutual_preferences"])
-        sociogram_micro_df["leadership_iq"] = (
+        sociogram_micro_df["leadership_coeff"] = (
             leadership_index
                 .sub(leadership_index.mean())
                 .div(leadership_index.std())
