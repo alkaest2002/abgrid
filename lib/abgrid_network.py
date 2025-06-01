@@ -626,8 +626,11 @@ class ABGridNetwork:
         sociogram_macro_df.insert(2, "median", median)
 
         # Add cohesion index
-        coehsion_index = 1
-        
+        coehsion_index = (
+            sociogram_micro_df.loc[:, ["mutual_preferences","mutual_rejections"]].sum(axis=1)
+                .div(sociogram_micro_df.loc[:, ["given_preferences", "given_rejections"]].sum(axis=1)).sum()
+        )
+
         # return sociogram dataframe, ordered by node
         return {
            "micro_stats": sociogram_micro_df.sort_index(),
