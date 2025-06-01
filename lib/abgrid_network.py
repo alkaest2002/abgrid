@@ -87,8 +87,8 @@ class ABGridNetwork:
         loc_b = nx.kamada_kawai_layout(network_b)
 
         # Try to push isolated nodes (if any) away from other nodes
-        self.handle_isolated_nodes(network_a, self.nodes_a, loc_a)
-        self.handle_isolated_nodes(network_b, self.nodes_b, loc_b)
+        self.handle_isolated_nodes(network_a, loc_a)
+        self.handle_isolated_nodes(network_b, loc_b)
                     
         # Store network A and B statistics and plots
         self.macro_stats_a = self.get_network_macro_stats(network_a)
@@ -441,29 +441,20 @@ class ABGridNetwork:
         # Return the data URI for the SVG
         return f"data:image/svg+xml;base64,{base64_econded_string}"
     
-    def handle_isolated_nodes(self, network: nx.DiGraph, nodes: Any, loc: Dict[Any, np.ndarray]):
+    def handle_isolated_nodes(self, network: nx.DiGraph, loc: Dict[Any, np.ndarray]):
         """
         Add isolated nodes to the network and adjust their positions to appear marginal.
 
-        This function first identifies isolated nodes by comparing the network nodes 
-        to a provided list of node identifiers. It adds these isolated nodes to the 
-        network. Then, for visualization purposes, it adjusts the positions of these 
-        isolated nodes to appear outside the convex hull of the main node cluster 
-        so that they are perceptually distant and marginal.
+        This function adjusts the positions of isolated nodes to appear outside the convex hull
+        of the main node cluster so that they are perceptually distant and marginal.
 
         Args:
             network (nx.DiGraph): The directed graph where isolated nodes are managed.
-            nodes (Any): A collection of node identifiers that should be present in the network.
             loc (Dict[Any, np.ndarray]): A dictionary representing the layout of nodes.
 
         """
-        # Identify and add isolated nodes
-        isolated_nodes = set(network).symmetric_difference(set(nodes))
-        network.add_nodes_from(isolated_nodes)
-
-        # Adjust layout by pushing isolated nodes away from network
+        # Adjust layout of isolated nodes by pushing them away from network
         for isolate in list(nx.isolates(network)):
-            
             # Convert current loc coordinates to dataframe
             coordinates = pd.DataFrame(loc).T
             # Compute convex hull
@@ -481,7 +472,7 @@ class ABGridNetwork:
                 direction = rand_vertex - centroid
                 direction /= np.linalg.norm(direction)
                 # Define scaling factore to move outward a bit
-                scale = np.random.uniform(0.15, 0.15)
+                scale = np.random.uniform(0.12, 0.12)
                 # Compute candidate position
                 candidate_pos = rand_vertex + direction * scale
                 # Check if candidate position is outside the convex hull
