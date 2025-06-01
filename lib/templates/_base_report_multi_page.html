@@ -165,6 +165,9 @@
                 {{ base_macro.render_logo() }}
                 {{ report_macro.render_disclaimer() }}
                 {{ report_macro.render_report_header(project_title, group, "sociogram") }}
+                <div style="margin: 12px 0px;">
+                    {{ report_macro.render_sociogram_measures_label("cohesion_index") }}: {{ sociogram["supplemental"]["coehsion_index"] }}
+                </div>
                 {{ base_report_macro.render_sociogram_macro_statistics(sociogram["macro_stats"], report_macro.render_sociogram_measures_label) }}
                 {{ report_macro.render_sociogram_legend(show_macro=True)}}
             </div>
