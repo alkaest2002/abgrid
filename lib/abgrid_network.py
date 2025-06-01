@@ -627,6 +627,6 @@ class ABGridNetwork:
         # return sociogram dataframe, ordered by node
         return {
            "micro_stats": sociogram_micro_df.sort_index(),
-           "macro_stats": sociogram_macro_df.round(3).apply(pd.to_numeric, downcast='integer')
+           "macro_stats": sociogram_macro_df.round(3).apply(pd.to_numeric, downcast="integer")
         }
 
