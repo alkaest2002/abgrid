@@ -85,6 +85,20 @@
 </div>
 {% endmacro %}
 
+{% macro render_sociogram_measures_label(measure) %}
+    {% if measure == "received_preferences" %}Received preferences{% endif%}
+    {% if measure == "received_rejections" %}Received rejections{% endif%}
+    {% if measure == "given_preferences" %}Given Preferences{% endif%}
+    {% if measure == "given_rejections" %}Given rejections{% endif%}
+    {% if measure == "mutual_preferences" %}Mutual preferences{% endif%}
+    {% if measure == "mutual_rejections" %}Mutual rejections{% endif%}
+    {% if measure == "orientation" %}Orientation{% endif%}
+    {% if measure == "impact" %}Impact{% endif%}
+    {% if measure == "balance" %}Balance{% endif%}
+    {% if measure == "followership_coeff" %}Followership coefficient{% endif%}
+    {% if measure == "leadership_coeff" %}Leadership coefficient{% endif%}
+{% endmacro %}
+
 {% macro render_footer(year) %}
 <div class="report-footer dimmed-text small-text">
     <b>Authors</b>: Dr. Pierpaolo CALANNA, PhD, Dr. Gaetano BUONAIUTO (2021-{{ year }}), <b>License of use</b>: the layout of this report, the customization of charts, as well as the selection of quantitative indices, are subject to copyright.

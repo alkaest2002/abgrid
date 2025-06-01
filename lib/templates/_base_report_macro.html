@@ -266,3 +266,34 @@
     {% endfor %}
 </table>
 {% endmacro %}
+
+{% macro render_sociogram_macro_statistics(data, render_sociogram_measures_label) %}
+<table class="report-table table_bordered table_striped full-width">
+    <tr>
+        <th style="text-align: left;">ID</th>
+        <th>Count</th>
+        <th>Mean</th>
+        <th>Median</th>
+        <th>Std</th>
+        <th>Min</th>
+        <th>P25</th>
+        <th>P50</th>
+        <th>P75</th>
+        <th>Max</th>
+    </tr>
+    {% for k in data.keys() %}
+        <tr>
+            <td style="text-align: left;"><div><div>{{ render_sociogram_measures_label(k) }}</div></div></td>
+            <td><div><div>{{ data[k].count }}</div></div></td>
+            <td><div><div>{{ data[k].mean }}</div></div></td>
+            <td><div><div>{{ data[k].median }}</div></div></td>
+            <td><div><div>{{ data[k].std }}</div></div></td>
+            <td><div><div>{{ data[k].min }}</div></div></td>
+            <td><div><div>{{ data[k]["25%"] }}</div></div></td>
+            <td><div><div>{{ data[k]["50%"] }}</div></div></td>
+            <td><div><div>{{ data[k]["75%"] }}</div></div></td>
+            <td><div><div>{{ data[k]["max"] }}</div></div></td>
+        </tr>
+    {% endfor %}
+</table>
+{% endmacro %}
