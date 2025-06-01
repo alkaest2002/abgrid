@@ -183,7 +183,7 @@ class ABGridMain:
             print(f"generating report: {group_file.name}")
         
             # Persist current group report to disk
-            self.render_pdf("report", report_data, group_file.stem, language)
+            self.render_pdf("report", { **report_data, "with_sociogram": with_sociogram }, group_file.stem, language)
         
         # Persist all collected to disk
         with open(self.abgrid_data.project_folderpath / f"{self.abgrid_data.project}_data.json", "w") as fout:
