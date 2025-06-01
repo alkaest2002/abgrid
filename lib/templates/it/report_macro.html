@@ -31,9 +31,9 @@
     {% if edge_type == "type_i" %}
         <p><b>Tipo I - Legami non reciproci</b></p>
         {% if network_type == "A" %}
-            <p class="dimmed-text small-text">X &rarr; Y nella rete A &middot; not Y &rarr; X nella rete B</p>
+            <p class="dimmed-text small-text">X &rarr; Y nella rete A &middot; no Y &rarr; X nella rete A</p>
         {% else %}
-            <p class="dimmed-text small-text">X &rarr; Y nella rete B &middot; not Y &rarr; X nella rete A</p>
+            <p class="dimmed-text small-text">X &rarr; Y nella rete B &middot; no Y &rarr; X nella rete B</p>
         {% endif %}
     {% elif edge_type == "type_ii" %}
         <p><b>Tipo II - Legami reciproci</b></p>

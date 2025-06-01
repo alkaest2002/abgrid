@@ -24,9 +24,9 @@
     {% if edge_type == "type_i" %}
         <p><b>Type I - Non reciprocal edges</b></p>
         {% if network_type == "A" %}
-            <p class="dimmed-text small-text">X &rarr; Y in network A &middot; not Y &rarr; X in network B</p>
+            <p class="dimmed-text small-text">X &rarr; Y in network A &middot; not Y &rarr; X in network A</p>
         {% else %}
-            <p class="dimmed-text small-text">X &rarr; Y in network B &middot; not Y &rarr; X in network A</p>
+            <p class="dimmed-text small-text">X &rarr; Y in network B &middot; not Y &rarr; X in network B</p>
         {% endif %}
     {% elif edge_type == "type_ii" %}
         <p><b>Type II - Reciprocal edges</b></p>

@@ -160,7 +160,7 @@
 </div>
 {% endmacro %}
 
-{% macro render_edges_type(edges_types, render_edges_types_label, render_edges_type_empty_list) %}
+{% macro render_edges_type(network_type, edges_types, render_edges_types_label, render_edges_type_empty_list) %}
 <div class="edges_types">
     {% for edges_type, edges in edges_types.items() %}
         <div class="edges-type">

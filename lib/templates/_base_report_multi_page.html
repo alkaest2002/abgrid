@@ -134,7 +134,7 @@
                 {{ report_macro.render_disclaimer() }}
                 {{ report_macro.render_report_header(project_title, group, "edges_types") }}
                 {{ base_report_macro.render_question(network_type, question) }}
-                {{ base_report_macro.render_edges_type(edges_types, report_macro.render_edges_types_label, report_macro.render_edges_type_empty_list ) }}
+                {{ base_report_macro.render_edges_type(network_type, edges_types, report_macro.render_edges_types_label, report_macro.render_edges_type_empty_list ) }}
             </div>
             {{ report_macro.render_footer(year) }}
         </div>

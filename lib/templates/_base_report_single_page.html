@@ -61,4 +61,30 @@
         </div>
         {{ report_macro.render_footer(year) }}
     </div>
+    {% if with_sociogram %}
+        <div class="page sociogram-micro-stats-main">
+            <div>
+                {{ base_macro.render_logo() }}
+                {{ report_macro.render_disclaimer() }}
+                {{ report_macro.render_report_header(project_title, group, "sociogram") }}
+                {{ base_report_macro.render_sociogram_micro_statistics(sociogram["micro_stats"], report_macro.render_sociogram_status_label) }}
+                {{ report_macro.render_sociogram_legend(show_micro=True, show_colors=True)}}
+            </div>
+            {{ report_macro.render_footer(year) }}
+        </div>
+        <div class="page sociogram-macro-stats-main">
+            <div>
+                {{ base_macro.render_logo() }}
+                {{ report_macro.render_disclaimer() }}
+                {{ report_macro.render_report_header(project_title, group, "sociogram") }}
+                <div style="margin: 12px 0px;">
+                    {{ report_macro.render_sociogram_measures_label("cohesion_index") }}: 
+                        {{ "%0.2f"| format(sociogram["supplemental"]["coehsion_index"] | round(2)) }}
+                </div>
+                {{ base_report_macro.render_sociogram_macro_statistics(sociogram["macro_stats"], report_macro.render_sociogram_measures_label) }}
+                {{ report_macro.render_sociogram_legend(show_macro=True)}}
+            </div>
+            {{ report_macro.render_footer(year) }}
+        </div>
+    {% endif %}
 {% endmacro %}
