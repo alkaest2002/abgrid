@@ -18,6 +18,7 @@
 
 {% macro render_sociogram_status_label(status) %}
     {% if status == "isolated" %}isolato{% endif %}
+    {% if status == "rejected" %}rifiutato{% endif %}
     {% if status == "neglected" %}trascurato{% endif %}
     {% if status == "underrated" %}sottovalutato{% endif %}
     {% if status == "-" %}-{% endif %}
@@ -93,7 +94,7 @@
 
 {% macro render_sociogram_legend(show_micro=False, show_colors=False) %}
 <div class="report-legend">
-    {% if show_micro %}<b>RP</b> Preferenze ricevute <b>RJ</b> Rifiuti ricevuti <b>GP</b> Preferenze accordate <b>GJ</b> Rigfiuti accordati <b>MP</b> Preferenze reciproche <b>MJ</b> Rifiuti reciprochi <b>OR</b> Orientamento <b>IM</b> Impatto <b>MP</b> Bilancio <b>FR</b> Amicizia QI <b>LD</b> Leadership QI <b>ST</b> Status nel gruppo {% endif %}{% if show_colors %}<span class="square very-low"></span> Molto basso <span class="square low"></span> Basso <span class="square high"></span> Alto <span class="square very-high"></span> Molto alto{% endif %}
+    {% if show_micro %}<b>RP</b> Preferenze ricevute <b>RJ</b> Rifiuti ricevuti <b>GP</b> Preferenze date <b>GJ</b> Rifiuti dati <b>MP</b> Preferenze reciproche <b>MJ</b> Rifiuti reciprochi <b>OR</b> Orientamento <b>IM</b> Impatto <b>MP</b> Bilancio <b>FR</b> Amicizia QI <b>LD</b> Leadership QI <b>ST</b> Status nel gruppo {% endif %}{% if show_colors %}<span class="square very-low"></span> Molto basso <span class="square low"></span> Basso <span class="square high"></span> Alto <span class="square very-high"></span> Molto alto{% endif %}
 </div>
 {% endmacro %}
 
