@@ -612,13 +612,14 @@ class ABGridNetwork:
 
         # 2. Update status: default is "-", unless otherwise specified
         sociogram_micro_df["status"] = "-"
+        sociogram_micro_df.loc[sociogram_micro_df.iloc[:, :4].sum(axis=1).eq(0), "status"] = "isolated"
         sociogram_micro_df.loc[z_impact < -1, "status"] = "neglected"
-        sociogram_micro_df.loc[z_impact.between(-.5, -1), "status"] = "underrated"
+        sociogram_micro_df.loc[z_impact.between(-1, -.5), "status"] = "underrated"
         sociogram_micro_df.loc[np.logical_and(z_impact > 0, z_balance > .5), "status"] = "appreciated"
         sociogram_micro_df.loc[np.logical_and(z_impact > 0, z_balance < -.5), "status"] = "rejected"
         sociogram_micro_df.loc[np.logical_and(z_impact > .5, z_balance.between(-.5, .5)), "status"] = "controversial"
         sociogram_micro_df.loc[np.logical_and(z_impact > .5, z_balance > .5), "status"] = "popular"
-
+        
         # Compute sociogram macro stats
         sociogram_numeric_columns = sociogram_micro_df.select_dtypes(np.number)
         median = sociogram_numeric_columns.median()
