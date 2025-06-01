@@ -59,7 +59,8 @@ class ABGridNetwork:
         self.graph_b = ""
         self.sociogram = {
             "micro_stats": pd.DataFrame(),
-            "macro_stats": pd.DataFrame()
+            "macro_stats": pd.DataFrame(),
+            "supplemental": {}
         }
 
     def compute_networks(self, with_sociogram: Boolean = False):
@@ -623,10 +624,16 @@ class ABGridNetwork:
         median = sociogram_numeric_columns.median()
         sociogram_macro_df = sociogram_numeric_columns.describe().T
         sociogram_macro_df.insert(2, "median", median)
+
+        # Add cohesion index
+        coehsion_index = 1
         
         # return sociogram dataframe, ordered by node
         return {
            "micro_stats": sociogram_micro_df.sort_index(),
-           "macro_stats": sociogram_macro_df.apply(pd.to_numeric, downcast="integer")
+           "macro_stats": sociogram_macro_df.apply(pd.to_numeric, downcast="integer"),
+           "supplemental": {
+               "coehsion_index": coehsion_index
+           }
         }
 

@@ -168,7 +168,8 @@ class ABGridData:
                     "graph_b": ntw.graph_b,
                     "sociogram": {
                         "micro_stats": ntw.sociogram["micro_stats"].to_dict("index"),
-                        "macro_stats": ntw.sociogram["macro_stats"].to_dict("index")
+                        "macro_stats": ntw.sociogram["macro_stats"].to_dict("index"),
+                        "supplemental": ntw.sociogram["supplemental"]
                     }
                 }
                 
