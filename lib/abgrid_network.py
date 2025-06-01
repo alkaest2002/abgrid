@@ -574,6 +574,7 @@ class ABGridNetwork:
             .div(sociogram_micro_df["given_preferences"].add(sociogram_micro_df["given_rejections"]))
             .fillna(0)
             .round(3)
+            .astype(int)
         )
 
         # Add impact
@@ -609,8 +610,8 @@ class ABGridNetwork:
         z_impact = sociogram_micro_df["impact"].sub(sociogram_micro_df["impact"].mean()).div(sociogram_micro_df["impact"].std())
         z_balance = sociogram_micro_df["balance"].sub(sociogram_micro_df["balance"].mean()).div(sociogram_micro_df["balance"].std())
 
-        # 2. Update status: default is average, unless otherwise specified
-        sociogram_micro_df["status"] = "average"
+        # 2. Update status: default is "-", unless otherwise specified
+        sociogram_micro_df["status"] = "-"
         sociogram_micro_df.loc[z_impact < -1, "status"] = "neglected"
         sociogram_micro_df.loc[z_impact.between(-.5, -1), "status"] = "underrated"
         sociogram_micro_df.loc[np.logical_and(z_impact > 0, z_balance > .5), "status"] = "appreciated"
