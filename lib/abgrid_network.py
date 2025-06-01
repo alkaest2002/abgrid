@@ -180,10 +180,10 @@ class ABGridNetwork:
         # Compute macro-level statistics
         network_nodes = network.number_of_nodes()
         network_edges = network.number_of_edges()
-        network_density = round(nx.density(network), 3)
+        network_density = nx.density(network)
         network_centralization = self.get_network_centralization(network.to_undirected())
-        network_transitivity = round(nx.transitivity(network), 3)
-        network_reciprocity = round(nx.overall_reciprocity(network), 3)
+        network_transitivity = nx.transitivity(network)
+        network_reciprocity = nx.overall_reciprocity(network)
         
         # Return macro-level statistics
         return {
@@ -259,7 +259,6 @@ class ABGridNetwork:
                 micro_level_stats_pct,
             ], axis=1)
                 .sort_index()
-                .round(3)
         )
         
     def get_nodes_rankings(self, micro_stats: pd.DataFrame) -> Dict[str, Dict[int, int]]:
@@ -532,7 +531,7 @@ class ABGridNetwork:
         )
         
         # Return network centralization
-        return round(network_centralization, 3)
+        return network_centralization
     
     def get_sociogram_data(self, network_a: nx.DiGraph, network_b: nx.DiGraph) -> dict[str, pd.DataFrame]:
         """
@@ -573,7 +572,6 @@ class ABGridNetwork:
             .sub(sociogram_micro_df["given_rejections"])
             .div(sociogram_micro_df["given_preferences"].add(sociogram_micro_df["given_rejections"]))
             .fillna(0)
-            .round(3)
             .astype(int)
         )
 
@@ -629,6 +627,6 @@ class ABGridNetwork:
         # return sociogram dataframe, ordered by node
         return {
            "micro_stats": sociogram_micro_df.sort_index(),
-           "macro_stats": sociogram_macro_df.round(3).apply(pd.to_numeric, downcast="integer")
+           "macro_stats": sociogram_macro_df.apply(pd.to_numeric, downcast="integer")
         }
 
