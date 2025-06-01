@@ -614,10 +614,10 @@ class ABGridNetwork:
         sociogram_micro_df.loc[sociogram_micro_df.iloc[:, :4].sum(axis=1).eq(0), "status"] = "isolated"
         sociogram_micro_df.loc[z_impact < -1, "status"] = "neglected"
         sociogram_micro_df.loc[z_impact.between(-1, -.5), "status"] = "underrated"
-        sociogram_micro_df.loc[np.logical_and(z_impact > 0, z_balance > .5), "status"] = "appreciated"
-        sociogram_micro_df.loc[np.logical_and(z_impact > 0, z_balance < -.5), "status"] = "rejected"
-        sociogram_micro_df.loc[np.logical_and(z_impact > .5, z_balance.between(-.5, .5)), "status"] = "controversial"
-        sociogram_micro_df.loc[np.logical_and(z_impact > .5, z_balance > .5), "status"] = "popular"
+        sociogram_micro_df.loc[np.logical_and(z_impact > 0, z_balance.between(.5, 1)), "status"] = "appreciated"
+        sociogram_micro_df.loc[np.logical_and(z_impact > 0, z_balance > 1), "status"] = "popular"
+        sociogram_micro_df.loc[np.logical_and(z_impact > 0, z_balance < -1), "status"] = "rejected"
+        sociogram_micro_df.loc[np.logical_and(z_impact > 0, z_balance.between(-.5, .5)), "status"] = "controversial"
         
         # Compute sociogram macro stats
         sociogram_numeric_columns = sociogram_micro_df.select_dtypes(np.number)
@@ -628,7 +628,7 @@ class ABGridNetwork:
         # Add cohesion index
         coehsion_index = (sociogram_micro_df.loc[:, "mutual_preferences"].sum() / 2) / len(network_a)
 
-        # return sociogram dataframe, ordered by node
+        # Return sociogram dataframe, ordered by node
         return {
            "micro_stats": sociogram_micro_df.sort_index(),
            "macro_stats": sociogram_macro_df.apply(pd.to_numeric, downcast="integer"),
