@@ -77,7 +77,13 @@
 
 {% macro render_sna_legend(show_macro=False, show_micro=False, show_arrows=False, show_colors=False) %}
 <div class="report-legend">
-    {% if show_macro %}<b>NN</b> Nodi <b>NE</b> Legami <b>ND</b> Densità <b>NC</b> Centralizzazione <b>NT</b> Transitività <b>NR</b> Reciprocità {% endif %}{% if show_micro%}<b>IC</b> In-Degree <b>PR</b> PageRank <b>BT</b> Betweenness <b>CL</b> Closenness <b>HU</b> Hub {% endif %}{% if show_arrows %}<b>ND</b> Nessun In-Degree (&larr; ) Nessun Out-Degree (&rarr;) Nessun In or Out-Degree (&rlarr;) {% endif %}{% if show_colors %}<span class="square very-low"></span> Molto basso <span class="square low"></span> Basso <span class="square high"></span> Alto <span class="square very-high"></span> Molto alto{% endif %}
+    {% if show_macro %}<b>NN</b> Nodi <b>NE</b> Legami <b>ND</b> Densità <b>NC</b> Centralizzazione <b>NT</b> Transitività <b>NR</b> Reciprocità {% elif show_micro%}<b>IC</b> In-Degree <b>PR</b> PageRank <b>BT</b> Betweenness <b>CL</b> Closenness <b>HU</b> Hub {% elif show_arrows %}<b>ND</b> Nessun In-Degree (&larr; ) Nessun Out-Degree (&rarr;) Nessun In or Out-Degree (&rlarr;) {% elif show_colors %}<span class="square very-low"></span> Molto basso <span class="square low"></span> Basso <span class="square high"></span> Alto <span class="square very-high"></span> Molto alto{% endif %}
+</div>
+{% endmacro %}
+
+{% macro render_sociogram_legend(show_micro=False, show_colors=False) %}
+<div class="report-legend">
+    {% if show_micro %}<b>RP</b> Preferenze ricevute <b>RJ</b> Rifiuti ricevuti <b>GP</b> Preferenze accordate <b>GJ</b> Rigfiuti accordati <b>MP</b> Preferenze reciproche <b>MJ</b> Rifiuti reciprochi <b>OR</b> Orientamento <b>IM</b> Impatto <b>MP</b> Bilancio <b>FR</b> Amicizia QI <b>LD</b> Leadership QI <b>ST</b> Status nel gruppo {% elif show_colors %}<span class="square very-low"></span> Very low <span class="square low"></span> Low <span class="square high"></span> High <span class="square very-high"></span> Very high{% endif %}
 </div>
 {% endmacro %}
 
