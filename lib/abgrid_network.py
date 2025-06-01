@@ -97,8 +97,8 @@ class ABGridNetwork:
         self.micro_stats_b = self.get_network_micro_stats(network_b)
         self.nodes_a_rankings = self.get_nodes_rankings(self.micro_stats_a)
         self.nodes_b_rankings = self.get_nodes_rankings(self.micro_stats_b)
-        self.edges_a_types = self.get_edges_types(network_a, self.edges_a, network_b)
-        self.edges_b_types = self.get_edges_types(network_b, self.edges_b, network_a)
+        self.edges_a_types = self.get_edges_types(network_a, self.edges_a, network_b, self.edges_b)
+        self.edges_b_types = self.get_edges_types(network_b, self.edges_b, network_a, self.edges_a)
         self.components_a = self.get_network_components(network_a)
         self.components_b = self.get_network_components(network_b)
         self.graph_a = self.get_network_graph(network_a, loc_a, "A")
@@ -299,7 +299,7 @@ class ABGridNetwork:
         # Return the dictionary of nodes ordered by their rank for each metric
         return nodes_ordered_by_rank
         
-    def get_edges_types(self, network: nx.DiGraph, edges: List[Tuple[str, str]], network_ref: nx.DiGraph) -> Dict[str, List[Tuple[str, str]]]:
+    def get_edges_types(self, network: nx.DiGraph, edges: List[Tuple[str, str]], network_ref: nx.DiGraph, edges_ref: List[Tuple[str, str]]) -> Dict[str, List[Tuple[str, str]]]:
         """
         Classify edges in a directed network graph into various types based on their relationships
         within the network and with respect to a reference network.
@@ -313,8 +313,9 @@ class ABGridNetwork:
 
         Args:
             network (nx.DiGraph): The main directed graph containing the edges to be classified.
-            edges (List[Tuple[str, str]]): A list of edges (tuples) in the graph `network` to be classified.
+            edges (List[Tuple[str, str]]): A list ozf edges (tuples) in the graph `network` to be classified.
             network_ref (nx.DiGraph): A reference directed graph used for comparison in classification.
+            edges_ref (List[Tuple[str, str]]): A list of edges (tuples) in the graph used for comparison in classification.
 
         Returns:
             Dict[str, List[Tuple[str, str]]]: A dictionary classifying edges into five categories:
@@ -338,24 +339,18 @@ class ABGridNetwork:
             pd.DataFrame(np.triu(adj_df) * np.tril(adj_df).T, index=adj_df.index, columns=adj_df.columns)
                 .stack().loc[lambda x: x == 1].index.tolist()
         )
-
+        
         # Compute type III edges, half simmetrical
         # i.e. A -> B in network network and A -> B in network G_ref
-        type_iii = (
-            pd.DataFrame(np.triu(adj_df) * np.triu(adj_ref_df), index=adj_df.index, columns=adj_df.columns)
-                .stack().loc[lambda x: x == 1].index.tolist()
-        )
+        type_iii = [ edge for edge in edges if edge in edges_ref ]
 
         # Compute type IV edges, half reversed simmetrical
         # i.e. A -> B in network network and B -> A in network G_ref
-        type_iv = (
-            pd.DataFrame(np.triu(adj_df) * np.tril(adj_ref_df).T, index=adj_df.index, columns=adj_df.columns)
-                .stack().loc[lambda x: x == 1].index.tolist()
-        )
+        type_iv = [ edge for edge in edges if edge[::-1] in edges_ref ]
 
         # Compute type V edges, full simmetrical
         # i.e. A -> B, B -> A in network network and A -> B, B -> A in network G_ref
-        type_v = [ edge for edge in type_ii if edge in type_iii and edge in type_iv]
+        type_v = [ edge for edge in type_ii if edge in type_iii and edge in type_iv ]
 
         # Return edges types
         return {
