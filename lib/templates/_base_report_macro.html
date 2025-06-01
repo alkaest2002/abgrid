@@ -45,16 +45,16 @@
     (95/100, 1, "very-low"),
 ] %}
 <div>
-    <table class="report-table table_bordered table_striped full-width">
+    <table class="report-table table_bordered table_striped full-width table-sna-micro-stats">
         <tr>
             <th>ID</th>
             <th>{{ render_choices_label() }}</th>
-            <th style="width: 80px;">IC</th>
-            <th style="width: 80px;">PR</th>
-            <th style="width: 80px;">BT</th>
-            <th style="width: 80px;">CL</th>
-            <th style="width: 80px;">HU</th>
-            <th style="width: 80px;">ND</th>
+            <th>IC</th>
+            <th>PR</th>
+            <th>BT</th>
+            <th>CL</th>
+            <th>HU</th>
+            <th>ND</th>
         </tr>
         {% for k in data.keys() %}
             {% if score_type == "ranks" %}
@@ -139,7 +139,7 @@
 <div class="ooa-tables-container">
     {% for metric, data in ooa_ranks.items() %}
         <div>
-            <table class="report-table table_bordered table_striped full-width">
+            <table class="report-table table_bordered table_striped full-width table-sna-ooa">
                 <tr>
                     <th>{{ render_rank_label() }}</th>
                     <th>{{ metric[:2] | upper }}</th>
@@ -217,7 +217,7 @@
     (80, 90, "low"),
     (0, 80, "very-low"),
 ] %}
-<table class="report-table table_bordered table_striped full-width">
+<table class="report-table table_bordered table_striped full-width table-sociogram-micro-stats">
     <tr>
         <th>ID</th>
         <th>RP</th>
@@ -268,9 +268,9 @@
 {% endmacro %}
 
 {% macro render_sociogram_macro_statistics(data, render_sociogram_measures_label) %}
-<table class="report-table table_bordered table_striped full-width">
+<table class="report-table table_bordered table_striped full-width table-sociogram-macro-stats">
     <tr>
-        <th style="text-align: left;">ID</th>
+        <th class="text-left">ID</th>
         <th>Count</th>
         <th>Mean</th>
         <th>Median</th>
@@ -283,11 +283,11 @@
     </tr>
     {% for k in data.keys() %}
         <tr>
-            <td style="text-align: left;"><div><div>{{ render_sociogram_measures_label(k) }}</div></div></td>
+            <td class="text-left"><div><div>{{ render_sociogram_measures_label(k) }}</div></div></td>
             <td><div><div>{{ data[k].count }}</div></div></td>
-            <td><div><div>{{ data[k].mean }}</div></div></td>
+            <td><div><div>{{ "%0.2f"| format(data[k].mean | round(2)) }}</div></div></td>
             <td><div><div>{{ data[k].median }}</div></div></td>
-            <td><div><div>{{ data[k].std }}</div></div></td>
+            <td><div><div>{{ "%0.2f"| format(data[k].std | round(2)) }}</div></div></td>
             <td><div><div>{{ data[k].min }}</div></div></td>
             <td><div><div>{{ data[k]["25%"] }}</div></div></td>
             <td><div><div>{{ data[k]["50%"] }}</div></div></td>
