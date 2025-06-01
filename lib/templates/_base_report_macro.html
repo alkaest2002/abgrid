@@ -211,7 +211,7 @@
 {% endmacro %}
 
 {% macro render_sociogram_micro_statistics(data, render_sociogram_status_label) %}
-{% set qi_highlight_values = [
+{% set coeff_highlight_values = [
     (130, 500, "very-high"),
     (110, 130, "high"),
     (80, 90, "low"),
@@ -247,17 +247,17 @@
             <td><div><div>{{ data[k].balance }}</div></div></td>
             <td>
                 <div>
-                    {% set value = data[k].friendship_iq %}
-                    <div class="{{ highlight_value(value, qi_highlight_values, (False, ''), (False, '')) }}">
-                        {{ data[k].friendship_iq }}
+                    {% set value = data[k].followership_coeff %}
+                    <div class="{{ highlight_value(value, coeff_highlight_values, (False, ''), (False, '')) }}">
+                        {{ data[k].followership_coeff }}
                     </div>
                 </div>
             </td>
             <td>
                 <div>
-                    {% set value = data[k].leadership_iq %}
-                    <div class="{{ highlight_value(value, qi_highlight_values, (False, ''), (False, '')) }}">
-                        {{ data[k].leadership_iq }}
+                    {% set value = data[k].leadership_coeff %}
+                    <div class="{{ highlight_value(value, coeff_highlight_values, (False, ''), (False, '')) }}">
+                        {{ data[k].leadership_coeff }}
                     </div>
                 </div>
             </td>
