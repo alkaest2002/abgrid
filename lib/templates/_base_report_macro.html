@@ -43,18 +43,18 @@
     (5/100, 10/100, "high"),
     (85/100, 95/100, "low"),
     (95/100, 1, "very-low"),
-    ] %}
+] %}
 <div>
     <table class="report-table table_bordered table_striped full-width">
         <tr>
             <th>ID</th>
             <th>{{ render_choices_label() }}</th>
-            <th>IC</th>
-            <th>PR</th>
-            <th>BT</th>
-            <th>CL</th>
-            <th>HU</th>
-            <th>ND</th>
+            <th style="width: 80px;">IC</th>
+            <th style="width: 80px;">PR</th>
+            <th style="width: 80px;">BT</th>
+            <th style="width: 80px;">CL</th>
+            <th style="width: 80px;">HU</th>
+            <th style="width: 80px;">ND</th>
         </tr>
         {% for k in data.keys() %}
             {% if score_type == "ranks" %}
@@ -208,4 +208,61 @@
         {{ render_components_empty_list() }}
     {% endif %}
 </div>
+{% endmacro %}
+
+{% macro render_sociogram_micro_statistics(data) %}
+{% set qi_highlight_values = [
+    (130, 500, "very-high"),
+    (110, 130, "high"),
+    (80, 90, "low"),
+    (0, 80, "very-low"),
+] %}
+<table class="report-table table_bordered table_striped full-width">
+    <tr>
+        <th>ID</th>
+        <th>RP</th>
+        <th>RJ</th>
+        <th>GP</th>
+        <th>GJ</th>
+        <th>MP</th>
+        <th>MR</th>
+        <th>OR</th>
+        <th>IM</th>
+        <th>BL</th>
+        <th>FR</th>
+        <th>LD</th>
+        <th>ST</th>
+    </tr>
+    {% for k in data.keys() %}
+        <tr>
+            <td><div><div>{{ k }}</div></div></td>
+            <td><div><div>{{ data[k].received_preferences }}</div></div></td>
+            <td><div><div>{{ data[k].received_rejections }}</div></div></td>
+            <td><div><div>{{ data[k].given_preferences }}</div></div></td>
+            <td><div><div>{{ data[k].given_rejections }}</div></div></td>
+            <td><div><div>{{ data[k].mutual_preferences }}</div></div></td>
+            <td><div><div>{{ data[k].mutual_rejections }}</div></div></td>
+            <td><div><div>{{ data[k].orientation }}</div></div></td>
+            <td><div><div>{{ data[k].impact }}</div></div></td>
+            <td><div><div>{{ data[k].balance }}</div></div></td>
+            <td>
+                <div>
+                    {% set value = data[k].friendship_iq %}
+                    <div class="{{ highlight_value(value, qi_highlight_values, (False, ''), (False, '')) }}">
+                        {{ data[k].friendship_iq }}
+                    </div>
+                </div>
+            </td>
+            <td>
+                <div>
+                    {% set value = data[k].leadership_iq %}
+                    <div class="{{ highlight_value(value, qi_highlight_values, (False, ''), (False, '')) }}">
+                        {{ data[k].leadership_iq }}
+                    </div>
+                </div>
+            </td>
+            <td><div><div>{{ data[k].status }}</div></div></td>
+        </tr>
+    {% endfor %}
+</table>
 {% endmacro %}

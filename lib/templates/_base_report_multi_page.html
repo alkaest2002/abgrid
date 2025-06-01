@@ -2,9 +2,6 @@
 
 {% block report_multi_style %}
 <style>
-    .report-table td:nth-last-child(-n+6) {
-        width: 80px;
-    }
     .ooa-tables-container {
         display: flex;
     }
@@ -91,7 +88,7 @@
                 {{ base_report_macro.render_sna_graph(graph) }}
             </div>
             <div>
-                {{ report_macro.render_legend(show_micro=False, show_arrows=False, show_pctiles=False) }}
+                {{ report_macro.render_sna_legend(show_macro=True) }}
                 {{ report_macro.render_footer(year) }}
             </div>
         </div>
@@ -102,7 +99,7 @@
                 {{ report_macro.render_report_header(project_title, group, "raw_scores") }}
                 {{ base_report_macro.render_question(network_type, question) }}
                 {{ base_report_macro.render_sna_micro_statistics(network_type, "raw_scores", micro_stats, report_macro.render_choices_label) }}
-                {{ report_macro.render_legend(show_macro=False, show_pctiles=False) }}
+                {{ report_macro.render_sna_legend(show_micro=True, show_arrows=True) }}
             </div>
             {{ report_macro.render_footer(year) }}
         </div>
@@ -113,7 +110,7 @@
                 {{ report_macro.render_report_header(project_title, group, "ranks") }}
                 {{ base_report_macro.render_question(network_type, question) }}
                 {{ base_report_macro.render_sna_micro_statistics(network_type, "ranks", micro_stats, report_macro.render_choices_label) }}
-                {{ report_macro.render_legend(show_macro=False, show_pctiles=True) }}
+                {{ report_macro.render_sna_legend(show_micro=True, show_arrows=True, show_colors=True) }}
             </div>
             {{ report_macro.render_footer(year) }}
         </div>
@@ -124,7 +121,7 @@
                 {{ report_macro.render_report_header(project_title, group, "ordered_nodes") }}
                 {{ base_report_macro.render_question(network_type, question) }}
                 {{ base_report_macro.render_sna_nodes_sorted_by_rank(nodes_rankings, report_macro.render_rank_label) }}
-                {{ report_macro.render_legend(show_macro=False, show_arrows=False, show_pctiles=False) }}
+                {{ report_macro.render_sna_legend(show_micro=True) }}
             </div>
             {{ report_macro.render_footer(year) }}
         </div>
@@ -154,6 +151,7 @@
                 {{ base_macro.render_logo() }}
                 {{ report_macro.render_disclaimer() }}
                 {{ report_macro.render_report_header(project_title, group, "sociogram") }}
+                {{ base_report_macro.render_sociogram_micro_statistics(sociogram["micro_stats"]) }}
             </div>
             {{ report_macro.render_footer(year) }}
         </div>
