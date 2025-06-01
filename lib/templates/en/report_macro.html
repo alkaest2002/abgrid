@@ -69,7 +69,7 @@
 
 {% macro render_report_header(project_title, group, type) %}
 <div class="report-header">
-    <span><b>GROUP {{ group | upper }} - {{ project_title | upper }}</b></span><span>{% if type == "graph" %}NETWORK GRAPH{% elif type == "raw_scores" %}RAW SCORES{% elif type == "ranks" %}RANK SCORES{% elif type == "ordered_nodes" %}NODES ORDERED BY RANK SCORES{% elif type == "edges_types" %}TYPES OF EDGES{% elif type == "components" %}NETWORK COMPONENTS{% endif %}</span>
+    <span><b>GROUP {{ group | upper }} - {{ project_title | upper }}</b></span><span>{% if type == "graph" %}NETWORK GRAPH{% elif type == "raw_scores" %}RAW SCORES{% elif type == "ranks" %}RANK SCORES{% elif type == "ordered_nodes" %}NODES ORDERED BY RANK SCORES{% elif type == "edges_types" %}TYPES OF EDGES{% elif type == "components" %}NETWORK COMPONENTS{% elif type == "sociogram" %}SOCIOGRAM{% endif %}</span>
 </div>
 {% endmacro %}
 

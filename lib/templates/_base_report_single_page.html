@@ -32,8 +32,8 @@
                     <div>
                         {{ base_report_macro.render_question(network_type, question) }}
                         {{ base_report_macro.render_graph(graph) }}
-                        {{ base_report_macro.render_macro_statistics(network_data_macro_level) }}
-                        {{ base_report_macro.render_micro_statistics(network_type, "ranks", network_data_micro_level, report_macro.render_choices_label) }}
+                        {{ base_report_macro.render_sna_macro_statistics(network_data_macro_level) }}
+                        {{ base_report_macro.render_sna_micro_statistics(network_type, "ranks", network_data_micro_level, report_macro.render_choices_label) }}
                         {{ report_macro.render_legend() }}
                     </div>
                 {% endfor %}
@@ -52,8 +52,8 @@
                     <div>
                         {{ base_report_macro.render_question(network_type, question) }}
                         {{ base_report_macro.render_graph(graph) }}
-                        {{ base_report_macro.render_macro_statistics(network_data_macro_level) }}
-                        {{ base_report_macro.render_micro_statistics(network_type, "raw_scores", network_data_micro_level, report_macro.render_choices_label) }}
+                        {{ base_report_macro.render_sna_macro_statistics(network_data_macro_level) }}
+                        {{ base_report_macro.render_sna_micro_statistics(network_type, "raw_scores", network_data_micro_level, report_macro.render_choices_label) }}
                         {{ report_macro.render_legend(show_pctiles=False) }}
                     </div>
                 {% endfor %}

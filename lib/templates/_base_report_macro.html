@@ -24,7 +24,7 @@
 </div>
 {% endmacro %}
 
-{% macro render_macro_statistics(data) %}
+{% macro render_sna_macro_statistics(data) %}
 <div class="macro-container">
     <p>
         <b>NN</b> {{ data.network_nodes }}, <b>NE</b> {{ data.network_edges }}, <b>ND</b> {{ (data.network_density * 100)|round|int }}%, <b>NC</b> {{ (data.network_centralization * 100)|round|int }}%, <b>NT</b> {{ (data.network_transitivity * 100)|round|int }}%, <b>NR</b> {{ (data.network_reciprocity * 100)|round|int }}%
@@ -32,7 +32,7 @@
 </div>
 {% endmacro %}
 
-{% macro render_micro_statistics(network_type, score_type, data, render_choices_label) %}
+{% macro render_sna_micro_statistics(network_type, score_type, data, render_choices_label) %}
 {% set last_rank_ic = data.values()|map(attribute='ic_rank') | max  %}
 {% set last_rank_pr = data.values()|map(attribute='pr_rank') | max  %}
 {% set last_rank_bt = data.values()|map(attribute='bt_rank') | max  %}
@@ -135,7 +135,7 @@
 </div>
 {% endmacro %}
 
-{% macro render_nodes_sorted_by_rank(ooa_ranks, render_rank_label) %}
+{% macro render_sna_nodes_sorted_by_rank(ooa_ranks, render_rank_label) %}
 <div class="ooa-tables-container">
     {% for metric, data in ooa_ranks.items() %}
         <div>
@@ -183,7 +183,7 @@
 </div>
 {% endmacro %}
 
-{% macro render_components(components, render_components_label, render_components_empty_list) %}
+{% macro render_sna_components(components, render_components_label, render_components_empty_list) %}
 <div class="components">
     {% if components | length > 0 %}
         {{ render_components_label() }}

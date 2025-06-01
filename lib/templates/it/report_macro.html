@@ -71,7 +71,7 @@
 
 {% macro render_report_header(project_title, group, type) %}
 <div class="report-header">
-    <span><b>GRUPPO {{ group | upper }} - {{ project_title | upper }}</b></span><span>{% if type == "graph" %}GRAFICO RETE{% elif type == "raw_scores" %}PUNTEGGI GREZZI{% elif type == "ranks" %}PUNTEGGI DI RANGO{% elif type == "ordered_nodes" %}NODI ORDINATI PER PUNTEGGI DI RANGO{% elif type == "edges_types" %}TIPOLOGIA LEGAMI{% elif type == "components" %}COMPONENTI RETE{% endif %}</span>
+    <span><b>GRUPPO {{ group | upper }} - {{ project_title | upper }}</b></span><span>{% if type == "graph" %}GRAFICO RETE{% elif type == "raw_scores" %}PUNTEGGI GREZZI{% elif type == "ranks" %}PUNTEGGI DI RANGO{% elif type == "ordered_nodes" %}NODI ORDINATI PER PUNTEGGI DI RANGO{% elif type == "edges_types" %}TIPOLOGIA LEGAMI{% elif type == "components" %}COMPONENTI RETE{% elif type == "sociogram" %}SOCIOGRAMMA{% endif %}</span>
 </div>
 {% endmacro %}
 
