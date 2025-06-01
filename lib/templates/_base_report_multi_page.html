@@ -15,7 +15,7 @@
     .ooa-tables-container > div:last-child {
         padding-right: 0px;
     }
-    .report-legend:first-of-type {
+    .sna-graph-main .report-legend {
         padding-top: 6px;
         margin-bottom: 24px;
         border-top: 1px solid var(--base-border-color);
@@ -81,7 +81,7 @@
             ("B", question_b, graph_b, macro_stats_b, micro_stats_b, nodes_b_rankings, edges_b_types, components_b)
         ] 
     %}
-        <div class="page">
+        <div class="page sna-graph-main">
             <div>
                 {{ base_macro.render_logo() }}
                 {{ report_macro.render_disclaimer() }}
@@ -95,7 +95,7 @@
                 {{ report_macro.render_footer(year) }}
             </div>
         </div>
-        <div class="page">
+        <div class="page sna-micro-stats-main">
             <div>
                 {{ base_macro.render_logo() }}
                 {{ report_macro.render_disclaimer() }}
@@ -106,7 +106,7 @@
             </div>
             {{ report_macro.render_footer(year) }}
         </div>
-        <div class="page">
+        <div class="page sna-micro-stats-main">
             <div>
                 {{ base_macro.render_logo() }}
                 {{ report_macro.render_disclaimer() }}
@@ -117,7 +117,7 @@
             </div>
             {{ report_macro.render_footer(year) }}
         </div>
-        <div class="page">
+        <div class="page sna-ooa-main">
             <div>
                 {{ base_macro.render_logo() }}
                 {{ report_macro.render_disclaimer() }}
@@ -128,7 +128,7 @@
             </div>
             {{ report_macro.render_footer(year) }}
         </div>
-        <div class="page">
+        <div class="page sna-edges-main">
             <div>
                 {{ base_macro.render_logo() }}
                 {{ report_macro.render_disclaimer() }}
@@ -138,7 +138,7 @@
             </div>
             {{ report_macro.render_footer(year) }}
         </div>
-        <div class="page">
+        <div class="page sna-components-main">
             <div>
                 {{ base_macro.render_logo() }}
                 {{ report_macro.render_disclaimer() }}
@@ -150,7 +150,7 @@
         </div>
     {% endfor %}
     {% if with_sociogram %}
-        <div class="page">
+        <div class="page sociogram-micro-stats-main">
             <div>
                 {{ base_macro.render_logo() }}
                 {{ report_macro.render_disclaimer() }}
@@ -160,7 +160,7 @@
             </div>
             {{ report_macro.render_footer(year) }}
         </div>
-        <div class="page">
+        <div class="page sociogram-macro-stats-main">
             <div>
                 {{ base_macro.render_logo() }}
                 {{ report_macro.render_disclaimer() }}
