@@ -229,8 +229,8 @@
         <th>OR</th>
         <th>IM</th>
         <th>BL</th>
-        <th>FR</th>
-        <th>LD</th>
+        <th>AI</th>
+        <th>II</th>
         <th>ST</th>
     </tr>
     {% for k in data.keys() %}
@@ -247,17 +247,17 @@
             <td><div><div>{{ data[k].balance }}</div></div></td>
             <td>
                 <div>
-                    {% set value = data[k].followership_coeff %}
+                    {% set value = data[k].affiliation_coeff %}
                     <div class="{{ highlight_value(value, coeff_highlight_values, (False, ''), (False, '')) }}">
-                        {{ data[k].followership_coeff }}
+                        {{ data[k].affiliation_coeff }}
                     </div>
                 </div>
             </td>
             <td>
                 <div>
-                    {% set value = data[k].leadership_coeff %}
+                    {% set value = data[k].influence_coeff %}
                     <div class="{{ highlight_value(value, coeff_highlight_values, (False, ''), (False, '')) }}">
-                        {{ data[k].leadership_coeff }}
+                        {{ data[k].influence_coeff }}
                     </div>
                 </div>
             </td>

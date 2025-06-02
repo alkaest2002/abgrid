@@ -94,7 +94,7 @@
 
 {% macro render_sociogram_legend(show_macro=False, show_micro=False, show_colors=False) %}
 <div class="report-legend">
-    {% if show_macro %}<b>Count</b> Frequenza <b>Mean</b> Media <b>Median</b> Mediana <b>Std</b> Deviazione standard <b>Min</b> Valore minimo <b>P25</b> 25° percentile <b>P50</b> 50° percentile <b>P75</b> 75° percentile <b>MAX</b> Valore massimo {% endif %}{% if show_micro %}<b>RP</b> Preferenze ricevute <b>RJ</b> Rifiuti ricevuti <b>GP</b> Preferenze date <b>GJ</b> Rifiuti dati <b>MP</b> Preferenze reciproche <b>MJ</b> Rifiuti reciproci <b>OR</b> Orientamento <b>IM</b> Impatto <b>MP</b> Bilancio <b>FR</b> Coefficiente followership <b>LD</b> Coefficiente leadership <b>ST</b> Status nel gruppo {% endif %}{% if show_colors %}<span class="square very-low"></span> Molto basso <span class="square low"></span> Basso <span class="square high"></span> Alto <span class="square very-high"></span> Molto alto{% endif %}
+    {% if show_macro %}<b>Count</b> Frequenza <b>Mean</b> Media <b>Median</b> Mediana <b>Std</b> Deviazione standard <b>Min</b> Valore minimo <b>P25</b> 25° percentile <b>P50</b> 50° percentile <b>P75</b> 75° percentile <b>MAX</b> Valore massimo {% endif %}{% if show_micro %}<b>RP</b> Preferenze ricevute <b>RJ</b> Rifiuti ricevuti <b>GP</b> Preferenze date <b>GJ</b> Rifiuti dati <b>MP</b> Preferenze reciproche <b>MJ</b> Rifiuti reciproci <b>OR</b> Orientamento <b>IM</b> Impatto <b>MP</b> Bilancio <b>AI</b> Coefficiente di affiliazione <b>II</b> Coefficiente di influenza <b>ST</b> Status nel gruppo {% endif %}{% if show_colors %}<span class="square very-low"></span> Molto basso <span class="square low"></span> Basso <span class="square high"></span> Alto <span class="square very-high"></span> Molto alto{% endif %}
 </div>
 {% endmacro %}
 
@@ -108,8 +108,8 @@
     {% if measure == "orientation" %}Orientamento{% endif%}
     {% if measure == "impact" %}Impatto{% endif%}
     {% if measure == "balance" %}Bilanciamento{% endif%}
-    {% if measure == "followership_coeff" %}Coefficinete di followership{% endif%}
-    {% if measure == "leadership_coeff" %}Coefficinete di leadership{% endif%}
+    {% if measure == "affiliation_coeff" %}Coefficinete di affiliazione{% endif%}
+    {% if measure == "influence_coeff" %}Coefficinete di influenza{% endif%}
     {% if measure == "cohesion_index" %}Indice di coesione{% endif%}
 {% endmacro %}
 
