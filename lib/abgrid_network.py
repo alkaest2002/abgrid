@@ -519,7 +519,7 @@ class ABGridNetwork:
         # Return network centralization
         return network_centralization
     
-    def get_sociogram_data(self, network_a: nx.DiGraph, network_b: nx.DiGraph) -> dict[str, pd.DataFrame]:
+    def get_sociogram_data(self, network_a: nx.DiGraph, network_b: nx.DiGraph) -> dict[str, pd.DataFrame | dict]:
         """
         Computes a sociogram DataFrame based on two directed graphs representing 
         social network data for preferences and rejections.
@@ -529,7 +529,7 @@ class ABGridNetwork:
         - network_b (nx.DiGraph): A directed graph where edges represent rejections given.
 
         Returns:
-        - dict[str, pd.DataFrame]: a dict containing sociogram macro and micro stats
+        - dict[str, pd.DataFrame | dict]: a dict containing sociogram macro and micro stats
         """
         
         # Compute basic data for sociogram micro stats
@@ -553,50 +553,66 @@ class ABGridNetwork:
                 for n in network_b.nodes() ], index=network_b.nodes()
         )
 
+        # Add balance
+        sociogram_micro_df["balance"] = (
+            sociogram_micro_df["received_preferences"]
+                .sub(sociogram_micro_df["received_rejections"])
+        )
+
         # Add orientation       
-        sociogram_micro_df["orientation"] = (sociogram_micro_df["given_preferences"]
-            .sub(sociogram_micro_df["given_rejections"])
+        sociogram_micro_df["orientation"] = (
+            sociogram_micro_df["given_preferences"]
+                .sub(sociogram_micro_df["given_rejections"])
         )
 
         # Add impact
-        sociogram_micro_df["impact"] = sociogram_micro_df["received_preferences"].add(sociogram_micro_df["received_rejections"])
-        
-        # Add balance
-        sociogram_micro_df["balance"] = sociogram_micro_df["received_preferences"].sub(sociogram_micro_df["received_rejections"])
+        sociogram_micro_df["impact"] = (
+            sociogram_micro_df["received_preferences"]
+                .add(sociogram_micro_df["received_rejections"])
+        )
         
         # Add affiliation coefficient
-        affiliation_index = sociogram_micro_df["balance"].add(sociogram_micro_df["mutual_preferences"])
+        affiliation = (
+            sociogram_micro_df["balance"]
+                .add(sociogram_micro_df["mutual_preferences"])
+                .add(sociogram_micro_df["orientation"])
+        )
         sociogram_micro_df["affiliation_coeff"] = (
-            affiliation_index
-                .sub(affiliation_index.mean())
-                .div(affiliation_index.std())
+            affiliation
+                .sub(affiliation.mean())
+                .div(affiliation.std())
                 .mul(10)
                 .add(100)
         )
 
         # Add influence coefficient
-        influence_index = sociogram_micro_df["received_preferences"].add(sociogram_micro_df["mutual_preferences"])
+        influence = (
+            sociogram_micro_df["received_preferences"]
+                .add(sociogram_micro_df["mutual_preferences"])
+        )
         sociogram_micro_df["influence_coeff"] = (
-            influence_index
-                .sub(influence_index.mean())
-                .div(influence_index.std())
+            influence
+                .sub(influence.mean())
+                .div(influence.std())
                 .mul(10)
                 .add(100)
         )
         
         # Add sociogram status
         # 1. Start by computing with z scores of relevat data
-        z_impact = sociogram_micro_df["impact"].sub(sociogram_micro_df["impact"].mean()).div(sociogram_micro_df["impact"].std())
-        z_balance = sociogram_micro_df["balance"].sub(sociogram_micro_df["balance"].mean()).div(sociogram_micro_df["balance"].std())
+        impact = sociogram_micro_df["impact"]
+        z_impact = impact.sub(impact.mean()).div(impact.std())
+        balance = sociogram_micro_df["balance"]
+        z_balance = balance.sub(balance.mean()).div(balance.std())
 
         # 2. Update status: default is "-", unless otherwise specified
         sociogram_micro_df["status"] = "-"
         sociogram_micro_df.loc[sociogram_micro_df.iloc[:, :4].sum(axis=1).eq(0), "status"] = "isolated"
         sociogram_micro_df.loc[z_impact < -1, "status"] = "neglected"
         sociogram_micro_df.loc[z_impact.between(-1, -.5), "status"] = "underrated"
-        sociogram_micro_df.loc[np.logical_and(z_impact > 0, z_balance.between(.5, 1)), "status"] = "appreciated"
-        sociogram_micro_df.loc[np.logical_and(z_impact > 0, z_balance > 1), "status"] = "popular"
-        sociogram_micro_df.loc[np.logical_and(z_impact > 0, z_balance < -1), "status"] = "rejected"
+        sociogram_micro_df.loc[np.logical_and(z_impact.between(.5, 1), z_balance.between(.5, 1)), "status"] = "appreciated"
+        sociogram_micro_df.loc[np.logical_and(z_impact > 1, z_balance > 1), "status"] = "popular"
+        sociogram_micro_df.loc[np.logical_and(z_impact > -.5, z_balance < -1), "status"] = "rejected"
         sociogram_micro_df.loc[np.logical_and(z_impact > 0, z_balance.between(-.5, .5)), "status"] = "controversial"
         
         # Compute sociogram macro stats
