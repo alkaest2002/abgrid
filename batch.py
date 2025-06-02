@@ -9,6 +9,7 @@ parser = argparse.ArgumentParser(prog="ABGrid")
 # Add arguments
 parser.add_argument("-u", "--user", type=str, required=True, help="Root folder.")
 parser.add_argument("-l", "--language", choices=["it", "en"], default="en", help="Language used for reporting.")
+parser.add_argument("-s", "--with-sociogram", action='store_true', help="Render sociogram.")
 
 # Parse arguments
 args = parser.parse_args()
@@ -30,5 +31,5 @@ for path in folders_to_process:
         project_filepath = next(project_folder_path.glob(f"{project}.*"))
         groups_filepaths = list(project_folder_path.glob("*_g*.*"))
         abgrid_main = ABGridMain(project, project_folder_path, project_filepath, groups_filepaths)
-        abgrid_main.generate_reports(args.language)
+        abgrid_main.generate_reports(args.language, args.with_sociogram)
         abgrid_main.generate_answer_sheets(args.language)
