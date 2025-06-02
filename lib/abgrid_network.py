@@ -610,7 +610,7 @@ class ABGridNetwork:
         sociogram_micro_df.loc[sociogram_micro_df.iloc[:, :4].sum(axis=1).eq(0), "status"] = "isolated"
         sociogram_micro_df.loc[z_impact < -1, "status"] = "neglected"
         sociogram_micro_df.loc[z_impact.between(-1, -.5), "status"] = "underrated"
-        sociogram_micro_df.loc[np.logical_and(z_impact.between(.5, 1), z_balance.between(.5, 1)), "status"] = "appreciated"
+        sociogram_micro_df.loc[np.logical_and(z_impact.between(.5, 1), z_balance > 1), "status"] = "appreciated"
         sociogram_micro_df.loc[np.logical_and(z_impact > 1, z_balance > 1), "status"] = "popular"
         sociogram_micro_df.loc[np.logical_and(z_impact > -.5, z_balance < -1), "status"] = "rejected"
         sociogram_micro_df.loc[np.logical_and(z_impact > 0, z_balance.between(-.5, .5)), "status"] = "controversial"
