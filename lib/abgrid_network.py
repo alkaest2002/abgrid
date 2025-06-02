@@ -448,42 +448,65 @@ class ABGridNetwork:
     def handle_isolated_nodes(self, network: nx.DiGraph, loc: Dict[Any, np.ndarray]):
         """
         Add isolated nodes to the network and adjust their positions to appear marginal.
-
         This function adjusts the positions of isolated nodes to appear outside the convex hull
         of the main node cluster so that they are perceptually distant and marginal.
-
+        
         Args:
             network (nx.DiGraph): The directed graph where isolated nodes are managed.
             loc (Dict[Any, np.ndarray]): A dictionary representing the layout of nodes.
-
         """
-        # Adjust layout of isolated nodes by pushing them away from network
-        for isolate in list(nx.isolates(network)):
-            # Convert current loc coordinates to dataframe
-            coordinates = pd.DataFrame(loc).T
-            # Compute convex hull
-            hull = ConvexHull(coordinates)
-            # Compute centroid of convex hull
-            centroid = np.mean(coordinates, axis=0)
-            # Compute delauny triangulation
-            delauny = Delaunay(coordinates)
+        
+        # Get isolates
+        isolates = list(nx.isolates(network))
+        if not isolates:
+            return
+        
+        # Convert current loc coordinates to dataframe
+        coordinates = pd.DataFrame(loc).T
+        
+        # Compute convex hull
+        hull = ConvexHull(coordinates)
+        
+        # Compute centroid of convex hull
+        centroid = np.mean(coordinates, axis=0)
+        
+        # Get hull vertices
+        hull_vertices = coordinates.iloc[hull.vertices].values
+        
+        # init vars
+        isolate_idx = 0
+        round_num = 1
+        
+        # Loop through rounds until all isolated nodes are placed
+        while isolate_idx < len(isolates):
             
-            # try to find candidate position for isolated (max 10 attempts)
-            for _ in range(5): 
-                # Choose a random hull vertex
-                rand_vertex = coordinates.iloc[np.random.choice(hull.vertices)]
-                # Create a unit vector pointing outward from the hull centroid
-                direction = rand_vertex - centroid
-                direction /= np.linalg.norm(direction)
-                # Define scaling factore to move outward a bit
-                scale = np.random.uniform(0.12, 0.12)
-                # Compute candidate position
-                candidate_pos = rand_vertex + direction * scale
-                # Check if candidate position is outside the convex hull
-                if delauny.find_simplex(candidate_pos) == -1:
-                    # Update isolate position and exit loop
-                    loc[isolate] = candidate_pos
+            # Loop through hull vertices
+            for vertex in hull_vertices:
+                if isolate_idx >= len(isolates):
                     break
+                
+                # Get current isolated node
+                isolate = isolates[isolate_idx]
+                
+                # Create direction vector from centroid to hull vertex
+                direction = vertex - centroid
+                direction /= np.linalg.norm(direction)
+                
+                # Distance multiplier increases with each round
+                distance_multiplier = 0.15 * round_num
+                
+                # Add some randomness to position
+                random_offset = np.random.uniform(-0.05, 0.05, size=2)
+                
+                # Calculate final position
+                candidate_pos = vertex + direction * distance_multiplier + random_offset
+                
+                # Place the isolated node
+                loc[isolate] = candidate_pos
+                isolate_idx += 1
+            
+            # Move to next round with increased distance
+            round_num += 1
 
     def get_network_centralization(self, network: nx.Graph) -> float:
         """
