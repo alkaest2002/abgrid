@@ -177,7 +177,7 @@ class ABGridMain:
                 raise ValueError(report_errors)
         
             # Add current group data to the collection
-            all_data[f"{self.abgrid_data.project}_{group_file.stem}"] = report_data
+            all_data[f"{self.abgrid_data.project}_{group_file.stem}"] = { **report_data, "graph_a": None, "graph_b": None }
 
             # Notify user
             print(f"generating report: {group_file.name}")
