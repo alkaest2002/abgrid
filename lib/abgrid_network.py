@@ -567,23 +567,23 @@ class ABGridNetwork:
         # Add balance
         sociogram_micro_df["balance"] = sociogram_micro_df["received_preferences"].sub(sociogram_micro_df["received_rejections"])
         
-        # Add followership coefficient
-        followership_index = sociogram_micro_df["balance"].add(sociogram_micro_df["mutual_preferences"])
-        sociogram_micro_df["followership_coeff"] = (
-            followership_index
-                .sub(followership_index.mean())
-                .div(followership_index.std())
+        # Add affiliation coefficient
+        affiliation_index = sociogram_micro_df["balance"].add(sociogram_micro_df["mutual_preferences"])
+        sociogram_micro_df["affiliation_coeff"] = (
+            affiliation_index
+                .sub(affiliation_index.mean())
+                .div(affiliation_index.std())
                 .mul(10)
                 .add(100)
                 .astype(int)
         )
 
-        # Add leadership coefficient
-        leadership_index = sociogram_micro_df["received_preferences"].add(sociogram_micro_df["mutual_preferences"])
-        sociogram_micro_df["leadership_coeff"] = (
-            leadership_index
-                .sub(leadership_index.mean())
-                .div(leadership_index.std())
+        # Add influence coefficient
+        influence_index = sociogram_micro_df["received_preferences"].add(sociogram_micro_df["mutual_preferences"])
+        sociogram_micro_df["influence_coeff"] = (
+            influence_index
+                .sub(influence_index.mean())
+                .div(influence_index.std())
                 .mul(10)
                 .add(100)
                 .astype(int)
