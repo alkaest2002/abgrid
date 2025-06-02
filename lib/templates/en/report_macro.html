@@ -81,7 +81,7 @@
 
 {% macro render_sociogram_legend(show_macro=False, show_micro=False, show_colors=False) %}
 <div class="report-legend">
-    {% if show_macro %}<b>Std</b> Standard Deviation <b>Min</b> Minimum value <b>P25</b> 25° percentile <b>P50</b> 50° percentile <b>P75</b> 75° percentile <b>MAX</b> Maximum value {% endif %}{% if show_micro %}<b>RP</b> Received preferences <b>RJ</b> Received rejections <b>GP</b> Given preferences <b>GJ</b> Given rejections <b>MP</b> Mutual preferences <b>MJ</b> Mutual rejections <b>OR</b> Orientation <b>IM</b> Impact <b>MP</b> Balance <b>AI</b> Affiliation coefficient <b>II</b> Influence coefficient <b>ST</b> Status in the group {% endif %}{% if show_colors %}<span class="square very-low"></span> Very low <span class="square low"></span> Low <span class="square high"></span> High <span class="square very-high"></span> Very high{% endif %}
+    {% if show_macro %}<b>Std</b> Standard Deviation <b>Min</b> Minimum value <b>P25</b> 25° percentile <b>P50</b> 50° percentile <b>P75</b> 75° percentile <b>Max</b> Maximum value {% endif %}{% if show_micro %}<b>RP</b> Received preferences <b>RJ</b> Received rejections <b>GP</b> Given preferences <b>GJ</b> Given rejections <b>MP</b> Mutual preferences <b>MJ</b> Mutual rejections <b>OR</b> Orientation <b>IM</b> Impact <b>MP</b> Balance <b>AI</b> Affiliation coefficient <b>II</b> Influence coefficient <b>ST</b> Status in the group {% endif %}{% if show_colors %}<span class="square very-low"></span> Very low <span class="square low"></span> Low <span class="square high"></span> High <span class="square very-high"></span> Very high{% endif %}
 </div>
 {% endmacro %}
 

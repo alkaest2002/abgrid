@@ -249,7 +249,7 @@
                 <div>
                     {% set value = data[k].affiliation_coeff %}
                     <div class="{{ highlight_value(value, coeff_highlight_values, (False, ''), (False, '')) }}">
-                        {{ data[k].affiliation_coeff }}
+                        {{ data[k].affiliation_coeff | int }}
                     </div>
                 </div>
             </td>
@@ -257,7 +257,7 @@
                 <div>
                     {% set value = data[k].influence_coeff %}
                     <div class="{{ highlight_value(value, coeff_highlight_values, (False, ''), (False, '')) }}">
-                        {{ data[k].influence_coeff }}
+                        {{ data[k].influence_coeff | int }}
                     </div>
                 </div>
             </td>
@@ -272,8 +272,8 @@
     <tr>
         <th class="text-left">ID</th>
         <th>Count</th>
-        <th>Mean</th>
         <th>Median</th>
+        <th>Mean</th>
         <th>Std</th>
         <th>Min</th>
         <th>P25</th>
@@ -285,14 +285,14 @@
         <tr>
             <td class="text-left"><div><div>{{ render_sociogram_measures_label(k) }}</div></div></td>
             <td><div><div>{{ data[k].count }}</div></div></td>
-            <td><div><div>{{ "%0.2f"| format(data[k].mean | round(2)) }}</div></div></td>
-            <td><div><div>{{ data[k].median }}</div></div></td>
-            <td><div><div>{{ "%0.2f"| format(data[k].std | round(2)) }}</div></div></td>
-            <td><div><div>{{ data[k].min }}</div></div></td>
-            <td><div><div>{{ data[k]["25%"] }}</div></div></td>
-            <td><div><div>{{ data[k]["50%"] }}</div></div></td>
-            <td><div><div>{{ data[k]["75%"] }}</div></div></td>
-            <td><div><div>{{ data[k]["max"] }}</div></div></td>
+            <td><div><div>{{ data[k].median | int }}</div></div></td>
+            <td><div><div>{{ "%0.2f" | format(data[k].mean | round(2)) }}</div></div></td>
+            <td><div><div>{{ "%0.2f" | format(data[k].std | round(2)) }}</div></div></td>
+            <td><div><div>{{ data[k].min |int }}</div></div></td>
+            <td><div><div>{{ data[k]["25%"] | int }}</div></div></td>
+            <td><div><div>{{ data[k]["50%"] | int }}</div></div></td>
+            <td><div><div>{{ data[k]["75%"] | int }}</div></div></td>
+            <td><div><div>{{ data[k]["max"] | int }}</div></div></td>
         </tr>
     {% endfor %}
 </table>
