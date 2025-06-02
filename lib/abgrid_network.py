@@ -556,9 +556,6 @@ class ABGridNetwork:
         # Add orientation       
         sociogram_micro_df["orientation"] = (sociogram_micro_df["given_preferences"]
             .sub(sociogram_micro_df["given_rejections"])
-            .div(sociogram_micro_df["given_preferences"].add(sociogram_micro_df["given_rejections"]))
-            .fillna(0)
-            .astype(int)
         )
 
         # Add impact
@@ -575,7 +572,6 @@ class ABGridNetwork:
                 .div(affiliation_index.std())
                 .mul(10)
                 .add(100)
-                .astype(int)
         )
 
         # Add influence coefficient
@@ -586,7 +582,6 @@ class ABGridNetwork:
                 .div(influence_index.std())
                 .mul(10)
                 .add(100)
-                .astype(int)
         )
         
         # Add sociogram status
@@ -608,7 +603,7 @@ class ABGridNetwork:
         sociogram_numeric_columns = sociogram_micro_df.select_dtypes(np.number)
         median = sociogram_numeric_columns.median()
         sociogram_macro_df = sociogram_numeric_columns.describe().T
-        sociogram_macro_df.insert(2, "median", median)
+        sociogram_macro_df.insert(1, "median", median)
 
         # Add cohesion index
         coehsion_index = (sociogram_micro_df.loc[:, "mutual_preferences"].sum() / 2) / len(network_a)
