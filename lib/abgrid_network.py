@@ -456,7 +456,7 @@ class ABGridNetwork:
             loc (Dict[Any, np.ndarray]): A dictionary representing the layout of nodes.
         """
         
-        # Get isolates
+        # Get isolated nodes
         isolates = list(nx.isolates(network))
         if not isolates:
             return
@@ -480,8 +480,9 @@ class ABGridNetwork:
         # Loop through rounds until all isolated nodes are placed
         while isolate_idx < len(isolates):
             
-            # Loop through hull vertices
-            for vertex in hull_vertices:
+            # Loop through hull vertices in current round
+            for _, vertex in enumerate(hull_vertices):
+                
                 if isolate_idx >= len(isolates):
                     break
                 
