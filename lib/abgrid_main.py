@@ -17,6 +17,7 @@ import jinja2
 from pathlib import Path
 from typing import Literal, Dict, Any
 from weasyprint import HTML
+from lib.abgrid_utils import deep_update
 from lib import SYMBOLS
 from lib.abgrid_yaml import ABGridYAML
 from lib.abigrid_data import ABGridData
@@ -177,7 +178,9 @@ class ABGridMain:
                 raise ValueError(report_errors)
         
             # Add current group data to the collection
-            all_data[f"{self.abgrid_data.project}_{group_file.stem}"] = { **report_data, "graph_a": None, "graph_b": None }
+            all_data[f"{self.abgrid_data.project}_{group_file.stem}"] = (
+                deep_update(report_data, {"sna": { "graph_a": None,  "graph_b": None }})
+            )
 
             # Notify user
             print(f"generating report: {group_file.name}")

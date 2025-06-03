@@ -9,7 +9,7 @@ The code is part of the AB-Grid project and is licensed under the MIT License.
 """
 
 from pathlib import Path
-from typing import Callable, Any
+from typing import Callable, Any, Dict
 from functools import wraps
 
 def notify_decorator(operation_name: str) -> Callable:
@@ -93,3 +93,30 @@ def notify_decorator(operation_name: str) -> Callable:
         return wrapper
     
     return decorator
+
+def deep_update(mapping: Dict[str, Any], *updating_mappings: Dict[str, Any]) -> Dict[str, Any]:
+    """
+    Recursively updates a dictionary with the values from one or more additional dictionaries.
+    This function will deep merge nested dictionaries within the provided mappings.
+
+    Args:
+        mapping (Dict[str, Any]): The original dictionary to be updated.
+        *updating_mappings (Dict[str, Any]): One or more dictionaries whose values will be used to update `mapping`.
+
+    Returns:
+        Dict[str, Any]: A new dictionary that is the result of deeply updating `mapping` with `updating_mappings`.
+
+    Example:
+        base = {'a': 1, 'b': {'c': 2}}
+        updates = {'b': {'d': 3}, 'e': 4}
+        result = deep_update(base, updates)
+        # result is {'a': 1, 'b': {'c': 2, 'd': 3}, 'e': 4}
+    """
+    updated_mapping = mapping.copy()
+    for updating_mapping in updating_mappings:
+        for k, v in updating_mapping.items():
+            if k in updated_mapping and isinstance(updated_mapping[k], dict) and isinstance(v, dict):
+                updated_mapping[k] = deep_update(updated_mapping[k], v)
+            else:
+                updated_mapping[k] = v
+    return updated_mapping
