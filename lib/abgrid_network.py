@@ -19,7 +19,7 @@ import networkx as nx
 from typing import Any, Literal, List, Dict, Tuple
 from base64 import b64encode
 from functools import reduce
-from scipy.spatial import ConvexHull, Delaunay
+from scipy.spatial import ConvexHull
 
 # Customize matplotlib settings
 matplotlib.rc('font', **{'size': 8})
@@ -693,4 +693,3 @@ class ABGridNetwork:
                "coehsion_index": coehsion_index
            }
         }
-
