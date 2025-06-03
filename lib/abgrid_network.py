@@ -455,7 +455,6 @@ class ABGridNetwork:
             network (nx.DiGraph): The directed graph where isolated nodes are managed.
             loc (Dict[Any, np.ndarray]): A dictionary representing the layout of nodes.
         """
-        
         # Get isolated nodes
         isolates = list(nx.isolates(network))
         if not isolates:
@@ -473,41 +472,44 @@ class ABGridNetwork:
         # Get hull vertices
         hull_vertices = coordinates.iloc[hull.vertices].values
         
-        # init vars
-        isolate_idx = 0
+        # Create an iterator from isolated nodes list
+        isolate_iter = iter(isolates)
+
+        # Keep track of loop rounds
+        # as isolated nodes may be greater than hull vertices
         round_num = 1
         
         # Loop through rounds until all isolated nodes are placed
-        while isolate_idx < len(isolates):
-            
-            # Loop through hull vertices in current round
-            for _, vertex in enumerate(hull_vertices):
+        try:
+            while True:
+                # Loop through hull vertices in current round
+                for vertex in hull_vertices:
+                    
+                    # Get next isolated node
+                    isolate = next(isolate_iter)
+                    
+                    # Create direction vector from centroid to hull vertex
+                    direction = vertex - centroid
+                    direction /= np.linalg.norm(direction)
+                    
+                    # Distance multiplier increases with each round
+                    distance_multiplier = 0.15 * round_num
+                    
+                    # Add some randomness to position
+                    random_offset = np.random.uniform(-0.05, 0.05, size=2)
+                    
+                    # Calculate final position
+                    candidate_pos = vertex + direction * distance_multiplier + random_offset
+                    
+                    # Place the isolated node
+                    loc[isolate] = candidate_pos
                 
-                if isolate_idx >= len(isolates):
-                    break
-                
-                # Get current isolated node
-                isolate = isolates[isolate_idx]
-                
-                # Create direction vector from centroid to hull vertex
-                direction = vertex - centroid
-                direction /= np.linalg.norm(direction)
-                
-                # Distance multiplier increases with each round
-                distance_multiplier = 0.15 * round_num
-                
-                # Add some randomness to position
-                random_offset = np.random.uniform(-0.05, 0.05, size=2)
-                
-                # Calculate final position
-                candidate_pos = vertex + direction * distance_multiplier + random_offset
-                
-                # Place the isolated node
-                loc[isolate] = candidate_pos
-                isolate_idx += 1
-            
-            # Move to next round with increased distance
-            round_num += 1
+                # Move to next round with increased distance
+                round_num += 1
+        
+        # All isolated nodes have been placed
+        except StopIteration:
+            pass
 
     def get_network_centralization(self, network: nx.Graph) -> float:
         """
