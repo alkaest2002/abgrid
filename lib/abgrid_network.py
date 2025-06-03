@@ -25,6 +25,8 @@ from scipy.spatial import ConvexHull, Delaunay
 matplotlib.rc('font', **{'size': 8})
 matplotlib.use("Agg")
 
+# Conversion factor from inches to centimeters
+CM_TO_INCHES = 1 / 2.54
 
 class ABGridNetwork:
     """
@@ -101,8 +103,8 @@ class ABGridNetwork:
         self.edges_b_types = self.get_edges_types(network_b, self.edges_b, network_a, self.edges_a)
         self.components_a = self.get_network_components(network_a)
         self.components_b = self.get_network_components(network_b)
-        self.graph_a = self.get_network_graph(network_a, loc_a, "A")
-        self.graph_b = self.get_network_graph(network_b, loc_b, "B")
+        self.graph_a = self.get_sna_graph(network_a, loc_a, "A")
+        self.graph_b = self.get_sna_graph(network_b, loc_b, "B")
 
         # Add sociogram if requested
         if with_sociogram:
@@ -389,61 +391,91 @@ class ABGridNetwork:
         # Ensure unique components and sort by length in descending order
         return sorted(list(set(components)), key=len, reverse=True)
 
-    def get_network_graph(self, network: nx.DiGraph, loc: Dict[str, Tuple[float, float]], graphType: Literal["A","B"] = "A") -> str:
+    def create_sna_plot(self, network: nx.DiGraph, loc: Dict[str, Tuple[float, float]], graphType: Literal["A","B"] = "A") -> plt.Figure:
         """
-        Generate a graphical representation of a network and return it encoded in base64 SVG format.
-
+        Create a matplotlib plot of a network graph.
+        
         Args:
             network (nx.DiGraph): The directed graph to plot.
             loc (Dict[str, Tuple[float, float]]): Node positions for layout.
             graphType (str): Type of the network ('A' or 'B'), used to determine node colors.
-
+        
         Returns:
-            str: The SVG data URI of the network plot.
+            plt.Figure: The matplotlib figure containing the network plot.
         """
-        # Conversion factor from inches to centimeters
-        CM_TO_INCHES = 1 / 2.54
-
+        
         # Set color based on graph type (A or B)
         color = "#0000FF" if graphType == "A" else "#FF0000"
         
-        # Initialize an in-memory buffer
-        buffer = io.BytesIO()
-
         # Determine dimensions of matplotlib graph based upon number of nodes
-        fig_size = (8 * CM_TO_INCHES, 8 * CM_TO_INCHES)\
+        fig_size = (8 * CM_TO_INCHES, 8 * CM_TO_INCHES) \
             if network.number_of_nodes() <= 10 else (17 * CM_TO_INCHES, 19 * CM_TO_INCHES)
         
         # Create a matplotlib figure
         fig, ax = plt.subplots(constrained_layout=True, figsize=fig_size)
         
         # Hide axis
-        ax.axis('off')  
+        ax.axis('off')
         
         # Draw nodes
         nx.draw_networkx_nodes(network, loc, node_color=color, edgecolors=color, ax=ax)
         nx.draw_networkx_nodes(nx.isolates(network), loc, node_color="#000", edgecolors="#000", ax=ax)
-
+        
         # Draw nodes labels
         nx.draw_networkx_labels(network, loc, font_color="#FFF", font_weight="normal", font_size=10, ax=ax)
         
         # Draw reciprocal edges with specific style
         reciprocal_edges = [e for e in network.edges if e[::-1] in network.edges]
-        nx.draw_networkx_edges(network, loc, edgelist=reciprocal_edges, edge_color=color, arrowstyle='-', width=3, ax=ax)
-                
+        nx.draw_networkx_edges(network, loc, edgelist=reciprocal_edges, edge_color=color, 
+                            arrowstyle='-', width=3, ax=ax)
+        
         # Draw non reciprocal edges with specific style
         non_reciprocal_edges = [e for e in network.edges if e not in reciprocal_edges]
-        nx.draw_networkx_edges(network, loc, edgelist=non_reciprocal_edges, edge_color=color, style="--", arrowstyle='-|>', arrowsize=15, ax=ax)
+        nx.draw_networkx_edges(network, loc, edgelist=non_reciprocal_edges, edge_color=color, 
+                            style="--", arrowstyle='-|>', arrowsize=15, ax=ax)
+        
+        return fig
+
+    def figure_to_base64_svg(self, fig: plt.Figure) -> str:
+        """
+        Convert a matplotlib figure to a base64-encoded SVG data URI.
+        
+        Args:
+            fig (plt.Figure): The matplotlib figure to convert.
+        
+        Returns:
+            str: The SVG data URI of the figure.
+        """
+        # Initialize an in-memory buffer
+        buffer = io.BytesIO()
         
         # Save figure to the buffer in SVG format then close it
         fig.savefig(buffer, format="svg", bbox_inches='tight', transparent=True, pad_inches=0.05)
-        plt.close(fig) 
+        plt.close(fig)
         
         # Encode the buffer contents to a base64 string
-        base64_econded_string = b64encode(buffer.getvalue()).decode()
+        base64_encoded_string = b64encode(buffer.getvalue()).decode()
         
         # Return the data URI for the SVG
-        return f"data:image/svg+xml;base64,{base64_econded_string}"
+        return f"data:image/svg+xml;base64,{base64_encoded_string}"
+
+    def get_sna_graph(self, network: nx.DiGraph, loc: Dict[str, Tuple[float, float]], graphType: Literal["A","B"] = "A") -> str:
+        """
+        Generate a graphical representation of a network and return it encoded in base64 SVG format.
+        
+        Args:
+            network (nx.DiGraph): The directed graph to plot.
+            loc (Dict[str, Tuple[float, float]]): Node positions for layout.
+            graphType (str): Type of the network ('A' or 'B'), used to determine node colors.
+        
+        Returns:
+            str: The SVG data URI of the network plot.
+        """
+        # Create the matplotlib plot
+        fig = self.create_sna_plot(network, loc, graphType)
+        
+        # Convert to base64 SVG string
+        return self.figure_to_base64_svg(fig)
     
     def handle_isolated_nodes(self, network: nx.DiGraph, loc: Dict[Any, np.ndarray]):
         """
