@@ -27,6 +27,8 @@ matplotlib.use("Agg")
 
 # Conversion factor from inches to centimeters
 CM_TO_INCHES = 1 / 2.54
+A_COLOR = "#0000FF"
+B_COLOR = "#FF0000"
 
 class ABGridNetwork:
     """
@@ -405,7 +407,7 @@ class ABGridNetwork:
         """
         
         # Set color based on graph type (A or B)
-        color = "#0000FF" if graphType == "A" else "#FF0000"
+        color = A_COLOR if graphType == "A" else B_COLOR
         
         # Determine dimensions of matplotlib graph based upon number of nodes
         fig_size = (8 * CM_TO_INCHES, 8 * CM_TO_INCHES) \
