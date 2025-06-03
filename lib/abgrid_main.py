@@ -178,7 +178,7 @@ class ABGridMain:
                 raise ValueError(report_errors)
         
             # Add current group data to the collection
-            all_data[f"{self.abgrid_data.project}_{group_file.stem}"] = (
+            all_data[f"{group_file.stem}"] = (
                 deep_update(report_data, {"sna": { "graph_a": None,  "graph_b": None }})
             )
 
