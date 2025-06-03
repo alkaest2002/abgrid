@@ -616,6 +616,7 @@ class ABGridNetwork:
         influence = (
             sociogram_micro_df["received_preferences"]
                 .add(sociogram_micro_df["mutual_preferences"])
+                .add(sociogram_micro_df["orientation"])
         )
         sociogram_micro_df["influence_coeff_raw"] = influence
         sociogram_micro_df["influence_coeff"] = (
