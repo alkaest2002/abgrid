@@ -44,23 +44,25 @@ class ABGridNetwork:
                 Tuple containing two lists of dictionaries, each representing edges for two networks.
         """
         
-        # Unpack network nodes and edges
-        self.nodes_a = self.unpack_network_nodes(packed_edges[0])
-        self.nodes_b = self.unpack_network_nodes(packed_edges[1])
-        self.edges_a = self.unpack_network_edges(packed_edges[0])
-        self.edges_b = self.unpack_network_edges(packed_edges[1])
+        # Init sna dict
+        self.sna = {
+            "nodes_a": self.unpack_network_nodes(packed_edges[0]),
+            "nodes_b": self.unpack_network_nodes(packed_edges[1]),
+            "edges_a": self.unpack_network_edges(packed_edges[0]),
+            "edges_b": self.unpack_network_edges(packed_edges[1]),
+            "macro_stats_a": {},
+            "macro_stats_b": {},
+            "micro_stats_a": pd.DataFrame(),
+            "micro_stats_b": pd.DataFrame(),
+            "nodes_a_rankings": [],
+            "edges_a_types": [],
+            "nodes_b_rankings": [],
+            "edges_b_types": [],
+            "graph_a": "",
+            "graph_b": ""
+        }
 
-        # Initialize data containers for analysis
-        self.macro_stats_a = {}
-        self.macro_stats_b = {}
-        self.micro_stats_a = pd.DataFrame()
-        self.micro_stats_b = pd.DataFrame()
-        self.nodes_a_rankings = []
-        self.edges_a_types = []
-        self.nodes_b_rankings = []
-        self.edges_b_types = []
-        self.graph_a = ""
-        self.graph_b = ""
+        # init sociogram dict
         self.sociogram = {
             "micro_stats": pd.DataFrame(),
             "macro_stats": pd.DataFrame(),
@@ -77,11 +79,11 @@ class ABGridNetwork:
         """
         
         # Create network A and B
-        network_a = nx.DiGraph(self.edges_a)
-        network_b = nx.DiGraph(self.edges_b)
+        network_a = nx.DiGraph(self.sna["edges_a"])
+        network_b = nx.DiGraph(self.sna["edges_b"])
 
         # Loop through networks
-        for network, nodes in [(network_a, self.nodes_a), (network_b, self.nodes_b)]:  
+        for network, nodes in [(network_a, self.sna["nodes_a"]), (network_b, self.sna["nodes_b"])]:  
             # Add isolated nodes to current network
             isolated_nodes = set(list(network)).symmetric_difference(set(nodes))
             network.add_nodes_from(isolated_nodes)
@@ -95,18 +97,18 @@ class ABGridNetwork:
         self.handle_isolated_nodes(network_b, loc_b)
                     
         # Store network A and B statistics and plots
-        self.macro_stats_a = self.get_network_macro_stats(network_a)
-        self.macro_stats_b = self.get_network_macro_stats(network_b)
-        self.micro_stats_a = self.get_network_micro_stats(network_a)
-        self.micro_stats_b = self.get_network_micro_stats(network_b)
-        self.nodes_a_rankings = self.get_nodes_rankings(self.micro_stats_a)
-        self.nodes_b_rankings = self.get_nodes_rankings(self.micro_stats_b)
-        self.edges_a_types = self.get_edges_types(network_a, self.edges_a, network_b, self.edges_b)
-        self.edges_b_types = self.get_edges_types(network_b, self.edges_b, network_a, self.edges_a)
-        self.components_a = self.get_network_components(network_a)
-        self.components_b = self.get_network_components(network_b)
-        self.graph_a = self.get_sna_graph(network_a, loc_a, "A")
-        self.graph_b = self.get_sna_graph(network_b, loc_b, "B")
+        self.sna["macro_stats_a"] = self.get_network_macro_stats(network_a)
+        self.sna["macro_stats_b"] = self.get_network_macro_stats(network_b)
+        self.sna["micro_stats_a"] = self.get_network_micro_stats(network_a)
+        self.sna["micro_stats_b"] = self.get_network_micro_stats(network_b)
+        self.sna["nodes_a_rankings"] = self.get_nodes_rankings(self.sna["micro_stats_a"])
+        self.sna["nodes_b_rankings"] = self.get_nodes_rankings(self.sna["micro_stats_b"])
+        self.sna["edges_a_types"] = self.get_edges_types(network_a, self.sna["edges_a"], network_b, self.sna["edges_b"])
+        self.sna["edges_b_types"] = self.get_edges_types(network_b, self.sna["edges_b"], network_a, self.sna["edges_a"])
+        self.sna["components_a"] = self.get_network_components(network_a)
+        self.sna["components_b"] = self.get_network_components(network_b)
+        self.sna["graph_a"] = self.get_sna_graph(network_a, loc_a, "A")
+        self.sna["graph_b"] = self.get_sna_graph(network_b, loc_b, "B")
 
         # Add sociogram if requested
         if with_sociogram:
@@ -631,32 +633,34 @@ class ABGridNetwork:
                 .add(sociogram_micro_df["received_rejections"])
         )
         
-        # Add affiliation coefficient
-        affiliation = (
+        # Add affiliation coefficient raw
+        sociogram_micro_df["affiliation_coeff_raw"] = (
             sociogram_micro_df["balance"]
                 .add(sociogram_micro_df["mutual_preferences"])
                 .add(sociogram_micro_df["orientation"])
         )
-        sociogram_micro_df["affiliation_coeff_raw"] = affiliation
+
+        # Add influence coefficient raw
+        sociogram_micro_df["influence_coeff_raw"] = (
+            sociogram_micro_df["received_preferences"]
+                .add(sociogram_micro_df["mutual_preferences"])
+                .add(sociogram_micro_df["orientation"])
+        )
+        
+        # Add affiliation coefficient
         sociogram_micro_df["affiliation_coeff"] = (
-            affiliation
-                .sub(affiliation.mean())
-                .div(affiliation.std())
+            sociogram_micro_df["affiliation_coeff_raw"]
+                .sub(sociogram_micro_df["affiliation_coeff_raw"].mean())
+                .div(sociogram_micro_df["affiliation_coeff_raw"].std())
                 .mul(10)
                 .add(100)
         )
 
         # Add influence coefficient
-        influence = (
-            sociogram_micro_df["received_preferences"]
-                .add(sociogram_micro_df["mutual_preferences"])
-                .add(sociogram_micro_df["orientation"])
-        )
-        sociogram_micro_df["influence_coeff_raw"] = influence
         sociogram_micro_df["influence_coeff"] = (
-            influence
-                .sub(influence.mean())
-                .div(influence.std())
+            sociogram_micro_df["influence_coeff_raw"]
+                .sub(sociogram_micro_df["influence_coeff_raw"].mean())
+                .div(sociogram_micro_df["influence_coeff_raw"].std())
                 .mul(10)
                 .add(100)
         )
