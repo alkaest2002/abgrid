@@ -455,7 +455,7 @@ class ABGridNetwork:
             network (nx.DiGraph): The directed graph where isolated nodes are managed.
             loc (Dict[Any, np.ndarray]): A dictionary representing the layout of nodes.
         """
-        # Get isolated nodes
+        # Get isolated nodes, if any
         isolates = list(nx.isolates(network))
         if not isolates:
             return
@@ -466,7 +466,7 @@ class ABGridNetwork:
         # Compute convex hull
         hull = ConvexHull(coordinates)
         
-        # Compute centroid of convex hull
+        # Compute centroid of coordinates
         centroid = np.mean(coordinates, axis=0)
         
         # Get hull vertices
