@@ -78,10 +78,28 @@
                 {{ report_macro.render_disclaimer() }}
                 {{ report_macro.render_report_header(project_title, group, "sociogram") }}
                 <div style="margin: 12px 0px;">
-                    {{ report_macro.render_sociogram_measures_label("cohesion_index") }}: 
-                        {{ "%0.2f"| format(sociogram["supplemental"]["coehsion_index"] | round(2)) }}
+                    <p>
+                        <span>
+                            {{- report_macro.render_sociogram_measures_label("cohesion_index_type_i") -}}: 
+                                {{ "%0.2f"| format(sociogram["supplemental"]["cohesion_index_type_i"] | round(2)) }}
+                        </span>,
+                        <span>
+                            {{- report_macro.render_sociogram_measures_label("cohesion_index_type_ii") -}}: 
+                                {{ "%0.2f"| format(sociogram["supplemental"]["cohesion_index_type_ii"] | round(2)) }}
+                        </span>
+                    </p>
+                    <p>
+                        <span>
+                            {{- report_macro.render_sociogram_measures_label("conflict_index_type_i") -}}: 
+                                {{ "%0.2f"| format(sociogram["supplemental"]["conflict_index_type_i"] | round(2)) }}
+                        </span>
+                        <span>,
+                            {{- report_macro.render_sociogram_measures_label("conflict_index_type_ii") -}}: 
+                                {{ "%0.2f"| format(sociogram["supplemental"]["conflict_index_type_ii"] | round(2)) }}
+                        </span>
+                    </p>
                 </div>
-                {{ base_report_macro.render_sociogram_macro_statistics(sociogram["macro_stats"], report_macro.render_sociogram_measures_label) }}
+                {{ base_report_macro.render_sociogram_macro_statistics(sociogram.macro_stats, report_macro.render_sociogram_measures_label) }}
                 {{ report_macro.render_sociogram_legend(show_macro=True)}}
             </div>
             {{ report_macro.render_footer(year) }}

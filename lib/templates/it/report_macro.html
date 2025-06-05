@@ -110,9 +110,12 @@
     {% if measure == "balance" %}Bilanciamento{% endif%}
     {% if measure == "affiliation_coeff_raw" %}Coeff. di afffiliazione grezzo{% endif%}
     {% if measure == "influence_coeff_raw" %}Coeff. di influenza grezzo{% endif%}
-    {% if measure == "affiliation_coeff" %}Coefficiente di affiliazione{% endif%}
-    {% if measure == "influence_coeff" %}Coefficiente di influenza{% endif%}
-    {% if measure == "cohesion_index" %}Indice di coesione{% endif%}
+    {% if measure == "affiliation_coeff" %}Coeff. di affiliazione{% endif%}
+    {% if measure == "influence_coeff" %}Coeff. di influenza{% endif%}
+    {% if measure == "cohesion_index_type_i" %}Indice di coesione tipo I{% endif%}
+    {% if measure == "cohesion_index_type_ii" %}Indice di coesione tipo II{% endif%}
+    {% if measure == "conflict_index_type_i" %}Indice di conflitto tipo I{% endif%}
+    {% if measure == "conflict_index_type_ii" %}Indice di conflitto tipo II{% endif%}
 {% endmacro %}
 
 {% macro render_footer(year) %}
