@@ -236,7 +236,6 @@ class ABGridNetwork:
             pd.Series(nx.betweenness_centrality(network), name="bt"),
             pd.Series(nx.closeness_centrality(network), name="cl"),
             pd.Series(nx.hits(network)[0], name="hu").abs(),
-
         ], axis=1)
         
         # Identify nodes with no in-degree and/or out-degree
@@ -305,7 +304,7 @@ class ABGridNetwork:
         # Return the dictionary of nodes ordered by their rank for each metric
         return nodes_ordered_by_rank
         
-    def get_edges_types(self, network: nx.DiGraph, edges: List[Tuple[str, str]], network_ref: nx.DiGraph, edges_ref: List[Tuple[str, str]]) -> Dict[str, List[Tuple[str, str]]]:
+    def get_edges_types(self, network: nx.DiGraph, network_ref: nx.DiGraph) -> Dict[str, List[Tuple[str, str]]]:
         """
         Classify edges in a directed network graph into various types based on their relationships
         within the network and with respect to a reference network.
@@ -319,9 +318,7 @@ class ABGridNetwork:
 
         Args:
             network (nx.DiGraph): The main directed graph containing the edges to be classified.
-            edges (List[Tuple[str, str]]): A list ozf edges (tuples) in the graph `network` to be classified.
             network_ref (nx.DiGraph): A reference directed graph used for comparison in classification.
-            edges_ref (List[Tuple[str, str]]): A list of edges (tuples) in the graph used for comparison in classification.
 
         Returns:
             Dict[str, List[Tuple[str, str]]]: A dictionary classifying edges into the five categories:
