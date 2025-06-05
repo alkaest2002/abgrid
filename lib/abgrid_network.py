@@ -608,10 +608,10 @@ class ABGridNetwork:
         matrix_b = nx.to_pandas_adjacency(network_b, nodelist=sorted(network_b.nodes))
 
         # Add mutual preferences
-        sociogram_micro_df["mutual_preferences"] = (matrix_a * matrix_a.T).dot(np.ones(matrix_a.shape[0]))
+        sociogram_micro_df["mutual_preferences"] = (matrix_a * matrix_a.T).dot(np.ones(matrix_a.shape[0])).astype(int)
 
         # Add mutual rejections
-        sociogram_micro_df["mutual_rejections"] = (matrix_b * matrix_b.T).dot(np.ones(matrix_b.shape[0]))
+        sociogram_micro_df["mutual_rejections"] = (matrix_b * matrix_b.T).dot(np.ones(matrix_b.shape[0])).astype(int)
 
         # Add balance
         sociogram_micro_df["balance"] = (
@@ -685,13 +685,21 @@ class ABGridNetwork:
         sociogram_macro_df.insert(1, "median", median)
 
         # Add cohesion index
-        coehsion_index = (sociogram_micro_df.loc[:, "mutual_preferences"].sum() / 2) / len(network_a)
+        cohesion_index_type_i = (len(self.sna["edges_a_types"]["type_ii"]) *2) / len(network_a.edges())
+        cohesion_index_type_ii = len(self.sna["edges_a_types"]["type_ii"]) / len(network_a)
+
+        # Add conflict index
+        conflict_index_type_i = (len(self.sna["edges_b_types"]["type_ii"]) *2) / len(network_b.edges())
+        conflict_index_type_ii = len(self.sna["edges_b_types"]["type_ii"]) / len(network_b)
 
         # Return sociogram dataframe, ordered by node
         return {
            "micro_stats": sociogram_micro_df.sort_index(),
            "macro_stats": sociogram_macro_df.apply(pd.to_numeric, downcast="integer"),
            "supplemental": {
-               "coehsion_index": coehsion_index
+               "cohesion_index_type_i": cohesion_index_type_i,
+               "cohesion_index_type_ii": cohesion_index_type_ii,
+               "conflict_index_type_i": conflict_index_type_i,
+               "conflict_index_type_ii": conflict_index_type_ii
            }
         }
