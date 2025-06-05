@@ -342,7 +342,7 @@ class ABGridNetwork:
 
         # Compute type V edges, full simmetrical
         # i.e. A -> B, B -> A in network network and A -> B, B -> A in network G_ref
-        type_v_df = type_ii_df * pd.DataFrame(np.triu(adj_ref_df) * np.tril(adj_ref_df).T, index=adj_ref_df.index, columns=adj_ref_df.columns)
+        type_v_df = type_ii_df * pd.DataFrame(np.triu(adj_ref_df) * np.tril(adj_ref_df).T, index=adj_df.index, columns=adj_df.columns)
         type_v = type_v_df.stack().loc[lambda x: x == 1].index.tolist()
         
         # Compute type III edges, half simmetrical
