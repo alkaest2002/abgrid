@@ -332,17 +332,23 @@ class ABGridNetwork:
 
         # Compute type I edges, non reciprocal
         # i.e. same network: A -> B and not B -> A
-        type_i = [ edge for edge in edges if edge[::-1] not in edges ]
+        type_i_df = adj_df - (adj_df * adj_df.T)
+        type_i = type_i_df.stack().loc[lambda x: x == 1].index.tolist()
 
         # Compute type II edges, reciprocal
         # i.e. same network: A -> B and B -> A
         type_ii_df = pd.DataFrame(np.triu(adj_df) * np.tril(adj_df).T, index=adj_df.index, columns=adj_df.columns)
         type_ii = type_ii_df.stack().loc[lambda x: x == 1].index.tolist()
+
+        # Compute type V edges, full simmetrical
+        # i.e. A -> B, B -> A in network network and A -> B, B -> A in network G_ref
+        type_v_df = type_ii_df * pd.DataFrame(np.triu(adj_ref_df) * np.tril(adj_ref_df).T, index=adj_ref_df.index, columns=adj_ref_df.columns)
+        type_v = type_v_df.stack().loc[lambda x: x == 1].index.tolist()
         
         # Compute type III edges, half simmetrical
         # i.e. A -> B in network network and A -> B in network G_ref
         type_iii_df = pd.DataFrame(np.triu(adj_df) * np.triu(adj_ref_df), index=adj_df.index, columns=adj_df.columns)
-        type_iii = type_iii_df.stack().loc[lambda x: x == 1].index.tolist()
+        type_iii = type_iii_df.sub(type_v_df).stack().loc[lambda x: x == 1].index.tolist()
         
         # Compute type IV edges, half reversed simmetrical
         # i.e. A -> B in network network and B -> A in network G_ref
@@ -350,19 +356,14 @@ class ABGridNetwork:
             pd.DataFrame(np.triu(adj_df) * np.tril(adj_ref_df).T, index=adj_df.index, columns=adj_df.columns)
             + pd.DataFrame(np.tril(adj_df) * np.triu(adj_ref_df).T, index=adj_df.index, columns=adj_df.columns)
         )
-        type_iv = type_iv_df.stack().loc[lambda x: x == 1].index.tolist()
+        type_iv = type_iv_df.sub(type_v_df).stack().loc[lambda x: x == 1].index.tolist()
         
-        # Compute type V edges, full simmetrical
-        # i.e. A -> B, B -> A in network network and A -> B, B -> A in network G_ref
-        type_v_df = pd.DataFrame(np.triu(type_ii_df) * np.triu(type_iii_df * type_iv_df), index=adj_df.index, columns=adj_df.columns)
-        type_v = type_v_df.stack().loc[lambda x: x == 1].index.tolist()
-
         # Return edges types
         return {
             "type_i": type_i,
             "type_ii": type_ii,
-            "type_iii": [ edge for edge in type_iii if edge not in type_v],
-            "type_iv": [ edge for edge in type_iv if edge not in type_v],
+            "type_iii": type_iii,
+            "type_iv": type_iv,
             "type_v": type_v
         }
     
@@ -603,17 +604,14 @@ class ABGridNetwork:
         # Init sociogram micro stats dataframe
         sociogram_micro_df = pd.concat([in_preferences, in_rejects, out_preferences, out_rejects], axis=1)
         
+        matrix_a = nx.to_pandas_adjacency(network_a, nodelist=sorted(network_a.nodes))
+        matrix_b = nx.to_pandas_adjacency(network_b, nodelist=sorted(network_b.nodes))
+
         # Add mutual preferences
-        sociogram_micro_df["mutual_preferences"] = pd.Series(
-            [ sum([ network_a.has_edge(x,n) for x in network_a.successors(n) ]) 
-                for n in network_a.nodes() ], index=network_a.nodes()
-        )
+        sociogram_micro_df["mutual_preferences"] = (matrix_a * matrix_a.T).dot(np.ones(matrix_a.shape[0]))
 
         # Add mutual rejections
-        sociogram_micro_df["mutual_rejections"] = pd.Series(
-            [ sum([ network_b.has_edge(x,n) for x in network_b.successors(n) ]) 
-                for n in network_b.nodes() ], index=network_b.nodes()
-        )
+        sociogram_micro_df["mutual_rejections"] = (matrix_b * matrix_b.T).dot(np.ones(matrix_b.shape[0]))
 
         # Add balance
         sociogram_micro_df["balance"] = (
