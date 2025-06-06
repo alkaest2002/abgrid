@@ -36,28 +36,28 @@
             <p class="dimmed-text small-text">X &rarr; Y nella rete B &middot; no Y &rarr; X nella rete B</p>
         {% endif %}
     {% elif edge_type == "type_ii" %}
-        <p><b>{{ edges_length }}{% if edges_length > 0 %} x 2{% endif %} Legami reciproci</b></p>
+        <p><b>Legami reciproci</b></p>
         {% if network_type == "A" %}
             <p class="dimmed-text small-text">X &rarr; Y nella rete A &middot; Y &rarr; X nella rete A</p>
         {% else %}
             <p class="dimmed-text small-text">X &rarr; Y nella rete B &middot; Y &rarr; X nella rete B</p>
         {% endif %}
     {% elif edge_type == "type_iii" %}
-        <p><b>{% if edges_length == 1 %}1 Legame simmetrico semplice{% else %}{{ edges_length }} Legami simmetrici semplici{% endif %}</b></p>
+        <p><b>Legami simmetrici semplici</b></p>
         {% if network_type == "A" %}
             <p class="dimmed-text small-text">X &rarr; Y nella rete A &middot; X &rarr; Y nella rete B</p>
         {% else %}
             <p class="dimmed-text small-text">X &rarr; Y nella rete B &middot; X &rarr; Y nella rete A</p>
         {% endif %}
     {% elif edge_type == "type_iv" %}
-        <p><b>{% if edges_length == 1 %}1 Legame simmetrico inverso{% else %}{{ edges_length }} Legami simmetrici inversi{% endif %}</b></p>
+        <p><b>Legami simmetrici inversi</b></p>
         {% if network_type == "A" %}
             <p class="dimmed-text small-text">X &rarr; Y nella rete A &middot; Y &rarr; X nella rete B</p>
         {% else %}
             <p class="dimmed-text small-text">X &rarr; Y nella rete B &middot; Y &rarr; X nella rete A</p>
         {% endif %}
     {% elif edge_type == "type_v" %}
-        <p><b>{{ edges_length }}{% if edges_length > 0 %} x 2{% endif %} Legami simmetrici completi</b></p>
+        <p><b>Legami simmetrici completi</b></p>
         {% if network_type == "A" %}
             <p class="dimmed-text small-text">X &rarr; Y, Y &rarr; X nella rete A &middot; X &rarr; Y, Y &rarr; X nella rete B</p>
         {% else %}
