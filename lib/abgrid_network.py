@@ -16,7 +16,7 @@ import matplotlib
 import matplotlib.pyplot as plt
 import networkx as nx
 
-from typing import Any, Literal, List, Dict, Tuple
+from typing import Any, Literal, List, Dict, Tuple, Union
 from base64 import b64encode
 from functools import reduce
 from scipy.spatial import ConvexHull
@@ -32,104 +32,114 @@ B_COLOR = "#FF0000"
 
 class ABGridNetwork:
     """
-    Class to represent and analyze directed networks (graphs) for a given set of edges.
+    Class to represent and analyze directed networks (graphs) given a set of edges.
     """
 
-    def __init__(self, packed_edges: Tuple[List[Dict[str, str]], List[Dict[str, str]]]):
+    def __init__(self):
         """
         Initialize the network analysis object.
-
-        Args:
-            packed_edges (Tuple[List[Dict[str, str]], List[Dict[str, str]]]): 
-                Tuple containing two lists of dictionaries, each representing edges for two networks.
+        This initialization sets up the internal dictionaries for storing
+        network structure, statistics, and potentially sociograms.
         """
         
         # Init sna dict
         self.sna = {
-            "nodes_a": self.unpack_network_nodes(packed_edges[0]),
-            "nodes_b": self.unpack_network_nodes(packed_edges[1]),
-            "edges_a": self.unpack_network_edges(packed_edges[0]),
-            "edges_b": self.unpack_network_edges(packed_edges[1]),
-            "macro_stats_a": {},
-            "macro_stats_b": {},
-            "micro_stats_a": pd.DataFrame(),
-            "micro_stats_b": pd.DataFrame(),
-            "nodes_a_rankings": [],
-            "edges_a_types": [],
-            "nodes_b_rankings": [],
-            "edges_b_types": [],
-            "graph_a": "",
-            "graph_b": ""
+            "nodes_a": None,
+            "nodes_b": None,
+            "edges_a": None,
+            "edges_b": None,
+            "adjacency_a": None,
+            "adjacency_b": None,
+            "network_a": None,
+            "network_b": None,
+            "macro_stats_a": None,
+            "macro_stats_b": None,
+            "micro_stats_a": None,
+            "micro_stats_b": None,
+            "nodes_rankings_a": None,
+            "nodes_rankings_b": None,
+            "edges_types_a": None,
+            "edges_types_b": None,
+            "graph_a": None,
+            "graph_b": None
         }
 
         # init sociogram dict
         self.sociogram = {
-            "micro_stats": pd.DataFrame(),
-            "macro_stats": pd.DataFrame(),
-            "supplemental": {}
+            "micro_stats": None,
+            "macro_stats": None,
+            "supplemental": None
         }
 
-    def compute_networks(self, with_sociogram: Boolean = False):
+    def compute_networks(self, 
+        packed_edges_a: List[Dict[str, str]], 
+        packed_edges_b: List[Dict[str, str]], 
+        with_sociogram: Boolean = False
+    ):
         """
-        Compute and store graphs, statistics, and visualization layouts for two networks.
+        Compute and store graphs, statistics, and visualization layouts for network a and b.
 
         Args:
-            sociogram (bool): A flag indicating whether to generate sociograms for the networks.
-                          Defaults to False.
+            packed_edges_a: List[Dict[str, str]]
+                List of dictionaries, each representing edges for network_a.
+            packed_edges_b: List[Dict[str, str]]
+                List of dictionaries, each representing edges for network_b.
+            with_sociogram: bool, optional (default is False)
+                Flag indicating whether to generate sociograms for the networks.
         """
-        
-        # Create network A and B
-        network_a = nx.DiGraph(self.sna["edges_a"])
-        network_b = nx.DiGraph(self.sna["edges_b"])
 
-        # Loop through networks
-        for network, nodes in [(network_a, self.sna["nodes_a"]), (network_b, self.sna["nodes_b"])]:  
+        # Crete netowork a and b
+        for network_type, packed_edges in [("a", packed_edges_a), ("b", packed_edges_b)]:
+            self.sna[f"nodes_{network_type}"] = self.unpack_network_nodes(packed_edges)
+            self.sna[f"edges_{network_type}"] = self.unpack_network_edges(packed_edges)
+            self.sna[f"network_{network_type}"] = nx.DiGraph(self.sna[f"edges_{network_type}"])
+
+        # Add isolated nodes to network a and b
+        for network_type, network, nodes in [
+            ("a", self.sna["network_a"], self.sna["nodes_a"]), 
+            ("b", self.sna["network_b"], self.sna["nodes_b"])
+        ]:  
             # Add isolated nodes to current network
             isolated_nodes = set(list(network)).symmetric_difference(set(nodes))
             network.add_nodes_from(isolated_nodes)
-           
-        # Generate layout for network A and B
-        loc_a = nx.kamada_kawai_layout(network_a)
-        loc_b = nx.kamada_kawai_layout(network_b)
+            
+            # Generate layout for current network
+            loc = nx.kamada_kawai_layout(network)
+            
+            # Update loc so to push isolated nodes away from other nodes
+            updated_loc = self.handle_isolated_nodes(network, loc)
 
-        # Try to push isolated nodes (if any) away from other nodes
-        self.handle_isolated_nodes(network_a, loc_a)
-        self.handle_isolated_nodes(network_b, loc_b)
+            # Add loc to current network
+            self.sna[f"loc_{network_type}"] = updated_loc
+
+            # add adiacency list of current network
+            self.sna[f"adjacency_{network_type}"] = nx.to_pandas_adjacency(network, nodelist=nodes)
                     
-        # Store network A and B statistics and plots
-        self.sna["macro_stats_a"] = self.get_network_macro_stats(network_a)
-        self.sna["macro_stats_b"] = self.get_network_macro_stats(network_b)
-        self.sna["micro_stats_a"] = self.get_network_micro_stats(network_a)
-        self.sna["micro_stats_b"] = self.get_network_micro_stats(network_b)
-        self.sna["nodes_a_rankings"] = self.get_nodes_rankings(self.sna["micro_stats_a"])
-        self.sna["nodes_b_rankings"] = self.get_nodes_rankings(self.sna["micro_stats_b"])
-        self.sna["edges_a_types"] = self.get_edges_types(network_a, self.sna["edges_a"], network_b, self.sna["edges_b"])
-        self.sna["edges_b_types"] = self.get_edges_types(network_b, self.sna["edges_b"], network_a, self.sna["edges_a"])
-        self.sna["components_a"] = self.get_network_components(network_a)
-        self.sna["components_b"] = self.get_network_components(network_b)
-        self.sna["graph_a"] = self.get_sna_graph(network_a, loc_a, "A")
-        self.sna["graph_b"] = self.get_sna_graph(network_b, loc_b, "B")
+        # Store sna data
+        for network_type in ("a", "b"):
+            self.sna[f"macro_stats_{network_type}"] = self.get_network_macro_stats(network_type)
+            self.sna[f"micro_stats_{network_type}"] = self.get_network_micro_stats(network_type)
+            self.sna[f"nodes_rankings_{network_type}"] = self.get_nodes_rankings(network_type)
+            self.sna[f"edges_types_{network_type}"] = self.get_edges_types(network_type)
+            self.sna[f"components_{network_type}"] = self.get_network_components(network_type)
+            self.sna[f"graph_{network_type}"] = self.get_sna_graph(network_type)
 
         # Add sociogram if requested
         if with_sociogram:
-            self.sociogram = self.get_sociogram_data(network_a, network_b)
+            self.sociogram = self.get_sociogram_data()
 
     def unpack_network_edges(self, packed_edges: List[Dict[str, str]]) -> List[Tuple[str, str]]:
         """
         Unpack a list of packed edge dictionaries into a list of edge tuples.
 
-        Each dictionary in `packed_edges` maps a source node to a comma-separated string of target nodes.
-        This function extracts these relationships and converts them into a list of tuples, where each 
-        tuple represents a directed edge from a source node to a target node.
-
         Args:
-            packed_edges (List[Dict[str, str]]): A list of dictionaries, where each dictionary has a 
-            source node as the key and a string consisting of comma-separated target nodes as the value.
-            The value can also be None, indicating no target nodes for that source.
+            packed_edges: List[Dict[str, str]]
+                A list of dictionaries, each with a source node as the key and a 
+                comma-separated string of target nodes as the value.
 
         Returns:
-            List[Tuple[str, str]]: A list of edge tuples, where each tuple is of the form 
-            (source, target), representing a directed edge from the source node to the target node.
+            List[Tuple[str, str]]:
+                A list of edge tuples (source, target) representing directed edges.
         """
         # Extract edges as tuples while ensuring no errors with None values
         return reduce(
@@ -148,13 +158,9 @@ class ABGridNetwork:
         """
         Extract and return a sorted list of unique source nodes from a list of packed edge dictionaries.
 
-        Each dictionary in `packed_edges` has a source node as the key. This function collects all 
-        unique source nodes and returns them in a sorted order.
-
         Args:
-            packed_edges (List[Dict[str, str]]): A list of dictionaries where each dictionary's key 
-            represents a "source" node. The values are strings of "target" nodes, which are ignored 
-            by this function.
+            packed_edges: List[Dict[str, str]]
+                A list of dictionaries where each dictionary's key represents a "source" node.
 
         Returns:
             List[str]: A sorted list of unique source node identifiers.
@@ -164,26 +170,22 @@ class ABGridNetwork:
             node for node_edges in packed_edges for node, _ in node_edges.items()
         ])
     
-    def get_network_macro_stats(self, network: nx.DiGraph) -> Dict[str, Any]:
+    def get_network_macro_stats(self, network_type: Literal["a", "b"]) -> Dict[str, Union[int, float]]:
         """
         Calculate and return macro-level statistics for a directed network.
 
-        This method computes several statistics about the structure of the given
-        network , including the number of nodes, the number of edges, 
-        density, centralization, transitivity, and reciprocity.
-
         Args:
-            network (nx.DiGraph): A directed graph represented using NetworkX's DiGraph class.
+            network_type: Literal["a", "b"]
+                The type identifier for selecting the specific network.
 
         Returns:
-            Dict[str, Any]: A dictionary containing the following macro-level statistics:
-                - "network_nodes": int, the total number of nodes in the network.
-                - "network_edges": int, the total number of edges in the network.
-                - "density": float, the density of the network rounded to three decimal places.
-                - "network_centralization": float, the centralization of the undirected version of the network.
-                - "network_transitivity": float, the transitivity of the network rounded to three decimal places.
-                - "network_reciprocity": float, the reciprocity of the network rounded to three decimal places.
+            Dict[str, Union[int, float]]:
+                A dictionary containing macro-level statistics such as number of nodes,
+                number of edges, network density, centralization, transitivity, and reciprocity.
         """
+        # Get netwrok
+        network = self.sna[f"network_{network_type}"]
+        
         # Compute macro-level statistics
         network_nodes = network.number_of_nodes()
         network_edges = network.number_of_edges()
@@ -202,32 +204,22 @@ class ABGridNetwork:
             "network_reciprocity": network_reciprocity,
         }
     
-    def get_network_micro_stats(self, network: nx.DiGraph) -> pd.DataFrame:
+    def get_network_micro_stats(self, network_type: Literal["a", "b"]) -> pd.DataFrame:
         """
         Calculate and return micro-level statistics for each node in a directed network graph.
 
-        This method computes several node-specific centrality metrics for a given NetworkX directed
-        graph and organizes them into a pandas DataFrame. Additionally, it identifies nodes
-        without incoming or outgoing connections and calculates relative ranks and percentiles for each
-        centrality measure.
-
         Args:
-            network (nx.DiGraph): A directed graph represented using NetworkX's DiGraph class.
+            network_type: Literal["a", "b"]
+                The type identifier for selecting the specific network.
 
         Returns:
-            pd.DataFrame: A DataFrame containing micro-level statistics for each node, including:
-                - "lns": List of nodes each node links to as a comma-separated string.
-                - "ic": In-degree centrality.
-                - "pr": PageRank.
-                - "bt": Betweenness centrality.
-                - "cl": Closeness centrality.
-                - "hu": HITS hub score.
-                - "nd": Category indicating node degree presence (0: has in and out-degree, 1: lacks in-degree,
-                2: lacks out-degree, 3: lacks both in and out-degree).
-                - Additional columns for each centrality measure's rank and percentile.
-
-        The DataFrame is sorted by index and rounded to three decimal places for centrality measures and percentiles.
+            pd.DataFrame: A DataFrame with micro-level statistics for each node, including
+                metrics like in-degree centrality, PageRank, betweenness, closeness centrality,
+                hubs score, and nodes rankings.
         """
+        # Get network
+        network = self.sna[f"network_{network_type}"]
+
         # Create a DataFrame with micro-level statistics
         micro_level_stats = pd.concat([
             pd.Series(nx.to_pandas_adjacency(network).apply(lambda x: ", ".join(x[x > 0].index.values), axis=1), name="lns"),
@@ -267,27 +259,21 @@ class ABGridNetwork:
                 .sort_index()
         )
         
-    def get_nodes_rankings(self, micro_stats: pd.DataFrame) -> Dict[str, Dict[int, int]]:
+    def get_nodes_rankings(self, network_type: Literal["a", "b"]) -> Dict[str, Dict[int, int]]:
         """
         Generate and return the order of nodes based on their rank scores for each centrality metric.
 
-        This method processes a DataFrame containing micro-level network statistics with node ranks
-        for various centrality metrics. It extracts the ranking columns, orders the nodes according 
-        to their rank for each metric, and returns the results as a dictionary.
-
         Args:
-            micro_stats (pd.DataFrame): A DataFrame containing node ranks for various centrality metrics,
-            with columns suffixed by "_rank".
+            network_type: Literal["a", "b"]
+                The type identifier for selecting the specific network.
 
         Returns:
-            Dict[str, Dict[int, int]]: A dictionary where each key corresponds to a centrality metric rank
-            column from the input DataFrame with an "_rank" suffix. The value is another dictionary that 
-            maps node identifiers to their rank ordinal within that metric.
-            
-            The inner dictionary has the following mapping structure:
-                - Key: int, node identifier.
-                - Value: int, node order (ordinal position) based on rank scores.
+            Dict[str, Dict[int, int]]:
+                A dictionary mapping centrality metric names to dictionaries of nodes sorted by rank.
         """
+        # Get network
+        micro_stats = self.sna[f"micro_stats_{network_type}"]
+
         # Initialize dictionary to store ordered node rankings
         nodes_ordered_by_rank = {}
 
@@ -304,28 +290,26 @@ class ABGridNetwork:
         # Return the dictionary of nodes ordered by their rank for each metric
         return nodes_ordered_by_rank
         
-    def get_edges_types(self, network: nx.DiGraph, network_ref: nx.DiGraph) -> Dict[str, List[Tuple[str, str]]]:
+    def get_edges_types(self, network_type: Literal["a", "b"]) -> Dict[str, List[Tuple[str, str]]]:
         """
-        Classify edges in a directed network graph into various types based on their relationships
-        within the network and with respect to a reference network.
-
-        This method computes and classifies edges into five types:
-        - Type I: Non-reciprocal edges, where if node A is connected to node B, node B is not connected to node A in the same network.
-        - Type II: Reciprocal edges, where node A is connected to node B and node B is also connected to node A in the same network.
-        - Type III: Half-symmetrical edges, where if node A is connected to node B in the original network, node A is also connected to node B in the reference network.
-        - Type IV: Half-reversed symmetrical edges, where if node A is connected to node B in the original network, node B is connected to node A in the reference network.
-        - Type V: Fully symmetrical edges, where node A and node B are reciprocally connected in both the original and reference networks.
+        Classify edges in a directed network graph into various types based on relationships within
+        the same network and a reference network.
 
         Args:
-            network (nx.DiGraph): The main directed graph containing the edges to be classified.
-            network_ref (nx.DiGraph): A reference directed graph used for comparison in classification.
+            network_type: Literal["a", "b"]
+                The type identifier for selecting the specific network.
 
         Returns:
-            Dict[str, List[Tuple[str, str]]]: A dictionary classifying edges into the five categories:
+            Dict[str, List[Tuple[str, str]]]:
+                A dictionary classifying edges into five types: I, II, III, IV, and V.
         """
-        # Compute ordered adjacency list for both networks
-        adj_df = nx.to_pandas_adjacency(network, nodelist=sorted(network.nodes))
-        adj_ref_df = nx.to_pandas_adjacency(network_ref, nodelist=sorted(network.nodes))
+        # Get adiacency dataframes
+        if network_type == "a":
+            adj_df = self.sna["adjacency_a"]
+            adj_ref_df = self.sna["adjacency_b"]
+        else:
+            adj_df = self.sna["adjacency_b"]
+            adj_ref_df = self.sna["adjacency_a"]
 
         # Compute type I edges, non reciprocal
         # i.e. same network: A -> B and not B -> A
@@ -364,26 +348,22 @@ class ABGridNetwork:
             "type_v": type_v
         }
     
-    def get_network_components(self, network: nx.DiGraph) -> List[str]:
+    def get_network_components(self, network_type: Literal["a", "b"]) -> List[str]:
         """
         Identify and return the unique and significant components of a directed graph as strings.
 
-        This method calculates and returns components of the given NetworkX directed graph, including:
-        - Strongly connected components: Subsets in which each node is reachable from any other node respecting edges direction.
-        - Weakly connected components: Subsets connected without considering the direction of edges.
-        - Cliques (from the undirected version of the graph): Subsets where each node is directly connected to every other node in the subset.
-
-        Components of each type are filtered to include only those with more than two nodes. 
-        The nodes in each component are concatenated into a single string after being 
-        sorted. The function returns a unique list of these strings, sorted by their length in descending order.
-
         Args:
-            network (nx.DiGraph): A directed graph represented using NetworkX's DiGraph class.
+            network_type: Literal["a", "b"]
+                The type identifier for selecting the specific network.
 
         Returns:
-            List[str]: A list of strings, where each string represents a unique component with its nodes concatenated
-            in sorted order. The list is sorted in descending order of string length.
+            List[str]: 
+                A list of strings, each representing a unique component with its nodes concatenated.
         """
+        # Get netwrok
+        network = self.sna[f"network_{network_type}"]
+        
+        # Compute network components
         components = [
             *["".join(sorted(list(c))) for c in sorted(nx.kosaraju_strongly_connected_components(network), key=len, reverse=True) if len(c) > 2],
             *["".join(sorted(list(c))) for c in sorted(nx.weakly_connected_components(network), key=len, reverse=True) if len(c) > 2],
@@ -393,21 +373,25 @@ class ABGridNetwork:
         # Ensure unique components and sort by length in descending order
         return sorted(list(set(components)), key=len, reverse=True)
 
-    def create_sna_plot(self, network: nx.DiGraph, loc: Dict[str, Tuple[float, float]], graphType: Literal["A","B"] = "A") -> plt.Figure:
+    def create_sna_plot(self, network: nx.DiGraph, loc: Dict[str, Tuple[float, float]], network_type: Literal["a","b"]) -> plt.Figure:
         """
         Create a matplotlib plot of a network graph.
-        
+
         Args:
-            network (nx.DiGraph): The directed graph to plot.
-            loc (Dict[str, Tuple[float, float]]): Node positions for layout.
-            graphType (str): Type of the network ('A' or 'B'), used to determine node colors.
-        
+            network: nx.DiGraph
+                The directed graph to plot.
+            loc: Dict[str, Tuple[float, float]]
+                Node positions for layout.
+            network_type: Literal["a", "b"]
+                Type of the network ('a' or 'b'), used to determine node colors.
+
         Returns:
-            plt.Figure: The matplotlib figure containing the network plot.
+            plt.Figure: 
+                The matplotlib figure containing the network plot.
         """
         
         # Set color based on graph type (A or B)
-        color = A_COLOR if graphType == "A" else B_COLOR
+        color = A_COLOR if network_type == "a" else B_COLOR
         
         # Determine dimensions of matplotlib graph based upon number of nodes
         fig_size = (8 * CM_TO_INCHES, 8 * CM_TO_INCHES) \
@@ -435,16 +419,17 @@ class ABGridNetwork:
         non_reciprocal_edges = [e for e in network.edges if e not in reciprocal_edges]
         nx.draw_networkx_edges(network, loc, edgelist=non_reciprocal_edges, edge_color=color, 
                             style="--", arrowstyle='-|>', arrowsize=15, ax=ax)
-        
+        # Return figure
         return fig
 
     def figure_to_base64_svg(self, fig: plt.Figure) -> str:
         """
         Convert a matplotlib figure to a base64-encoded SVG data URI.
-        
+
         Args:
-            fig (plt.Figure): The matplotlib figure to convert.
-        
+            fig: plt.Figure
+                The matplotlib figure to convert.
+
         Returns:
             str: The SVG data URI of the figure.
         """
@@ -461,33 +446,45 @@ class ABGridNetwork:
         # Return the data URI for the SVG
         return f"data:image/svg+xml;base64,{base64_encoded_string}"
 
-    def get_sna_graph(self, network: nx.DiGraph, loc: Dict[str, Tuple[float, float]], graphType: Literal["A","B"] = "A") -> str:
+    def get_sna_graph(self, network_type: Literal["a","b"]) -> str:
         """
         Generate a graphical representation of a network and return it encoded in base64 SVG format.
-        
+
         Args:
-            network (nx.DiGraph): The directed graph to plot.
-            loc (Dict[str, Tuple[float, float]]): Node positions for layout.
-            graphType (str): Type of the network ('A' or 'B'), used to determine node colors.
-        
+            network_type: Literal["a", "b"]
+                Type of the network ('a' or 'b') used to select which graph to create the plot for.
+
         Returns:
             str: The SVG data URI of the network plot.
         """
+
+        # Get network
+        network = self.sna[f"network_{network_type}"]
+
+        # Get network locations
+        loc = self.sna[f"loc_{network_type}"]
+
         # Create the matplotlib plot
-        fig = self.create_sna_plot(network, loc, graphType)
+        fig = self.create_sna_plot(network, loc, network_type)
         
         # Convert to base64 SVG string
         return self.figure_to_base64_svg(fig)
     
-    def handle_isolated_nodes(self, network: nx.DiGraph, loc: Dict[Any, np.ndarray]):
-        """
+    def handle_isolated_nodes(self, network: nx.DiGraph, loc: Dict[Any, np.ndarray]) -> Dict[Any, np.ndarray]:
+        """"
         Add isolated nodes to the network and adjust their positions to appear marginal.
-        This function adjusts the positions of isolated nodes to appear outside the convex hull
-        of the main node cluster so that they are perceptually distant and marginal.
-        
+
+        Adjust the positions of isolated nodes to appear outside the convex hull of the main node
+        cluster so that they are perceptually distant and marginal.
+
         Args:
-            network (nx.DiGraph): The directed graph where isolated nodes are managed.
-            loc (Dict[Any, np.ndarray]): A dictionary representing the layout of nodes.
+            network: nx.DiGraph
+                The directed graph where isolated nodes are managed.
+            loc: Dict[Any, np.ndarray]
+                A dictionary representing the layout of nodes.
+
+        Returns:
+            Dict[Any, np.ndarray]: Updated node layout including isolated nodes.
         """
         # Get isolated nodes, if any
         isolates = list(nx.isolates(network))
@@ -543,20 +540,21 @@ class ABGridNetwork:
         
         # All isolated nodes have been placed
         except StopIteration:
-            pass
+            return loc
 
     def get_network_centralization(self, network: nx.Graph) -> float:
         """
         Calculate the centralization of a network.
 
-        The centralization measure indicates how concentrated the network is around its most central node.
-        It compares the current network structure to an ideal star network structure.
+        Centralization indicates how concentrated the network is around its most central node, 
+        comparing the current network structure to an ideal star network structure.
 
         Args:
-            network (nx.Graph): The graph for which the centralization is calculated.
+            network: nx.Graph
+                The graph for which the centralization is calculated.
 
         Returns:
-            float: The centralization value of the network, rounded to three decimal places, or
+            float: The centralization value of the network, rounded to three decimal places.
         """
         
         # Get number of nodes
@@ -579,18 +577,21 @@ class ABGridNetwork:
         # Return network centralization
         return network_centralization
     
-    def get_sociogram_data(self, network_a: nx.DiGraph, network_b: nx.DiGraph) -> dict[str, pd.DataFrame | dict]:
+    def get_sociogram_data(self) -> Dict[str, Union[pd.DataFrame, Dict[str, float]]]:
         """
         Computes a sociogram DataFrame based on two directed graphs representing 
         social network data for preferences and rejections.
 
-        Parameters:
-        - network_a (nx.DiGraph): A directed graph where edges represent preferences given.
-        - network_b (nx.DiGraph): A directed graph where edges represent rejections given.
-
         Returns:
-        - dict[str, pd.DataFrame | dict]: a dict containing sociogram macro and micro stats
+            Dict[str, Union[pd.DataFrame, Dict[str, float]]]:
+                A dictionary containing sociogram micro and macro statistics and supplemental indices.
         """
+
+        network_a = self.sna["network_a"]
+        matrix_a = self.sna["adjacency_a"]
+
+        network_b = self.sna["network_b"]
+        matrix_b = self.sna["adjacency_b"]
         
         # Compute basic data for sociogram micro stats
         out_preferences = pd.Series(dict(network_a.out_degree()), name="given_preferences")
@@ -601,8 +602,6 @@ class ABGridNetwork:
         # Init sociogram micro stats dataframe
         sociogram_micro_df = pd.concat([in_preferences, in_rejects, out_preferences, out_rejects], axis=1)
         
-        matrix_a = nx.to_pandas_adjacency(network_a, nodelist=sorted(network_a.nodes))
-        matrix_b = nx.to_pandas_adjacency(network_b, nodelist=sorted(network_b.nodes))
 
         # Add mutual preferences
         sociogram_micro_df["mutual_preferences"] = (matrix_a * matrix_a.T).dot(np.ones(matrix_a.shape[0])).astype(int)
@@ -682,12 +681,12 @@ class ABGridNetwork:
         sociogram_macro_df.insert(1, "median", median)
 
         # Add cohesion index
-        cohesion_index_type_i = (len(self.sna["edges_a_types"]["type_ii"]) *2) / len(network_a.edges())
-        cohesion_index_type_ii = len(self.sna["edges_a_types"]["type_ii"]) / len(network_a)
+        cohesion_index_type_i = (len(self.sna["edges_types_a"]["type_ii"]) *2) / len(network_a.edges())
+        cohesion_index_type_ii = len(self.sna["edges_types_a"]["type_ii"]) / len(network_a)
 
         # Add conflict index
-        conflict_index_type_i = (len(self.sna["edges_b_types"]["type_ii"]) *2) / len(network_b.edges())
-        conflict_index_type_ii = len(self.sna["edges_b_types"]["type_ii"]) / len(network_b)
+        conflict_index_type_i = (len(self.sna["edges_types_b"]["type_ii"]) *2) / len(network_b.edges())
+        conflict_index_type_ii = len(self.sna["edges_types_b"]["type_ii"]) / len(network_b)
 
         # Return sociogram dataframe, ordered by node
         return {
