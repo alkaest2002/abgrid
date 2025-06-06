@@ -488,8 +488,10 @@ class ABGridNetwork:
         """
         # Get isolated nodes, if any
         isolates = list(nx.isolates(network))
+        
+        # If there are no isolated nodes, just return loc
         if not isolates:
-            return
+            return loc
         
         # Convert current loc coordinates to dataframe
         coordinates = pd.DataFrame(loc).T
