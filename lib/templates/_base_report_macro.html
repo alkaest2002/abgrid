@@ -163,8 +163,9 @@
 {% macro render_edges_type(network_type, edges_types, render_edges_types_label, render_edges_type_empty_list) %}
 <div class="edges_types">
     {% for edges_type, edges in edges_types.items() %}
+        {% set edges_length = edges | length %}
         <div class="edges-type">
-            <div class="edges-type-label">{{ render_edges_types_label(network_type, edges_type) }}</div>
+            <div class="edges-type-label">{{ render_edges_types_label(network_type, edges_type, edges_length) }}</div>
             <div class="edges-list">
                 {% if  edges | length > 0 %}
                     {% for edge in edges %}

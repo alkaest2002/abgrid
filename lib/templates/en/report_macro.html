@@ -20,37 +20,37 @@
     {{ status }}
 {% endmacro %}
 
-{% macro render_edges_types_label(network_type, edge_type) %}
+{% macro render_edges_types_label(network_type, edge_type, edges_length) %}
     {% if edge_type == "type_i" %}
-        <p><b>Type I - Non reciprocal edges</b></p>
+        <p><b>Type I - Non reciprocal edges ({{ edges_length }})</b></p>
         {% if network_type == "A" %}
             <p class="dimmed-text small-text">X &rarr; Y in network A &middot; not Y &rarr; X in network A</p>
         {% else %}
             <p class="dimmed-text small-text">X &rarr; Y in network B &middot; not Y &rarr; X in network B</p>
         {% endif %}
     {% elif edge_type == "type_ii" %}
-        <p><b>Type II - Reciprocal edges</b></p>
+        <p><b>Type II - Reciprocal edges ({{ edges_length }})</b></p>
         {% if network_type == "A" %}
             <p class="dimmed-text small-text">X &rarr; Y in network A &middot; Y &rarr; X in network A</p>
         {% else %}
             <p class="dimmed-text small-text">X &rarr; Y in network B &middot; Y &rarr; X in network B</p>
         {% endif %}
     {% elif edge_type == "type_iii" %}
-        <p><b>Type III - Half symmetrical edges</b></p>
+        <p><b>Type III - Half symmetrical edges ({{ edges_length }})</b></p>
         {% if network_type == "A" %}
             <p class="dimmed-text small-text">X &rarr; Y in network A &middot; X &rarr; Y in network B</p>
         {% else %}
             <p class="dimmed-text small-text">X &rarr; Y in network B &middot; X &rarr; Y in network A</p>
         {% endif %}
     {% elif edge_type == "type_iv" %}
-        <p><b>Type IV - Reversed half symmetrical edges</b></p>
+        <p><b>Type IV - Reversed half symmetrical edges ({{ edges_length }})</b></p>
         {% if network_type == "A" %}
             <p class="dimmed-text small-text">X &rarr; Y in network A &middot; Y &rarr; X in network B</p>
         {% else %}
             <p class="dimmed-text small-text">X &rarr; Y in network B &middot; Y &rarr; X in network A</p>
         {% endif %}
     {% elif edge_type == "type_v" %}
-        <p><b>Type V - Full symmetrical edges</b></p>
+        <p><b>Type V - Full symmetrical edges ({{ edges_length }})</b></p>
         {% if network_type == "A" %}
             <p class="dimmed-text small-text">X &rarr; Y, Y &rarr; X in network A &middot; X &rarr; Y, Y &rarr; X in network B</p>
         {% else %}
