@@ -635,12 +635,6 @@ class ABGridNetwork:
                 .add(sociogram_micro_df["orientation"])
         )
 
-        # Add influence coefficient raw
-        sociogram_micro_df["influence_coeff_raw"] = (
-            sociogram_micro_df["received_preferences"]
-                .add(sociogram_micro_df["mutual_preferences"])
-        )
-        
         # Add affiliation coefficient
         sociogram_micro_df["affiliation_coeff"] = (
             sociogram_micro_df["affiliation_coeff_raw"]
@@ -648,6 +642,13 @@ class ABGridNetwork:
                 .div(sociogram_micro_df["affiliation_coeff_raw"].std())
                 .mul(10)
                 .add(100)
+                .astype(int)
+        )
+
+        # Add influence coefficient raw
+        sociogram_micro_df["influence_coeff_raw"] = (
+            sociogram_micro_df["received_preferences"]
+                .add(sociogram_micro_df["mutual_preferences"])
         )
 
         # Add influence coefficient
@@ -657,6 +658,7 @@ class ABGridNetwork:
                 .div(sociogram_micro_df["influence_coeff_raw"].std())
                 .mul(10)
                 .add(100)
+                .astype(int)
         )
         
         # Add sociogram status
