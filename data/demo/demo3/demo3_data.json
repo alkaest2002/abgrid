@@ -2135,7 +2135,7 @@
                     "hu_rank_pctile": 0.3157894736842105
                 }
             },
-            "nodes_a_rankings": {
+            "nodes_rankings_a": {
                 "ic_rank": {
                     "P": 1,
                     "M": 2,
@@ -2337,7 +2337,7 @@
                     "V": 36
                 }
             },
-            "nodes_b_rankings": {
+            "nodes_rankings_b": {
                 "ic_rank": {
                     "H": 1,
                     "O": 2,
@@ -2539,7 +2539,7 @@
                     "j": 23
                 }
             },
-            "edges_a_types": {
+            "edges_types_a": {
                 "type_i": [
                     [
                         "A",
@@ -2882,7 +2882,7 @@
                 ],
                 "type_v": []
             },
-            "edges_b_types": {
+            "edges_types_b": {
                 "type_i": [
                     [
                         "A",

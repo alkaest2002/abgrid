@@ -455,7 +455,7 @@
                     "hu_rank_pctile": 0.625
                 }
             },
-            "nodes_a_rankings": {
+            "nodes_rankings_a": {
                 "ic_rank": {
                     "A": 1,
                     "F": 2,
@@ -507,7 +507,7 @@
                     "C": 5
                 }
             },
-            "nodes_b_rankings": {
+            "nodes_rankings_b": {
                 "ic_rank": {
                     "B": 1,
                     "C": 2,
@@ -559,7 +559,7 @@
                     "B": 7
                 }
             },
-            "edges_a_types": {
+            "edges_types_a": {
                 "type_i": [
                     [
                         "B",
@@ -621,7 +621,7 @@
                 ],
                 "type_v": []
             },
-            "edges_b_types": {
+            "edges_types_b": {
                 "type_i": [
                     [
                         "A",
@@ -1450,7 +1450,7 @@
                     "hu_rank_pctile": 0.4375
                 }
             },
-            "nodes_a_rankings": {
+            "nodes_rankings_a": {
                 "ic_rank": {
                     "D": 1,
                     "B": 2,
@@ -1502,7 +1502,7 @@
                     "B": 7
                 }
             },
-            "nodes_b_rankings": {
+            "nodes_rankings_b": {
                 "ic_rank": {
                     "E": 1,
                     "H": 2,
@@ -1554,7 +1554,7 @@
                     "F": 6
                 }
             },
-            "edges_a_types": {
+            "edges_types_a": {
                 "type_i": [
                     [
                         "A",
@@ -1616,7 +1616,7 @@
                 ],
                 "type_v": []
             },
-            "edges_b_types": {
+            "edges_types_b": {
                 "type_i": [
                     [
                         "A",
@@ -2450,7 +2450,7 @@
                     "hu_rank_pctile": 0.25
                 }
             },
-            "nodes_a_rankings": {
+            "nodes_rankings_a": {
                 "ic_rank": {
                     "H": 1,
                     "F": 2,
@@ -2502,7 +2502,7 @@
                     "H": 5
                 }
             },
-            "nodes_b_rankings": {
+            "nodes_rankings_b": {
                 "ic_rank": {
                     "D": 1,
                     "B": 2,
@@ -2554,7 +2554,7 @@
                     "D": 5
                 }
             },
-            "edges_a_types": {
+            "edges_types_a": {
                 "type_i": [
                     [
                         "A",
@@ -2632,7 +2632,7 @@
                 ],
                 "type_v": []
             },
-            "edges_b_types": {
+            "edges_types_b": {
                 "type_i": [
                     [
                         "A",
@@ -3479,7 +3479,7 @@
                     "hu_rank_pctile": 0.5
                 }
             },
-            "nodes_a_rankings": {
+            "nodes_rankings_a": {
                 "ic_rank": {
                     "B": 1,
                     "F": 2,
@@ -3531,7 +3531,7 @@
                     "C": 6
                 }
             },
-            "nodes_b_rankings": {
+            "nodes_rankings_b": {
                 "ic_rank": {
                     "G": 1,
                     "E": 2,
@@ -3583,7 +3583,7 @@
                     "F": 7
                 }
             },
-            "edges_a_types": {
+            "edges_types_a": {
                 "type_i": [
                     [
                         "A",
@@ -3666,7 +3666,7 @@
                 ],
                 "type_v": []
             },
-            "edges_b_types": {
+            "edges_types_b": {
                 "type_i": [
                     [
                         "A",
