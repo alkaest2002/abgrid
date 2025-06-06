@@ -86,8 +86,8 @@
 {% macro report_body() %}
     {% for (network_type, question, graph, macro_stats, micro_stats, nodes_rankings, edges_types, components) in 
         [
-            ("A", question_a, sna.graph_a, sna.macro_stats_a, sna.micro_stats_a, sna.nodes_a_rankings, sna.edges_a_types, sna.components_a), 
-            ("B", question_b, sna.graph_b, sna.macro_stats_b, sna.micro_stats_b, sna.nodes_b_rankings, sna.edges_b_types, sna.components_b)
+            ("A", question_a, sna.graph_a, sna.macro_stats_a, sna.micro_stats_a, sna.nodes_rankings_a, sna.edges_types_a, sna.components_a), 
+            ("B", question_b, sna.graph_b, sna.macro_stats_b, sna.micro_stats_b, sna.nodes_rankings_b, sna.edges_types_b, sna.components_b)
         ] 
     %}
         <div class="page sna-graph-main">
@@ -176,21 +176,21 @@
                 {{ report_macro.render_report_header(project_title, group, "sociogram") }}
                 <div style="margin: 12px 0px;">
                     <p>
-                        <span>
+                        <span class="text-italic">
                             {{- report_macro.render_sociogram_measures_label("cohesion_index_type_i") -}}: 
                                 {{ "%0.2f"| format(sociogram["supplemental"]["cohesion_index_type_i"] * 100 | round(0)) }}%
                         </span>,
-                        <span>
+                        <span class="text-italic">,
                             {{- report_macro.render_sociogram_measures_label("cohesion_index_type_ii") -}}: 
                                 {{ "%0.2f"| format(sociogram["supplemental"]["cohesion_index_type_ii"] | round(2)) }}
                         </span>
                     </p>
                     <p>
-                        <span>
+                        <span class="text-italic">
                             {{- report_macro.render_sociogram_measures_label("conflict_index_type_i") -}}: 
                                 {{ "%0.2f"| format(sociogram["supplemental"]["conflict_index_type_i"] * 100 | round(0)) }}%
                         </span>
-                        <span>,
+                        <span class="text-italic">,
                             {{- report_macro.render_sociogram_measures_label("conflict_index_type_ii") -}}: 
                                 {{ "%0.2f"| format(sociogram["supplemental"]["conflict_index_type_ii"] | round(2)) }}
                         </span>
