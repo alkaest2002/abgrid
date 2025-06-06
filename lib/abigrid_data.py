@@ -139,10 +139,10 @@ class ABGridData:
             if group_data is not None:
                 
                 # Initialize ABGrid network
-                ntw = ABGridNetwork((group_data["choices_a"], group_data["choices_b"]))
+                ntw = ABGridNetwork()
                 
                 # Compute network statistics
-                ntw.compute_networks(with_sociogram)
+                ntw.compute_networks(group_data["choices_a"], group_data["choices_b"], with_sociogram)
                 
                 # Prepare report data
                 report_data = {
@@ -159,10 +159,10 @@ class ABGridData:
                         "macro_stats_b": ntw.sna["macro_stats_b"],
                         "micro_stats_a": ntw.sna["micro_stats_a"].to_dict('index'),
                         "micro_stats_b": ntw.sna["micro_stats_b"].to_dict('index'),
-                        "nodes_a_rankings": ntw.sna["nodes_a_rankings"],
-                        "nodes_b_rankings": ntw.sna["nodes_b_rankings"],
-                        "edges_a_types": ntw.sna["edges_a_types"],
-                        "edges_b_types": ntw.sna["edges_b_types"],
+                        "nodes_rankings_a": ntw.sna["nodes_rankings_a"],
+                        "nodes_rankings_b": ntw.sna["nodes_rankings_b"],
+                        "edges_types_a": ntw.sna["edges_types_a"],
+                        "edges_types_b": ntw.sna["edges_types_b"],
                         "components_a":ntw.sna["components_a"],
                         "components_b":ntw.sna["components_b"],
                         "graph_a": ntw.sna["graph_a"],
