@@ -83,6 +83,16 @@
             </div>
             {{ report_macro.render_footer(year) }}
         </div>
+        <div class="page sociogram-rankings-main">
+            <div>
+                {{ base_macro.render_logo() }}
+                {{ report_macro.render_disclaimer() }}
+                {{ report_macro.render_report_header(project_title, group, "sociogram_rankings") }}
+                {{ base_report_macro.render_rankings(sociogram["rankings"], report_macro.render_rank_label) }}
+                {{ report_macro.render_sociogram_legend(show_rankings=True) }}
+            </div>
+            {{ report_macro.render_footer(year) }}
+        </div>
         <div class="page sociogram-macro-stats-main">
             <div>
                 {{ base_macro.render_logo() }}
@@ -90,28 +100,28 @@
                 {{ report_macro.render_report_header(project_title, group, "sociogram_macro") }}
                 <div style="margin: 12px 0px;">
                     <p>
-                        <span>
-                            {{- report_macro.render_sociogram_measures_label("cohesion_index_type_i") -}}: 
-                                {{ "%0.2f"| format(sociogram["supplemental"]["cohesion_index_type_i"] * 100 | round(0)) }}%
+                        <span class="text-italic">
+                            {{- report_macro.render_sociogram_measures_label("ui_i") -}}: 
+                                {{ "%0.2f"| format(sociogram["supplemental"]["ui_i"] * 100 | round(0)) }}%
                         </span>,
-                        <span>
-                            {{- report_macro.render_sociogram_measures_label("cohesion_index_type_ii") -}}: 
-                                {{ "%0.2f"| format(sociogram["supplemental"]["cohesion_index_type_ii"] | round(2)) }}
+                        <span class="text-italic">,
+                            {{- report_macro.render_sociogram_measures_label("ui_ii") -}}: 
+                                {{ "%0.2f"| format(sociogram["supplemental"]["ui_ii"] | round(2)) }}
                         </span>
                     </p>
                     <p>
-                        <span>
-                            {{- report_macro.render_sociogram_measures_label("conflict_index_type_i") -}}: 
-                                {{ "%0.2f"| format(sociogram["supplemental"]["conflict_index_type_i"] * 100 | round(0)) }}%
+                        <span class="text-italic">
+                            {{- report_macro.render_sociogram_measures_label("wi_i") -}}: 
+                                {{ "%0.2f"| format(sociogram["supplemental"]["wi_i"] * 100 | round(0)) }}%
                         </span>
-                        <span>,
-                            {{- report_macro.render_sociogram_measures_label("conflict_index_type_ii") -}}: 
-                                {{ "%0.2f"| format(sociogram["supplemental"]["conflict_index_type_ii"] | round(2)) }}
+                        <span class="text-italic">,
+                            {{- report_macro.render_sociogram_measures_label("wi_ii") -}}: 
+                                {{ "%0.2f"| format(sociogram["supplemental"]["wi_ii"] | round(2)) }}
                         </span>
                     </p>
                 </div>
                 {{ base_report_macro.render_sociogram_macro_statistics(sociogram.macro_stats, report_macro.render_sociogram_measures_label) }}
-                {{ report_macro.render_sociogram_legend(show_macro=True)}}
+                {{ report_macro.render_sociogram_legend(show_macro=True) }}
             </div>
             {{ report_macro.render_footer(year) }}
         </div>
