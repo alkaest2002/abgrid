@@ -68,6 +68,8 @@ class ABGridNetwork:
         self.sociogram = {
             "micro_stats": None,
             "macro_stats": None,
+            "graph_ic": None,
+            "graph_ac": None,
             "supplemental": None
         }
 
@@ -127,6 +129,8 @@ class ABGridNetwork:
         # Add sociogram if requested
         if with_sociogram:
             self.sociogram = self.get_sociogram_data()
+            self.sociogram["graph_ic"] = self.get_sociogram_graph("ic_raw")
+            self.sociogram["graph_ac"] = self.get_sociogram_graph("ac_raw")
 
     def unpack_network_edges(self, packed_edges: List[Dict[str, str]]) -> List[Tuple[str, str]]:
         """
@@ -675,7 +679,7 @@ class ABGridNetwork:
         sociogram_micro_df.loc[sociogram_micro_df.iloc[:, :4].sum(axis=1).eq(0), "st"] = "isolated"
         sociogram_micro_df.loc[z_impact < -1, "st"] = "neglected"
         sociogram_micro_df.loc[z_impact.between(-1, -.5), "st"] = "underrated"
-        sociogram_micro_df.loc[np.logical_and(z_impact.between(.5, 1), z_balance > 1), "status"] = "appreciated"
+        sociogram_micro_df.loc[np.logical_and(z_impact.between(.5, 1), z_balance > 1), "st"] = "appreciated"
         sociogram_micro_df.loc[np.logical_and(z_impact > 1, z_balance > 1), "st"] = "popular"
         sociogram_micro_df.loc[np.logical_and(z_impact > -.5, z_balance < -1), "st"] = "rejected"
         sociogram_micro_df.loc[np.logical_and(z_impact > 0, z_balance.between(-.5, .5)), "st"] = "controversial"
@@ -707,13 +711,25 @@ class ABGridNetwork:
            }
         }
     
-    def get_sociogram_rankings(self, micro_stats: pd.DataFrame):
+    def get_sociogram_rankings(self, micro_stats: pd.DataFrame) -> Dict[str, Dict[Any, int]]:
+        """
+        Generate and return the order of nodes based on their rank scores for each specified centrality metric.
+
+        Args:
+            micro_stats (pd.DataFrame): A DataFrame containing micro-level statistics for nodes
+                indexed by node identifiers with columns representing metrics.
+
+        Returns:
+            Dict[str, Dict[Any, int]]: A dictionary where each key corresponds to a metric from the input DataFrame.
+                The value is another dictionary mapping node identifiers to their rank order
+                (ordinal position) based on the metric scores.
+        """
 
         # Initialize dictionary to store ordered node rankings
         nodes_ordered_by_rank = {}
 
         # Get columns that represent rank data
-        metrics = micro_stats.loc[:, [ "rp", "rr", "bl", "im", "ac_raw", "ic_raw"]]
+        metrics = micro_stats.loc[:, [ "rp", "rr", "bl", "im", "ac_raw", "ic_raw" ]]
         
         # For each metric, nodes will be ordered by their relative rank
         for metric_label, metric_data in metrics.items():
@@ -731,3 +747,51 @@ class ABGridNetwork:
         
         # Return the dictionary of nodes ordered by their rank for each metric
         return nodes_ordered_by_rank
+    
+    def get_sociogram_graph(self, coeffient: Literal["ac_raw", "ic_raw"]) -> str:
+        """
+        Generate a graphical representation of sociogram rankings and return it encoded in base64 SVG format.
+
+
+        Returns:
+            str: A base64-encoded SVG string representing the sociogram plot.
+        """
+
+        # Create the matplotlib plot
+        fig = self.create_sociogram_plot(coeffient)
+        
+        # Convert to base64 SVG string
+        return self.figure_to_base64_svg(fig)
+    
+    
+    def create_sociogram_plot(self, coeffient: Literal["ac_raw", "ic_raw"]):
+    
+        # Get data
+        data = self.sociogram["micro_stats"].loc[:, [coeffient]]
+        
+        # Normalize values
+        data = data.rsub(data.max()).div(data.min() + data.max())
+        
+        # Create plot figure
+        fig, ax = plt.subplots(figsize=(5,5), subplot_kw = {'projection': 'polar'})
+        
+        # Customize plot
+        ax.set_xticklabels([]);
+        ax.set_yticklabels([]);
+        ax.set_ylim(0, 1.2)
+        ax.get_xaxis().set_visible(False)
+        ax.grid(color= '#bbb', linestyle = '--', linewidth = .8)
+        
+        # Plot data
+        for idx, (_, group_data) in enumerate(data.groupby(by=coeffient)):
+            offset = idx * .25
+            group_data = group_data.reset_index(names="node_labels")
+            r = group_data[coeffient]
+            slice = (2 * np.pi) / group_data[coeffient].shape[0]
+            theta = pd.Series(group_data[coeffient].index.values).mul(slice).add(offset)
+            ax.scatter(theta, r, alpha=0.5, color="#aaa")
+            for i, txt in enumerate(group_data["node_labels"]):
+                ax.annotate(txt, (theta[i], r[i]), fontsize=12, color="blue")
+        
+        # Return figure
+        return fig
