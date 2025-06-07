@@ -767,31 +767,35 @@ class ABGridNetwork:
     def create_sociogram_plot(self, coeffient: Literal["ac_raw", "ic_raw"]):
     
         # Get data
-        data = self.sociogram["micro_stats"].loc[:, [coeffient]]
+        data = self.sociogram["micro_stats"].loc[:, [coeffient]].copy()
         
         # Normalize values
-        data = data.rsub(data.max()).div(data.min() + data.max())
-        
+        plot_data = data.sub(data.min()).div(data.max() - data.min())
+        plot_data = plot_data.max() - plot_data
+
         # Create plot figure
-        fig, ax = plt.subplots(figsize=(5,5), subplot_kw = {'projection': 'polar'})
+        fig, ax = plt.subplots(
+            figsize=(13 * CM_TO_INCHES, 13 * CM_TO_INCHES), 
+            subplot_kw = { "projection": "polar" }
+        )
         
         # Customize plot
         ax.set_xticklabels([]);
         ax.set_yticklabels([]);
-        ax.set_ylim(0, 1.2)
         ax.get_xaxis().set_visible(False)
-        ax.grid(color= '#bbb', linestyle = '--', linewidth = .8)
+        ax.set_ylim(0, 1.1)
+        ax.grid(color= "#bbb", linestyle = "--", linewidth = .8)
         
         # Plot data
-        for idx, (_, group_data) in enumerate(data.groupby(by=coeffient)):
-            offset = idx * .25
-            group_data = group_data.reset_index(names="node_labels")
-            r = group_data[coeffient]
-            slice = (2 * np.pi) / group_data[coeffient].shape[0]
-            theta = pd.Series(group_data[coeffient].index.values).mul(slice).add(offset)
-            ax.scatter(theta, r, alpha=0.5, color="#aaa")
-            for i, txt in enumerate(group_data["node_labels"]):
-                ax.annotate(txt, (theta[i], r[i]), fontsize=12, color="blue")
+        for idx, (_, group_plot_data) in enumerate(plot_data.groupby(by=coeffient)):
+            offset = idx % 2 * -np.pi + idx * .25
+            group_plot_data = group_plot_data.reset_index(names="node_labels")
+            r = group_plot_data[coeffient]
+            slice = (2 * np.pi) / group_plot_data[coeffient].shape[0]
+            theta = pd.Series(group_plot_data[coeffient].index.values).mul(slice).add(offset)
+            ax.scatter(theta, r, alpha=0.8, color="#999", s=3)
+            for i, txt in enumerate(group_plot_data["node_labels"]):
+                ax.annotate(txt, (theta[i] + .01, r[i]), fontsize=8, color="blue")
         
         # Return figure
         return fig
