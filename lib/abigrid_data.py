@@ -168,13 +168,16 @@ class ABGridData:
                         "graph_a": ntw.sna["graph_a"],
                         "graph_b": ntw.sna["graph_b"],
                     },
-                    "sociogram": {
-                        "micro_stats": ntw.sociogram["micro_stats"].to_dict("index"),
-                        "macro_stats": ntw.sociogram["macro_stats"].to_dict("index"),
-                        "rankings": ntw.sociogram["rankings"],
-                        "supplemental": ntw.sociogram["supplemental"]
-                    }
                 }
+
+                # Add sociogram data to report data, if requested
+                if with_sociogram:
+                    report_data["sociogram"] = {
+                            "micro_stats": ntw.sociogram["micro_stats"].to_dict("index"),
+                            "macro_stats": ntw.sociogram["macro_stats"].to_dict("index"),
+                            "rankings": ntw.sociogram["rankings"],
+                            "supplemental": ntw.sociogram["supplemental"]
+                        }
                 
                 # Return report data with no errors
                 return report_data, None
