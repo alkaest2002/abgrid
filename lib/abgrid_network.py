@@ -637,11 +637,6 @@ class ABGridNetwork:
                 .add(sociogram_micro_df["orientation"])
         )
 
-         # Add influence coefficient rank
-        sociogram_micro_df["affiliation_coeff_rank"] = (
-            sociogram_micro_df["affiliation_coeff_raw"].rank(method="dense", ascending=False)
-        )
-
         # Add affiliation coefficient
         sociogram_micro_df["affiliation_coeff"] = (
             sociogram_micro_df["affiliation_coeff_raw"]
@@ -656,11 +651,6 @@ class ABGridNetwork:
         sociogram_micro_df["influence_coeff_raw"] = (
             sociogram_micro_df["received_preferences"]
                 .add(sociogram_micro_df["mutual_preferences"])
-        )
-
-        # Add influence coefficient rank
-        sociogram_micro_df["influence_coeff_rank"] = (
-            sociogram_micro_df["influence_coeff_raw"].rank(method="dense", ascending=False)
         )
 
         # Add influence coefficient
@@ -723,7 +713,7 @@ class ABGridNetwork:
         nodes_ordered_by_rank = {}
 
         # Get columns that represent rank data
-        ranks = micro_stats.loc[:, [
+        metrics = micro_stats.loc[:, [
             "received_preferences",
             "received_rejections",
             "balance",
@@ -733,11 +723,18 @@ class ABGridNetwork:
         ]]
         
         # For each metric, nodes will be ordered by their relative rank
-        for rank_label, rank_data in ranks.items():
-            series = rank_data.to_frame().reset_index().sort_values(by=[rank_label, "index"]).set_index("index").squeeze()
-            series.name = rank_label
+        for metric_label, metric_data in metrics.items():
+            series = (
+                metric_data
+                    .rank(method="dense", ascending=False)
+                    .to_frame()
+                    .reset_index()
+                    .sort_values(by=[metric_label, "index"])
+                    .set_index("index").squeeze()
+            )
+            series.name = metric_label
             series = pd.to_numeric(series, downcast="integer")
-            nodes_ordered_by_rank[rank_label] = series.to_dict()
+            nodes_ordered_by_rank[metric_label] = series.to_dict()
         
         # Return the dictionary of nodes ordered by their rank for each metric
         return nodes_ordered_by_rank
