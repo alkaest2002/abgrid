@@ -723,7 +723,14 @@ class ABGridNetwork:
         nodes_ordered_by_rank = {}
 
         # Get columns that represent rank data
-        ranks = micro_stats.filter(regex=r"_rank$")
+        ranks = micro_stats.loc[:, [
+            "received_preferences",
+            "received_rejections",
+            "balance",
+            "impact",
+            "affiliation_coeff_raw",
+            "influence_coeff_raw"
+        ]]
         
         # For each metric, nodes will be ordered by their relative rank
         for rank_label, rank_data in ranks.items():
