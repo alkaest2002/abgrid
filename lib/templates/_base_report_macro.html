@@ -135,11 +135,11 @@
 </div>
 {% endmacro %}
 
-{% macro render_sna_nodes_sorted_by_rank(ooa_ranks, render_rank_label) %}
-<div class="ooa-tables-container">
-    {% for metric, data in ooa_ranks.items() %}
+{% macro render_sna_rankings(rankings, render_rank_label) %}
+<div class="rankings-tables-container">
+    {% for metric, data in rankings.items() %}
     <div>
-        <table class="report-table table_bordered table_striped full-width table-sna-ooa">
+        <table class="report-table table_bordered table_striped full-width table-sna-rankings">
             <tr>
                 <th>{{ render_rank_label() }}</th>
                 <th>{{ metric[:2] | upper }}</th>
