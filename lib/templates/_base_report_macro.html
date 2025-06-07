@@ -20,7 +20,20 @@
 
 {% macro render_graph(graph) %}
 <div class="graph-container">
-  <img src="{{ graph }}" />
+    <img src="{{ graph }}" />
+</div>
+{% endmacro %}
+
+{% macro render_sociogram_graphs(graph_ic, graph_ac) %}
+<div class="sociogram-graphs-container">
+    <div>
+        <div class="sociogram-graphs-container-header"><b>Influence index</b></div>
+        {{ render_graph(graph_ic) }}
+    </div>
+    <div>
+        <div class="sociogram-graphs-container-header"><b>Affiliation index</b></div>
+        {{ render_graph(graph_ac) }}
+    </div>
 </div>
 {% endmacro %}
 
@@ -268,33 +281,57 @@
 </table>
 {% endmacro %}
 
-{% macro render_sociogram_macro_statistics(data, render_sociogram_measures_label) %}
-<table class="report-table table_bordered table_striped full-width table-sociogram-macro-stats">
-    <tr>
-        <th class="text-left">ID</th>
-        <th>Count</th>
-        <th>Median</th>
-        <th>Mean</th>
-        <th>Std</th>
-        <th>Min</th>
-        <th>P25</th>
-        <th>P50</th>
-        <th>P75</th>
-        <th>Max</th>
-    </tr>
-    {% for k in data.keys() %}
+{% macro render_sociogram_macro_statistics(macro_stats, supplemental, render_sociogram_measures_label) %}
+<div class="sociogram-supplemental-container">
+    <p>
+        <span class="text-italic">
+            {{- render_sociogram_measures_label("ui_i") -}}: 
+                {{ "%0.2f"| format(supplemental["ui_i"] * 100 | round(0)) }}%
+        </span>,
+        <span class="text-italic">,
+            {{- render_sociogram_measures_label("ui_ii") -}}: 
+                {{ "%0.2f"| format(supplemental["ui_ii"] | round(2)) }}
+        </span>
+    </p>
+    <p>
+        <span class="text-italic">
+            {{- render_sociogram_measures_label("wi_i") -}}: 
+                {{ "%0.2f"| format(supplemental["wi_i"] * 100 | round(0)) }}%
+        </span>
+        <span class="text-italic">,
+            {{- render_sociogram_measures_label("wi_ii") -}}: 
+                {{ "%0.2f"| format(supplemental["wi_ii"] | round(2)) }}
+        </span>
+    </p>
+</div>
+<div>
+    <table class="report-table table_bordered table_striped full-width table-sociogram-macro-stats">
         <tr>
-            <td class="text-left"><div><div>{{ render_sociogram_measures_label(k) }}</div></div></td>
-            <td><div><div>{{ data[k].count }}</div></div></td>
-            <td><div><div>{{ data[k].median | int }}</div></div></td>
-            <td><div><div>{{ "%0.2f" | format(data[k].mean | round(2)) }}</div></div></td>
-            <td><div><div>{{ "%0.2f" | format(data[k].std | round(2)) }}</div></div></td>
-            <td><div><div>{{ data[k].min |int }}</div></div></td>
-            <td><div><div>{{ data[k]["25%"] | int }}</div></div></td>
-            <td><div><div>{{ data[k]["50%"] | int }}</div></div></td>
-            <td><div><div>{{ data[k]["75%"] | int }}</div></div></td>
-            <td><div><div>{{ data[k]["max"] | int }}</div></div></td>
+            <th class="text-left">ID</th>
+            <th>Count</th>
+            <th>Median</th>
+            <th>Mean</th>
+            <th>Std</th>
+            <th>Min</th>
+            <th>P25</th>
+            <th>P50</th>
+            <th>P75</th>
+            <th>Max</th>
         </tr>
-    {% endfor %}
-</table>
+        {% for k in macro_stats.keys() %}
+            <tr>
+                <td class="text-left"><div><div>{{ render_sociogram_measures_label(k) }}</div></div></td>
+                <td><div><div>{{ macro_stats[k].count }}</div></div></td>
+                <td><div><div>{{ macro_stats[k].median | int }}</div></div></td>
+                <td><div><div>{{ "%0.2f" | format(macro_stats[k].mean | round(2)) }}</div></div></td>
+                <td><div><div>{{ "%0.2f" | format(macro_stats[k].std | round(2)) }}</div></div></td>
+                <td><div><div>{{ macro_stats[k].min |int }}</div></div></td>
+                <td><div><div>{{ macro_stats[k]["25%"] | int }}</div></div></td>
+                <td><div><div>{{ macro_stats[k]["50%"] | int }}</div></div></td>
+                <td><div><div>{{ macro_stats[k]["75%"] | int }}</div></div></td>
+                <td><div><div>{{ macro_stats[k]["max"] | int }}</div></div></td>
+            </tr>
+        {% endfor %}
+    </table>
+</div>
 {% endmacro %}
