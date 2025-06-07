@@ -159,8 +159,8 @@ class ABGridData:
                         "macro_stats_b": ntw.sna["macro_stats_b"],
                         "micro_stats_a": ntw.sna["micro_stats_a"].to_dict('index'),
                         "micro_stats_b": ntw.sna["micro_stats_b"].to_dict('index'),
-                        "nodes_rankings_a": ntw.sna["nodes_rankings_a"],
-                        "nodes_rankings_b": ntw.sna["nodes_rankings_b"],
+                        "rankings_a": ntw.sna["rankings_a"],
+                        "rankings_b": ntw.sna["rankings_b"],
                         "edges_types_a": ntw.sna["edges_types_a"],
                         "edges_types_b": ntw.sna["edges_types_b"],
                         "components_a":ntw.sna["components_a"],
@@ -171,6 +171,7 @@ class ABGridData:
                     "sociogram": {
                         "micro_stats": ntw.sociogram["micro_stats"].to_dict("index"),
                         "macro_stats": ntw.sociogram["macro_stats"].to_dict("index"),
+                        "rankings": ntw.sociogram["rankings"],
                         "supplemental": ntw.sociogram["supplemental"]
                     }
                 }
