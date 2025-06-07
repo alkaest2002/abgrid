@@ -90,8 +90,8 @@ class ABGridSna:
 
         Returns:
             Dict[str, Dict]: A dictionary containing computed network analysis data and layouts.
-                            Various attributes, like nodes, edges, adjacency matrices, layouts,
-                            and statistics, are stored for both networks.
+                Various attributes, like nodes, edges, adjacency matrices, layouts,
+                and statistics, are stored for both networks.
 
         Side Effects:
             - Constructs directed graph objects for both networks A and B.
@@ -228,12 +228,13 @@ class ABGridSna:
                 metrics like in-degree centrality, PageRank, betweenness, closeness centrality,
                 hubs score, and nodes rankings.
         """
-        # Get network
+        # Get network and adjacency
         network = self.sna[f"network_{network_type}"]
+        adjacency = self.sna[f"adjacency_{network_type}"]
 
         # Create a DataFrame with micro-level statistics
         micro_level_stats = pd.concat([
-            pd.Series(nx.to_pandas_adjacency(network).apply(lambda x: ", ".join(x[x > 0].index.values), axis=1), name="lns"),
+            pd.Series(adjacency.apply(lambda x: ", ".join(x[x > 0].index.values), axis=1), name="lns"),
             pd.Series(nx.in_degree_centrality(network), name="ic_raw"),
             pd.Series(nx.pagerank(network, max_iter=1000), name="pr_raw"),
             pd.Series(nx.betweenness_centrality(network), name="bt_raw"),
@@ -296,7 +297,6 @@ class ABGridSna:
         # For each metric, nodes will be ordered by their relative rank
         for rank_label, rank_data in ranks.items():
             series = rank_data.to_frame().reset_index().sort_values(by=[rank_label, "index"]).set_index("index").squeeze()
-            series.name = rank_label
             series = pd.to_numeric(series, downcast="integer")
             nodes_ordered_by_rank[rank_label] = series.to_dict()
         
