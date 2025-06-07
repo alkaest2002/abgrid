@@ -1,7 +1,7 @@
 {%- macro highlight_value(value, highlight_values, is_min, is_max) %}
     {%- set highlight = namespace(value=False) %}
     {%- for (min, max, label) in highlight_values %}
-        {%- if value > min and value <= max %}
+        {%- if value >= min and value <= max %}
             {%- set highlight.value = True %}
             {{ label }}
         {%- endif %}
@@ -39,10 +39,10 @@
 {% set last_rank_cl = data.values()|map(attribute='cl_rank') | max  %}
 {% set last_rank_hu = data.values()|map(attribute='hu_rank') | max  %}
 {% set highlight_values = [
-    (0, 5/100, "very-high"),
-    (5/100, 10/100, "high"),
-    (85/100, 95/100, "low"),
-    (95/100, 1, "very-low"),
+    (0, 5/100, "very-low"),
+    (5/100, 10/100, "low"),
+    (85/100, 95/100, "high"),
+    (95/100, 1, "very-high"),
 ] %}
 <div>
     <table class="report-table table_bordered table_striped full-width table-sna-micro-stats">
