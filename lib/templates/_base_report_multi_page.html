@@ -100,7 +100,7 @@
                 {{ report_macro.render_report_header(project_title, group, "sna_graph") }}
                 {{ base_report_macro.render_question(network_type, question) }}
                 {{ base_report_macro.render_sna_macro_statistics(macro_stats) }}
-                {{ base_report_macro.render_sna_graph(graph) }}
+                {{ base_report_macro.render_graph(graph) }}
             </div>
             <div>
                 {{ report_macro.render_sna_legend(show_macro=True) }}
@@ -211,6 +211,15 @@
                 </div>
                 {{ base_report_macro.render_sociogram_macro_statistics(sociogram.macro_stats, report_macro.render_sociogram_measures_label) }}
                 {{ report_macro.render_sociogram_legend(show_macro=True) }}
+            </div>
+            {{ report_macro.render_footer(year) }}
+        </div>
+        <div class="page sociogram-graphs-main">
+            <div>
+                {{ base_macro.render_logo() }}
+                {{ report_macro.render_disclaimer() }}
+                {{ report_macro.render_report_header(project_title, group, "sociogram_micro") }}
+                {{ base_report_macro.render_graph(sociogram["graph_ic"]) }}
             </div>
             {{ report_macro.render_footer(year) }}
         </div>
