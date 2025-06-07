@@ -105,6 +105,14 @@
     {% if measure == "wi_ii" %}Type II conflitct index{% endif%}
 {% endmacro %}
 
+{% macro render_sociogram_graph_label(type) %}
+    {% if type == "ic" %}
+        Influence coefficient
+    {% else %}
+        Affiliation coefficient
+    {% endif %}
+{% endmacro %}
+
 {% macro render_footer(year) %}
 <div class="report-footer dimmed-text small-text">
     <b>Authors</b>: Dr. Pierpaolo CALANNA, PhD, Dr. Gaetano BUONAIUTO (2021-{{ year }}), <b>License of use</b>: the layout of this report, the customization of charts, as well as the selection of quantitative indices, are subject to copyright.

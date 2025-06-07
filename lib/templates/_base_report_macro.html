@@ -24,16 +24,10 @@
 </div>
 {% endmacro %}
 
-{% macro render_sociogram_graphs(graph_ic, graph_ac) %}
+{% macro render_sociogram_graphs(graph, graph_label) %}
 <div class="sociogram-graphs-container">
-    <div>
-        <div class="sociogram-graphs-container-header"><b>Influence index</b></div>
-        {{ render_graph(graph_ic) }}
-    </div>
-    <div>
-        <div class="sociogram-graphs-container-header"><b>Affiliation index</b></div>
-        {{ render_graph(graph_ac) }}
-    </div>
+    <div class="sociogram-graphs-container-header"><b>{{ graph_label }}</b></div>
+    {{ render_graph(graph) }}
 </div>
 {% endmacro %}
 

@@ -89,7 +89,7 @@
     .sociogram-graphs-container-header {
         padding-bottom: 6px;
         border-bottom: 1px dashed var(--base-border-color);
-        margin-bottom: 12px;
+        margin-bottom: 24px;
     }
 </style>
 {% endblock %}
@@ -200,12 +200,21 @@
             </div>
             {{ report_macro.render_footer(year) }}
         </div>
-        <div class="page sociogram-graphs-main">
+        <div class="page sociogram-graph-main">
             <div>
                 {{ base_macro.render_logo() }}
                 {{ report_macro.render_disclaimer() }}
                 {{ report_macro.render_report_header(project_title, group, "sociogram_micro") }}
-                {{ base_report_macro.render_sociogram_graphs(sociogram["graph_ic"], sociogram["graph_ac"]) }}
+                {{ base_report_macro.render_sociogram_graphs(sociogram["graph_ic"], report_macro.render_sociogram_graph_label("ic")) }}
+            </div>
+            {{ report_macro.render_footer(year) }}
+        </div>
+        <div class="page sociogram-graph-main">
+            <div>
+                {{ base_macro.render_logo() }}
+                {{ report_macro.render_disclaimer() }}
+                {{ report_macro.render_report_header(project_title, group, "sociogram_micro") }}
+                {{ base_report_macro.render_sociogram_graphs(sociogram["graph_ac"], report_macro.render_sociogram_graph_label("ac")) }}
             </div>
             {{ report_macro.render_footer(year) }}
         </div>

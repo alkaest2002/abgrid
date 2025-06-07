@@ -112,6 +112,14 @@
     {% if measure == "wi_ii" %}Indice di conflitto tipo II{% endif%}
 {% endmacro %}
 
+{% macro render_sociogram_graph_label(type) %}
+    {% if type == "ic" %}
+        Coefficiente di influenza
+    {% else %}
+        Coefficiente di affiliazione
+    {% endif %}
+{% endmacro %}
+
 {% macro render_footer(year) %}
 <div class="report-footer dimmed-text small-text">
     <b>Autori</b>: Dr. Pierpaolo CALANNA, PhD, Dr. Gaetano BUONAIUTO (2021-{{ year }}), <b>Licenza d'uso</b>: l'impaginazione del report, la personalizzazione dei grafici, nonché la scelta degli indici quantitativi è soggetta a copyright.
