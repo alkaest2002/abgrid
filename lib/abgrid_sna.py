@@ -485,11 +485,11 @@ class ABGridSna:
         # Convert current loc coordinates to dataframe
         coordinates = pd.DataFrame(loc).T
         
+        # Compute centroid of coordinates
+        coordinates_centroid = np.mean(coordinates, axis=0)
+        
         # Compute convex hull
         hull = ConvexHull(coordinates)
-        
-        # Compute centroid of coordinates
-        centroid = np.mean(coordinates, axis=0)
         
         # Get hull vertices
         hull_vertices = coordinates.iloc[hull.vertices].values
@@ -504,14 +504,15 @@ class ABGridSna:
         # Loop through rounds until all isolated nodes are placed
         try:
             while True:
+                
                 # Loop through hull vertices in current round
                 for vertex in hull_vertices:
                     
                     # Get next isolated node
                     isolate = next(isolate_iter)
                     
-                    # Create direction vector from centroid to hull vertex
-                    direction = vertex - centroid
+                    # Create direction vector from coordinates centroid to hull vertex
+                    direction = vertex - coordinates_centroid
                     direction /= np.linalg.norm(direction)
                     
                     # Distance multiplier increases with each round
