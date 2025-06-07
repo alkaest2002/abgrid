@@ -8,8 +8,6 @@ Date Created: May 3, 2025
 The code is part of the AB-Grid project and is licensed under the MIT License.
 """
 
-import networkx as nx
-
 from typing import List, Dict
 from lib.abgrid_sna import ABGridSna
 from lib.abgrid_sociogram import ABGridSociogram
@@ -31,35 +29,10 @@ class ABGridNetwork:
         """
         
         # Init sna dict
-        self.sna = {
-            "nodes_a": None,
-            "nodes_b": None,
-            "edges_a": None,
-            "edges_b": None,
-            "adjacency_a": None,
-            "adjacency_b": None,
-            "network_a": None,
-            "network_b": None,
-            "macro_stats_a": None,
-            "macro_stats_b": None,
-            "micro_stats_a": None,
-            "micro_stats_b": None,
-            "rankings_a": None,
-            "rankings_b": None,
-            "edges_types_a": None,
-            "edges_types_b": None,
-            "graph_a": None,
-            "graph_b": None
-        }
+        self.sna = {}
 
         # init sociogram dict
-        self.sociogram = {
-            "micro_stats": None,
-            "macro_stats": None,
-            "graph_ic": None,
-            "graph_ac": None,
-            "supplemental": None
-        }
+        self.sociogram = {}
 
     def compute(self, 
         packed_edges_a: List[Dict[str, str]], 

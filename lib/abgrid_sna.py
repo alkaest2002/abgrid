@@ -10,23 +10,34 @@ The code is part of the AB-Grid project and is licensed under the MIT License.
 
 import numpy as np
 import pandas as pd
-import matplotlib
 import matplotlib.pyplot as plt
 import networkx as nx
 
-from typing import Any, Literal, List, Dict, Tuple, Union
+from typing import Any, Literal, List, Dict, Optional, Tuple, TypedDict, Union
 from functools import reduce
 from scipy.spatial import ConvexHull
+from lib import A_COLOR, B_COLOR, CM_TO_INCHES
 from lib.abgrid_utils import figure_to_base64_svg
 
-# Customize matplotlib settings
-matplotlib.rc('font', **{'size': 8})
-matplotlib.use("Agg")
-
-# Conversion factor from inches to centimeters
-CM_TO_INCHES = 1 / 2.54
-A_COLOR = "#0000FF"
-B_COLOR = "#FF0000"
+class SNADict(TypedDict, total=False):
+    nodes_a: Optional[List[str]]
+    nodes_b: Optional[List[str]]
+    edges_a: Optional[List[Tuple[str, str]]]
+    edges_b: Optional[List[Tuple[str, str]]]
+    adjacency_a: Optional[pd.DataFrame]
+    adjacency_b: Optional[pd.DataFrame]
+    network_a: Optional[nx.DiGraph]
+    network_b: Optional[nx.DiGraph]
+    macro_stats_a: Optional[Dict[str, Union[int, float]]]
+    macro_stats_b: Optional[Dict[str, Union[int, float]]]
+    micro_stats_a: Optional[pd.DataFrame]
+    micro_stats_b: Optional[pd.DataFrame]
+    rankings_a: Optional[Dict[str, Dict[int, int]]]
+    rankings_b: Optional[Dict[str, Dict[int, int]]]
+    edges_types_a: Optional[Dict[str, List[Tuple[str, str]]]]
+    edges_types_b: Optional[Dict[str, List[Tuple[str, str]]]]
+    graph_a: Optional[str]
+    graph_b: Optional[str]
 
 class ABGridSna:
 
@@ -37,7 +48,7 @@ class ABGridSna:
         """
         
         # Init sna dict
-        self.sna = {
+        self.sna: SNADict = {
             "nodes_a": None,
             "nodes_b": None,
             "edges_a": None,

@@ -10,19 +10,18 @@ The code is part of the AB-Grid project and is licensed under the MIT License.
 
 import numpy as np
 import pandas as pd
-import matplotlib
 import matplotlib.pyplot as plt
 
-from typing import Any, Literal, Dict, Union
+from typing import Any, Literal, Dict, Optional, TypedDict, Union
+from lib import CM_TO_INCHES
 from lib.abgrid_utils import figure_to_base64_svg
 
-
-# Customize matplotlib settings
-matplotlib.rc('font', **{'size': 8})
-matplotlib.use("Agg")
-
-# Conversion factor from inches to centimeters
-CM_TO_INCHES = 1 / 2.54
+class SociogramDict(TypedDict, total=False):
+    micro_stats: Optional[pd.DataFrame]
+    macro_stats: Optional[Dict[str, Union[int, float]]]
+    graph_ic: Optional[str]
+    graph_ac: Optional[str]
+    supplemental: Optional[Dict[str, float]]
 
 class ABGridSociogram:
 
@@ -32,7 +31,7 @@ class ABGridSociogram:
         """
 
         # init sociogram dict
-        self.sociogram = {
+        self.sociogram: SociogramDict = {
             "micro_stats": None,
             "macro_stats": None,
             "graph_ic": None,
