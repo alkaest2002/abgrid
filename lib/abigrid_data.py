@@ -142,7 +142,7 @@ class ABGridData:
                 ntw = ABGridNetwork()
                 
                 # Compute network statistics
-                ntw.compute_networks(group_data["choices_a"], group_data["choices_b"], with_sociogram)
+                ntw.compute(group_data["choices_a"], group_data["choices_b"], with_sociogram)
                 
                 # Prepare report data
                 report_data = {

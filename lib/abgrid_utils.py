@@ -8,9 +8,13 @@ Date Created: May 3, 2025
 The code is part of the AB-Grid project and is licensed under the MIT License.
 """
 
+import io
+from base64 import b64encode
 from pathlib import Path
 from typing import Callable, Any, Dict
 from functools import wraps
+
+from matplotlib import pyplot as plt
 
 def notify_decorator(operation_name: str) -> Callable:
     """
@@ -120,3 +124,28 @@ def deep_update(mapping: Dict[str, Any], *updating_mappings: Dict[str, Any]) -> 
             else:
                 updated_mapping[k] = v
     return updated_mapping
+
+
+def figure_to_base64_svg(fig: plt.Figure) -> str:
+        """
+        Convert a matplotlib figure to a base64-encoded SVG data URI.
+
+        Args:
+            fig: plt.Figure
+                The matplotlib figure to convert.
+
+        Returns:
+            str: The SVG data URI of the figure.
+        """
+        # Initialize an in-memory buffer
+        buffer = io.BytesIO()
+        
+        # Save figure to the buffer in SVG format then close it
+        fig.savefig(buffer, format="svg", bbox_inches='tight', transparent=True, pad_inches=0.05)
+        plt.close(fig)
+        
+        # Encode the buffer contents to a base64 string
+        base64_encoded_string = b64encode(buffer.getvalue()).decode()
+        
+        # Return the data URI for the SVG
+        return f"data:image/svg+xml;base64,{base64_encoded_string}"
