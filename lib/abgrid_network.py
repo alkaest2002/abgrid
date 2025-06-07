@@ -761,41 +761,80 @@ class ABGridNetwork:
         fig = self.create_sociogram_plot(coeffient)
         
         # Convert to base64 SVG string
-        return self.figure_to_base64_svg(fig)
-    
+        return self.figure_to_base64_svg(fig)  
     
     def create_sociogram_plot(self, coeffient: Literal["ac_raw", "ic_raw"]):
-    
-        # Get data
+        """
+        Create a polar plot of sociogram data normalized to [0, 1].
+        Args:
+            coefficient (Literal["ac_raw", "ic_raw"]): The coefficient to be used for plotting.
+            Must be one of "ac_raw" or "ic_raw", indicating which micro-level metric to visualize.
+        Returns:
+            plt.Figure: A matplotlib Figure object containing the plot.
+        """
+        # Get values
         data = self.sociogram["micro_stats"].loc[:, [coeffient]].copy()
         
         # Normalize values
         plot_data = data.sub(data.min()).div(data.max() - data.min())
         plot_data = plot_data.max() - plot_data
-
+        
         # Create plot figure
         fig, ax = plt.subplots(
-            figsize=(25 * CM_TO_INCHES, 25 * CM_TO_INCHES), 
-            subplot_kw = { "projection": "polar" }
+            figsize=(25 * CM_TO_INCHES, 25 * CM_TO_INCHES),
+            subplot_kw={"projection": "polar"}
         )
         
-        # Customize plot
-        ax.set_xticklabels([]);
-        ax.set_yticklabels([]);
+        # Customize plot figure
+        ax.set_xticklabels([])
+        ax.set_yticklabels([])
         ax.get_xaxis().set_visible(False)
         ax.set_ylim(0, 1.1)
-        ax.grid(color= "#bbb", linestyle = "--", linewidth = .8)
+        ax.grid(color="#bbb", linestyle="--", linewidth=.8)
         
-        # Plot data
+        # Set jitter parameters
+        theta_jitter_scale = 0.05
+        r_jitter_scale = 0.02
+        
+        # Plot datapoints for each group
         for idx, (_, group_plot_data) in enumerate(plot_data.groupby(by=coeffient)):
+            
+            # Define starting offset for the current bunch of datapoints
             offset = idx % 2 * -np.pi + idx * .25
+            
+            # divide the 360 degree pie into equal size slices based on the number of dots
+            # to be plotted
+            slice_angle = (2 * np.pi) / group_plot_data[coeffient].shape[0]
+            
+            # Reset index
             group_plot_data = group_plot_data.reset_index(names="node_labels")
+            
+            # Set r and theta data for the polar plot
             r = group_plot_data[coeffient]
-            slice = (2 * np.pi) / group_plot_data[coeffient].shape[0]
-            theta = pd.Series(group_plot_data[coeffient].index.values).mul(slice).add(offset)
-            ax.scatter(theta, r, alpha=0, color="#999", s=3)
+            theta = pd.Series(group_plot_data[coeffient].index.values).mul(slice_angle).add(offset)
+            
+            # Seed random state for reproducibility
+            np.random.seed(42 + idx)
+            
+            # Generate jitter
+            theta_jitter = np.random.normal(0, theta_jitter_scale, len(theta))
+            r_jitter = np.random.normal(0, r_jitter_scale, len(r))
+            
+            # Apply jitter with bounds checking
+            theta_jittered = theta + theta_jitter
+            r_jittered = np.clip(r + r_jitter, 0, 1.1)
+            
+            # Plot datapoints
+            ax.scatter(theta_jittered, r_jittered, alpha=0.6, color="#999", s=20)
+            
+            # Annotate with jittered positions
             for i, txt in enumerate(group_plot_data["node_labels"]):
-                ax.annotate(txt, (theta[i] + .01, r[i]), fontsize=12, color="blue")
+                ax.annotate(
+                    txt, 
+                    (theta_jittered.iloc[i], r_jittered.iloc[i]), 
+                    fontsize=12, 
+                    color="blue"
+                )
         
         # Return figure
         return fig
