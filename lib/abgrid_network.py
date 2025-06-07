@@ -775,7 +775,7 @@ class ABGridNetwork:
 
         # Create plot figure
         fig, ax = plt.subplots(
-            figsize=(13 * CM_TO_INCHES, 13 * CM_TO_INCHES), 
+            figsize=(25 * CM_TO_INCHES, 25 * CM_TO_INCHES), 
             subplot_kw = { "projection": "polar" }
         )
         
@@ -793,9 +793,9 @@ class ABGridNetwork:
             r = group_plot_data[coeffient]
             slice = (2 * np.pi) / group_plot_data[coeffient].shape[0]
             theta = pd.Series(group_plot_data[coeffient].index.values).mul(slice).add(offset)
-            ax.scatter(theta, r, alpha=0.8, color="#999", s=3)
+            ax.scatter(theta, r, alpha=0, color="#999", s=3)
             for i, txt in enumerate(group_plot_data["node_labels"]):
-                ax.annotate(txt, (theta[i] + .01, r[i]), fontsize=8, color="blue")
+                ax.annotate(txt, (theta[i] + .01, r[i]), fontsize=12, color="blue")
         
         # Return figure
         return fig
