@@ -9,14 +9,14 @@ The code is part of the AB-Grid project and is licensed under the MIT License.
 """
 
 from typing import List, Dict
-from lib.abgrid_sna import ABGridSna
-from lib.abgrid_sociogram import ABGridSociogram
+from lib.abgrid_sna import ABGridSna, SNADict
+from lib.abgrid_sociogram import ABGridSociogram, SociogramDict
 
 class ABGridNetwork:
     """
     A class to represent and analyze directed networks (graphs) given a set of edges.
     
-    This class provides methods to compute social network analysis data and optionally
+    This class provides methods to compute social network analysis and optionally
     sociogram analysis for two networks defined by sets of edges.
     """
 
@@ -29,10 +29,10 @@ class ABGridNetwork:
         """
         
         # Init sna dict
-        self.sna = {}
+        self.sna: SNADict = {}
 
         # init sociogram dict
-        self.sociogram = {}
+        self.sociogram: SociogramDict = {}
 
     def compute(self, 
         packed_edges_a: List[Dict[str, str]], 
@@ -40,7 +40,7 @@ class ABGridNetwork:
         with_sociogram: bool = False
     ):
         """
-        Compute and store graphs, statistics, and visualization layouts for network A and B.
+        Compute and store graphs, statistics, and visualizations for network A and B.
 
         This method processes given edge lists to perform social network analysis.
         If requested, it also computes sociogram analysis for these networks.
@@ -60,7 +60,7 @@ class ABGridNetwork:
             - Updates the `self.sociogram` attribute with sociogram results if `with_sociogram` is True.
         """
 
-        # Init sna class
+        # Init sna
         abgrid_sna = ABGridSna()
 
         # Compute sna data
@@ -72,7 +72,7 @@ class ABGridNetwork:
             # Init sociogram class
             abgrid_sociogram = ABGridSociogram()
 
-            # Compute sociogram data
-            self.sociogram = abgrid_sociogram.compute_sociogram( self.sna)
+            # Compute sociogram
+            self.sociogram = abgrid_sociogram.compute_sociogram(self.sna)
 
        
