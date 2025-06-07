@@ -133,9 +133,9 @@
             <div>
                 {{ base_macro.render_logo() }}
                 {{ report_macro.render_disclaimer() }}
-                {{ report_macro.render_report_header(project_title, group, "ordered_nodes") }}
+                {{ report_macro.render_report_header(project_title, group, "sna_rankings") }}
                 {{ base_report_macro.render_question(network_type, question) }}
-                {{ base_report_macro.render_sna_rankings(rankings, report_macro.render_rank_label) }}
+                {{ base_report_macro.render_rankings(rankings, report_macro.render_rank_label) }}
                 {{ report_macro.render_sna_legend(show_micro=True) }}
             </div>
             {{ report_macro.render_footer(year) }}
@@ -174,7 +174,11 @@
         </div>
         <div class="page sociogram-rankings-main">
             <div>
-               
+                {{ base_macro.render_logo() }}
+                {{ report_macro.render_disclaimer() }}
+                {{ report_macro.render_report_header(project_title, group, "sociogram_rankings") }}
+                {{ base_report_macro.render_rankings(sociogram["rankings"], report_macro.render_rank_label) }}
+                {{ report_macro.render_sociogram_legend(show_micro=True) }}
             </div>
             {{ report_macro.render_footer(year) }}
         </div>
@@ -206,7 +210,7 @@
                     </p>
                 </div>
                 {{ base_report_macro.render_sociogram_macro_statistics(sociogram.macro_stats, report_macro.render_sociogram_measures_label) }}
-                {{ report_macro.render_sociogram_legend(show_macro=True)}}
+                {{ report_macro.render_sociogram_legend(show_macro=True) }}
             </div>
             {{ report_macro.render_footer(year) }}
         </div>

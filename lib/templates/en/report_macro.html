@@ -69,7 +69,7 @@
 
 {% macro render_report_header(project_title, group, type) %}
 <div class="report-header">
-    <span><b>GROUP {{ group | upper }} - {{ project_title | upper }}</b></span><span>{% if type == "graph" %}NETWORK GRAPH{% elif type == "raw_scores" %}RAW SCORES{% elif type == "ranks" %}RANK SCORES{% elif type == "ordered_nodes" %}NODES ORDERED BY RANK SCORES{% elif type == "edges_types" %}TYPES OF EDGES{% elif type == "components" %}NETWORK COMPONENTS{% elif type == "sociogram" %}SOCIOGRAM{% endif %}</span>
+    <span><b>GROUP {{ group | upper }} - {{ project_title | upper }}</b></span><span>{% if type == "sna_graph" %}SNA NETWORK GRAPH{% elif type == "sna_raw_scores" %}SNA RAW SCORES{% elif type == "sna_ranks" %}SNA RANK SCORES{% elif type == "sna_rankings" %}SNA NODES ORDERED BY RANK SCORES{% elif type == "sna_edges_types" %}SNA EDGES GROUPED BY TYPE{% elif type == "sna_components" %}SNA COMPONENTS{% elif type == "sociogram" %}SOCIOGRAM{% elif type == "sociogram_rankings" %}SOCIOGRAM NODES ORDERED BY RANK SCORES{% endif %}</span>
 </div>
 {% endmacro %}
 
