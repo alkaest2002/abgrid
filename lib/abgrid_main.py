@@ -179,7 +179,10 @@ class ABGridMain:
         
             # Add current group data to the collection
             all_data[f"{group_file.stem}"] = (
-                deep_update(report_data, {"sna": { "graph_a": None,  "graph_b": None }})
+                deep_update(
+                    report_data, 
+                    { "sna": { "graph_a": None,  "graph_b": None }, "sociogram": { "graph_ic": None, "graph_ac": None }}
+                )
             )
 
             # Notify user
