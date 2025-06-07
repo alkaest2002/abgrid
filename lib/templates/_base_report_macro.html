@@ -63,7 +63,7 @@
                     <td>{{ data[k].lns | default("-", boolean=True) }}</td>
                     <td>
                         <div>
-                            {% set value = data[k].ic_rank_pctile %}
+                            {% set value = data[k].ic_pctile %}
                             {% set rank = data[k].ic_rank %}
                             {% set is_first = (rank == 1, "high") %}
                             {% set is_last = (rank == last_rank_ic, "low") %}
@@ -74,7 +74,7 @@
                     </td>
                     <td>
                         <div>
-                            {% set value = data[k].pr_rank_pctile %}
+                            {% set value = data[k].pr_pctile %}
                             {% set rank = data[k].pr_rank %}
                             {% set is_first = (rank == 1, "high") %}
                             {% set is_last = (rank == last_rank_pr, "low") %}
@@ -85,7 +85,7 @@
                     </td>
                     <td>
                         <div>
-                            {% set value = data[k].bt_rank_pctile %}
+                            {% set value = data[k].bt_pctile %}
                             {% set rank = data[k].bt_rank %}
                             {% set is_first = (rank == 1, "high") %}
                             {% set is_last = (rank == last_rank_bt, "low") %}
@@ -96,7 +96,7 @@
                     </td>
                     <td>
                         <div>
-                            {% set value = data[k].cl_rank_pctile %}
+                            {% set value = data[k].cl_pctile %}
                             {% set rank = data[k].cl_rank %}
                             {% set is_first = (rank == 1, "high") %}
                             {% set is_last = (rank == last_rank_cl, "low") %}
@@ -107,7 +107,7 @@
                     </td>
                     <td>
                         <div>
-                            {% set value = data[k].hu_rank_pctile %}
+                            {% set value = data[k].hu_pctile %}
                             {% set rank = data[k].hu_rank %}
                             {% set is_first = (rank == 1, "high") %}
                             {% set is_last = (rank == last_rank_hu, "low") %}
@@ -122,11 +122,11 @@
                 <tr>
                     <td>{{ k }}</td>
                     <td>{{ data[k].lns | default("-", boolean=True) }}</td>
-                    <td>{{ "%0.2f"| format(data[k].ic | round(2)) }}</td>
-                    <td>{{ "%0.2f"| format(data[k].pr | round(2)) }}</td>
-                    <td>{{ "%0.2f"| format(data[k].bt | round(2)) }}</td>
-                    <td>{{ "%0.2f"| format(data[k].cl | round(2)) }}</td>
-                    <td>{{ "%0.2f"| format(data[k].hu | round(2)) }}</td>
+                    <td>{{ "%0.2f"| format(data[k].ic_raw | round(2)) }}</td>
+                    <td>{{ "%0.2f"| format(data[k].pr_raw | round(2)) }}</td>
+                    <td>{{ "%0.2f"| format(data[k].bt_raw | round(2)) }}</td>
+                    <td>{{ "%0.2f"| format(data[k].cl_raw | round(2)) }}</td>
+                    <td>{{ "%0.2f"| format(data[k].hu_raw | round(2)) }}</td>
                     <td>{% if data[k].nd == 1 %}&larr;{% elif data[k].nd == 2 %}&rarr;{% elif data[k].nd == 3 %}&rlarr;{% endif %}</td>
                 </tr>
             {% endif %}
@@ -138,24 +138,24 @@
 {% macro render_sna_nodes_sorted_by_rank(ooa_ranks, render_rank_label) %}
 <div class="ooa-tables-container">
     {% for metric, data in ooa_ranks.items() %}
-        <div>
-            <table class="report-table table_bordered table_striped full-width table-sna-ooa">
+    <div>
+        <table class="report-table table_bordered table_striped full-width table-sna-ooa">
+            <tr>
+                <th>{{ render_rank_label() }}</th>
+                <th>{{ metric[:2] | upper }}</th>
+            </tr>
+            {% for letter, rank in data.items() %}
                 <tr>
-                    <th>{{ render_rank_label() }}</th>
-                    <th>{{ metric[:2] | upper }}</th>
+                    <td>
+                        <div><div>{{ rank }}</div></div>
+                    </td>
+                    <td>
+                        <div><div>{{ letter }}</div></div>
+                    </td>
                 </tr>
-                {% for letter, rank in data.items() %}
-                    <tr>
-                        <td>
-                            <div><div>{{ rank }}</div></div>
-                        </td>
-                        <td>
-                            <div><div>{{ letter }}</div></div>
-                        </td>
-                    </tr>
-                {% endfor %}
-            </table>
-        </div>
+            {% endfor %}
+        </table>
+    </div>
     {% endfor %}
 </div>
 {% endmacro %}
