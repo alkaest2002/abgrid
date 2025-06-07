@@ -61,11 +61,13 @@ class ABGridSociogram:
             - Modifies the `self.sociogram` attribute by populating it with computed
             sociogram data derived from the input SNA data.
         """
+        # Compute sociogram data
 
         self.sociogram = self.get_sociogram_data(sna)
         self.sociogram["graph_ic"] = self.get_sociogram_graph("ic_raw")
         self.sociogram["graph_ac"] = self.get_sociogram_graph("ac_raw")
 
+        # Return sociogram data
         return self.sociogram
     
     def get_sociogram_data(self, sna: dict) -> Dict[str, Union[pd.DataFrame, Dict[str, float]]]:
@@ -80,11 +82,10 @@ class ABGridSociogram:
 
         # Get sna data to be used for sociogram analysis
         network_a = sna["network_a"]
-        matrix_a = sna["adjacency_a"]
-
         network_b = sna["network_b"]
-        matrix_b = sna["adjacency_b"]
-        
+        adjacency_a = sna["adjacency_a"]
+        adjacency_b = sna["adjacency_b"]
+ 
         # Compute basic data for sociogram micro stats
         out_preferences = pd.Series(dict(network_a.out_degree()), name="gp")
         out_rejects = pd.Series(dict(network_b.out_degree()), name="gr")
@@ -95,30 +96,30 @@ class ABGridSociogram:
         sociogram_micro_df = pd.concat([in_preferences, in_rejects, out_preferences, out_rejects], axis=1)
 
         # Add mutual preferences
-        sociogram_micro_df["mp"] = (matrix_a * matrix_a.T).dot(np.ones(matrix_a.shape[0])).astype(int)
+        sociogram_micro_df["mp"] = (adjacency_a * adjacency_a.T).sum(axis=1).astype(int)
 
         # Add mutual rejections
-        sociogram_micro_df["mr"] = (matrix_b * matrix_b.T).dot(np.ones(matrix_b.shape[0])).astype(int)
+        sociogram_micro_df["mr"] = (adjacency_b * adjacency_b.T).sum(axis=1).astype(int)
 
-        # Add balance
+        # Add balance: received preferences - received rejections
         sociogram_micro_df["bl"] = (
             sociogram_micro_df["rp"]
                 .sub(sociogram_micro_df["rr"])
         )
 
-        # Add orientation       
+        # Add orientation: give preferences - given rejections       
         sociogram_micro_df["or"] = (
             sociogram_micro_df["gp"]
                 .sub(sociogram_micro_df["gr"])
         )
 
-        # Add impact
+        # Add impact: received preferences + received rejections
         sociogram_micro_df["im"] = (
             sociogram_micro_df["rp"]
                 .add(sociogram_micro_df["rr"])
         )
         
-        # Add affiliation coefficient raw
+        # Add affiliation coefficient raw: balance + orientation
         sociogram_micro_df["ac_raw"] = (
             sociogram_micro_df["bl"]
                 .add(sociogram_micro_df["or"])
@@ -134,7 +135,7 @@ class ABGridSociogram:
                 .astype(int)
         )
 
-        # Add influence coefficient raw
+        # Add influence coefficient raw: received preferences + mutual preferences
         sociogram_micro_df["ic_raw"] = (
             sociogram_micro_df["rp"]
                 .add(sociogram_micro_df["mp"])
@@ -173,15 +174,15 @@ class ABGridSociogram:
         sociogram_macro_df = sociogram_numeric_columns.describe().T
         sociogram_macro_df.insert(1, "median", median)
 
-        # Add cohesion index
+        # Add cohesion indices
         cohesion_index_type_i = (len(sna["edges_types_a"]["type_ii"]) *2) / len(network_a.edges())
         cohesion_index_type_ii = len(sna["edges_types_a"]["type_ii"]) / len(network_a)
 
-        # Add conflict index
+        # Add conflict indices
         conflict_index_type_i = (len(sna["edges_types_b"]["type_ii"]) *2) / len(network_b.edges())
         conflict_index_type_ii = len(sna["edges_types_b"]["type_ii"]) / len(network_b)
 
-        # Return sociogram dataframe, ordered by node
+        # Return sociogram data
         return {
            "micro_stats": sociogram_micro_df.sort_index(),
            "macro_stats": sociogram_macro_df.apply(pd.to_numeric, downcast="integer"),
@@ -224,7 +225,6 @@ class ABGridSociogram:
                     .sort_values(by=[metric_label, "index"])
                     .set_index("index").squeeze()
             )
-            series.name = metric_label
             series = pd.to_numeric(series, downcast="integer")
             nodes_ordered_by_rank[metric_label] = series.to_dict()
         
