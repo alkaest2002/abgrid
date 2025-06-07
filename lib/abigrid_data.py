@@ -175,6 +175,8 @@ class ABGridData:
                     report_data["sociogram"] = {
                             "micro_stats": ntw.sociogram["micro_stats"].to_dict("index"),
                             "macro_stats": ntw.sociogram["macro_stats"].to_dict("index"),
+                            "graph_ic": ntw.sociogram["graph_ic"],
+                            "graph_ac": ntw.sociogram["graph_ac"],
                             "rankings": ntw.sociogram["rankings"],
                             "supplemental": ntw.sociogram["supplemental"]
                         }
