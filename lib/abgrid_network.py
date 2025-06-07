@@ -223,28 +223,30 @@ class ABGridNetwork:
         # Create a DataFrame with micro-level statistics
         micro_level_stats = pd.concat([
             pd.Series(nx.to_pandas_adjacency(network).apply(lambda x: ", ".join(x[x > 0].index.values), axis=1), name="lns"),
-            pd.Series(nx.in_degree_centrality(network), name="ic"),
-            pd.Series(nx.pagerank(network, max_iter=1000), name="pr"),
-            pd.Series(nx.betweenness_centrality(network), name="bt"),
-            pd.Series(nx.closeness_centrality(network), name="cl"),
-            pd.Series(nx.hits(network)[0], name="hu").abs(),
+            pd.Series(nx.in_degree_centrality(network), name="ic_raw"),
+            pd.Series(nx.pagerank(network, max_iter=1000), name="pr_raw"),
+            pd.Series(nx.betweenness_centrality(network), name="bt_raw"),
+            pd.Series(nx.closeness_centrality(network), name="cl_raw"),
+            pd.Series(nx.hits(network)[0], name="hu_raw").abs(),
         ], axis=1)
         
         # Identify nodes with no in-degree and/or out-degree
         micro_level_stats["nd"] = 0
-        micro_level_stats["nd"] += (micro_level_stats["ic"] == 0).astype(int)
+        micro_level_stats["nd"] += (micro_level_stats["ic_raw"] == 0).astype(int)
         micro_level_stats["nd"] += (micro_level_stats["lns"].str.len() == 0).astype(int) * 2
 
         # Compute node ranks relative to each network centrality metric
         micro_level_stats_ranks = (
             micro_level_stats.iloc[:, 1:-1]  # omit first column (LNS) and last column (ND)
+                .rename(columns=lambda x: x.replace("_raw", ""))
                 .apply(lambda x: x.rank(method="dense", ascending=False))
                 .add_suffix("_rank")
         )
         
         # Compute node percentiles relative to each network centrality metric
         micro_level_stats_pct = (
-            micro_level_stats_ranks
+            micro_level_stats.iloc[:, 1:-1]
+                .rename(columns=lambda x: x.replace("_raw", ""))
                 .apply(lambda x: x.rank(pct=True))
                 .add_suffix("_pctile")
         )
