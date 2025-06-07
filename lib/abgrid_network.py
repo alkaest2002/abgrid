@@ -56,8 +56,8 @@ class ABGridNetwork:
             "macro_stats_b": None,
             "micro_stats_a": None,
             "micro_stats_b": None,
-            "nodes_rankings_a": None,
-            "nodes_rankings_b": None,
+            "rankings_a": None,
+            "rankings_b": None,
             "edges_types_a": None,
             "edges_types_b": None,
             "graph_a": None,
@@ -119,7 +119,7 @@ class ABGridNetwork:
         for network_type in ("a", "b"):
             self.sna[f"macro_stats_{network_type}"] = self.get_network_macro_stats(network_type)
             self.sna[f"micro_stats_{network_type}"] = self.get_network_micro_stats(network_type)
-            self.sna[f"nodes_rankings_{network_type}"] = self.get_nodes_rankings(network_type)
+            self.sna[f"rankings_{network_type}"] = self.get_sna_ankings(network_type)
             self.sna[f"edges_types_{network_type}"] = self.get_edges_types(network_type)
             self.sna[f"components_{network_type}"] = self.get_network_components(network_type)
             self.sna[f"graph_{network_type}"] = self.get_sna_graph(network_type)
@@ -261,7 +261,7 @@ class ABGridNetwork:
                 .sort_index()
         )
         
-    def get_nodes_rankings(self, network_type: Literal["a", "b"]) -> Dict[str, Dict[int, int]]:
+    def get_sna_ankings(self, network_type: Literal["a", "b"]) -> Dict[str, Dict[int, int]]:
         """
         Generate and return the order of nodes based on their rank scores for each centrality metric.
 
@@ -637,6 +637,11 @@ class ABGridNetwork:
                 .add(sociogram_micro_df["orientation"])
         )
 
+         # Add influence coefficient rank
+        sociogram_micro_df["affiliation_coeff_rank"] = (
+            sociogram_micro_df["affiliation_coeff_raw"].rank(method="dense", ascending=False)
+        )
+
         # Add affiliation coefficient
         sociogram_micro_df["affiliation_coeff"] = (
             sociogram_micro_df["affiliation_coeff_raw"]
@@ -651,6 +656,11 @@ class ABGridNetwork:
         sociogram_micro_df["influence_coeff_raw"] = (
             sociogram_micro_df["received_preferences"]
                 .add(sociogram_micro_df["mutual_preferences"])
+        )
+
+        # Add influence coefficient rank
+        sociogram_micro_df["influence_coeff_rank"] = (
+            sociogram_micro_df["influence_coeff_raw"].rank(method="dense", ascending=False)
         )
 
         # Add influence coefficient
@@ -698,6 +708,7 @@ class ABGridNetwork:
         return {
            "micro_stats": sociogram_micro_df.sort_index(),
            "macro_stats": sociogram_macro_df.apply(pd.to_numeric, downcast="integer"),
+           "rankings": self.get_sociogram_rankings(sociogram_micro_df),
            "supplemental": {
                "cohesion_index_type_i": cohesion_index_type_i,
                "cohesion_index_type_ii": cohesion_index_type_ii,
@@ -705,3 +716,21 @@ class ABGridNetwork:
                "conflict_index_type_ii": conflict_index_type_ii
            }
         }
+    
+    def get_sociogram_rankings(self, micro_stats: pd.DataFrame):
+
+        # Initialize dictionary to store ordered node rankings
+        nodes_ordered_by_rank = {}
+
+        # Get columns that represent rank data
+        ranks = micro_stats.filter(regex=r"_rank$")
+        
+        # For each metric, nodes will be ordered by their relative rank
+        for rank_label, rank_data in ranks.items():
+            series = rank_data.to_frame().reset_index().sort_values(by=[rank_label, "index"]).set_index("index").squeeze()
+            series.name = f"{rank_label}_ooa"
+            series = pd.to_numeric(series, downcast="integer")
+            nodes_ordered_by_rank[rank_label] = series.to_dict()
+        
+        # Return the dictionary of nodes ordered by their rank for each metric
+        return nodes_ordered_by_rank
