@@ -117,11 +117,11 @@ class ABGridNetwork:
                     
         # Store sna data
         for network_type in ("a", "b"):
-            self.sna[f"macro_stats_{network_type}"] = self.get_network_macro_stats(network_type)
-            self.sna[f"micro_stats_{network_type}"] = self.get_network_micro_stats(network_type)
-            self.sna[f"rankings_{network_type}"] = self.get_sna_ankings(network_type)
-            self.sna[f"edges_types_{network_type}"] = self.get_edges_types(network_type)
-            self.sna[f"components_{network_type}"] = self.get_network_components(network_type)
+            self.sna[f"macro_stats_{network_type}"] = self.get_sna_macro_stats(network_type)
+            self.sna[f"micro_stats_{network_type}"] = self.get_sna_micro_stats(network_type)
+            self.sna[f"rankings_{network_type}"] = self.get_sna_rankings(network_type)
+            self.sna[f"edges_types_{network_type}"] = self.get_sna_edges_types(network_type)
+            self.sna[f"components_{network_type}"] = self.get_sna_components(network_type)
             self.sna[f"graph_{network_type}"] = self.get_sna_graph(network_type)
 
         # Add sociogram if requested
@@ -170,7 +170,7 @@ class ABGridNetwork:
             node for node_edges in packed_edges for node, _ in node_edges.items()
         ])
     
-    def get_network_macro_stats(self, network_type: Literal["a", "b"]) -> Dict[str, Union[int, float]]:
+    def get_sna_macro_stats(self, network_type: Literal["a", "b"]) -> Dict[str, Union[int, float]]:
         """
         Calculate and return macro-level statistics for a directed network.
 
@@ -204,7 +204,7 @@ class ABGridNetwork:
             "network_reciprocity": network_reciprocity,
         }
     
-    def get_network_micro_stats(self, network_type: Literal["a", "b"]) -> pd.DataFrame:
+    def get_sna_micro_stats(self, network_type: Literal["a", "b"]) -> pd.DataFrame:
         """
         Calculate and return micro-level statistics for each node in a directed network graph.
 
@@ -261,7 +261,7 @@ class ABGridNetwork:
                 .sort_index()
         )
         
-    def get_sna_ankings(self, network_type: Literal["a", "b"]) -> Dict[str, Dict[int, int]]:
+    def get_sna_rankings(self, network_type: Literal["a", "b"]) -> Dict[str, Dict[int, int]]:
         """
         Generate and return the order of nodes based on their rank scores for each centrality metric.
 
@@ -285,14 +285,14 @@ class ABGridNetwork:
         # For each metric, nodes will be ordered by their relative rank
         for rank_label, rank_data in ranks.items():
             series = rank_data.to_frame().reset_index().sort_values(by=[rank_label, "index"]).set_index("index").squeeze()
-            series.name = f"{rank_label}_ooa"
+            series.name = rank_label
             series = pd.to_numeric(series, downcast="integer")
             nodes_ordered_by_rank[rank_label] = series.to_dict()
         
         # Return the dictionary of nodes ordered by their rank for each metric
         return nodes_ordered_by_rank
         
-    def get_edges_types(self, network_type: Literal["a", "b"]) -> Dict[str, List[Tuple[str, str]]]:
+    def get_sna_edges_types(self, network_type: Literal["a", "b"]) -> Dict[str, List[Tuple[str, str]]]:
         """
         Classify edges in a directed network graph into various types based on relationships within
         the same network and a reference network.
@@ -350,7 +350,7 @@ class ABGridNetwork:
             "type_v": type_v
         }
     
-    def get_network_components(self, network_type: Literal["a", "b"]) -> List[str]:
+    def get_sna_components(self, network_type: Literal["a", "b"]) -> List[str]:
         """
         Identify and return the unique and significant components of a directed graph as strings.
 
@@ -728,7 +728,7 @@ class ABGridNetwork:
         # For each metric, nodes will be ordered by their relative rank
         for rank_label, rank_data in ranks.items():
             series = rank_data.to_frame().reset_index().sort_values(by=[rank_label, "index"]).set_index("index").squeeze()
-            series.name = f"{rank_label}_ooa"
+            series.name = rank_label
             series = pd.to_numeric(series, downcast="integer")
             nodes_ordered_by_rank[rank_label] = series.to_dict()
         
