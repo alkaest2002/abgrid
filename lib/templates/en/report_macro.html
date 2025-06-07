@@ -79,30 +79,30 @@
 </div>
 {% endmacro %}
 
-{% macro render_sociogram_legend(show_macro=False, show_micro=False, show_colors=False) %}
+{% macro render_sociogram_legend(show_macro=False, show_micro=False, show_rankings=False, show_colors=False) %}
 <div class="report-legend">
-    {% if show_macro %}<b>Std</b> Standard Deviation <b>Min</b> Minimum value <b>P25</b> 25° percentile <b>P50</b> 50° percentile <b>P75</b> 75° percentile <b>Max</b> Maximum value {% endif %}{% if show_micro %}<b>RP</b> Received preferences <b>RJ</b> Received rejections <b>GP</b> Given preferences <b>GJ</b> Given rejections <b>MP</b> Mutual preferences <b>MJ</b> Mutual rejections <b>BL</b> Balance <b>OR</b> Orientation <b>IM</b> Impact <b>AI</b> Affiliation coefficient <b>II</b> Influence coefficient <b>ST</b> Sociometric status{% endif %}{% if show_colors %}<span class="square very-low"></span> Very low <span class="square low"></span> Low <span class="square high"></span> High <span class="square very-high"></span> Very high{% endif %}
+    {% if show_macro %}<b>Std</b> Standard Deviation <b>Min</b> Minimum value <b>P25</b> 25° percentile <b>P50</b> 50° percentile <b>P75</b> 75° percentile <b>Max</b> Maximum value {% endif %}{% if show_micro %}<b>RP</b> Received preferences <b>RR</b> Received rejections <b>GP</b> Given preferences <b>GR</b> Given rejections <b>MP</b> Mutual preferences <b>MR</b> Mutual rejections <b>BL</b> Balance <b>OR</b> Orientation <b>IM</b> Impact <b>AC</b> Affiliation coefficient <b>IC</b> Influence coefficient <b>ST</b> Sociometric status{% endif %}{%if show_rankings %}<b>RP</b> Received preferences <b>RR</b> Received rejections <b>BL</b> Balance <b>IM</b> Impact <b>AC</b> Affiliation coefficient <b>IC</b> Influence coefficient {% endif %}{% if show_colors %}<span class="square very-low"></span> Very low <span class="square low"></span> Low <span class="square high"></span> High <span class="square very-high"></span> Very high{% endif %}
 </div>
 {% endmacro %}
 
 {% macro render_sociogram_measures_label(measure) %}
-    {% if measure == "received_preferences" %}Received preferences{% endif%}
-    {% if measure == "received_rejections" %}Received rejections{% endif%}
-    {% if measure == "given_preferences" %}Given Preferences{% endif%}
-    {% if measure == "given_rejections" %}Given rejections{% endif%}
-    {% if measure == "mutual_preferences" %}Mutual preferences{% endif%}
-    {% if measure == "mutual_rejections" %}Mutual rejections{% endif%}
-    {% if measure == "orientation" %}Orientation{% endif%}
-    {% if measure == "impact" %}Impact{% endif%}
-    {% if measure == "balance" %}Balance{% endif%}
-    {% if measure == "affiliation_coeff_raw" %}Affiliation coeff. raw{% endif%}
-    {% if measure == "influence_coeff_raw" %}Influence coeff. raw{% endif%}
-    {% if measure == "affiliation_coeff" %}Affiliation coeff.{% endif%}
-    {% if measure == "influence_coeff" %}Influence coeff.{% endif%}
-    {% if measure == "cohesion_index_type_i" %}Type I cohesion index{% endif%}
-    {% if measure == "cohesion_index_type_ii" %}Type II cohesion index{% endif%}
-    {% if measure == "conflict_index_type_i" %}Type I conflitct index{% endif%}
-    {% if measure == "conflict_index_type_ii" %}Type II conflitct index{% endif%}
+    {% if measure == "rp" %}Received preferences{% endif%}
+    {% if measure == "rr" %}Received rejections{% endif%}
+    {% if measure == "gp" %}Given Preferences{% endif%}
+    {% if measure == "gr" %}Given rejections{% endif%}
+    {% if measure == "mp" %}Mutual preferences{% endif%}
+    {% if measure == "mr" %}Mutual rejections{% endif%}
+    {% if measure == "or" %}Orientation{% endif%}
+    {% if measure == "im" %}Impact{% endif%}
+    {% if measure == "bl" %}Balance{% endif%}
+    {% if measure == "ac_raw" %}Affiliation coeff. raw{% endif%}
+    {% if measure == "ic_raw" %}Influence coeff. raw{% endif%}
+    {% if measure == "ac" %}Affiliation coeff.{% endif%}
+    {% if measure == "ic" %}Influence coeff.{% endif%}
+    {% if measure == "ui_i" %}Type I cohesion index{% endif%}
+    {% if measure == "ui_ii" %}Type II cohesion index{% endif%}
+    {% if measure == "wi_i" %}Type I conflitct index{% endif%}
+    {% if measure == "wi_ii" %}Type II conflitct index{% endif%}
 {% endmacro %}
 
 {% macro render_footer(year) %}

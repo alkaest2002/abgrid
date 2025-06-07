@@ -222,47 +222,47 @@
     <tr>
         <th>ID</th>
         <th>RP</th>
-        <th>RJ</th>
+        <th>RR</th>
         <th>GP</th>
-        <th>GJ</th>
+        <th>GR</th>
         <th>MP</th>
         <th>MR</th>
         <th>BL</th>
         <th>OR</th>
         <th>IM</th>
-        <th>AI</th>
-        <th>II</th>
+        <th>AC</th>
+        <th>IC</th>
         <th>ST</th>
     </tr>
     {% for k in data.keys() %}
         <tr>
             <td><div><div>{{ k }}</div></div></td>
-            <td><div><div>{{ data[k].received_preferences }}</div></div></td>
-            <td><div><div>{{ data[k].received_rejections }}</div></div></td>
-            <td><div><div>{{ data[k].given_preferences }}</div></div></td>
-            <td><div><div>{{ data[k].given_rejections }}</div></div></td>
-            <td><div><div>{{ data[k].mutual_preferences }}</div></div></td>
-            <td><div><div>{{ data[k].mutual_rejections }}</div></div></td>
-            <td><div><div>{{ data[k].balance }}</div></div></td>
-            <td><div><div>{{ data[k].orientation }}</div></div></td>
-            <td><div><div>{{ data[k].impact }}</div></div></td>
+            <td><div><div>{{ data[k].rp }}</div></div></td>
+            <td><div><div>{{ data[k].rr }}</div></div></td>
+            <td><div><div>{{ data[k].gp }}</div></div></td>
+            <td><div><div>{{ data[k].gr }}</div></div></td>
+            <td><div><div>{{ data[k].mp }}</div></div></td>
+            <td><div><div>{{ data[k].mr }}</div></div></td>
+            <td><div><div>{{ data[k].bl }}</div></div></td>
+            <td><div><div>{{ data[k].or }}</div></div></td>
+            <td><div><div>{{ data[k].im }}</div></div></td>
             <td>
                 <div>
-                    {% set value = data[k].affiliation_coeff %}
+                    {% set value = data[k].ac %}
                     <div class="{{ highlight_value(value, coeff_highlight_values, (False, ''), (False, '')) }}">
-                        {{ data[k].affiliation_coeff | int }}
+                        {{ data[k].ac | int }}
                     </div>
                 </div>
             </td>
             <td>
                 <div>
-                    {% set value = data[k].influence_coeff %}
+                    {% set value = data[k].ic %}
                     <div class="{{ highlight_value(value, coeff_highlight_values, (False, ''), (False, '')) }}">
-                        {{ data[k].influence_coeff | int }}
+                        {{ data[k].ic | int }}
                     </div>
                 </div>
             </td>
-            <td><div><div>{{ render_sociogram_status_label(data[k].status) }}</div></div></td>
+            <td><div><div>{{ render_sociogram_status_label(data[k].st) }}</div></div></td>
         </tr>
     {% endfor %}
 </table>

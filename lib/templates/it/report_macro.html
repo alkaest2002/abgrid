@@ -92,30 +92,30 @@
 </div>
 {% endmacro %}
 
-{% macro render_sociogram_legend(show_macro=False, show_micro=False, show_colors=False) %}
+{% macro render_sociogram_legend(show_macro=False, show_micro=False, show_rankings=False, show_colors=False) %}
 <div class="report-legend">
-    {% if show_macro %}<b>Count</b> Frequenza <b>Mean</b> Media <b>Median</b> Mediana <b>Std</b> Deviazione standard <b>Min</b> Valore minimo <b>P25</b> 25° percentile <b>P50</b> 50° percentile <b>P75</b> 75° percentile <b>Max</b> Valore massimo {% endif %}{% if show_micro %}<b>RP</b> Preferenze ricevute <b>RJ</b> Rifiuti ricevuti <b>GP</b> Preferenze data <b>GJ</b> Rifiuti dati <b>MP</b> Preferenze reciproche <b>MJ</b> Rifiuti reciproci <b>BL</b> Saldo <b>OR</b> Orientamento <b>IM</b> Impatto <b>AI</b> Coefficiente di affiliazione <b>II</b> Coefficiente di influenza <b>ST</b> Status sociometrico {% endif %}{% if show_colors %}<span class="square very-low"></span> Molto basso <span class="square low"></span> Basso <span class="square high"></span> Alto <span class="square very-high"></span> Molto alto{% endif %}
+    {% if show_macro %}<b>Count</b> Frequenza <b>Mean</b> Media <b>Median</b> Mediana <b>Std</b> Deviazione standard <b>Min</b> Valore minimo <b>P25</b> 25° percentile <b>P50</b> 50° percentile <b>P75</b> 75° percentile <b>Max</b> Valore massimo {% endif %}{% if show_micro %}<b>RP</b> Preferenze ricevute <b>RR</b> Rifiuti ricevuti <b>GP</b> Preferenze date <b>GR</b> Rifiuti dati <b>MP</b> Preferenze reciproche <b>MR</b> Rifiuti reciproci <b>BL</b> Saldo <b>OR</b> Orientamento <b>IM</b> Impatto <b>AC</b> Coefficiente di affiliazione <b>IC</b> Coefficiente di influenza <b>ST</b> Status sociometrico {% endif %}{%if show_rankings %}<b>RP</b> Preferenze ricevute <b>RR</b> Rifiuti ricevuti <b>BL</b> Saldo <b>IM</b> Impatto <b>AC</b> Coefficiente di affiliazione <b>IC</b> Coefficiente di influenza {% endif %}{% if show_colors %}<span class="square very-low"></span> Molto basso <span class="square low"></span> Basso <span class="square high"></span> Alto <span class="square very-high"></span> Molto alto{% endif %}
 </div>
 {% endmacro %}
 
 {% macro render_sociogram_measures_label(measure) %}
-    {% if measure == "received_preferences" %}Preferenze ricevute{% endif%}
-    {% if measure == "received_rejections" %}Rifiuti ricevuti{% endif%}
-    {% if measure == "given_preferences" %}Preferenze date{% endif%}
-    {% if measure == "given_rejections" %}Rifiuti dati{% endif%}
-    {% if measure == "mutual_preferences" %}Preferenze reciproche{% endif%}
-    {% if measure == "mutual_rejections" %}Rifiuti reciproci{% endif%}
-    {% if measure == "impact" %}Impatto{% endif%}
-    {% if measure == "orientation" %}Orientamento{% endif%}
-    {% if measure == "balance" %}Saldo{% endif%}
-    {% if measure == "affiliation_coeff_raw" %}Coeff. di afffiliazione grezzo{% endif%}
-    {% if measure == "influence_coeff_raw" %}Coeff. di influenza grezzo{% endif%}
-    {% if measure == "affiliation_coeff" %}Coeff. di affiliazione{% endif%}
-    {% if measure == "influence_coeff" %}Coeff. di influenza{% endif%}
-    {% if measure == "cohesion_index_type_i" %}Indice di coesione tipo I{% endif%}
-    {% if measure == "cohesion_index_type_ii" %}Indice di coesione tipo II{% endif%}
-    {% if measure == "conflict_index_type_i" %}Indice di conflitto tipo I{% endif%}
-    {% if measure == "conflict_index_type_ii" %}Indice di conflitto tipo II{% endif%}
+    {% if measure == "rp" %}Preferenze ricevute{% endif%}
+    {% if measure == "rr" %}Rifiuti ricevuti{% endif%}
+    {% if measure == "gp" %}Preferenze date{% endif%}
+    {% if measure == "gr" %}Rifiuti dati{% endif%}
+    {% if measure == "mp" %}Preferenze reciproche{% endif%}
+    {% if measure == "mr" %}Rifiuti reciproci{% endif%}
+    {% if measure == "im" %}Impatto{% endif%}
+    {% if measure == "or" %}Orientamento{% endif%}
+    {% if measure == "bl" %}Saldo{% endif%}
+    {% if measure == "ac_raw" %}Coeff. di afffiliazione grezzo{% endif%}
+    {% if measure == "ic_raw" %}Coeff. di influenza grezzo{% endif%}
+    {% if measure == "af" %}Coeff. di affiliazione{% endif%}
+    {% if measure == "ic" %}Coeff. di influenza{% endif%}
+    {% if measure == "ui_i" %}Indice di coesione tipo I{% endif%}
+    {% if measure == "ui_ii" %}Indice di coesione tipo II{% endif%}
+    {% if measure == "wi_i" %}Indice di conflitto tipo I{% endif%}
+    {% if measure == "wi_ii" %}Indice di conflitto tipo II{% endif%}
 {% endmacro %}
 
 {% macro render_footer(year) %}
