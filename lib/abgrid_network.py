@@ -598,66 +598,66 @@ class ABGridNetwork:
         matrix_b = self.sna["adjacency_b"]
         
         # Compute basic data for sociogram micro stats
-        out_preferences = pd.Series(dict(network_a.out_degree()), name="given_preferences")
-        out_rejects = pd.Series(dict(network_b.out_degree()), name="given_rejections")
-        in_preferences = pd.Series(dict(network_a.in_degree()), name="received_preferences")
-        in_rejects = pd.Series(dict(network_b.in_degree()), name="received_rejections")
+        out_preferences = pd.Series(dict(network_a.out_degree()), name="gp")
+        out_rejects = pd.Series(dict(network_b.out_degree()), name="gr")
+        in_preferences = pd.Series(dict(network_a.in_degree()), name="rp")
+        in_rejects = pd.Series(dict(network_b.in_degree()), name="rr")
         
         # Init sociogram micro stats dataframe
         sociogram_micro_df = pd.concat([in_preferences, in_rejects, out_preferences, out_rejects], axis=1)
         
 
         # Add mutual preferences
-        sociogram_micro_df["mutual_preferences"] = (matrix_a * matrix_a.T).dot(np.ones(matrix_a.shape[0])).astype(int)
+        sociogram_micro_df["mp"] = (matrix_a * matrix_a.T).dot(np.ones(matrix_a.shape[0])).astype(int)
 
         # Add mutual rejections
-        sociogram_micro_df["mutual_rejections"] = (matrix_b * matrix_b.T).dot(np.ones(matrix_b.shape[0])).astype(int)
+        sociogram_micro_df["mr"] = (matrix_b * matrix_b.T).dot(np.ones(matrix_b.shape[0])).astype(int)
 
         # Add balance
-        sociogram_micro_df["balance"] = (
-            sociogram_micro_df["received_preferences"]
-                .sub(sociogram_micro_df["received_rejections"])
+        sociogram_micro_df["bl"] = (
+            sociogram_micro_df["rp"]
+                .sub(sociogram_micro_df["rr"])
         )
 
         # Add orientation       
-        sociogram_micro_df["orientation"] = (
-            sociogram_micro_df["given_preferences"]
-                .sub(sociogram_micro_df["given_rejections"])
+        sociogram_micro_df["or"] = (
+            sociogram_micro_df["gp"]
+                .sub(sociogram_micro_df["gr"])
         )
 
         # Add impact
-        sociogram_micro_df["impact"] = (
-            sociogram_micro_df["received_preferences"]
-                .add(sociogram_micro_df["received_rejections"])
+        sociogram_micro_df["im"] = (
+            sociogram_micro_df["rp"]
+                .add(sociogram_micro_df["rr"])
         )
         
         # Add affiliation coefficient raw
-        sociogram_micro_df["affiliation_coeff_raw"] = (
-            sociogram_micro_df["balance"]
-                .add(sociogram_micro_df["orientation"])
+        sociogram_micro_df["ac_raw"] = (
+            sociogram_micro_df["bl"]
+                .add(sociogram_micro_df["or"])
         )
 
         # Add affiliation coefficient
-        sociogram_micro_df["affiliation_coeff"] = (
-            sociogram_micro_df["affiliation_coeff_raw"]
-                .sub(sociogram_micro_df["affiliation_coeff_raw"].mean())
-                .div(sociogram_micro_df["affiliation_coeff_raw"].std())
+        sociogram_micro_df["ac"] = (
+            sociogram_micro_df["ac_raw"]
+                .sub(sociogram_micro_df["ac_raw"].mean())
+                .div(sociogram_micro_df["ac_raw"].std())
                 .mul(10)
                 .add(100)
                 .astype(int)
         )
 
         # Add influence coefficient raw
-        sociogram_micro_df["influence_coeff_raw"] = (
-            sociogram_micro_df["received_preferences"]
-                .add(sociogram_micro_df["mutual_preferences"])
+        sociogram_micro_df["ic_raw"] = (
+            sociogram_micro_df["rp"]
+                .add(sociogram_micro_df["mp"])
         )
 
         # Add influence coefficient
-        sociogram_micro_df["influence_coeff"] = (
-            sociogram_micro_df["influence_coeff_raw"]
-                .sub(sociogram_micro_df["influence_coeff_raw"].mean())
-                .div(sociogram_micro_df["influence_coeff_raw"].std())
+        sociogram_micro_df["ic"] = (
+            sociogram_micro_df["ic_raw"]
+                .sub(sociogram_micro_df["ic_raw"].mean())
+                .div(sociogram_micro_df["ic_raw"].std())
                 .mul(10)
                 .add(100)
                 .astype(int)
@@ -665,20 +665,20 @@ class ABGridNetwork:
         
         # Add sociogram status
         # 1. Start by computing with z scores of relevat data
-        impact = sociogram_micro_df["impact"]
+        impact = sociogram_micro_df["im"]
         z_impact = impact.sub(impact.mean()).div(impact.std())
-        balance = sociogram_micro_df["balance"]
+        balance = sociogram_micro_df["bl"]
         z_balance = balance.sub(balance.mean()).div(balance.std())
 
         # 2. Update status: default is "-", unless otherwise specified
-        sociogram_micro_df["status"] = "-"
-        sociogram_micro_df.loc[sociogram_micro_df.iloc[:, :4].sum(axis=1).eq(0), "status"] = "isolated"
-        sociogram_micro_df.loc[z_impact < -1, "status"] = "neglected"
-        sociogram_micro_df.loc[z_impact.between(-1, -.5), "status"] = "underrated"
+        sociogram_micro_df["st"] = "-"
+        sociogram_micro_df.loc[sociogram_micro_df.iloc[:, :4].sum(axis=1).eq(0), "st"] = "isolated"
+        sociogram_micro_df.loc[z_impact < -1, "st"] = "neglected"
+        sociogram_micro_df.loc[z_impact.between(-1, -.5), "st"] = "underrated"
         sociogram_micro_df.loc[np.logical_and(z_impact.between(.5, 1), z_balance > 1), "status"] = "appreciated"
-        sociogram_micro_df.loc[np.logical_and(z_impact > 1, z_balance > 1), "status"] = "popular"
-        sociogram_micro_df.loc[np.logical_and(z_impact > -.5, z_balance < -1), "status"] = "rejected"
-        sociogram_micro_df.loc[np.logical_and(z_impact > 0, z_balance.between(-.5, .5)), "status"] = "controversial"
+        sociogram_micro_df.loc[np.logical_and(z_impact > 1, z_balance > 1), "st"] = "popular"
+        sociogram_micro_df.loc[np.logical_and(z_impact > -.5, z_balance < -1), "st"] = "rejected"
+        sociogram_micro_df.loc[np.logical_and(z_impact > 0, z_balance.between(-.5, .5)), "st"] = "controversial"
         
         # Compute sociogram macro stats
         sociogram_numeric_columns = sociogram_micro_df.select_dtypes(np.number)
@@ -700,10 +700,10 @@ class ABGridNetwork:
            "macro_stats": sociogram_macro_df.apply(pd.to_numeric, downcast="integer"),
            "rankings": self.get_sociogram_rankings(sociogram_micro_df),
            "supplemental": {
-               "cohesion_index_type_i": cohesion_index_type_i,
-               "cohesion_index_type_ii": cohesion_index_type_ii,
-               "conflict_index_type_i": conflict_index_type_i,
-               "conflict_index_type_ii": conflict_index_type_ii
+               "ui_i": cohesion_index_type_i,
+               "ui_ii": cohesion_index_type_ii,
+               "wi_i": conflict_index_type_i,
+               "wi_ii": conflict_index_type_ii
            }
         }
     
@@ -713,14 +713,7 @@ class ABGridNetwork:
         nodes_ordered_by_rank = {}
 
         # Get columns that represent rank data
-        metrics = micro_stats.loc[:, [
-            "received_preferences",
-            "received_rejections",
-            "balance",
-            "impact",
-            "affiliation_coeff_raw",
-            "influence_coeff_raw"
-        ]]
+        metrics = micro_stats.loc[:, [ "rp", "rr", "bl", "im", "ac_raw", "ic_raw"]]
         
         # For each metric, nodes will be ordered by their relative rank
         for metric_label, metric_data in metrics.items():
