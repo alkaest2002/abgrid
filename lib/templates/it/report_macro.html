@@ -74,15 +74,9 @@
     <span class="text-italic">Nessun componente di questo tipo</span>
 {% endmacro %}
 
-{% macro render_report_header(project_title, group, score_type) %}
-<div class="report-header">
-    <span><b>GRUPPO {{ group | upper }} - {{ project_title | upper }}</b></span><span>{% if type == "sna_graph" %}GRAFICO RETE SNA{% elif type == "sna_raw_scores" %}PUNTEGGI SNA GREZZI{% elif type == "sna_ranks" %}PUNTEGGI SNA DI RANGO{% elif type == "sna_rankings" %}NODI SNA ORDINATI PER METRICA{% elif type == "sna_edges_types" %}LEGAMI SNA RAGGRUPPATI PER TIPO{% elif type == "sna_components" %}COMPONENTI SNA{% elif type == "sociogram" %}SOCIOGRAMMA{% elif type == "sociogram_rankings" %}NODI SOCIOGRAMMA ORDINATI PER METRICA{% endif %}</span>
-</div>
-{% endmacro %}
-
 {% macro render_report_header(project_title, group, type) %}
 <div class="report-header">
-    <span><b>GRUPPO {{ group | upper }} - {{ project_title | upper }}</b></span><span>{% if type == "graph" %}GRAFICO RETE{% elif type == "raw_scores" %}PUNTEGGI GREZZI{% elif type == "ranks" %}PUNTEGGI DI RANGO{% elif type == "ordered_nodes" %}NODI ORDINATI PER PUNTEGGI DI RANGO{% elif type == "edges_types" %}TIPOLOGIA LEGAMI{% elif type == "components" %}COMPONENTI RETE{% elif type == "sociogram" %}SOCIOGRAMMA{% endif %}</span>
+    <span><b>GRUPPO {{ group | upper }} - {{ project_title | upper }}</b></span><span>{% if type == "sna_graph" %}GRAFICO RETE SNA{% elif type == "sna_raw_scores" %}PUNTEGGI SNA GREZZI{% elif type == "sna_ranks" %}PUNTEGGI SNA DI RANGO{% elif type == "sna_rankings" %}NODI SNA ORDINATI PER METRICA{% elif type == "sna_edges_types" %}LEGAMI SNA RAGGRUPPATI PER TIPO{% elif type == "sna_components" %}COMPONENTI SNA{% elif type == "sociogram_micro" %}SOCIOGRAMMA{% elif type == "sociogram_rankings" %}NODI SOCIOGRAMMA ORDINATI PER METRICA{% elif type == "sociogram_macro" %}SOCIOGRAMMA STATISTICHE{% endif %}</span>
 </div>
 {% endmacro %}
 
@@ -110,7 +104,7 @@
     {% if measure == "bl" %}Saldo{% endif%}
     {% if measure == "ac_raw" %}Coeff. di afffiliazione grezzo{% endif%}
     {% if measure == "ic_raw" %}Coeff. di influenza grezzo{% endif%}
-    {% if measure == "af" %}Coeff. di affiliazione{% endif%}
+    {% if measure == "ac" %}Coeff. di affiliazione{% endif%}
     {% if measure == "ic" %}Coeff. di influenza{% endif%}
     {% if measure == "ui_i" %}Indice di coesione tipo I{% endif%}
     {% if measure == "ui_ii" %}Indice di coesione tipo II{% endif%}

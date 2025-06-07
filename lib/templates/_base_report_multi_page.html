@@ -97,7 +97,7 @@
             <div>
                 {{ base_macro.render_logo() }}
                 {{ report_macro.render_disclaimer() }}
-                {{ report_macro.render_report_header(project_title, group, "graph") }}
+                {{ report_macro.render_report_header(project_title, group, "sna_graph") }}
                 {{ base_report_macro.render_question(network_type, question) }}
                 {{ base_report_macro.render_sna_macro_statistics(macro_stats) }}
                 {{ base_report_macro.render_sna_graph(graph) }}
@@ -111,7 +111,7 @@
             <div>
                 {{ base_macro.render_logo() }}
                 {{ report_macro.render_disclaimer() }}
-                {{ report_macro.render_report_header(project_title, group, "raw_scores") }}
+                {{ report_macro.render_report_header(project_title, group, "sna_raw_scores") }}
                 {{ base_report_macro.render_question(network_type, question) }}
                 {{ base_report_macro.render_sna_micro_statistics(network_type, "raw_scores", micro_stats, report_macro.render_choices_label) }}
                 {{ report_macro.render_sna_legend(show_micro=True, show_arrows=True) }}
@@ -122,7 +122,7 @@
             <div>
                 {{ base_macro.render_logo() }}
                 {{ report_macro.render_disclaimer() }}
-                {{ report_macro.render_report_header(project_title, group, "ranks") }}
+                {{ report_macro.render_report_header(project_title, group, "sna_ranks") }}
                 {{ base_report_macro.render_question(network_type, question) }}
                 {{ base_report_macro.render_sna_micro_statistics(network_type, "ranks", micro_stats, report_macro.render_choices_label) }}
                 {{ report_macro.render_sna_legend(show_micro=True, show_arrows=True, show_colors=True) }}
@@ -144,7 +144,7 @@
             <div>
                 {{ base_macro.render_logo() }}
                 {{ report_macro.render_disclaimer() }}
-                {{ report_macro.render_report_header(project_title, group, "edges_types") }}
+                {{ report_macro.render_report_header(project_title, group, "sna_edges_types") }}
                 {{ base_report_macro.render_question(network_type, question) }}
                 {{ base_report_macro.render_edges_type(network_type, edges_types, report_macro.render_edges_types_label, report_macro.render_edges_type_empty_list ) }}
             </div>
@@ -154,7 +154,7 @@
             <div>
                 {{ base_macro.render_logo() }}
                 {{ report_macro.render_disclaimer() }}
-                {{ report_macro.render_report_header(project_title, group, "components") }}
+                {{ report_macro.render_report_header(project_title, group, "sna_components") }}
                 {{ base_report_macro.render_question(network_type, question) }}
                 {{ base_report_macro.render_sna_components(components, report_macro.render_components_label, report_macro.render_components_empty_list) }}
             </div>
@@ -166,7 +166,7 @@
             <div>
                 {{ base_macro.render_logo() }}
                 {{ report_macro.render_disclaimer() }}
-                {{ report_macro.render_report_header(project_title, group, "sociogram") }}
+                {{ report_macro.render_report_header(project_title, group, "sociogram_micro") }}
                 {{ base_report_macro.render_sociogram_micro_statistics(sociogram.micro_stats, report_macro.render_sociogram_status_label) }}
                 {{ report_macro.render_sociogram_legend(show_micro=True, show_colors=True)}}
             </div>
@@ -186,7 +186,7 @@
             <div>
                 {{ base_macro.render_logo() }}
                 {{ report_macro.render_disclaimer() }}
-                {{ report_macro.render_report_header(project_title, group, "sociogram") }}
+                {{ report_macro.render_report_header(project_title, group, "sociogram_macro") }}
                 <div style="margin: 12px 0px;">
                     <p>
                         <span class="text-italic">
