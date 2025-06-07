@@ -87,10 +87,10 @@
 {% endblock %}
 
 {% macro report_body() %}
-    {% for (network_type, question, graph, macro_stats, micro_stats, nodes_rankings, edges_types, components) in 
+    {% for (network_type, question, graph, macro_stats, micro_stats, rankings, edges_types, components) in 
         [
-            ("A", question_a, sna.graph_a, sna.macro_stats_a, sna.micro_stats_a, sna.nodes_rankings_a, sna.edges_types_a, sna.components_a), 
-            ("B", question_b, sna.graph_b, sna.macro_stats_b, sna.micro_stats_b, sna.nodes_rankings_b, sna.edges_types_b, sna.components_b)
+            ("A", question_a, sna.graph_a, sna.macro_stats_a, sna.micro_stats_a, sna.rankings_a, sna.edges_types_a, sna.components_a), 
+            ("B", question_b, sna.graph_b, sna.macro_stats_b, sna.micro_stats_b, sna.rankings_b, sna.edges_types_b, sna.components_b)
         ] 
     %}
         <div class="page sna-graph-main">
@@ -135,7 +135,7 @@
                 {{ report_macro.render_disclaimer() }}
                 {{ report_macro.render_report_header(project_title, group, "ordered_nodes") }}
                 {{ base_report_macro.render_question(network_type, question) }}
-                {{ base_report_macro.render_sna_nodes_sorted_by_rank(nodes_rankings, report_macro.render_rank_label) }}
+                {{ base_report_macro.render_sna_nodes_sorted_by_rank(rankings, report_macro.render_rank_label) }}
                 {{ report_macro.render_sna_legend(show_micro=True) }}
             </div>
             {{ report_macro.render_footer(year) }}
