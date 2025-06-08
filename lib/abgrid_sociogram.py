@@ -86,14 +86,14 @@ class ABGridSociogram:
         adjacency_a = sna["adjacency_a"]
         adjacency_b = sna["adjacency_b"]
  
-        # Compute basic data for sociogram micro stats
-        out_preferences = pd.Series(dict(network_a.out_degree()), name="gp")
-        out_rejects = pd.Series(dict(network_b.out_degree()), name="gr")
-        in_preferences = pd.Series(dict(network_a.in_degree()), name="rp")
-        in_rejects = pd.Series(dict(network_b.in_degree()), name="rr")
-        
         # Init sociogram micro stats dataframe
-        sociogram_micro_df = pd.concat([in_preferences, in_rejects, out_preferences, out_rejects], axis=1)
+        sociogram_micro_df = pd.concat([
+            pd.Series(dict(network_a.out_degree()), name="gp"), 
+            pd.Series(dict(network_b.out_degree()), name="gr"), 
+            pd.Series(dict(network_a.in_degree()), name="rp"), 
+            pd.Series(dict(network_b.in_degree()), name="rr")
+            ], axis=1
+        )
 
         # Add mutual preferences
         sociogram_micro_df["mp"] = (adjacency_a * adjacency_a.T).sum(axis=1).astype(int)
