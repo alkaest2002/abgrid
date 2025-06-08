@@ -180,6 +180,24 @@
             </div>
             {{ report_macro.render_footer(year) }}
         </div>
+        <div class="page sociogram-graph-main">
+            <div>
+                {{ base_macro.render_logo() }}
+                {{ report_macro.render_disclaimer() }}
+                {{ report_macro.render_report_header(project_title, group, "sociogram_micro") }}
+                {{ base_report_macro.render_sociogram_graphs(sociogram["graph_ic"], report_macro.render_sociogram_graph_label("ic")) }}
+            </div>
+            {{ report_macro.render_footer(year) }}
+        </div>
+        <div class="page sociogram-graph-main">
+            <div>
+                {{ base_macro.render_logo() }}
+                {{ report_macro.render_disclaimer() }}
+                {{ report_macro.render_report_header(project_title, group, "sociogram_micro") }}
+                {{ base_report_macro.render_sociogram_graphs(sociogram["graph_ac"], report_macro.render_sociogram_graph_label("ac")) }}
+            </div>
+            {{ report_macro.render_footer(year) }}
+        </div>
         <div class="page sociogram-rankings-main">
             <div>
                 {{ base_macro.render_logo() }}
@@ -197,24 +215,6 @@
                 {{ report_macro.render_report_header(project_title, group, "sociogram_macro") }}
                 {{ base_report_macro.render_sociogram_macro_statistics(sociogram["macro_stats"], sociogram["supplemental"], report_macro.render_sociogram_measures_label) }}
                 {{ report_macro.render_sociogram_legend(show_macro=True) }}
-            </div>
-            {{ report_macro.render_footer(year) }}
-        </div>
-        <div class="page sociogram-graph-main">
-            <div>
-                {{ base_macro.render_logo() }}
-                {{ report_macro.render_disclaimer() }}
-                {{ report_macro.render_report_header(project_title, group, "sociogram_micro") }}
-                {{ base_report_macro.render_sociogram_graphs(sociogram["graph_ic"], report_macro.render_sociogram_graph_label("ic")) }}
-            </div>
-            {{ report_macro.render_footer(year) }}
-        </div>
-        <div class="page sociogram-graph-main">
-            <div>
-                {{ base_macro.render_logo() }}
-                {{ report_macro.render_disclaimer() }}
-                {{ report_macro.render_report_header(project_title, group, "sociogram_micro") }}
-                {{ base_report_macro.render_sociogram_graphs(sociogram["graph_ac"], report_macro.render_sociogram_graph_label("ac")) }}
             </div>
             {{ report_macro.render_footer(year) }}
         </div>
