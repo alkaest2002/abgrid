@@ -15,7 +15,6 @@ import matplotlib.pyplot as plt
 from typing import Any, Literal, Dict, Optional, TypedDict, Union
 from lib import CM_TO_INCHES
 from lib.abgrid_utils import figure_to_base64_svg
-from adjustText import adjust_text
 
 class SociogramDict(TypedDict, total=False):
     micro_stats: Optional[pd.DataFrame]
@@ -277,8 +276,8 @@ class ABGridSociogram:
         ax.grid(color="#bbb", linestyle="--", linewidth=.8)
         
         # Set jitter parameters
-        theta_jitter_scale = 0.05
-        r_jitter_scale = 0.02
+        theta_jitter_scale = 0.03
+        r_jitter_scale = 0.01
         
         # Plot data points for each group
         for idx, (_, group_plot_data) in enumerate(plot_data.groupby(by=coeffient)):
@@ -312,26 +311,13 @@ class ABGridSociogram:
             ax.scatter(theta_jittered, r_jittered, alpha=0.6, color="#999", s=20)
 
             # Alternative way to avoid text collision, with no dependencies
-            # for i, txt in enumerate(group_plot_data["node_labels"]):
-            #     ax.annotate(
-            #         txt, 
-            #         (theta_jittered.iloc[i], r_jittered.iloc[i]), 
-            #         color="blue",
-            #         fontsize=12
-            #     )
-            
-            texts = [ 
-                ax.text(
-                    theta_jittered[i], 
-                    r_jittered[i], 
-                    group_plot_data["node_labels"].iat[i], 
-                    ha="center", 
-                    va="center", 
+            for i, txt in enumerate(group_plot_data["node_labels"]):
+                ax.annotate(
+                    txt, 
+                    (theta_jittered.iloc[i], r_jittered.iloc[i]), 
                     color="blue",
-                    fontsize=12, 
-                ) for i in range(len(theta_jittered)) 
-            ]
-            adjust_text(texts)
-        
+                    fontsize=12
+                )
+
         # Return figure
         return fig
