@@ -1,7 +1,7 @@
 import matplotlib
 
 # Customize matplotlib settings
-matplotlib.rc("font", **{"size": 8 })
+matplotlib.rc("font", **{ "family": "Times New Roman", "size": 8 })
 matplotlib.use("Agg")
 
 SYMBOLS = list("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz")
