@@ -33,8 +33,6 @@ class ABGridYAML:
             with open(yaml_file_path, 'r') as file:
                 # Parse the YAML file using safe_load
                 yaml_data = yaml.safe_load(file)
-                # Ensure that all keys are strings
-                yaml_data = self.convert_keys_to_strings(yaml_data)
                 
             # Validate the parsed YAML data
             return self.validate(yaml_type, yaml_data)
@@ -46,23 +44,6 @@ class ABGridYAML:
         except yaml.YAMLError:
             # Return error for YAML parsing issues
             return None, "YAML file {yaml_file_path.name} could not be parsed."
-        
-    def convert_keys_to_strings(self, yaml_data: dict | list) :
-        """
-        Recursively ensure that all keys in a given data structure are strings.
-
-        Args:
-            yaml_data: The data structure loaded from the YAML file (e.g., a dictionary or list).
-
-        Returns:
-            A new data structure with all keys converted to strings.
-        """
-        if isinstance(yaml_data, dict):
-            return {str(key): self.convert_keys_to_strings(value) for key, value in yaml_data.items()}
-        elif isinstance(yaml_data, list):
-            return [self.convert_keys_to_strings(element) for element in yaml_data]
-        else:
-            return yaml_data
     
     def validate(self, yaml_type: Literal["project", "group"], yaml_data: Dict[str, Any]) -> Tuple[Optional[Dict[str, Any]], Optional[str]]:
         """
