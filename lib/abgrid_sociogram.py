@@ -15,6 +15,7 @@ import matplotlib.pyplot as plt
 from typing import Any, Literal, Dict, Optional, TypedDict, Union
 from lib import CM_TO_INCHES
 from lib.abgrid_utils import figure_to_base64_svg
+from adjustText import adjust_text
 
 class SociogramDict(TypedDict, total=False):
     micro_stats: Optional[pd.DataFrame]
@@ -309,15 +310,28 @@ class ABGridSociogram:
             
             # Plot data points
             ax.scatter(theta_jittered, r_jittered, alpha=0.6, color="#999", s=20)
+
+            # Alternative way to avoid text collision, with no dependencies
+            # for i, txt in enumerate(group_plot_data["node_labels"]):
+            #     ax.annotate(
+            #         txt, 
+            #         (theta_jittered.iloc[i], r_jittered.iloc[i]), 
+            #         color="blue",
+            #         fontsize=12
+            #     )
             
-            # Annotate with jittered positions
-            for i, txt in enumerate(group_plot_data["node_labels"]):
-                ax.annotate(
-                    txt, 
-                    (theta_jittered.iloc[i], r_jittered.iloc[i]), 
+            texts = [ 
+                ax.text(
+                    theta_jittered[i], 
+                    r_jittered[i], 
+                    group_plot_data["node_labels"].iat[i], 
+                    ha="center", 
+                    va="center", 
+                    color="blue",
                     fontsize=12, 
-                    color="blue"
-                )
+                ) for i in range(len(theta_jittered)) 
+            ]
+            adjust_text(texts)
         
         # Return figure
         return fig
