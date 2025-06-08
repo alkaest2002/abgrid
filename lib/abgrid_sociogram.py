@@ -39,7 +39,7 @@ class ABGridSociogram:
             "supplemental": None
         }
 
-    def compute_sociogram(self, sna: dict):
+    def compute(self, sna: dict):
         """
         Compute sociogram data from the given structural network analysis (SNA) data.
 

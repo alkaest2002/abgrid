@@ -13,7 +13,8 @@ import datetime
 
 from pathlib import Path
 from typing import Any, List, Tuple, Dict, Optional
-from lib.abgrid_network import ABGridNetwork
+from lib.abgrid_sna import ABGridSna
+from lib.abgrid_sociogram import ABGridSociogram
 
 class ABGridData:
     """
@@ -138,11 +139,11 @@ class ABGridData:
             # If group data was correctly loaded
             if group_data is not None:
                 
-                # Initialize ABGrid network
-                ntw = ABGridNetwork()
-                
-                # Compute network statistics
-                ntw.compute(group_data["choices_a"], group_data["choices_b"], with_sociogram)
+                # Init sna
+                abgrid_sna = ABGridSna()
+
+                # Compute sna data
+                sna = abgrid_sna.compute(group_data["choices_a"], group_data["choices_b"])
                 
                 # Prepare report data
                 report_data = {
@@ -153,32 +154,39 @@ class ABGridData:
                     "question_a": project_data["question_a"],
                     "question_b": project_data["question_b"],
                     "sna": {
-                        "edges_a": ntw.sna["edges_a"],
-                        "edges_b": ntw.sna["edges_b"],
-                        "macro_stats_a": ntw.sna["macro_stats_a"],
-                        "macro_stats_b": ntw.sna["macro_stats_b"],
-                        "micro_stats_a": ntw.sna["micro_stats_a"].to_dict('index'),
-                        "micro_stats_b": ntw.sna["micro_stats_b"].to_dict('index'),
-                        "rankings_a": ntw.sna["rankings_a"],
-                        "rankings_b": ntw.sna["rankings_b"],
-                        "edges_types_a": ntw.sna["edges_types_a"],
-                        "edges_types_b": ntw.sna["edges_types_b"],
-                        "components_a":ntw.sna["components_a"],
-                        "components_b":ntw.sna["components_b"],
-                        "graph_a": ntw.sna["graph_a"],
-                        "graph_b": ntw.sna["graph_b"],
+                        "edges_a": sna["edges_a"],
+                        "edges_b": sna["edges_b"],
+                        "macro_stats_a": sna["macro_stats_a"],
+                        "macro_stats_b": sna["macro_stats_b"],
+                        "micro_stats_a": sna["micro_stats_a"].to_dict('index'),
+                        "micro_stats_b": sna["micro_stats_b"].to_dict('index'),
+                        "rankings_a": sna["rankings_a"],
+                        "rankings_b": sna["rankings_b"],
+                        "edges_types_a": sna["edges_types_a"],
+                        "edges_types_b": sna["edges_types_b"],
+                        "components_a":sna["components_a"],
+                        "components_b":sna["components_b"],
+                        "graph_a": sna["graph_a"],
+                        "graph_b": sna["graph_b"],
                     },
                 }
 
                 # Add sociogram data to report data, if requested
                 if with_sociogram:
+
+                    # Init sociogram class
+                    abgrid_sociogram = ABGridSociogram()
+
+                    # Compute sociogram
+                    sociogram = abgrid_sociogram.compute(sna)
+                
                     report_data["sociogram"] = {
-                            "micro_stats": ntw.sociogram["micro_stats"].to_dict("index"),
-                            "macro_stats": ntw.sociogram["macro_stats"].to_dict("index"),
-                            "graph_ic": ntw.sociogram["graph_ic"],
-                            "graph_ac": ntw.sociogram["graph_ac"],
-                            "rankings": ntw.sociogram["rankings"],
-                            "supplemental": ntw.sociogram["supplemental"]
+                            "micro_stats": sociogram["micro_stats"].to_dict("index"),
+                            "macro_stats": sociogram["macro_stats"].to_dict("index"),
+                            "graph_ic": sociogram["graph_ic"],
+                            "graph_ac": sociogram["graph_ac"],
+                            "rankings": sociogram["rankings"],
+                            "supplemental": sociogram["supplemental"]
                         }
                 
                 # Return report data with no errors

@@ -69,7 +69,7 @@ class ABGridSna:
             "graph_b": None
         }
 
-    def compute_sna(self, 
+    def compute(self, 
         packed_edges_a: List[Dict[str, str]], 
         packed_edges_b: List[Dict[str, str]], 
     ) -> Dict[str, Dict]:
