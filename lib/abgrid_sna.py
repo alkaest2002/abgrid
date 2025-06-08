@@ -445,7 +445,7 @@ class ABGridSna:
         nx.draw_networkx_nodes(nx.isolates(network), loc, node_color="#000", edgecolors="#000", ax=ax)
         
         # Draw nodes labels
-        nx.draw_networkx_labels(network, loc, font_color="#FFF", font_weight="normal", font_size=10, ax=ax)
+        nx.draw_networkx_labels(network, loc, font_family="Times New Roman", font_color="#FFF", font_weight="normal", font_size=10, ax=ax)
         
         # Draw reciprocal edges with specific style
         reciprocal_edges = [e for e in network.edges if e[::-1] in network.edges]
