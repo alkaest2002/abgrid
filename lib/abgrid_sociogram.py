@@ -213,7 +213,7 @@ class ABGridSociogram:
         nodes_ordered_by_rank = {}
 
         # Get columns that represent rank data
-        metrics = micro_stats.loc[:, [ "rp", "rr", "bl", "im", "ac_raw", "ic_raw" ]]
+        metrics = micro_stats.loc[:, [ "rp", "rr", "gp", "gr", "bl", "im", "ac_raw", "ic_raw" ]]
         
         # For each metric, nodes will be ordered by their relative rank
         for metric_label, metric_data in metrics.items():
