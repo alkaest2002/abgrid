@@ -151,22 +151,35 @@ class ABGridSociogram:
                 .astype(int)
         )
         
-        # Add sociogram status
-        # 1. Start by computing with z scores of relevat data
+        # Compute robust z score for impact
         impact = sociogram_micro_df["im"]
-        z_impact = impact.sub(impact.mean()).div(impact.std())
-        balance = sociogram_micro_df["bl"]
-        z_balance = balance.sub(balance.mean()).div(balance.std())
+        median_impact = impact.median()
+        mad_impact = impact.sub(median_impact).abs().median()
+        robust_z_impact = impact.sub(median_impact).div(mad_impact).mul(.6745)
 
-        # 2. Update status: default is "-", unless otherwise specified
+        # Compute balance related data
+        balance = sociogram_micro_df["bl"]
+        abs_balance = balance.abs()
+        median_rprr = sociogram_micro_df["rp"].add(sociogram_micro_df["rr"]).median()
+
+        # Define positive, negative and neutral evaluation
+        positive_eval = np.logical_and(balance > 0, abs_balance > median_rprr)
+        negative_eval = np.logical_and(balance < 0, abs_balance >  median_rprr)
+        neutral_eval = np.logical_and(
+            sociogram_micro_df["rp"].mul(sociogram_micro_df["rr"]).gt(0),
+            abs_balance.between(1, abs_balance.median())
+        )
+
+        # Define status: default is "-", unless otherwise specified
         sociogram_micro_df["st"] = "-"
         sociogram_micro_df.loc[sociogram_micro_df.iloc[:, :4].sum(axis=1).eq(0), "st"] = "isolated"
-        sociogram_micro_df.loc[z_impact < -1, "st"] = "neglected"
-        sociogram_micro_df.loc[z_impact.between(-1, -.5), "st"] = "underrated"
-        sociogram_micro_df.loc[np.logical_and(z_impact.between(.5, 1), z_balance > 1), "st"] = "appreciated"
-        sociogram_micro_df.loc[np.logical_and(z_impact > 1, z_balance > 1), "st"] = "popular"
-        sociogram_micro_df.loc[np.logical_and(z_impact > -.5, z_balance < -1), "st"] = "rejected"
-        sociogram_micro_df.loc[np.logical_and(z_impact > 0, z_balance.between(-.5, .5)), "st"] = "controversial"
+        sociogram_micro_df.loc[robust_z_impact < -1, "st"] = "marginal"
+        sociogram_micro_df.loc[np.logical_and(positive_eval, robust_z_impact.between(-1, 1)), "st"] = "appreciated"
+        sociogram_micro_df.loc[np.logical_and(negative_eval, robust_z_impact.between(-1, 1)), "st"] = "disliked"
+        sociogram_micro_df.loc[np.logical_and(neutral_eval, robust_z_impact.between(-1, 1)), "st"] = "ambivalent"
+        sociogram_micro_df.loc[np.logical_and(positive_eval, robust_z_impact > 1), "st"] = "popular"
+        sociogram_micro_df.loc[np.logical_and(negative_eval, robust_z_impact > 1), "st"] = "rejected"
+        sociogram_micro_df.loc[np.logical_and(neutral_eval, robust_z_impact > 1), "st"] = "controversial"
         
         # Compute sociogram macro stats
         sociogram_numeric_columns = sociogram_micro_df.select_dtypes(np.number)
