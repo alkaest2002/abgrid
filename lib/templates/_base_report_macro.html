@@ -32,7 +32,7 @@
 {% endmacro %}
 
 {% macro render_sna_macro_statistics(data) %}
-<div class="macro-container">
+<div class="macro-stats-container">
     <p>
         <b>NN</b> {{ data.network_nodes }}, <b>NE</b> {{ data.network_edges }}, <b>ND</b> {{ (data.network_density * 100)|round|int }}%, <b>NC</b> {{ (data.network_centralization * 100)|round|int }}%, <b>NT</b> {{ (data.network_transitivity * 100)|round|int }}%, <b>NR</b> {{ (data.network_reciprocity * 100)|round|int }}%
     </p>
@@ -52,7 +52,7 @@
     (95/100, 1, "very-high"),
 ] %}
 <div>
-    <table class="report-table table_bordered table_striped full-width table-sna-micro-stats">
+    <table class="report-table table-bordered table-striped full-width table-sna-micro-stats">
         <tr>
             <th>ID</th>
             <th>{{ render_choices_label() }}</th>
@@ -146,7 +146,7 @@
 <div class="rankings-tables-container">
     {% for metric, data in rankings.items() %}
     <div>
-        <table class="report-table table_bordered table_striped full-width table-sna-rankings">
+        <table class="report-table table-bordered table-striped full-width table-rankings">
             <tr>
                 <th>{{ render_rank_label() }}</th>
                 <th>{{ metric[:2] | upper }}</th>
@@ -168,45 +168,43 @@
 {% endmacro %}
 
 {% macro render_edges_type(network_type, edges_types, render_edges_types_label, render_edges_type_empty_list) %}
-<div class="edges_types">
+<div class="sna-edges-types">
     {% for edges_type, edges in edges_types.items() %}
         {% set edges_length = edges | length %}
-        <div class="edges-types">
-            <div class="edges-type-header">
-                {{ render_edges_types_label(network_type, edges_type, edges_length) }}
-            </div>
-            <div class="edges-type-list">
-                {% if  edges | length > 0 %}
-                    {% for edge in edges %}
-                        <div class="edge">     
-                            {% for node in edge %}
-                                <span>{{ node }}</span>{% if loop.index0 == 0 %} &middot; {% endif %}
-                            {% endfor %}
-                        </div>
-                    {% endfor %}
-                {% else %}
-                    {{ render_edges_type_empty_list()  }}
-                {% endif %}
-            </div>
+        <div class="sna-edges-type-header">
+            {{ render_edges_types_label(network_type, edges_type, edges_length) }}
+        </div>
+        <div class="sna-edges-type-list">
+            {% if  edges | length > 0 %}
+                {% for edge in edges %}
+                    <div class="sna-edge">     
+                        {% for node in edge %}
+                            <span>{{ node }}</span>{% if loop.index0 == 0 %} &middot; {% endif %}
+                        {% endfor %}
+                    </div>
+                {% endfor %}
+            {% else %}
+                {{ render_edges_type_empty_list()  }}
+            {% endif %}
         </div>
     {% endfor %}
 </div>
 {% endmacro %}
 
 {% macro render_sna_components(all_components, render_components_label, render_components_empty_list) %}
-<div class="components">
+<div class="sna-components">
     {% for type, components in all_components.items() %}
         {% set current = namespace(length=None) %}
-        <div class="components-type-header" >
+        <div class="sna-components-type-header" >
             {{ render_components_label(type) }}
         </div>
-        <div class="components-list">
+        <div class="sna-components-list">
             {% if  components | length > 0 %}
                 {% for component in components %}
-                    <div class="component">
+                    <div class="sna-component">
                         {% if not current.length or current.length != (component | length) %}
                             {% set current.length = (component | length) %}
-                            <span class="component-length">{{ current.length }}</span>
+                            <span class="sna-component-length">{{ current.length }}</span>
                             {% for node in component %}
                                 <span>{{ node }}</span>{% if not loop.last %} &middot;{% endif %}
                             {% endfor %}
@@ -233,7 +231,7 @@
     (80, 90, "low"),
     (0, 80, "very-low"),
 ] %}
-<table class="report-table table_bordered table_striped full-width table-sociogram-micro-stats">
+<table class="report-table table-bordered table-striped full-width sociogram-micro-stats-table">
     <tr>
         <th>ID</th>
         <th>RP</th>
@@ -307,7 +305,7 @@
     </p>
 </div>
 <div>
-    <table class="report-table table_bordered table_striped full-width table-sociogram-macro-stats">
+    <table class="report-table table-bordered table-striped full-width sociogram-macro-stats-table">
         <tr>
             <th class="text-left">ID</th>
             <th>Count</th>

@@ -15,13 +15,13 @@
 {% macro render_components_label(type) %}
     {% if type == "strongly_connected" %}
         <p><b>Sottografi fortemente connessi</b></p>
-        <p class="dimmed-text small-text">Sottografi massimali in cui tutti i vertici sono reciprocamente raggiungibili.</p>
+        <p class="text-dimmed text-small">Sottografi massimali in cui tutti i vertici sono reciprocamente raggiungibili.</p>
     {% elif type == "weakly_connected" %}
         <p><b>Sottografi debolmente connessi</b></p>
-        <p class="dimmed-text small-text">Sottografi massimali in cui qualsiasi vertice è collegato da percorsi non diretti.</p>
+        <p class="text-dimmed text-small">Sottografi massimali in cui qualsiasi vertice è collegato da percorsi non diretti.</p>
     {% elif type == "cliques" %}
         <p><b>Clique</b></p>
-        <p class="dimmed-text small-text">Sottografi che diventano completamente connessi quando si ignorano le direzioni dei legami.</p>
+        <p class="text-dimmed text-small">Sottografi che diventano completamente connessi quando si ignorano le direzioni dei legami.</p>
     {% endif %}
 {% endmacro %}
 
@@ -41,37 +41,37 @@
     {% if edge_type == "type_i" %}
         <p><b>Legami non reciproci</b></p>
         {% if network_type == "A" %}
-            <p class="dimmed-text small-text">X &rarr; Y nella rete A &middot; no Y &rarr; X nella rete A</p>
+            <p class="text-dimmed text-small">X &rarr; Y nella rete A &middot; no Y &rarr; X nella rete A</p>
         {% else %}
-            <p class="dimmed-text small-text">X &rarr; Y nella rete B &middot; no Y &rarr; X nella rete B</p>
+            <p class="text-dimmed text-small">X &rarr; Y nella rete B &middot; no Y &rarr; X nella rete B</p>
         {% endif %}
     {% elif edge_type == "type_ii" %}
         <p><b>Legami reciproci</b></p>
         {% if network_type == "A" %}
-            <p class="dimmed-text small-text">X &rarr; Y nella rete A &middot; Y &rarr; X nella rete A</p>
+            <p class="text-dimmed text-small">X &rarr; Y nella rete A &middot; Y &rarr; X nella rete A</p>
         {% else %}
-            <p class="dimmed-text small-text">X &rarr; Y nella rete B &middot; Y &rarr; X nella rete B</p>
+            <p class="text-dimmed text-small">X &rarr; Y nella rete B &middot; Y &rarr; X nella rete B</p>
         {% endif %}
     {% elif edge_type == "type_iii" %}
         <p><b>Legami simmetrici semplici</b></p>
         {% if network_type == "A" %}
-            <p class="dimmed-text small-text">X &rarr; Y nella rete A &middot; X &rarr; Y nella rete B</p>
+            <p class="text-dimmed text-small">X &rarr; Y nella rete A &middot; X &rarr; Y nella rete B</p>
         {% else %}
-            <p class="dimmed-text small-text">X &rarr; Y nella rete B &middot; X &rarr; Y nella rete A</p>
+            <p class="text-dimmed text-small">X &rarr; Y nella rete B &middot; X &rarr; Y nella rete A</p>
         {% endif %}
     {% elif edge_type == "type_iv" %}
         <p><b>Legami simmetrici inversi</b></p>
         {% if network_type == "A" %}
-            <p class="dimmed-text small-text">X &rarr; Y nella rete A &middot; Y &rarr; X nella rete B</p>
+            <p class="text-dimmed text-small">X &rarr; Y nella rete A &middot; Y &rarr; X nella rete B</p>
         {% else %}
-            <p class="dimmed-text small-text">X &rarr; Y nella rete B &middot; Y &rarr; X nella rete A</p>
+            <p class="text-dimmed text-small">X &rarr; Y nella rete B &middot; Y &rarr; X nella rete A</p>
         {% endif %}
     {% elif edge_type == "type_v" %}
         <p><b>Legami simmetrici completi</b></p>
         {% if network_type == "A" %}
-            <p class="dimmed-text small-text">X &rarr; Y, Y &rarr; X nella rete A &middot; X &rarr; Y, Y &rarr; X nella rete B</p>
+            <p class="text-dimmed text-small">X &rarr; Y, Y &rarr; X nella rete A &middot; X &rarr; Y, Y &rarr; X nella rete B</p>
         {% else %}
-            <p class="dimmed-text small-text">X &rarr; Y, Y &rarr; X nella rete B &middot; X &rarr; Y, Y &rarr; X nella rete A</p>
+            <p class="text-dimmed text-small">X &rarr; Y, Y &rarr; X nella rete B &middot; X &rarr; Y, Y &rarr; X nella rete A</p>
         {% endif %}
     {% endif %}
 {% endmacro %}

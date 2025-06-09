@@ -15,13 +15,13 @@
 {% macro render_components_label(type) %}
     {% if type == "strongly_connected" %}
         <p><b>Strongly Connected Components</b></p>
-        <p class="dimmed-text small-text">Maximal subgraphs where all vertices are mutually reachable.</p>
+        <p class="text-dimmed text-small">Maximal subgraphs where all vertices are mutually reachable.</p>
     {% elif type == "weakly_connected" %}
         <p><b>Weakly Connected Components</b></p>
-        <p class="dimmed-text small-text">Maximal subgraphs where any vertices are connected by undirected paths.</p>
+        <p class="text-dimmed text-small">Maximal subgraphs where any vertices are connected by undirected paths.</p>
     {% elif type == "cliques" %}
         <p><b>Cliques</b></p>
-        <p class="dimmed-text small-text">Subgraphs that become fully connected when directional edges are ignored.</p>
+        <p class="text-dimmed text-small">Subgraphs that become fully connected when directional edges are ignored.</p>
     {% endif %}
 {% endmacro %}
 
@@ -33,37 +33,37 @@
     {% if edge_type == "type_i" %}
         <p><b>Non reciprocal edges</b></p>
         {% if network_type == "A" %}
-            <p class="dimmed-text small-text">X &rarr; Y in network A &middot; not Y &rarr; X in network A</p>
+            <p class="text-dimmed text-small">X &rarr; Y in network A &middot; not Y &rarr; X in network A</p>
         {% else %}
-            <p class="dimmed-text small-text">X &rarr; Y in network B &middot; not Y &rarr; X in network B</p>
+            <p class="text-dimmed text-small">X &rarr; Y in network B &middot; not Y &rarr; X in network B</p>
         {% endif %}
     {% elif edge_type == "type_ii" %}
         <p><b>Reciprocal edges</b></p>
         {% if network_type == "A" %}
-            <p class="dimmed-text small-text">X &rarr; Y in network A &middot; Y &rarr; X in network A</p>
+            <p class="text-dimmed text-small">X &rarr; Y in network A &middot; Y &rarr; X in network A</p>
         {% else %}
-            <p class="dimmed-text small-text">X &rarr; Y in network B &middot; Y &rarr; X in network B</p>
+            <p class="text-dimmed text-small">X &rarr; Y in network B &middot; Y &rarr; X in network B</p>
         {% endif %}
     {% elif edge_type == "type_iii" %}
         <p><b>Half symmetrical edges</b></p>
         {% if network_type == "A" %}
-            <p class="dimmed-text small-text">X &rarr; Y in network A &middot; X &rarr; Y in network B</p>
+            <p class="text-dimmed text-small">X &rarr; Y in network A &middot; X &rarr; Y in network B</p>
         {% else %}
-            <p class="dimmed-text small-text">X &rarr; Y in network B &middot; X &rarr; Y in network A</p>
+            <p class="text-dimmed text-small">X &rarr; Y in network B &middot; X &rarr; Y in network A</p>
         {% endif %}
     {% elif edge_type == "type_iv" %}
         <p><b>Reversed half symmetrical edges</b></p>
         {% if network_type == "A" %}
-            <p class="dimmed-text small-text">X &rarr; Y in network A &middot; Y &rarr; X in network B</p>
+            <p class="text-dimmed text-small">X &rarr; Y in network A &middot; Y &rarr; X in network B</p>
         {% else %}
-            <p class="dimmed-text small-text">X &rarr; Y in network B &middot; Y &rarr; X in network A</p>
+            <p class="text-dimmed text-small">X &rarr; Y in network B &middot; Y &rarr; X in network A</p>
         {% endif %}
     {% elif edge_type == "type_v" %}
         <p><b>Full symmetrical edges</b></p>
         {% if network_type == "A" %}
-            <p class="dimmed-text small-text">X &rarr; Y, Y &rarr; X in network A &middot; X &rarr; Y, Y &rarr; X in network B</p>
+            <p class="text-dimmed text-small">X &rarr; Y, Y &rarr; X in network A &middot; X &rarr; Y, Y &rarr; X in network B</p>
         {% else %}
-            <p class="dimmed-text small-text">X &rarr; Y, Y &rarr; X in network B &middot; X &rarr; Y, Y &rarr; X in network A</p>
+            <p class="text-dimmed text-small">X &rarr; Y, Y &rarr; X in network B &middot; X &rarr; Y, Y &rarr; X in network A</p>
         {% endif %}
     {% endif %}
 {% endmacro %}

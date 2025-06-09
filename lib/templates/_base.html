@@ -26,6 +26,9 @@
                 line-height: 14pt;
                 box-sizing: border-box
             }
+            table {
+                border-collapse: collapse;
+            }
             @page {
                 position: relative;
                 width: 210mm;
@@ -61,33 +64,24 @@
                 font-size: 2em;
                 font-weight: bold;
             }
-            .logo-letter {
+            .logo .logo-letter {
                 padding: 12px 9px;
                 margin-right: 3px;
                 border-radius: 6px;
             }
-            .letter-A {
-                color: var(--abgrid-blue);
-            }
-            .letter-B {
-                color: var(--abgrid-red);
-            }
-            .letter-A-reversed {
+            .logo .logo-letter.letter-A-reversed {
                 background-color: var(--abgrid-blue);
                 color: var(--abgrid-white);
             }
-            .letter-B-reversed {
+            .logo .logo-letter.letter-B-reversed {
                 background-color: var(--abgrid-red);
                 color: var(--abgrid-white);
             }
-            table {
-                border-collapse: collapse;
-            }
-            .table_bordered {
+            .table-bordered {
                 border-top: 2px solid var(--base-border-color);
                 border-bottom: 2px solid var(--base-border-color);
             }
-            .table_striped tr:nth-child(odd) td {
+            .table-striped tr:nth-child(odd) td {
                 background-color: var(--base-background-color-light);
             }
             .text-center {
@@ -96,14 +90,14 @@
             .text-left {
                 text-align: left !important;
             }
-            .dimmed-text {
+            .text-dimmed {
                 color: var(--base-font-color-light);
             }
-            .small-text {
+            .text-small {
                 font-size: 8pt;
                 line-height: 10pt;
             }
-            .small-text b {
+            .text-small b {
                 font-size: 8pt;
                 line-height: 10pt;
             }
