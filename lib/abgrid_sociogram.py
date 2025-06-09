@@ -39,7 +39,7 @@ class ABGridSociogram:
             "graph_ac": None,
         }
 
-    def compute(self, sna: dict):
+    def get(self, sna: dict):
         """
         Compute sociogram data from the given structural network analysis (SNA) data.
 
@@ -58,23 +58,7 @@ class ABGridSociogram:
             - Modifies the `self.sociogram` attribute by populating it with computed
             sociogram data derived from the input SNA data.
         """
-        # Compute sociogram data
-        self.sociogram = self.get_sociogram_data(sna)
-        self.sociogram["graph_ic"] = self.get_sociogram_graph("ic_raw")
-        self.sociogram["graph_ac"] = self.get_sociogram_graph("ac_raw")
-        
-        # Return sociogram data
-        return self.sociogram
-    
-    def get_sociogram_data(self, sna: dict) -> Dict[str, Union[pd.DataFrame, Dict[str, float]]]:
-        """
-        Computes a sociogram DataFrame based on two directed graphs representing 
-        social network data for preferences and rejections.
-
-        Returns:
-            Dict[str, Union[pd.DataFrame, Dict[str, float]]]:
-                A dictionary containing sociogram micro and macro statistics and supplemental indices.
-        """
+                
         # Get sna data to be used for sociogram analysis
         network_a = sna["network_a"]
         network_b = sna["network_b"]
@@ -84,7 +68,7 @@ class ABGridSociogram:
         sociogram_macro_df = self.compute_macro_stats(sociogram_micro_df)
 
         # Compute rankings
-        rankings = self.get_sociogram_rankings(sociogram_micro_df)
+        rankings = self.compute_rankings(sociogram_micro_df)
 
         # Add cohesion indices
         cohesion_index_type_i = (len(sna["edges_types_a"]["type_ii"]) *2) / len(network_a.edges())
@@ -94,8 +78,8 @@ class ABGridSociogram:
         conflict_index_type_i = (len(sna["edges_types_b"]["type_ii"]) *2) / len(network_b.edges())
         conflict_index_type_ii = len(sna["edges_types_b"]["type_ii"]) / len(network_b)
 
-        # Return sociogram data
-        return {
+        # Compute sociogram data
+        self.sociogram =  {
             "micro_stats": sociogram_micro_df,
             "macro_stats": sociogram_macro_df,
             "rankings": rankings,
@@ -105,10 +89,15 @@ class ABGridSociogram:
                 "wi_i": conflict_index_type_i,
                 "wi_ii": conflict_index_type_ii
             },
-            "graph_ic": None,
-            "graph_ac": None
         }
+    
+        # Add graphs
+        self.sociogram["graph_ic"] = self.create_graph("ic_raw")
+        self.sociogram["graph_ac"] = self.create_graph("ac_raw")
 
+        # return sociogram
+        return self.sociogram
+        
     def compute_macro_stats(self, sociogram_micro_df: pd.DataFrame) -> pd.DataFrame:
         """
         Computes macro-level sociogram statistics based on micro-level statistics.
@@ -268,8 +257,7 @@ class ABGridSociogram:
         # Return sociogram micro stats
         return sociogram_micro_df.sort_index()
 
-    
-    def get_sociogram_rankings(self, micro_stats: pd.DataFrame) -> Dict[str, Dict[Any, int]]:
+    def compute_rankings(self, micro_stats: pd.DataFrame) -> Dict[str, Dict[Any, int]]:
         """
         Generate and return the order of nodes based on their rank scores for each specified centrality metric.
 
@@ -305,7 +293,7 @@ class ABGridSociogram:
         # Return the dictionary of nodes ordered by their rank for each metric
         return nodes_ordered_by_rank
     
-    def get_sociogram_graph(self, coeffient: Literal["ac_raw", "ic_raw"]) -> str:
+    def create_graph(self, coeffient: Literal["ac_raw", "ic_raw"]) -> str:
         """
         Generate a graphical representation of sociogram rankings and return it encoded in base64 SVG format.
 
@@ -315,12 +303,12 @@ class ABGridSociogram:
         """
 
         # Create matplotlib plot
-        fig = self.create_sociogram_plot(coeffient)
+        fig = self.create_sfig(coeffient)
         
         # Convert matplotlib plot to base64 SVG string
         return figure_to_base64_svg(fig)  
     
-    def create_sociogram_plot(self, coeffient: Literal["ac_raw", "ic_raw"]):
+    def create_sfig(self, coeffient: Literal["ac_raw", "ic_raw"]):
         """
         Create a polar plot of sociogram data normalized to [0, 1].
         Args:
