@@ -369,7 +369,7 @@ class ABGridSociogram:
             r_jittered = np.clip(r + r_jitter, 0, 1.1)
             
             # Plot data points
-            ax.scatter(theta_jittered, r_jittered, alpha=0.6, color="#999", s=20)
+            ax.scatter(theta_jittered, r_jittered, c="#bbb", s=20)
 
             # Alternative way to avoid text collision, with no dependencies
             for i, txt in enumerate(group_plot_data["node_labels"]):
