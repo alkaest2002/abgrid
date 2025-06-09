@@ -139,10 +139,10 @@ class ABGridSociogram:
         
         # Init sociogram micro stats dataframe
         sociogram_micro_df = pd.concat([
+            pd.Series(dict(network_a.in_degree()), name="rp"), 
+            pd.Series(dict(network_b.in_degree()), name="rr"),
             pd.Series(dict(network_a.out_degree()), name="gp"), 
             pd.Series(dict(network_b.out_degree()), name="gr"), 
-            pd.Series(dict(network_a.in_degree()), name="rp"), 
-            pd.Series(dict(network_b.in_degree()), name="rr")
             ], axis=1
         )
 
@@ -254,6 +254,7 @@ class ABGridSociogram:
         sociogram_micro_df.loc[np.logical_and(neutral_eval, robust_z_impact > 1), "st"] = "controversial"
         
         # Return sociogram micro stats
+        print(sociogram_micro_df)
         return sociogram_micro_df.sort_index()
 
     def compute_rankings(self, micro_stats: pd.DataFrame) -> Dict[str, Dict[Any, int]]:
