@@ -74,32 +74,27 @@ class ABGridSna:
         packed_edges_b: List[Dict[str, str]], 
     ) -> Dict[str, Dict]:
         """
-        Compute and store graphs, statistics, and visualization layouts for networks A and B.
-
-        This method processes input edge lists to create directed graph structures for two
-        networks. It calculates various network statistics and layouts, storing them
-        in the `self.sna` dictionary for further analysis or visualization.
+        Compute and store graphs, statistics, and visualization layouts for two directed networks (A and B).
 
         Args:
-            packed_edges_a (List[EdgeDict]): 
-                A list of dictionaries, each representing an edge for network A.
-                Each dictionary includes 'source' and 'target' keys mapping to node identifiers.
-            packed_edges_b (List[EdgeDict]): 
-                A list of dictionaries, each representing an edge for network B.
-                Should follow the same structure as `packed_edges_a`.
+            packed_edges_a (List[Dict[str, str]]): 
+                A list of dictionaries where each dictionary represents an edge for network A.
+                Each dictionary should contain 'source' and 'target' keys that map to node identifiers.
+            packed_edges_b (List[Dict[str, str]]): 
+                A list of dictionaries where each dictionary represents an edge for network B.
+                Structure should mirror that of `packed_edges_a`.
 
         Returns:
-            Dict[str, Dict]: A dictionary containing computed network analysis data and layouts.
-                Various attributes, like nodes, edges, adjacency matrices, layouts,
-                and statistics, are stored for both networks.
+            Dict[str, Dict]: A comprehensive dictionary containing network analysis data and layouts 
+                            for both networks A and B. This includes attributes such as nodes, edges,
+                            adjacency matrices, layouts, and various statistics.
 
         Side Effects:
-            - Constructs directed graph objects for both networks A and B.
-            - Computes and stores macro and micro statistics for both networks.
-            - Generates and stores layout information, adjusting for isolated nodes.
-            - Populates the adjacency matrix representation of networks with stored data.
+            - Creates and modifies directed graph objects for networks A and B.
+            - Computes, stores, and organizes macro and micro statistics for each network.
+            - Generates node layout information and adjusts layouts to incorporate isolated nodes.
+            - Updates adjacency matrix representations within the `self.sna` data structure.
         """
-
         # Crete netowork a and b
         for network_type, packed_edges in [("a", packed_edges_a), ("b", packed_edges_b)]:
             self.sna[f"nodes_{network_type}"] = self.unpack_network_nodes(packed_edges)
@@ -136,7 +131,7 @@ class ABGridSna:
             self.sna[f"components_{network_type}"] = self.compute_components(network_type)
             self.sna[f"graph_{network_type}"] = self.create_graph(network_type)
 
-        # Retrun 
+        # Return sna data
         return self.sna
 
     def unpack_network_edges(self, packed_edges: List[Dict[str, str]]) -> List[Tuple[str, str]]:
