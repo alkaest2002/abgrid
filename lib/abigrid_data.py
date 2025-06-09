@@ -143,7 +143,7 @@ class ABGridData:
                 abgrid_sna = ABGridSna()
 
                 # Compute sna data
-                sna = abgrid_sna.compute(group_data["choices_a"], group_data["choices_b"])
+                sna = abgrid_sna.get(group_data["choices_a"], group_data["choices_b"])
                 
                 # Prepare report data
                 report_data = {
@@ -178,7 +178,7 @@ class ABGridData:
                     abgrid_sociogram = ABGridSociogram()
 
                     # Compute sociogram
-                    sociogram = abgrid_sociogram.compute(sna)
+                    sociogram = abgrid_sociogram.get(sna)
                 
                     report_data["sociogram"] = {
                             "micro_stats": sociogram["micro_stats"].to_dict("index"),
