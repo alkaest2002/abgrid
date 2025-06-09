@@ -212,12 +212,8 @@ class ABGridMain:
             case "answersheet":
                 template = jinja_env.get_template(f"./{language}/answersheet.html")
             
-            # Document type is report and group has up to 10 members
-            case "report" if doc_data["members_per_group"] <= 10:
-                template = jinja_env.get_template(f"./{language}/report_single_page.html")
-            
-            # Document type is report and group ahs more than 10 members
-            case "report" if doc_data["members_per_group"] > 10:
+            # Document type is report and group
+            case "report":
                 template = jinja_env.get_template(f"./{language}/report_multi_page.html")
         
         # Render report
