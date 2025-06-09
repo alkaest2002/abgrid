@@ -150,23 +150,30 @@ class ABGridSociogram:
                 .add(100)
                 .astype(int)
         )
-        
-        # Compute robust z score for impact
+
+        # Cache relevant columns to be used in following calculations
+        received_preferences = sociogram_micro_df["rp"]
+        received_rejections = sociogram_micro_df["rr"]
         impact = sociogram_micro_df["im"]
+        balance = sociogram_micro_df["bl"]
+        
+        # Compute robust z score for impact 
         median_impact = impact.median()
         mad_impact = impact.sub(median_impact).abs().median()
-        robust_z_impact = impact.sub(median_impact).div(mad_impact).mul(.6745)
+        mad_impact = max(mad_impact, 1e-6) # ensure no zero division
+        threshold = max(0.6745, 1.5 - (sociogram_micro_df.shape[0] / 50))
+        robust_z_impact = impact.sub(median_impact).div(mad_impact).mul(threshold)
 
         # Compute balance related data
-        balance = sociogram_micro_df["bl"]
+        # (i.e., received preference - received rejections)
         abs_balance = balance.abs()
-        median_rprr = sociogram_micro_df["rp"].add(sociogram_micro_df["rr"]).median()
+        median_rprr = received_preferences.add(received_rejections).median()
 
-        # Define positive, negative and neutral evaluation
+        # Define positive, negative and neutral evaluations
         positive_eval = np.logical_and(balance > 0, abs_balance > median_rprr)
         negative_eval = np.logical_and(balance < 0, abs_balance >  median_rprr)
         neutral_eval = np.logical_and(
-            sociogram_micro_df["rp"].mul(sociogram_micro_df["rr"]).gt(0),
+            received_preferences.mul(received_rejections).gt(0),
             abs_balance.between(1, abs_balance.median())
         )
 
