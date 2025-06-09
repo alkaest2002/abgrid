@@ -8,109 +8,193 @@
         font-size: 10pt;
         line-height: 12pt;
     }
+    
     .report-disclaimer {
-        margin: 24px 0px;
+        margin: 18pt 0pt;
         text-align: justify;
     }
+    
     .report-header {
         display: flex;
         justify-content: space-between;
-        margin: 12px 0px;
-        padding-bottom: 6px;
+        margin: 9pt 0pt;
+        padding-bottom: 6pt;
         font-size: 1.5em;
         font-weight: bold;
-        border-bottom: 1px solid var(--base-border-color);
+        border-bottom: 1pt solid var(--base-border-color);
     }
+    
     .question-container {
-        margin: 24px 0px 12px 0px;
-        padding-bottom: 6px;
-        border-bottom: 1px dashed var(--base-border-color);
+        margin: 18pt 0pt 9pt 0pt;
+        padding-bottom: 6pt;
+        border-bottom: .75pt dashed var(--base-border-color);
     }
+    
     .graph-container {
         display: flex;
         justify-content: center;
         align-items: center;
     }
+    
     .macro-container {
-        margin: 12px 0px;
+        margin: 9pt 0pt;
     }
+    
     .report-table th {
-        padding: 6px 3px;
+        padding: 6pt 3pt;
         background-color: var(--base-background-color-dark);
-        border-bottom: 1px solid var(--base-border-color);
+        border-bottom: .75pt solid var(--base-border-color);
     }
+    
     .report-table td {
-        padding: 2px;
+        padding: 1.5pt;
     }
+    
     .report-table th, .report-table td {
         text-align: center;
     } 
+    
     .report-table td > div > div {
         height: 12pt;
     }
-    .report-table td > div > div.very-low,
-    .report-table td > div > div.low,
-    .report-table td > div > div.high,
-    .report-table td > div > div.very-high {
-        color: var(--abgrid-white);
-    }
-    .rankings-tables-container {
-        display: flex;
-    }
-    .rankings-tables-container > div {
-        width: 20%;
-        padding-right: 9px;
-    }
-    .rankings-tables-container > div:last-child {
-        padding-right: 0px;
-    }
-    .rankings-tables-container > div > table td {
-        width: 50%;
-    }
-    .sociogram-supplemental-container {
-        margin-bottom: 12px;
-    }
-    .table-sociogram-micro-stats td:nth-last-child(-n+12) {
-        width: 50px;
-    }
-    .table-sociogram-micro-stats td:last-child {
-        width: 100px;
-    }
-    .table-sociogram-macro-stats td:nth-last-child(-n+9) {
-        width: 60px;
-    }
-    .sociogram-graphs-container-header {
-        padding-bottom: 6px;
-        border-bottom: 1px dashed var(--base-border-color);
-        margin-bottom: 48px;
-    }
-    .very-low {
-        background-color: var(--highlight-very-low-values);
-    }
-    .low {
-        background-color: var(--highlight-low-values);
-    }
-    .very-high {
-        background: var(--highlight-very-high-values);
-    }
-    .high {
-        background: var(--highlight-high-values);
-    }
-    .square {
-        display: inline-block;
-        position: relative;
-        top: 2px;
-        height: 8pt;
-        width: 8pt;
-    }
-    .report-legend, .report-legend b {
-        margin-top: 6px;
+
+    .report-table-legend, .report-table-legend b {
+        margin-top: 6pt;
         font-size: 9pt;
         line-height: 11pt;
         text-align: justify;
     }
+    
+    .report-table-legend .square {
+        display: inline-block;
+        position: relative;
+        top: 2pt;
+        height: 8pt;
+        width: 8pt;
+    }
+
+    .sna-graph-main .report-table-legend {
+        padding-top: 6pt;
+        border-top: .75pt solid var(--base-border-color);
+    }
+    
+    .rankings-tables-container {
+        display: flex;
+    }
+    
+    .rankings-tables-container > div {
+        width: 20%;
+        padding-right: 6pt;
+    }
+    
+    .rankings-tables-container > div:last-child {
+        padding-right: 0pt;
+    }
+    
+    .rankings-tables-container > div > table td {
+        width: 50%;
+    
+    }
+
+    
+    
+    .sna-edges-types {
+        margin-top: 18pt;
+    }
+    
+    .sna-edges-type {
+        margin-bottom: 18pt;
+    }
+    
+    .sna-edges-type-header {
+        margin-bottom: 9pt;
+    }
+    
+    .sna-edges-type-header p:last-child {
+        margin-top: 3pt;
+    }
+    
+    .sna-edges-type-list {
+        display: flex;
+        flex-wrap: wrap;
+        margin-top: 8pt;
+        margin-bottom: 16pt;
+    }
+    
+    .sna-edge {
+        padding: 2.5pt 5pt;
+        margin-right: 5pt;
+        margin-bottom: 5pt;
+        border: .75pt solid var(--base-border-color);
+        border-radius: 5pt;
+    }
+    
+    .sna-components {
+        margin-top: 18pt;
+    }
+    
+    .sna-components-type-header {
+        margin-top: 18pt;
+    }
+    
+    .sna-components-list {
+        margin-top: 8pt;
+        margin-bottom: 16pt;
+    }
+    
+    .sna-components-type-header p:last-child {
+        margin-top: 3pt;
+    }
+    
+    .sna-component-length {
+        display: inline-block;
+        height: 12pt;
+        width: 12pt;
+        margin-right: 3pt;
+        text-align: center;
+        font-size: 8pt;
+        border-radius: 3pt;
+        background-color: var(--base-font-color-light);
+        color: var(--abgrid-white);
+    }
+    
+    .sna-component {
+        display: inline-block;
+        padding: 3pt;
+        margin-right: 5pt;
+        margin-bottom: 5pt;
+        border: .75pt solid var(--base-border-color);
+        border-radius: 5pt;
+    }
+    
+    .sna-component span:last-of-type {
+        margin-right: 5pt;
+    }
+    
+    .sociogram-supplemental-container {
+        margin-bottom: 12pt;
+    }
+    
+    .sociogram-micro-stats-table td:nth-last-child(-n+12) {
+        width: 40pt;
+    }
+    
+    .sociogram-micro-stats-table td:last-child {
+        width: 75pt;
+    }
+    
+    .sociogram-macro-stats-table td:nth-last-child(-n+9) {
+        width: 50pt;
+    }
+    
+    .sociogram-graphs-container-header {
+        padding-bottom: 6pt;
+        border-bottom: 1pt dashed var(--base-border-color);
+        margin-bottom: 48pt;
+    }
+    
     .report-footer, .report-footer b {
-        margin-top: 24px;
+        margin-top: 18pt;
         font-size: 9pt;
         line-height: 11pt;
         text-align: justify;

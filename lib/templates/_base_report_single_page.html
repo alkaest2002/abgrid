@@ -2,31 +2,34 @@
 
 {% block report_single_style %}
 <style>
-    .report-table td {
-        padding: 4px 3px;
-    }
     .report-table td:nth-last-child(-n+6) {
-        width: 36px;
+        width: 30pt;
     }
+
     .single-report-content {
         display: flex;
     }
+
     .single-report-content > div:first-child {
         width: 50%;
-        padding-right: 6px;
+        padding-right: 6pt;
     }
+
     .single-report-content > div:last-child {
         width: 50%;
-        padding-left: 6px;
+        padding-left: 6pt;
     }
-    .table-sociogram-micro-stats td:nth-last-child(-n+12) {
-        width: 50px;
+
+    .sociogram-micro-stats-table td:nth-last-child(-n+12) {
+        width: 40pt;
     }
-    .table-sociogram-micro-stats td:last-child {
-        width: 100px;
+
+    .sociogram-micro-stats-table td:last-child {
+        width: 75pt;
     }
-    .table-sociogram-macro-stats td:nth-last-child(-n+9) {
-        width: 60px;
+
+    .sociogram-macro-stats-table td:nth-last-child(-n+9) {
+        width: 450pt;
     }
 </style>
 {% endblock %}

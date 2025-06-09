@@ -46,10 +46,10 @@
 {% set last_rank_cl = data.values()|map(attribute='cl_rank') | max  %}
 {% set last_rank_hu = data.values()|map(attribute='hu_rank') | max  %}
 {% set highlight_values = [
-    (0, 5/100, "very-low"),
-    (5/100, 10/100, "low"),
-    (85/100, 95/100, "high"),
-    (95/100, 1, "very-high"),
+    (0, 5/100, "highlight-very-low-values"),
+    (5/100, 10/100, "highlight-low-values"),
+    (85/100, 95/100, "highlight-high-values"),
+    (95/100, 1, "highlight-very-high-values"),
 ] %}
 <div>
     <table class="report-table table-bordered table-striped full-width table-sna-micro-stats">
@@ -72,8 +72,8 @@
                         <div>
                             {% set value = data[k].ic_pctile %}
                             {% set rank = data[k].ic_rank %}
-                            {% set is_first = (rank == 1, "high") %}
-                            {% set is_last = (rank == last_rank_ic, "low") %}
+                            {% set is_first = (rank == 1, "highlight-high-values") %}
+                            {% set is_last = (rank == last_rank_ic, "highlight-low-values") %}
                             <div class="{{ highlight_value(value, highlight_values, is_first, is_last) }}">
                                 {{ data[k].ic_rank | int }}
                             </div>
@@ -83,8 +83,8 @@
                         <div>
                             {% set value = data[k].pr_pctile %}
                             {% set rank = data[k].pr_rank %}
-                            {% set is_first = (rank == 1, "high") %}
-                            {% set is_last = (rank == last_rank_pr, "low") %}
+                            {% set is_first = (rank == 1, "highlight-high-values") %}
+                            {% set is_last = (rank == last_rank_pr, "highlight-low-values") %}
                             <div class="{{ highlight_value(value, highlight_values, is_first, is_last) }}">
                                 {{ data[k].pr_rank | int }}
                             </div>
@@ -94,8 +94,8 @@
                         <div>
                             {% set value = data[k].bt_pctile %}
                             {% set rank = data[k].bt_rank %}
-                            {% set is_first = (rank == 1, "high") %}
-                            {% set is_last = (rank == last_rank_bt, "low") %}
+                            {% set is_first = (rank == 1, "highlight-high-values") %}
+                            {% set is_last = (rank == last_rank_bt, "highlight-low-values") %}
                             <div class="{{ highlight_value(value, highlight_values, is_first, is_last) }}">
                                 {{ data[k].bt_rank | int }}
                             </div>
@@ -105,8 +105,8 @@
                         <div>
                             {% set value = data[k].cl_pctile %}
                             {% set rank = data[k].cl_rank %}
-                            {% set is_first = (rank == 1, "high") %}
-                            {% set is_last = (rank == last_rank_cl, "low") %}
+                            {% set is_first = (rank == 1, "highlight-high-values") %}
+                            {% set is_last = (rank == last_rank_cl, "highlight-low-values") %}
                             <div class="{{ highlight_value(value, highlight_values, is_first, is_last) }}">
                                 {{ data[k].cl_rank | int }}
                             </div>
@@ -116,8 +116,8 @@
                         <div>
                             {% set value = data[k].hu_pctile %}
                             {% set rank = data[k].hu_rank %}
-                            {% set is_first = (rank == 1, "high") %}
-                            {% set is_last = (rank == last_rank_hu, "low") %}
+                            {% set is_first = (rank == 1, "highlight-high-values") %}
+                            {% set is_last = (rank == last_rank_hu, "highlight-low-values") %}
                             <div class="{{ highlight_value(value, highlight_values, is_first, is_last) }}">
                                 {{ data[k].hu_rank | int }}
                             </div>
@@ -226,10 +226,10 @@
 
 {% macro render_sociogram_micro_statistics(data, render_sociogram_status_label) %}
 {% set coeff_highlight_values = [
-    (130, 500, "very-high"),
-    (110, 130, "high"),
-    (80, 90, "low"),
-    (0, 80, "very-low"),
+    (0, 70, "highlight-very-low-values"),
+    (70, 85, "highlight-low-values"),
+    (115, 130, "highlight-high-values"),
+    (130, 500, "highlight-very-high-values"),
 ] %}
 <table class="report-table table-bordered table-striped full-width sociogram-micro-stats-table">
     <tr>
