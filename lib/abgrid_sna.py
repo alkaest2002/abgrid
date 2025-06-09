@@ -69,7 +69,7 @@ class ABGridSna:
             "graph_b": None
         }
 
-    def compute(self, 
+    def get(self, 
         packed_edges_a: List[Dict[str, str]], 
         packed_edges_b: List[Dict[str, str]], 
     ) -> Dict[str, Dict]:
@@ -129,12 +129,12 @@ class ABGridSna:
                     
         # Store sna data
         for network_type in ("a", "b"):
-            self.sna[f"macro_stats_{network_type}"] = self.get_sna_macro_stats(network_type)
-            self.sna[f"micro_stats_{network_type}"] = self.get_sna_micro_stats(network_type)
-            self.sna[f"rankings_{network_type}"] = self.get_sna_rankings(network_type)
-            self.sna[f"edges_types_{network_type}"] = self.get_sna_edges_types(network_type)
-            self.sna[f"components_{network_type}"] = self.get_sna_components(network_type)
-            self.sna[f"graph_{network_type}"] = self.get_sna_graph(network_type)
+            self.sna[f"macro_stats_{network_type}"] = self.compute_macro_stats(network_type)
+            self.sna[f"micro_stats_{network_type}"] = self.compute_micro_stats(network_type)
+            self.sna[f"rankings_{network_type}"] = self.compute_rankings(network_type)
+            self.sna[f"edges_types_{network_type}"] = self.compute_edges_types(network_type)
+            self.sna[f"components_{network_type}"] = self.compute_components(network_type)
+            self.sna[f"graph_{network_type}"] = self.create_graph(network_type)
 
         # Retrun 
         return self.sna
@@ -181,7 +181,7 @@ class ABGridSna:
             node for node_edges in packed_edges for node, _ in node_edges.items()
         ])
     
-    def get_sna_macro_stats(self, network_type: Literal["a", "b"]) -> Dict[str, Union[int, float]]:
+    def compute_macro_stats(self, network_type: Literal["a", "b"]) -> Dict[str, Union[int, float]]:
         """
         Calculate and return macro-level statistics for a directed network.
 
@@ -201,7 +201,7 @@ class ABGridSna:
         network_nodes = network.number_of_nodes()
         network_edges = network.number_of_edges()
         network_density = nx.density(network)
-        network_centralization = self.get_network_centralization(network.to_undirected())
+        network_centralization = self.compute_network_centralization(network.to_undirected())
         network_transitivity = nx.transitivity(network)
         network_reciprocity = nx.overall_reciprocity(network)
         
@@ -215,7 +215,7 @@ class ABGridSna:
             "network_reciprocity": network_reciprocity,
         }
     
-    def get_sna_micro_stats(self, network_type: Literal["a", "b"]) -> pd.DataFrame:
+    def compute_micro_stats(self, network_type: Literal["a", "b"]) -> pd.DataFrame:
         """
         Calculate and return micro-level statistics for each node in a directed network graph.
 
@@ -273,7 +273,7 @@ class ABGridSna:
                 .sort_index()
         )
         
-    def get_sna_rankings(self, network_type: Literal["a", "b"]) -> Dict[str, Dict[int, int]]:
+    def compute_rankings(self, network_type: Literal["a", "b"]) -> Dict[str, Dict[int, int]]:
         """
         Generate and return the order of nodes based on their rank scores for each centrality metric.
 
@@ -303,7 +303,7 @@ class ABGridSna:
         # Return the dictionary of nodes ordered by their rank for each metric
         return nodes_ordered_by_rank
         
-    def get_sna_edges_types(self, network_type: Literal["a", "b"]) -> Dict[str, List[Tuple[str, str]]]:
+    def compute_edges_types(self, network_type: Literal["a", "b"]) -> Dict[str, List[Tuple[str, str]]]:
         """
         Classify edges in a directed network graph into various types based on relationships within
         the same network and a reference network.
@@ -361,7 +361,7 @@ class ABGridSna:
             "type_v": type_v
         }
     
-    def get_sna_components(self, network_type: Literal["a", "b"]) -> List[str]:
+    def compute_components(self, network_type: Literal["a", "b"]) -> List[str]:
         """
         Identify and return the unique and significant components of a directed graph as strings.
 
@@ -386,7 +386,7 @@ class ABGridSna:
         # Ensure unique components and sort by length in descending order
         return sorted(list(set(components)), key=len, reverse=True)
 
-    def get_sna_graph(self, network_type: Literal["a","b"]) -> str:
+    def create_graph(self, network_type: Literal["a","b"]) -> str:
         """
         Generate a graphical representation of a network and return it encoded in base64 SVG format.
 
@@ -405,12 +405,12 @@ class ABGridSna:
         loc = self.sna[f"loc_{network_type}"]
 
         # Create matplotlib plot
-        fig = self.create_sna_plot(network, loc, network_type)
+        fig = self.create_fig(network, loc, network_type)
     
         # Convert matplotlib plot to base64 SVG string
         return figure_to_base64_svg(fig)
     
-    def create_sna_plot(self, network: nx.DiGraph, loc: Dict[str, Tuple[float, float]], network_type: Literal["a","b"]) -> plt.Figure:
+    def create_fig(self, network: nx.DiGraph, loc: Dict[str, Tuple[float, float]], network_type: Literal["a","b"]) -> plt.Figure:
         """
         Create a matplotlib plot of a network graph.
 
@@ -534,7 +534,7 @@ class ABGridSna:
         except StopIteration:
             return loc
         
-    def get_network_centralization(self, network: nx.Graph) -> float:
+    def compute_network_centralization(self, network: nx.Graph) -> float:
         """
         Calculate the centralization of a network.
 
