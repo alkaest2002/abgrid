@@ -41,24 +41,23 @@ class ABGridSociogram:
 
     def get(self, sna: dict):
         """
-        Compute sociogram data from the given structural network analysis (SNA) data.
-
-        This method uses the provided SNA data to generate sociogram-related information,
-        which includes graph representations and statistical data.
+        Compute and store sociogram-related data from the provided social network analysis (SNA) data.
 
         Args:
-            sna (dict): A dictionary containing social network analysis data. 
-                        It includes various metrics computed for networks 
-                        which are required for generating sociograms.
+            sna (dict): A dictionary containing the social network analysis data. This should include.
 
         Returns:
-            dict: A dictionary containing the computed sociogram data.
+            dict: A dictionary containing detailed sociogram data, structured as follows:
+                - "micro_stats": DataFrame of individual-level statistics.
+                - "macro_stats": DataFrame of network-level statistics.
+                - "rankings": A dictionary mapping metrics to node rank orders.
+                - "supplemental": Dictionary with cohesion and conflict indices.
+                - "graph_ic" and "graph_ac": Strings of base64-encoded SVGs representing graph visualizations.
 
         Side Effects:
-            - Modifies the `self.sociogram` attribute by populating it with computed
-            sociogram data derived from the input SNA data.
-        """
-                
+            - The `self.sociogram` attribute is updated with the computed sociogram data based on the input
+            SNA data, encapsulating both statistical and visual components.
+        """           
         # Get sna data to be used for sociogram analysis
         network_a = sna["network_a"]
         network_b = sna["network_b"]
@@ -91,11 +90,11 @@ class ABGridSociogram:
             },
         }
     
-        # Add graphs
+        # Add sociogram graphs
         self.sociogram["graph_ic"] = self.create_graph("ic_raw")
         self.sociogram["graph_ac"] = self.create_graph("ac_raw")
 
-        # return sociogram
+        # return sociogram data
         return self.sociogram
         
     def compute_macro_stats(self, sociogram_micro_df: pd.DataFrame) -> pd.DataFrame:
@@ -303,12 +302,12 @@ class ABGridSociogram:
         """
 
         # Create matplotlib plot
-        fig = self.create_sfig(coeffient)
+        fig = self.create_fig(coeffient)
         
         # Convert matplotlib plot to base64 SVG string
         return figure_to_base64_svg(fig)  
     
-    def create_sfig(self, coeffient: Literal["ac_raw", "ic_raw"]):
+    def create_fig(self, coeffient: Literal["ac_raw", "ic_raw"]):
         """
         Create a polar plot of sociogram data normalized to [0, 1].
         Args:
