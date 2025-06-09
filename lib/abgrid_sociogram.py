@@ -17,11 +17,11 @@ from lib import CM_TO_INCHES
 from lib.abgrid_utils import figure_to_base64_svg
 
 class SociogramDict(TypedDict, total=False):
-    micro_stats: Optional[pd.DataFrame]
     macro_stats: Optional[Dict[str, Union[int, float]]]
+    micro_stats: Optional[pd.DataFrame]
+    supplemental: Optional[Dict[str, float]]
     graph_ic: Optional[str]
     graph_ac: Optional[str]
-    supplemental: Optional[Dict[str, float]]
 
 class ABGridSociogram:
 
@@ -32,11 +32,11 @@ class ABGridSociogram:
 
         # init sociogram dict
         self.sociogram: SociogramDict = {
-            "micro_stats": None,
             "macro_stats": None,
+            "micro_stats": None,
+            "supplemental": None,
             "graph_ic": None,
             "graph_ac": None,
-            "supplemental": None
         }
 
     def compute(self, sna: dict):
@@ -52,21 +52,17 @@ class ABGridSociogram:
                         which are required for generating sociograms.
 
         Returns:
-            dict: A dictionary containing the computed sociogram data. Its keys include:
-                - "graph_ic": The in-component graph representation.
-                - "graph_ac": The all-component graph representation.
-                Additional keys provide further sociogram-related data and statistics.
+            dict: A dictionary containing the computed sociogram data.
 
         Side Effects:
             - Modifies the `self.sociogram` attribute by populating it with computed
             sociogram data derived from the input SNA data.
         """
         # Compute sociogram data
-
         self.sociogram = self.get_sociogram_data(sna)
         self.sociogram["graph_ic"] = self.get_sociogram_graph("ic_raw")
         self.sociogram["graph_ac"] = self.get_sociogram_graph("ac_raw")
-
+        
         # Return sociogram data
         return self.sociogram
     
@@ -79,7 +75,74 @@ class ABGridSociogram:
             Dict[str, Union[pd.DataFrame, Dict[str, float]]]:
                 A dictionary containing sociogram micro and macro statistics and supplemental indices.
         """
+        # Get sna data to be used for sociogram analysis
+        network_a = sna["network_a"]
+        network_b = sna["network_b"]
+        
+        # Compute micro and macro statistics
+        sociogram_micro_df = self.compute_micro_stats(sna)
+        sociogram_macro_df = self.compute_macro_stats(sociogram_micro_df)
 
+        # Compute rankings
+        rankings = self.get_sociogram_rankings(sociogram_micro_df)
+
+        # Add cohesion indices
+        cohesion_index_type_i = (len(sna["edges_types_a"]["type_ii"]) *2) / len(network_a.edges())
+        cohesion_index_type_ii = len(sna["edges_types_a"]["type_ii"]) / len(network_a)
+
+        # Add conflict indices
+        conflict_index_type_i = (len(sna["edges_types_b"]["type_ii"]) *2) / len(network_b.edges())
+        conflict_index_type_ii = len(sna["edges_types_b"]["type_ii"]) / len(network_b)
+
+        # Return sociogram data
+        return {
+            "micro_stats": sociogram_micro_df,
+            "macro_stats": sociogram_macro_df,
+            "rankings": rankings,
+            "supplemental": {
+                "ui_i": cohesion_index_type_i,
+                "ui_ii": cohesion_index_type_ii,
+                "wi_i": conflict_index_type_i,
+                "wi_ii": conflict_index_type_ii
+            },
+            "graph_ic": None,
+            "graph_ac": None
+        }
+
+    def compute_macro_stats(self, sociogram_micro_df: pd.DataFrame) -> pd.DataFrame:
+        """
+        Computes macro-level sociogram statistics based on micro-level statistics.
+
+        Args:
+            sociogram_micro_df (pd.DataFrame): DataFrame containing micro-level statistics
+
+        Returns:
+            pd.DataFrame: DataFrame with macro-level descriptive statistics
+        """
+        # Compute sociogram macro stats
+        sociogram_numeric_columns = sociogram_micro_df.select_dtypes(np.number)
+        median = sociogram_numeric_columns.median()
+        sociogram_macro_df = sociogram_numeric_columns.describe().T
+        sociogram_macro_df.insert(1, "median", median)
+        
+        # Return sociogram macro stats
+        return sociogram_macro_df.apply(pd.to_numeric, downcast="integer")
+    
+    def compute_micro_stats(self, sna: dict) -> pd.DataFrame:
+        """
+        Computes micro-level sociogram statistics for individual nodes based on 
+        social network data for preferences and rejections.
+
+        Args:
+            sna (dict): Dictionary containing network data with keys:
+                - network_a: NetworkX graph for preferences
+                - network_b: NetworkX graph for rejections  
+                - adjacency_a: Adjacency matrix for preferences
+                - adjacency_b: Adjacency matrix for rejections
+
+        Returns:
+            pd.DataFrame: DataFrame with micro-level statistics for each node
+        """
         # Get sna data to be used for sociogram analysis
         network_a = sna["network_a"]
         network_b = sna["network_b"]
@@ -202,32 +265,9 @@ class ABGridSociogram:
         sociogram_micro_df.loc[np.logical_and(negative_eval, robust_z_impact > 1), "st"] = "rejected"
         sociogram_micro_df.loc[np.logical_and(neutral_eval, robust_z_impact > 1), "st"] = "controversial"
         
-        # Compute sociogram macro stats
-        sociogram_numeric_columns = sociogram_micro_df.select_dtypes(np.number)
-        median = sociogram_numeric_columns.median()
-        sociogram_macro_df = sociogram_numeric_columns.describe().T
-        sociogram_macro_df.insert(1, "median", median)
+        # Return sociogram micro stats
+        return sociogram_micro_df.sort_index()
 
-        # Add cohesion indices
-        cohesion_index_type_i = (len(sna["edges_types_a"]["type_ii"]) *2) / len(network_a.edges())
-        cohesion_index_type_ii = len(sna["edges_types_a"]["type_ii"]) / len(network_a)
-
-        # Add conflict indices
-        conflict_index_type_i = (len(sna["edges_types_b"]["type_ii"]) *2) / len(network_b.edges())
-        conflict_index_type_ii = len(sna["edges_types_b"]["type_ii"]) / len(network_b)
-
-        # Return sociogram data
-        return {
-           "micro_stats": sociogram_micro_df.sort_index(),
-           "macro_stats": sociogram_macro_df.apply(pd.to_numeric, downcast="integer"),
-           "rankings": self.get_sociogram_rankings(sociogram_micro_df),
-           "supplemental": {
-               "ui_i": cohesion_index_type_i,
-               "ui_ii": cohesion_index_type_ii,
-               "wi_i": conflict_index_type_i,
-               "wi_ii": conflict_index_type_ii
-           }
-        }
     
     def get_sociogram_rankings(self, micro_stats: pd.DataFrame) -> Dict[str, Dict[Any, int]]:
         """
