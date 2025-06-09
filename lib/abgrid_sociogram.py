@@ -85,7 +85,7 @@ class ABGridSociogram:
         network_b = sna["network_b"]
         adjacency_a = sna["adjacency_a"]
         adjacency_b = sna["adjacency_b"]
- 
+        
         # Init sociogram micro stats dataframe
         sociogram_micro_df = pd.concat([
             pd.Series(dict(network_a.out_degree()), name="gp"), 
@@ -94,6 +94,9 @@ class ABGridSociogram:
             pd.Series(dict(network_b.in_degree()), name="rr")
             ], axis=1
         )
+
+        # Compute threshold for calculations relating to median and mad
+        ROBUST_THRESHOLD = max(0.6745, 1.5 - (sociogram_micro_df.shape[0] / 50))
 
         # Add mutual preferences
         sociogram_micro_df["mp"] = (adjacency_a * adjacency_a.T).sum(axis=1).astype(int)
@@ -118,7 +121,7 @@ class ABGridSociogram:
             sociogram_micro_df["rp"]
                 .add(sociogram_micro_df["rr"])
         )
-        
+
         # Add affiliation coefficient raw: balance + orientation
         sociogram_micro_df["ac_raw"] = (
             sociogram_micro_df["bl"]
@@ -126,10 +129,16 @@ class ABGridSociogram:
         )
 
         # Add affiliation coefficient
+        affiliation_coeff = sociogram_micro_df["ac_raw"]
+        median_affiliation_coeff = affiliation_coeff.median()
+        mad_affiliation_coeff = (
+            max(affiliation_coeff.sub(median_affiliation_coeff).abs().median(), 1e-6) # ensure no zero division
+        )
         sociogram_micro_df["ac"] = (
-            sociogram_micro_df["ac_raw"]
-                .sub(sociogram_micro_df["ac_raw"].mean())
-                .div(sociogram_micro_df["ac_raw"].std())
+            affiliation_coeff
+                .sub(median_affiliation_coeff)
+                .div(mad_affiliation_coeff)
+                .mul(ROBUST_THRESHOLD)
                 .mul(10)
                 .add(100)
                 .astype(int)
@@ -142,10 +151,16 @@ class ABGridSociogram:
         )
 
         # Add influence coefficient
+        influence_coeff = sociogram_micro_df["ic_raw"]
+        median_influence_coeff = influence_coeff.median()
+        mad_influence_coeff = (
+            max(influence_coeff.sub(median_influence_coeff).abs().median(), 1e-6) # ensure no zero division
+        )
         sociogram_micro_df["ic"] = (
-            sociogram_micro_df["ic_raw"]
-                .sub(sociogram_micro_df["ic_raw"].mean())
-                .div(sociogram_micro_df["ic_raw"].std())
+            influence_coeff
+                .sub(median_influence_coeff)
+                .div(mad_influence_coeff)
+                .mul(ROBUST_THRESHOLD)
                 .mul(10)
                 .add(100)
                 .astype(int)
@@ -161,8 +176,7 @@ class ABGridSociogram:
         median_impact = impact.median()
         mad_impact = impact.sub(median_impact).abs().median()
         mad_impact = max(mad_impact, 1e-6) # ensure no zero division
-        threshold = max(0.6745, 1.5 - (sociogram_micro_df.shape[0] / 50))
-        robust_z_impact = impact.sub(median_impact).div(mad_impact).mul(threshold)
+        robust_z_impact = impact.sub(median_impact).div(mad_impact).mul(ROBUST_THRESHOLD)
 
         # Compute balance related data
         # (i.e., received preference - received rejections)
