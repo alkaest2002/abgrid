@@ -12,8 +12,17 @@
     <span>RANGO</span>
 {% endmacro %}
 
-{% macro render_components_label() %}
-    <p><b>Componenti della rete</b></p>
+{% macro render_components_label(type) %}
+    {% if type == "strongly_connected" %}
+        <p><b>Sottografi fortemente connessi</b></p>
+        <p class="dimmed-text small-text">Sottografi massimali in cui tutti i vertici sono reciprocamente raggiungibili.</p>
+    {% elif type == "weakly_connected" %}
+        <p><b>Sottografi debolmente connessi</b></p>
+        <p class="dimmed-text small-text">Sottografi massimali in cui qualsiasi vertice è collegato da percorsi non diretti.</p>
+    {% elif type == "cliques" %}
+        <p><b>Clique</b></p>
+        <p class="dimmed-text small-text">Sottografi che diventano completamente connessi quando si ignorano le direzioni dei legami.</p>
+    {% endif %}
 {% endmacro %}
 
 {% macro render_sociogram_status_label(status) %}
@@ -77,7 +86,7 @@
 
 {% macro render_report_header(project_title, group, type) %}
 <div class="report-header">
-    <span><b>GRUPPO {{ group | upper }} - {{ project_title | upper }}</b></span><span>{% if type == "sna_graph" %}GRAFICO RETE SNA{% elif type == "sna_raw_scores" %}PUNTEGGI SNA GREZZI{% elif type == "sna_ranks" %}PUNTEGGI SNA DI RANGO{% elif type == "sna_rankings" %}NODI SNA ORDINATI PER METRICA{% elif type == "sna_edges_types" %}LEGAMI SNA RAGGRUPPATI PER TIPO{% elif type == "sna_components" %}COMPONENTI SNA{% elif type == "sociogram_micro" %}SOCIOGRAMMA{% elif type == "sociogram_rankings" %}NODI SOCIOGRAMMA ORDINATI PER METRICA{% elif type == "sociogram_macro" %}SOCIOGRAMMA STATISTICHE{% endif %}</span>
+    <span><b>GRUPPO {{ group | upper }} - {{ project_title | upper }}</b></span><span>{% if type == "sna_graph" %}GRAFICO RETE SNA{% elif type == "sna_raw_scores" %}PUNTEGGI SNA GREZZI{% elif type == "sna_ranks" %}PUNTEGGI SNA DI RANGO{% elif type == "sna_rankings" %}NODI SNA ORDINATI PER METRICA{% elif type == "sna_edges_types" %}LEGAMI SNA RAGGRUPPATI PER TIPO{% elif type == "sna_components" %}SOTTOGRAFI SNA{% elif type == "sociogram_micro" %}SOCIOGRAMMA{% elif type == "sociogram_rankings" %}NODI SOCIOGRAMMA ORDINATI PER METRICA{% elif type == "sociogram_macro" %}SOCIOGRAMMA STATISTICHE{% endif %}</span>
 </div>
 {% endmacro %}
 
