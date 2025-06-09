@@ -81,7 +81,7 @@
 
 {% macro render_sociogram_legend(show_macro=False, show_micro=False, show_rankings=False, show_colors=False) %}
 <div class="report-legend">
-    {% if show_macro %}<b>Std</b> Standard Deviation <b>Min</b> Minimum value <b>P25</b> 25° percentile <b>P50</b> 50° percentile <b>P75</b> 75° percentile <b>Max</b> Maximum value {% endif %}{% if show_micro %}<b>RP</b> Received preferences <b>RR</b> Received rejections <b>GP</b> Given preferences <b>GR</b> Given rejections <b>MP</b> Mutual preferences <b>MR</b> Mutual rejections <b>BL</b> Balance <b>OR</b> Orientation <b>IM</b> Impact <b>AC</b> Affiliation coefficient <b>IC</b> Influence coefficient <b>ST</b> Sociometric status{% endif %}{%if show_rankings %}<b>RP</b> Received preferences <b>RR</b> Received rejections <b>GP</b> Given preferences <b>GR</b> Given rejections <b>BL</b> Balance <b>IM</b> Impact <b>AC</b> Affiliation coefficient <b>IC</b> Influence coefficient {% endif %}{% if show_colors %}<span class="square very-low"></span> Very low <span class="square low"></span> Low <span class="square high"></span> High <span class="square very-high"></span> Very high{% endif %}
+    {% if show_macro %}<b>Std</b> Standard Deviation <b>Min</b> Minimum value <b>P25</b> 25° percentile <b>P50</b> 50° percentile <b>P75</b> 75° percentile <b>Max</b> Maximum value {% endif %}{% if show_micro %}<b>RP</b> Received preferences <b>RR</b> Received rejections <b>GP</b> Given preferences <b>GR</b> Given rejections <b>MP</b> Mutual preferences <b>MR</b> Mutual rejections <b>BL</b> Balance <b>OR</b> Orientation <b>IM</b> Impact <b>AC</b> Affiliation coefficient <b>IC</b> Influence coefficient <b>ST</b> Sociometric status {% endif %}{%if show_rankings %}<b>RP</b> Received preferences <b>RR</b> Received rejections <b>GP</b> Given preferences <b>GR</b> Given rejections <b>BL</b> Balance <b>IM</b> Impact <b>AC</b> Affiliation coefficient <b>IC</b> Influence coefficient {% endif %}{% if show_colors %}<span class="square very-low"></span> Very low <span class="square low"></span> Low <span class="square high"></span> High <span class="square very-high"></span> Very high{% endif %}
 </div>
 {% endmacro %}
 
@@ -114,7 +114,7 @@
 {% endmacro %}
 
 {% macro render_footer(year) %}
-<div class="report-footer small-text">
+<div class="report-footer">
     <b>Authors</b>: Dr. Pierpaolo CALANNA, PhD, Dr. Gaetano BUONAIUTO (2021-{{ year }}), <b>License of use</b>: the layout of this report, the customization of charts, as well as the selection of quantitative indices, are subject to copyright.
 </div>
 {% endmacro %}
