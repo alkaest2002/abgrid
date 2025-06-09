@@ -110,8 +110,10 @@ class ABGridSociogram:
         # Compute sociogram macro stats
         sociogram_numeric_columns = sociogram_micro_df.select_dtypes(np.number)
         median = sociogram_numeric_columns.median()
+        iqr = sociogram_numeric_columns.quantile([.75, .25]).apply(lambda x: x.iat[0] - x.iat[1])
         sociogram_macro_df = sociogram_numeric_columns.describe().T
         sociogram_macro_df.insert(1, "median", median)
+        sociogram_macro_df.insert(2, "iqr", iqr)
         
         # Return sociogram macro stats
         return sociogram_macro_df.apply(pd.to_numeric, downcast="integer")
