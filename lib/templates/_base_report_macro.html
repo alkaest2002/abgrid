@@ -304,8 +304,9 @@
             <th class="text-left">ID</th>
             <th>Count</th>
             <th>Median</th>
+            <th>IQR</th>
             <th>Mean</th>
-            <th>Std</th>
+            <th>SD</th>
             <th>Min</th>
             <th>P25</th>
             <th>P50</th>
@@ -318,6 +319,7 @@
                     <td class="text-left"><div><div>{{ render_sociogram_measures_label(k) }}</div></div></td>
                     <td><div><div>{{ macro_stats[k].count }}</div></div></td>
                     <td><div><div>{{ macro_stats[k].median | int }}</div></div></td>
+                    <td><div><div>{{ macro_stats[k].iqr | int }}</div></div></td>
                     <td><div><div>{{ "%0.2f" | format(macro_stats[k].mean | round(2)) }}</div></div></td>
                     <td><div><div>{{ "%0.2f" | format(macro_stats[k].std | round(2)) }}</div></div></td>
                     <td><div><div>{{ macro_stats[k].min |int }}</div></div></td>
