@@ -13,11 +13,11 @@
     }
     .single-report-content > div:first-child {
         width: 50%;
-        padding-right: 12px;
+        padding-right: 6px;
     }
     .single-report-content > div:last-child {
         width: 50%;
-        padding-left: 12px;
+        padding-left: 6px;
     }
     .table-sociogram-micro-stats td:nth-last-child(-n+12) {
         width: 50px;
@@ -45,12 +45,14 @@
                         {{ base_report_macro.render_graph(graph) }}
                         {{ base_report_macro.render_sna_macro_statistics(network_data_macro_level) }}
                         {{ base_report_macro.render_sna_micro_statistics(network_type, "ranks", network_data_micro_level, report_macro.render_choices_label) }}
-                        {{ report_macro.render_sna_legend() }}
                     </div>
-                {% endfor %}
+                    {% endfor %}
+                </div>
+            {{ report_macro.render_sna_legend(show_macro=True, show_micro=True, show_arrows=True, show_colors=True) }}
             </div>
-        </div>
-        {{ report_macro.render_footer(year) }}
+            <div>
+                {{ report_macro.render_footer(year) }}
+            </div>
     </div>
     <div class="page">
         <div>
@@ -65,10 +67,10 @@
                         {{ base_report_macro.render_graph(graph) }}
                         {{ base_report_macro.render_sna_macro_statistics(network_data_macro_level) }}
                         {{ base_report_macro.render_sna_micro_statistics(network_type, "raw_scores", network_data_micro_level, report_macro.render_choices_label) }}
-                        {{ report_macro.render_sna_legend() }}
                     </div>
                 {% endfor %}
             </div>
+            {{ report_macro.render_sna_legend(show_macro=True, show_micro=True, show_arrows=True, show_colors=True) }}
         </div>
         {{ report_macro.render_footer(year) }}
     </div>
@@ -80,6 +82,24 @@
                 {{ report_macro.render_report_header(project_title, group, "sociogram_micro") }}
                 {{ base_report_macro.render_sociogram_micro_statistics(sociogram.micro_stats, report_macro.render_sociogram_status_label) }}
                 {{ report_macro.render_sociogram_legend(show_micro=True, show_colors=True)}}
+            </div>
+            {{ report_macro.render_footer(year) }}
+        </div>
+        <div class="page sociogram-graph-main">
+            <div>
+                {{ base_macro.render_logo() }}
+                {{ report_macro.render_disclaimer() }}
+                {{ report_macro.render_report_header(project_title, group, "sociogram_micro") }}
+                {{ base_report_macro.render_sociogram_graphs(sociogram["graph_ic"], report_macro.render_sociogram_graph_label("ic")) }}
+            </div>
+            {{ report_macro.render_footer(year) }}
+        </div>
+        <div class="page sociogram-graph-main">
+            <div>
+                {{ base_macro.render_logo() }}
+                {{ report_macro.render_disclaimer() }}
+                {{ report_macro.render_report_header(project_title, group, "sociogram_micro") }}
+                {{ base_report_macro.render_sociogram_graphs(sociogram["graph_ac"], report_macro.render_sociogram_graph_label("ac")) }}
             </div>
             {{ report_macro.render_footer(year) }}
         </div>
@@ -98,29 +118,7 @@
                 {{ base_macro.render_logo() }}
                 {{ report_macro.render_disclaimer() }}
                 {{ report_macro.render_report_header(project_title, group, "sociogram_macro") }}
-                <div style="margin: 12px 0px;">
-                    <p>
-                        <span class="text-italic">
-                            {{- report_macro.render_sociogram_measures_label("ui_i") -}}: 
-                                {{ "%0.2f"| format(sociogram["supplemental"]["ui_i"] * 100 | round(0)) }}%
-                        </span>,
-                        <span class="text-italic">,
-                            {{- report_macro.render_sociogram_measures_label("ui_ii") -}}: 
-                                {{ "%0.2f"| format(sociogram["supplemental"]["ui_ii"] | round(2)) }}
-                        </span>
-                    </p>
-                    <p>
-                        <span class="text-italic">
-                            {{- report_macro.render_sociogram_measures_label("wi_i") -}}: 
-                                {{ "%0.2f"| format(sociogram["supplemental"]["wi_i"] * 100 | round(0)) }}%
-                        </span>
-                        <span class="text-italic">,
-                            {{- report_macro.render_sociogram_measures_label("wi_ii") -}}: 
-                                {{ "%0.2f"| format(sociogram["supplemental"]["wi_ii"] | round(2)) }}
-                        </span>
-                    </p>
-                </div>
-                {{ base_report_macro.render_sociogram_macro_statistics(sociogram.macro_stats, report_macro.render_sociogram_measures_label) }}
+                {{ base_report_macro.render_sociogram_macro_statistics(sociogram["macro_stats"], sociogram["supplemental"], report_macro.render_sociogram_measures_label) }}
                 {{ report_macro.render_sociogram_legend(show_macro=True) }}
             </div>
             {{ report_macro.render_footer(year) }}
