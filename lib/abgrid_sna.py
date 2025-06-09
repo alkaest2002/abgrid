@@ -372,14 +372,14 @@ class ABGridSna:
         network = self.sna[f"network_{network_type}"]
         
         # Compute network components
-        components = [
-            *["".join(sorted(list(c))) for c in sorted(nx.kosaraju_strongly_connected_components(network), key=len, reverse=True) if len(c) > 2],
-            *["".join(sorted(list(c))) for c in sorted(nx.weakly_connected_components(network), key=len, reverse=True) if len(c) > 2],
-            *["".join(sorted(list(c))) for c in sorted(nx.find_cliques(network.to_undirected()), key=len, reverse=True) if len(c) > 2]
-        ]
-        
-        # Ensure unique components and sort by length in descending order
-        return sorted(list(set(components)), key=len, reverse=True)
+        components = {
+            "strongly_connected": [ "".join(sorted(list(c))) for c in sorted(nx.strongly_connected_components(network), key=len, reverse=True) if len(c) > 2 ],
+            "weakly_connected":   [ "".join(sorted(list(c))) for c in sorted(nx.weakly_connected_components(network), key=len, reverse=True) if len(c) > 2 ],
+            "cliques":  [ "".join(sorted(list(c))) for c in sorted(nx.find_cliques(network.to_undirected()), key=len, reverse=True) if len(c) > 2 ]
+        }
+
+        # return components
+        return components
 
     def create_graph(self, network_type: Literal["a","b"]) -> str:
         """
