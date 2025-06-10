@@ -5,7 +5,7 @@
 {% endmacro %}
 
 {% macro render_disclaimer() %}
-<div class="report-disclaimer mt-xl mb-xl">
+<div class="report-disclaimer text-justify mt-xl mb-xl">
     Questo report è stato concepito come strumento per agevolare il processo decisionale e non sostituisce il giudizio degli esperti di settore. Le interpretazioni che se ne ricavano devono essere integrate con altre informazioni relative al contesto valutativo.
 </div>
 {% endmacro %}
@@ -21,13 +21,13 @@
 {% macro render_components_label(type) %}
     {% if type == "strongly_connected" %}
         <p><b>Sottografi fortemente connessi</b></p>
-        <p class="text-dimmed text-small mt-xs">Sottografi massimali in cui tutti i vertici sono reciprocamente raggiungibili.</p>
+        <p class="text-dimmed text-small mt-xs">Strutture in cui tutti i vertici sono reciprocamente raggiungibili.</p>
     {% elif type == "weakly_connected" %}
         <p><b>Sottografi debolmente connessi</b></p>
-        <p class="text-dimmed text-small mt-xs">Sottografi massimali in cui qualsiasi vertice è collegato da percorsi non diretti.</p>
+        <p class="text-dimmed text-small mt-xs">Strutture in cui qualsiasi vertice è collegato da percorsi non diretti.</p>
     {% elif type == "cliques" %}
         <p><b>Clique</b></p>
-        <p class="text-dimmed text-small mt-xs">Sottografi che diventano completamente connessi quando si ignorano le direzioni dei legami.</p>
+        <p class="text-dimmed text-small mt-xs">Strutture che diventano completamente connesse quando si ignorano le direzioni dei legami.</p>
     {% endif %}
 {% endmacro %}
 

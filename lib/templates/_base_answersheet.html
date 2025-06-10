@@ -5,7 +5,7 @@
     <div class="likert-container">
         {% for option in likert %}
             {% if option != participant %}
-                <div class="likert">
+                <div class="likert-main">
                     <div class="likert-option">{{ option }}</div>
                     <div class="likert-bubble"></div>
                 </div>
@@ -51,44 +51,53 @@
         font-size: 1.5em;
         margin: 24pt auto;
         font-weight: bold;
-        padding-bottom: 18px;
-        border-bottom: 1px solid var(--base-border-color);
+        padding-bottom: 18pt;
+        border-bottom: .75pt solid var(--base-border-color);
         display: flex;
         justify-content: space-between;
     }
+    
     .explanation {
-        margin-bottom: 48px;
+        margin-bottom: 48pt;
     }
+    
     .question {
-        margin-bottom: 28px;
+        margin-bottom: 28pt;
     }
+    
     .question-hint {
-        margin-top: 6px;
+        margin-top: 6pt;
         font-size: 10pt;
         color: var(--base-font-color-light);
     }
+    
     .likert-container {
-        margin-top: 24px;
+        margin-top: 12pt;
     }
-    .likert {
+    
+    .likert-main {
         display: inline-block;
-        margin-right: 24px;
-        margin-bottom: 24px;
+        margin-right: 24pt;
+        margin-bottom: 12pt;
     }
+    
     .likert-option {
         text-align: center;
     }
+    
     .likert-bubble {
         font-family: "OMR";
         font-size: 11pt;
     }
+    
     .barcode-wrapper {
         position: relative;
         display: inline-block;
-        padding: 12px;
-        border: 1px solid var(--base-border-color);
-        border-radius: 6px;
+        padding: 12pt;
+        border: .75pt solid var(--base-border-color);
+        border-radius: 6pt;
     }
+    
     .barcode-wrapper .barcode {
         font-family: "3 of 9 Barcode";
         font-size: 25pt;
