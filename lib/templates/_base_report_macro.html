@@ -61,102 +61,104 @@
     (85/100, 95/100, "highlight-high-values"),
     (95/100, 1, "highlight-very-high-values"),
 ] %}
-<div class="sna-micro-stats-container">
-    <table class="table-data table-bordered table-striped full-width">
-        <tr>
-            <th>ID</th>
-            <th>{{ render_choices_label() }}</th>
-            <th>IC</th>
-            <th>PR</th>
-            <th>BT</th>
-            <th>CL</th>
-            <th>HU</th>
-            <th>ND</th>
-        </tr>
-        {% for k in data.keys() %}
-            {% if score_type == "ranks" %}
-                <tr>
-                    <td>{{ k }}</td>
-                    <td>{{ data[k].lns | default("-", boolean=True) }}</td>
-                    <td>
-                        <div>
-                            {% set value = data[k].ic_pctile %}
-                            {% set rank = data[k].ic_rank %}
-                            {% set is_first = (rank == 1, "highlight-high-values") %}
-                            {% set is_last = (rank == last_rank_ic, "highlight-low-values") %}
-                            <div class="{{ highlight_value(value, highlight_values, is_first, is_last) }}">
-                                {{ data[k].ic_rank | int }}
+<div class="sna-micro-stats-container mt-lg">
+    <div class="sna-micro-stats-main">
+         <table class="table-data table-bordered table-striped full-width">
+            <tr>
+                <th>ID</th>
+                <th>{{ render_choices_label() }}</th>
+                <th>IC</th>
+                <th>PR</th>
+                <th>BT</th>
+                <th>CL</th>
+                <th>HU</th>
+                <th>ND</th>
+            </tr>
+            {% for k in data.keys() %}
+                {% if score_type == "ranks" %}
+                    <tr>
+                        <td>{{ k }}</td>
+                        <td>{{ data[k].lns | default("-", boolean=True) }}</td>
+                        <td>
+                            <div>
+                                {% set value = data[k].ic_pctile %}
+                                {% set rank = data[k].ic_rank %}
+                                {% set is_first = (rank == 1, "highlight-high-values") %}
+                                {% set is_last = (rank == last_rank_ic, "highlight-low-values") %}
+                                <div class="{{ highlight_value(value, highlight_values, is_first, is_last) }}">
+                                    {{ data[k].ic_rank | int }}
+                                </div>
                             </div>
-                        </div>
-                    </td>
-                    <td>
-                        <div>
-                            {% set value = data[k].pr_pctile %}
-                            {% set rank = data[k].pr_rank %}
-                            {% set is_first = (rank == 1, "highlight-high-values") %}
-                            {% set is_last = (rank == last_rank_pr, "highlight-low-values") %}
-                            <div class="{{ highlight_value(value, highlight_values, is_first, is_last) }}">
-                                {{ data[k].pr_rank | int }}
+                        </td>
+                        <td>
+                            <div>
+                                {% set value = data[k].pr_pctile %}
+                                {% set rank = data[k].pr_rank %}
+                                {% set is_first = (rank == 1, "highlight-high-values") %}
+                                {% set is_last = (rank == last_rank_pr, "highlight-low-values") %}
+                                <div class="{{ highlight_value(value, highlight_values, is_first, is_last) }}">
+                                    {{ data[k].pr_rank | int }}
+                                </div>
                             </div>
-                        </div>
-                    </td>
-                    <td>
-                        <div>
-                            {% set value = data[k].bt_pctile %}
-                            {% set rank = data[k].bt_rank %}
-                            {% set is_first = (rank == 1, "highlight-high-values") %}
-                            {% set is_last = (rank == last_rank_bt, "highlight-low-values") %}
-                            <div class="{{ highlight_value(value, highlight_values, is_first, is_last) }}">
-                                {{ data[k].bt_rank | int }}
+                        </td>
+                        <td>
+                            <div>
+                                {% set value = data[k].bt_pctile %}
+                                {% set rank = data[k].bt_rank %}
+                                {% set is_first = (rank == 1, "highlight-high-values") %}
+                                {% set is_last = (rank == last_rank_bt, "highlight-low-values") %}
+                                <div class="{{ highlight_value(value, highlight_values, is_first, is_last) }}">
+                                    {{ data[k].bt_rank | int }}
+                                </div>
                             </div>
-                        </div>
-                    </td>
-                    <td>
-                        <div>
-                            {% set value = data[k].cl_pctile %}
-                            {% set rank = data[k].cl_rank %}
-                            {% set is_first = (rank == 1, "highlight-high-values") %}
-                            {% set is_last = (rank == last_rank_cl, "highlight-low-values") %}
-                            <div class="{{ highlight_value(value, highlight_values, is_first, is_last) }}">
-                                {{ data[k].cl_rank | int }}
+                        </td>
+                        <td>
+                            <div>
+                                {% set value = data[k].cl_pctile %}
+                                {% set rank = data[k].cl_rank %}
+                                {% set is_first = (rank == 1, "highlight-high-values") %}
+                                {% set is_last = (rank == last_rank_cl, "highlight-low-values") %}
+                                <div class="{{ highlight_value(value, highlight_values, is_first, is_last) }}">
+                                    {{ data[k].cl_rank | int }}
+                                </div>
                             </div>
-                        </div>
-                    </td>
-                    <td>
-                        <div>
-                            {% set value = data[k].hu_pctile %}
-                            {% set rank = data[k].hu_rank %}
-                            {% set is_first = (rank == 1, "highlight-high-values") %}
-                            {% set is_last = (rank == last_rank_hu, "highlight-low-values") %}
-                            <div class="{{ highlight_value(value, highlight_values, is_first, is_last) }}">
-                                {{ data[k].hu_rank | int }}
+                        </td>
+                        <td>
+                            <div>
+                                {% set value = data[k].hu_pctile %}
+                                {% set rank = data[k].hu_rank %}
+                                {% set is_first = (rank == 1, "highlight-high-values") %}
+                                {% set is_last = (rank == last_rank_hu, "highlight-low-values") %}
+                                <div class="{{ highlight_value(value, highlight_values, is_first, is_last) }}">
+                                    {{ data[k].hu_rank | int }}
+                                </div>
                             </div>
-                        </div>
-                    </td>
-                    <td >{% if data[k].nd == 1 %}&larr;{% elif data[k].nd == 2 %}&rarr;{% elif data[k].nd == 3 %}&rlarr;{% endif %}</td>
-                </tr>
-            {% else %}
-                <tr>
-                    <td>{{ k }}</td>
-                    <td>{{ data[k].lns | default("-", boolean=True) }}</td>
-                    <td>{{ "%0.2f"| format(data[k].ic_raw | round(2)) }}</td>
-                    <td>{{ "%0.2f"| format(data[k].pr_raw | round(2)) }}</td>
-                    <td>{{ "%0.2f"| format(data[k].bt_raw | round(2)) }}</td>
-                    <td>{{ "%0.2f"| format(data[k].cl_raw | round(2)) }}</td>
-                    <td>{{ "%0.2f"| format(data[k].hu_raw | round(2)) }}</td>
-                    <td>{% if data[k].nd == 1 %}&larr;{% elif data[k].nd == 2 %}&rarr;{% elif data[k].nd == 3 %}&rlarr;{% endif %}</td>
-                </tr>
-            {% endif %}
-        {% endfor %}
-    </table>
+                        </td>
+                        <td >{% if data[k].nd == 1 %}&larr;{% elif data[k].nd == 2 %}&rarr;{% elif data[k].nd == 3 %}&rlarr;{% endif %}</td>
+                    </tr>
+                {% else %}
+                    <tr>
+                        <td>{{ k }}</td>
+                        <td>{{ data[k].lns | default("-", boolean=True) }}</td>
+                        <td>{{ "%0.2f"| format(data[k].ic_raw | round(2)) }}</td>
+                        <td>{{ "%0.2f"| format(data[k].pr_raw | round(2)) }}</td>
+                        <td>{{ "%0.2f"| format(data[k].bt_raw | round(2)) }}</td>
+                        <td>{{ "%0.2f"| format(data[k].cl_raw | round(2)) }}</td>
+                        <td>{{ "%0.2f"| format(data[k].hu_raw | round(2)) }}</td>
+                        <td>{% if data[k].nd == 1 %}&larr;{% elif data[k].nd == 2 %}&rarr;{% elif data[k].nd == 3 %}&rlarr;{% endif %}</td>
+                    </tr>
+                {% endif %}
+            {% endfor %}
+        </table>
+    </div>
 </div>
 {% endmacro %}
 
 {% macro render_rankings(rankings, render_rank_label) %}
-<div class="rankings-container">
+<div class="rankings-container mt-lg">
     {% for metric, data in rankings.items() %}
         <div class="rankings-main">
-            <table class="table-data table-bordered table-striped full-width table-rankings">
+            <table class="table-data table-bordered table-striped full-width">
                 <tr>
                     <th>{{ render_rank_label() }}</th>
                     <th>{{ metric[:2] | upper }}</th>
@@ -178,11 +180,11 @@
 {% endmacro %}
 
 {% macro render_edges_type(network_type, edges_types, render_edges_types_label, render_edges_type_empty_list) %}
-<div class="sna-edges-types-container">
+<div class="sna-edges-types-container mt-lg">
     {% for edges_type, edges in edges_types.items() %}
         <div class="sna-edges-type-main">
             {% set edges_length = edges | length %}
-            <div class="mb-md sna-edges-type-header mt-lg">
+            <div class="mb-md sna-edges-type-header">
                 {{ render_edges_types_label(network_type, edges_type, edges_length) }}
             </div>
             <div class="sna-edges-type-list">
@@ -204,11 +206,11 @@
 {% endmacro %}
 
 {% macro render_sna_components(all_components, render_components_label, render_components_empty_list) %}
-<div class="sna-components-container">
+<div class="sna-components-container mt-lg">
     {% for type, components in all_components.items() %}
         <div class="sna-components-main">
             {% set current = namespace(length=None) %}
-            <div class="sna-components-type-header mt-lg" >
+            <div class="sna-components-type-header" >
                 {{ render_components_label(type) }}
             </div>
             <div class="sna-components-list mt-md mb-lg">
@@ -245,7 +247,7 @@
     (115, 130, "highlight-high-values"),
     (130, 500, "highlight-very-high-values"),
 ] %}
-<div class="sociogram-micro-stats-container">
+<div class="sociogram-micro-stats-container mt-lg">
     <div class="sociogram-micro-stats-main">
         <table class="table-data table-bordered table-striped full-width">
             <tr>
@@ -300,7 +302,7 @@
 {% endmacro %}
 
 {% macro render_sociogram_macro_statistics(macro_stats, supplemental, render_sociogram_measures_label) %}
-<div class="sociogram-supplemental-container">
+<div class="sociogram-supplemental-container mt-lg">
     <div class="sociogram-supplemental-container-main">
         <p class="mt-md">
             <span class="text-italic">
