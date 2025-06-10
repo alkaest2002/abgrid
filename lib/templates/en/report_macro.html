@@ -20,16 +20,17 @@
 
 {% macro render_components_label(type) %}
     {% if type == "strongly_connected" %}
-        <p><b>Strongly Connected Components</b></p>
-        <p class="text-dimmed text-small mt-xs">Maximal subgraphs where all vertices are mutually reachable.</p>
+        <p><b>Strongly Connected Subgraphs</b></p>
+        <p class="text-dimmed text-small mt-xs">Structures where each node directly reaches all other nodes</p>
     {% elif type == "weakly_connected" %}
-        <p><b>Weakly Connected Components</b></p>
-        <p class="text-dimmed text-small mt-xs">Maximal subgraphs where any vertices are connected by undirected paths.</p>
+        <p><b>Weakly Connected Subgraphs</b></p>
+        <p class="text-dimmed text-small mt-xs">Structures where each node reaches all other nodes directly or indirectly</p>
     {% elif type == "cliques" %}
         <p><b>Cliques</b></p>
-        <p class="text-dimmed text-small mt-xs">Subgraphs that become fully connected when directional edges are ignored.</p>
+        <p class="text-dimmed text-small mt-xs">Structures where each node directly reaches all other nodes, provided the direction of connections is ignored</p>
     {% endif %}
 {% endmacro %}
+
 
 {% macro render_sociogram_status_label(status) %}
     {{ status }}

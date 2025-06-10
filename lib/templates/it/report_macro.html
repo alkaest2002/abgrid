@@ -21,13 +21,13 @@
 {% macro render_components_label(type) %}
     {% if type == "strongly_connected" %}
         <p><b>Sottografi fortemente connessi</b></p>
-        <p class="text-dimmed text-small mt-xs">Strutture in cui tutti i vertici sono reciprocamente raggiungibili.</p>
+        <p class="text-dimmed text-small mt-xs">Strutture in cui ogni nodo raggiunge direttamente gli altri nodi</p>
     {% elif type == "weakly_connected" %}
         <p><b>Sottografi debolmente connessi</b></p>
-        <p class="text-dimmed text-small mt-xs">Strutture in cui qualsiasi vertice è collegato da percorsi non diretti.</p>
+        <p class="text-dimmed text-small mt-xs">Strutture in cui ogni nodo raggiunge direttamente o indirettamente gli altri nodi</p>
     {% elif type == "cliques" %}
         <p><b>Clique</b></p>
-        <p class="text-dimmed text-small mt-xs">Strutture che diventano completamente connesse quando si ignorano le direzioni dei legami.</p>
+        <p class="text-dimmed text-small mt-xs">Strutture in cui ogni nodo raggiunge direttamente gli altri nodi, se si ignorano le direzioni dei legami</p>
     {% endif %}
 {% endmacro %}
 
