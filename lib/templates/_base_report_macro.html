@@ -51,8 +51,8 @@
     (85/100, 95/100, "highlight-high-values"),
     (95/100, 1, "highlight-very-high-values"),
 ] %}
-<div>
-    <table class="table-data table-bordered table-striped full-width table-sna-micro-stats">
+<div class="sna-micro-stats-container">
+    <table class="table-data table-bordered table-striped full-width">
         <tr>
             <th>ID</th>
             <th>{{ render_choices_label() }}</th>
@@ -145,24 +145,24 @@
 {% macro render_rankings(rankings, render_rank_label) %}
 <div class="rankings-container">
     {% for metric, data in rankings.items() %}
-    <div>
-        <table class="table-data table-bordered table-striped full-width table-rankings">
-            <tr>
-                <th>{{ render_rank_label() }}</th>
-                <th>{{ metric[:2] | upper }}</th>
-            </tr>
-            {% for letter, rank in data.items() %}
+        <div class="rankings-main">
+            <table class="table-data table-bordered table-striped full-width table-rankings">
                 <tr>
-                    <td>
-                        <div><div>{{ rank }}</div></div>
-                    </td>
-                    <td>
-                        <div><div>{{ letter }}</div></div>
-                    </td>
+                    <th>{{ render_rank_label() }}</th>
+                    <th>{{ metric[:2] | upper }}</th>
                 </tr>
-            {% endfor %}
-        </table>
-    </div>
+                {% for letter, rank in data.items() %}
+                    <tr>
+                        <td>
+                            <div><div>{{ rank }}</div></div>
+                        </td>
+                        <td>
+                            <div><div>{{ letter }}</div></div>
+                        </td>
+                    </tr>
+                {% endfor %}
+            </table>
+        </div>
     {% endfor %}
 </div>
 {% endmacro %}
@@ -170,6 +170,7 @@
 {% macro render_edges_type(network_type, edges_types, render_edges_types_label, render_edges_type_empty_list) %}
 <div class="sna-edges-types-container mt-xl">
     {% for edges_type, edges in edges_types.items() %}
+    <div class="sna-edges-type-main">
         {% set edges_length = edges | length %}
         <div class="mb-md sna-edges-type-header">
             {{ render_edges_types_label(network_type, edges_type, edges_length) }}
@@ -187,6 +188,7 @@
                 {{ render_edges_type_empty_list()  }}
             {% endif %}
         </div>
+    </div>
     {% endfor %}
 </div>
 {% endmacro %}
@@ -194,31 +196,33 @@
 {% macro render_sna_components(all_components, render_components_label, render_components_empty_list) %}
 <div class="sna-components-container mt-xl">
     {% for type, components in all_components.items() %}
-        {% set current = namespace(length=None) %}
-        <div class="sna-components-type-header mt-xl" >
-            {{ render_components_label(type) }}
-        </div>
-        <div class="sna-components-list mt-md mb-lg">
-            {% if  components | length > 0 %}
-                {% for component in components %}
-                    <div class="sna-component">
-                        {% if not current.length or current.length != (component | length) %}
-                            {% set current.length = component | length %}
-                            <span class="sna-component-length">{{ current.length }}</span>
-                            {% for node in component %}
-                                <span>{{ node }}</span>{% if not loop.last %} &middot;{% endif %}
-                            {% endfor %}
-                        {% else %}
-                            {% for node in component %}
-                                <span {% if loop.first %}style="margin-left:5pt"{% endif %}>
-                                    {{ node }}</span>{% if not loop.last %} &middot;{% endif %}
-                            {% endfor %}
-                        {% endif %}           
-                    </div>
-                {% endfor %}
-            {% else %}
-                {{ render_components_empty_list() }}
-            {% endif %}
+        <div class="sna-components-main">
+            {% set current = namespace(length=None) %}
+            <div class="sna-components-type-header mt-xl" >
+                {{ render_components_label(type) }}
+            </div>
+            <div class="sna-components-list mt-md mb-lg">
+                {% if  components | length > 0 %}
+                    {% for component in components %}
+                        <div class="sna-component">
+                            {% if not current.length or current.length != (component | length) %}
+                                {% set current.length = component | length %}
+                                <span class="sna-component-length">{{ current.length }}</span>
+                                {% for node in component %}
+                                    <span>{{ node }}</span>{% if not loop.last %} &middot;{% endif %}
+                                {% endfor %}
+                            {% else %}
+                                {% for node in component %}
+                                    <span {% if loop.first %}style="margin-left:5pt"{% endif %}>
+                                        {{ node }}</span>{% if not loop.last %} &middot;{% endif %}
+                                {% endfor %}
+                            {% endif %}           
+                        </div>
+                    {% endfor %}
+                {% else %}
+                    {{ render_components_empty_list() }}
+                {% endif %}
+            </div>
         </div>
     {% endfor %}
 </div>
@@ -231,54 +235,58 @@
     (115, 130, "highlight-high-values"),
     (130, 500, "highlight-very-high-values"),
 ] %}
-<table class="table-data table-bordered table-striped full-width sociogram-micro-stats-table">
-    <tr>
-        <th>ID</th>
-        <th>RP</th>
-        <th>RR</th>
-        <th>GP</th>
-        <th>GR</th>
-        <th>MP</th>
-        <th>MR</th>
-        <th>BL</th>
-        <th>OR</th>
-        <th>IM</th>
-        <th>AC</th>
-        <th>IC</th>
-        <th>ST</th>
-    </tr>
-    {% for k in data.keys() %}
-        <tr>
-            <td><div><div>{{ k }}</div></div></td>
-            <td><div><div>{{ data[k].rp }}</div></div></td>
-            <td><div><div>{{ data[k].rr }}</div></div></td>
-            <td><div><div>{{ data[k].gp }}</div></div></td>
-            <td><div><div>{{ data[k].gr }}</div></div></td>
-            <td><div><div>{{ data[k].mp }}</div></div></td>
-            <td><div><div>{{ data[k].mr }}</div></div></td>
-            <td><div><div>{{ data[k].bl }}</div></div></td>
-            <td><div><div>{{ data[k].or }}</div></div></td>
-            <td><div><div>{{ data[k].im }}</div></div></td>
-            <td>
-                <div>
-                    {% set value = data[k].ac %}
-                    <div class="{{ highlight_value(value, coeff_highlight_values, (False, ''), (False, '')) }}">
-                        {{ data[k].ac_raw }}
-                    </div>
-                </div>
-            </td>
-            <td>
-                <div>
-                    {% set value = data[k].ic %}
-                    <div class="{{ highlight_value(value, coeff_highlight_values, (False, ''), (False, '')) }}">
-                        {{ data[k].ic_raw }}
-                    </div>
-                </div>
-            </td>
-            <td><div><div>{{ render_sociogram_status_label(data[k].st) }}</div></div></td>
-        </tr>
-    {% endfor %}
-</table>
+<div class="sociogram-micro-stats-container">
+    <div class="sociogram-micro-stats-main">
+        <table class="table-data table-bordered table-striped full-width">
+            <tr>
+                <th>ID</th>
+                <th>RP</th>
+                <th>RR</th>
+                <th>GP</th>
+                <th>GR</th>
+                <th>MP</th>
+                <th>MR</th>
+                <th>BL</th>
+                <th>OR</th>
+                <th>IM</th>
+                <th>AC</th>
+                <th>IC</th>
+                <th>ST</th>
+            </tr>
+            {% for k in data.keys() %}
+                <tr>
+                    <td><div><div>{{ k }}</div></div></td>
+                    <td><div><div>{{ data[k].rp }}</div></div></td>
+                    <td><div><div>{{ data[k].rr }}</div></div></td>
+                    <td><div><div>{{ data[k].gp }}</div></div></td>
+                    <td><div><div>{{ data[k].gr }}</div></div></td>
+                    <td><div><div>{{ data[k].mp }}</div></div></td>
+                    <td><div><div>{{ data[k].mr }}</div></div></td>
+                    <td><div><div>{{ data[k].bl }}</div></div></td>
+                    <td><div><div>{{ data[k].or }}</div></div></td>
+                    <td><div><div>{{ data[k].im }}</div></div></td>
+                    <td>
+                        <div>
+                            {% set value = data[k].ac %}
+                            <div class="{{ highlight_value(value, coeff_highlight_values, (False, ''), (False, '')) }}">
+                                {{ data[k].ac_raw }}
+                            </div>
+                        </div>
+                    </td>
+                    <td>
+                        <div>
+                            {% set value = data[k].ic %}
+                            <div class="{{ highlight_value(value, coeff_highlight_values, (False, ''), (False, '')) }}">
+                                {{ data[k].ic_raw }}
+                            </div>
+                        </div>
+                    </td>
+                    <td><div><div>{{ render_sociogram_status_label(data[k].st) }}</div></div></td>
+                </tr>
+            {% endfor %}
+        </table>
+    </div>
+</div>
 {% endmacro %}
 
 {% macro render_sociogram_macro_statistics(macro_stats, supplemental, render_sociogram_measures_label) %}

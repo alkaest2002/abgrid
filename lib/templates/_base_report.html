@@ -17,7 +17,7 @@
         padding-bottom: 6pt;
         font-size: 1.5em;
         font-weight: bold;
-        border-bottom: 1pt solid var(--base-border-color);
+        border-bottom: .75pt solid var(--base-border-color);
     }
     
     .question-container {
@@ -75,16 +75,16 @@
         display: flex;
     }
     
-    .rankings-container > div {
+    .rankings-main {
         width: 20%;
         padding-right: 6pt;
     }
     
-    .rankings-container > div:last-child {
+    .rankings-main:last-of-type {
         padding-right: 0pt;
     }
     
-    .rankings-container > div > table td {
+    .rankings-main table td {
         width: 50%;
     }
     
@@ -128,22 +128,22 @@
         margin-right: 5pt;
     }
     
-    .sociogram-micro-stats-table td:nth-last-child(-n+12) {
+    .sociogram-micro-stats-main table td:nth-last-child(-n+12) {
         width: 40pt;
     }
     
-    .sociogram-micro-stats-table td:last-child {
-        width: 65pt;
-    }
-    
-    .sociogram-macro-stats-table td:nth-last-child(-n+9) {
+    .sociogram-micro-stats-main table td:nth-last-child(-n+9) {
         width: 40pt;
+    }
+
+    .sociogram-micro-stats-main table td:last-child {
+        width: 75pt;
     }
     
     .sociogram-graphs-container-header {
         padding-bottom: 6pt;
         margin-bottom: 48pt;
-        border-bottom: 1pt dashed var(--base-border-color);
+        border-bottom: .75pt dashed var(--base-border-color);
     }
     
     /* Highlight values */
