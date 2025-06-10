@@ -2,7 +2,7 @@
 
 {% block report_multi_style %}
 <style>
-    .graph-main .table-data-legend {
+    div:has(.graph-container) + div > .table-data-legend {
         padding-top: 6pt;
         border-top: .75pt solid var(--base-border-color);
     }

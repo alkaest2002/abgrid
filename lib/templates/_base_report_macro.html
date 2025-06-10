@@ -14,7 +14,9 @@
 
 {% macro render_question(network_type, question) %}
 <div class="question-container">
-   <p><b>{{ network_type }}. {{ question }}</b></p> 
+    <div class="question-main">
+        <p><b>{{ network_type }}. {{ question }}</b></p> 
+    </div>
 </div>
 {% endmacro %}
 
@@ -38,10 +40,12 @@
 {% endmacro %}
 
 {% macro render_sna_macro_statistics(data) %}
-<div class="macro-stats-container">
-    <p>
-        <b>NN</b> {{ data.network_nodes }}, <b>NE</b> {{ data.network_edges }}, <b>ND</b> {{ (data.network_density * 100)|round|int }}%, <b>NC</b> {{ (data.network_centralization * 100)|round|int }}%, <b>NT</b> {{ (data.network_transitivity * 100)|round|int }}%, <b>NR</b> {{ (data.network_reciprocity * 100)|round|int }}%
-    </p>
+<div class="sna-macro-stats-container">
+    <div class="sna-macro-stats-main">
+        <p>
+            <b>NN</b> {{ data.network_nodes }}, <b>NE</b> {{ data.network_edges }}, <b>ND</b> {{ (data.network_density * 100)|round|int }}%, <b>NC</b> {{ (data.network_centralization * 100)|round|int }}%, <b>NT</b> {{ (data.network_transitivity * 100)|round|int }}%, <b>NR</b> {{ (data.network_reciprocity * 100)|round|int }}%
+        </p>
+    </div>
 </div>
 {% endmacro %}
 
