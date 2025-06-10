@@ -1,3 +1,9 @@
+{% macro render_report_header(project_title, group, type) %}
+<div class="section-header">
+    <span><b>GROUP {{ group | upper }} - {{ project_title | upper }}</b></span><span>{% if type == "sna_graph" %}SNA NETWORK GRAPH{% elif type == "sna_raw_scores" %}SNA RAW SCORES{% elif type == "sna_ranks" %}SNA RANK SCORES{% elif type == "sna_rankings" %}SNA NODES ORDERED BY RANKS{% elif type == "sna_edges_types" %}SNA EDGES GROUPED BY TYPE{% elif type == "sna_components" %}SNA SUBGRAPHS{% elif type == "sociogram_micro" %}SOCIOGRAM{% elif type == "sociogram_rankings" %}SOCIOGRAM NODES ORDERED BY RANKS{% elif type == "sociogram_macro" %}SOCIOGRAM STATISTICS{% endif %}</span>
+</div>
+{% endmacro %}
+
 {% macro render_disclaimer() %}
 <div class="report-disclaimer text-justify mt-xl mb-xl">
     This report is designed as a support tool to facilitate decision-making and does not replace the professional judgment of industry experts. Interpretations drawn from the report should be integrated with other information related to the specific evaluation context.
@@ -15,13 +21,13 @@
 {% macro render_components_label(type) %}
     {% if type == "strongly_connected" %}
         <p><b>Strongly Connected Components</b></p>
-        <p class="text-dimmed text-small">Maximal subgraphs where all vertices are mutually reachable.</p>
+        <p class="text-dimmed text-small mt-xs">Maximal subgraphs where all vertices are mutually reachable.</p>
     {% elif type == "weakly_connected" %}
         <p><b>Weakly Connected Components</b></p>
-        <p class="text-dimmed text-small">Maximal subgraphs where any vertices are connected by undirected paths.</p>
+        <p class="text-dimmed text-small mt-xs">Maximal subgraphs where any vertices are connected by undirected paths.</p>
     {% elif type == "cliques" %}
         <p><b>Cliques</b></p>
-        <p class="text-dimmed text-small">Subgraphs that become fully connected when directional edges are ignored.</p>
+        <p class="text-dimmed text-small mt-xs">Subgraphs that become fully connected when directional edges are ignored.</p>
     {% endif %}
 {% endmacro %}
 
@@ -33,37 +39,37 @@
     {% if edge_type == "type_i" %}
         <p><b>Non reciprocal edges</b></p>
         {% if network_type == "A" %}
-            <p class="text-dimmed text-small">X &rarr; Y in network A &middot; not Y &rarr; X in network A</p>
+            <p class="text-dimmed text-small mt-xs">X &rarr; Y in network A &middot; not Y &rarr; X in network A</p>
         {% else %}
-            <p class="text-dimmed text-small">X &rarr; Y in network B &middot; not Y &rarr; X in network B</p>
+            <p class="text-dimmed text-small mt-xs">X &rarr; Y in network B &middot; not Y &rarr; X in network B</p>
         {% endif %}
     {% elif edge_type == "type_ii" %}
         <p><b>Reciprocal edges</b></p>
         {% if network_type == "A" %}
-            <p class="text-dimmed text-small">X &rarr; Y in network A &middot; Y &rarr; X in network A</p>
+            <p class="text-dimmed text-small mt-xs">X &rarr; Y in network A &middot; Y &rarr; X in network A</p>
         {% else %}
-            <p class="text-dimmed text-small">X &rarr; Y in network B &middot; Y &rarr; X in network B</p>
+            <p class="text-dimmed text-small mt-xs">X &rarr; Y in network B &middot; Y &rarr; X in network B</p>
         {% endif %}
     {% elif edge_type == "type_iii" %}
         <p><b>Half symmetrical edges</b></p>
         {% if network_type == "A" %}
-            <p class="text-dimmed text-small">X &rarr; Y in network A &middot; X &rarr; Y in network B</p>
+            <p class="text-dimmed text-small mt-xs">X &rarr; Y in network A &middot; X &rarr; Y in network B</p>
         {% else %}
-            <p class="text-dimmed text-small">X &rarr; Y in network B &middot; X &rarr; Y in network A</p>
+            <p class="text-dimmed text-small mt-xs">X &rarr; Y in network B &middot; X &rarr; Y in network A</p>
         {% endif %}
     {% elif edge_type == "type_iv" %}
         <p><b>Reversed half symmetrical edges</b></p>
         {% if network_type == "A" %}
-            <p class="text-dimmed text-small">X &rarr; Y in network A &middot; Y &rarr; X in network B</p>
+            <p class="text-dimmed text-small mt-xs">X &rarr; Y in network A &middot; Y &rarr; X in network B</p>
         {% else %}
-            <p class="text-dimmed text-small">X &rarr; Y in network B &middot; Y &rarr; X in network A</p>
+            <p class="text-dimmed text-small mt-xs">X &rarr; Y in network B &middot; Y &rarr; X in network A</p>
         {% endif %}
     {% elif edge_type == "type_v" %}
         <p><b>Full symmetrical edges</b></p>
         {% if network_type == "A" %}
-            <p class="text-dimmed text-small">X &rarr; Y, Y &rarr; X in network A &middot; X &rarr; Y, Y &rarr; X in network B</p>
+            <p class="text-dimmed text-small mt-xs">X &rarr; Y, Y &rarr; X in network A &middot; X &rarr; Y, Y &rarr; X in network B</p>
         {% else %}
-            <p class="text-dimmed text-small">X &rarr; Y, Y &rarr; X in network B &middot; X &rarr; Y, Y &rarr; X in network A</p>
+            <p class="text-dimmed text-small mt-xs">X &rarr; Y, Y &rarr; X in network B &middot; X &rarr; Y, Y &rarr; X in network A</p>
         {% endif %}
     {% endif %}
 {% endmacro %}
@@ -76,20 +82,14 @@
     <span class="text-italic">No components of this type</span>
 {% endmacro %}
 
-{% macro render_report_header(project_title, group, type) %}
-<div class="report-header">
-    <span><b>GROUP {{ group | upper }} - {{ project_title | upper }}</b></span><span>{% if type == "sna_graph" %}SNA NETWORK GRAPH{% elif type == "sna_raw_scores" %}SNA RAW SCORES{% elif type == "sna_ranks" %}SNA RANK SCORES{% elif type == "sna_rankings" %}SNA NODES ORDERED BY RANKS{% elif type == "sna_edges_types" %}SNA EDGES GROUPED BY TYPE{% elif type == "sna_components" %}SNA SUBGRAPHS{% elif type == "sociogram_micro" %}SOCIOGRAM{% elif type == "sociogram_rankings" %}SOCIOGRAM NODES ORDERED BY RANKS{% elif type == "sociogram_macro" %}SOCIOGRAM STATISTICS{% endif %}</span>
-</div>
-{% endmacro %}
-
 {% macro render_sna_legend(show_macro=False, show_micro=False, show_arrows=False, show_colors=False) %}
-<div class="report-table-legend">
+<div class="table-data-legend">
     {% if show_macro %}<b>NN</b> Nodes <b>NE</b> Edges <b>ND</b> Density <b>NC</b> Centralization <b>NT</b> Transitivity <b>NR</b> Reciprocity {% endif %}{% if show_micro %}<b>IC</b> In-Degree <b>PR</b> PageRank <b>BT</b> Betweenness <b>CL</b> Closenness <b>HU</b> Hub {% endif %}{% if show_arrows %}<b>ND</b> No In-Degree (&larr; ) No Out-Degree (&rarr;) No In or Out-Degree (&rlarr;) {% endif %}{% if show_colors %}<span class="square highlight-very-low-values"></span> Very low <span class="square highlight-low-values"></span> Low <span class="square highlight-high-values"></span> High <span class="square highlight-very-high-values"></span> Very high{% endif %}
 </div>
 {% endmacro %}
 
 {% macro render_sociogram_legend(show_macro=False, show_micro=False, show_rankings=False, show_colors=False) %}
-<div class="report-table-legend">
+<div class="table-data-legend">
     {% if show_macro %}<b>IQR</b> Interquartile range <b>SD</b> Standard Deviation <b>Min</b> Minimum value <b>P25</b> 25° percentile <b>P50</b> 50° percentile <b>P75</b> 75° percentile <b>Max</b> Maximum value {% endif %}{% if show_micro %}<b>RP</b> Received preferences <b>RR</b> Received rejections <b>GP</b> Given preferences <b>GR</b> Given rejections <b>MP</b> Mutual preferences <b>MR</b> Mutual rejections <b>BL</b> Balance <b>OR</b> Orientation <b>IM</b> Impact <b>AC</b> Affiliation coefficient <b>IC</b> Influence coefficient <b>ST</b> Sociometric status {% endif %}{%if show_rankings %}<b>RP</b> Received preferences <b>RR</b> Received rejections <b>GP</b> Given preferences <b>GR</b> Given rejections <b>BL</b> Balance <b>IM</b> Impact <b>AC</b> Affiliation coefficient <b>IC</b> Influence coefficient {% endif %}{% if show_colors %}<span class="square highlight-very-low-values"></span> Very low <span class="square highlight-low-values"></span> Low <span class="square highlight-high-values"></span> High <span class="square highlight-very-high-values"></span> Very high{% endif %}
 </div>
 {% endmacro %}
@@ -123,7 +123,7 @@
 {% endmacro %}
 
 {% macro render_footer(year) %}
-<div class="report-footer">
+<div class="footer mt-xl">
     <b>Authors</b>: Dr. Pierpaolo CALANNA, PhD, Dr. Gaetano BUONAIUTO (2021-{{ year }}), <b>License of use</b>: the layout of this report, the customization of charts, as well as the selection of quantitative indices, are subject to copyright.
 </div>
 {% endmacro %}

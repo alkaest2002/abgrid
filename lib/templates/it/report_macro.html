@@ -1,3 +1,9 @@
+{% macro render_report_header(project_title, group, type) %}
+<div class="section-header">
+    <span><b>GRUPPO {{ group | upper }} - {{ project_title | upper }}</b></span><span>{% if type == "sna_graph" %}GRAFICO RETE SNA{% elif type == "sna_raw_scores" %}PUNTEGGI SNA GREZZI{% elif type == "sna_ranks" %}PUNTEGGI SNA DI RANGO{% elif type == "sna_rankings" %}NODI SNA ORDINATI PER METRICA{% elif type == "sna_edges_types" %}LEGAMI SNA RAGGRUPPATI PER TIPO{% elif type == "sna_components" %}SOTTOGRAFI SNA{% elif type == "sociogram_micro" %}SOCIOGRAMMA{% elif type == "sociogram_rankings" %}NODI SOCIOGRAMMA ORDINATI PER METRICA{% elif type == "sociogram_macro" %}SOCIOGRAMMA STATISTICHE{% endif %}</span>
+</div>
+{% endmacro %}
+
 {% macro render_disclaimer() %}
 <div class="report-disclaimer mt-xl mb-xl">
     Questo report è stato concepito come strumento per agevolare il processo decisionale e non sostituisce il giudizio degli esperti di settore. Le interpretazioni che se ne ricavano devono essere integrate con altre informazioni relative al contesto valutativo.
@@ -15,13 +21,13 @@
 {% macro render_components_label(type) %}
     {% if type == "strongly_connected" %}
         <p><b>Sottografi fortemente connessi</b></p>
-        <p class="text-dimmed text-small">Sottografi massimali in cui tutti i vertici sono reciprocamente raggiungibili.</p>
+        <p class="text-dimmed text-small mt-xs">Sottografi massimali in cui tutti i vertici sono reciprocamente raggiungibili.</p>
     {% elif type == "weakly_connected" %}
         <p><b>Sottografi debolmente connessi</b></p>
-        <p class="text-dimmed text-small">Sottografi massimali in cui qualsiasi vertice è collegato da percorsi non diretti.</p>
+        <p class="text-dimmed text-small mt-xs">Sottografi massimali in cui qualsiasi vertice è collegato da percorsi non diretti.</p>
     {% elif type == "cliques" %}
         <p><b>Clique</b></p>
-        <p class="text-dimmed text-small">Sottografi che diventano completamente connessi quando si ignorano le direzioni dei legami.</p>
+        <p class="text-dimmed text-small mt-xs">Sottografi che diventano completamente connessi quando si ignorano le direzioni dei legami.</p>
     {% endif %}
 {% endmacro %}
 
@@ -41,37 +47,37 @@
     {% if edge_type == "type_i" %}
         <p><b>Legami non reciproci</b></p>
         {% if network_type == "A" %}
-            <p class="text-dimmed text-small">X &rarr; Y nella rete A &middot; no Y &rarr; X nella rete A</p>
+            <p class="text-dimmed text-small mt-xs">X &rarr; Y nella rete A &middot; no Y &rarr; X nella rete A</p>
         {% else %}
-            <p class="text-dimmed text-small">X &rarr; Y nella rete B &middot; no Y &rarr; X nella rete B</p>
+            <p class="text-dimmed text-small mt-xs">X &rarr; Y nella rete B &middot; no Y &rarr; X nella rete B</p>
         {% endif %}
     {% elif edge_type == "type_ii" %}
         <p><b>Legami reciproci</b></p>
         {% if network_type == "A" %}
-            <p class="text-dimmed text-small">X &rarr; Y nella rete A &middot; Y &rarr; X nella rete A</p>
+            <p class="text-dimmed text-small mt-xs">X &rarr; Y nella rete A &middot; Y &rarr; X nella rete A</p>
         {% else %}
-            <p class="text-dimmed text-small">X &rarr; Y nella rete B &middot; Y &rarr; X nella rete B</p>
+            <p class="text-dimmed text-small mt-xs">X &rarr; Y nella rete B &middot; Y &rarr; X nella rete B</p>
         {% endif %}
     {% elif edge_type == "type_iii" %}
         <p><b>Legami simmetrici semplici</b></p>
         {% if network_type == "A" %}
-            <p class="text-dimmed text-small">X &rarr; Y nella rete A &middot; X &rarr; Y nella rete B</p>
+            <p class="text-dimmed text-small mt-xs">X &rarr; Y nella rete A &middot; X &rarr; Y nella rete B</p>
         {% else %}
-            <p class="text-dimmed text-small">X &rarr; Y nella rete B &middot; X &rarr; Y nella rete A</p>
+            <p class="text-dimmed text-small mt-xs">X &rarr; Y nella rete B &middot; X &rarr; Y nella rete A</p>
         {% endif %}
     {% elif edge_type == "type_iv" %}
         <p><b>Legami simmetrici inversi</b></p>
         {% if network_type == "A" %}
-            <p class="text-dimmed text-small">X &rarr; Y nella rete A &middot; Y &rarr; X nella rete B</p>
+            <p class="text-dimmed text-small mt-xs">X &rarr; Y nella rete A &middot; Y &rarr; X nella rete B</p>
         {% else %}
-            <p class="text-dimmed text-small">X &rarr; Y nella rete B &middot; Y &rarr; X nella rete A</p>
+            <p class="text-dimmed text-small mt-xs">X &rarr; Y nella rete B &middot; Y &rarr; X nella rete A</p>
         {% endif %}
     {% elif edge_type == "type_v" %}
         <p><b>Legami simmetrici completi</b></p>
         {% if network_type == "A" %}
-            <p class="text-dimmed text-small">X &rarr; Y, Y &rarr; X nella rete A &middot; X &rarr; Y, Y &rarr; X nella rete B</p>
+            <p class="text-dimmed text-small mt-xs">X &rarr; Y, Y &rarr; X nella rete A &middot; X &rarr; Y, Y &rarr; X nella rete B</p>
         {% else %}
-            <p class="text-dimmed text-small">X &rarr; Y, Y &rarr; X nella rete B &middot; X &rarr; Y, Y &rarr; X nella rete A</p>
+            <p class="text-dimmed text-small mt-xs">X &rarr; Y, Y &rarr; X nella rete B &middot; X &rarr; Y, Y &rarr; X nella rete A</p>
         {% endif %}
     {% endif %}
 {% endmacro %}
@@ -84,20 +90,14 @@
     <span class="text-italic">Nessun componente di questo tipo</span>
 {% endmacro %}
 
-{% macro render_report_header(project_title, group, type) %}
-<div class="report-header">
-    <span><b>GRUPPO {{ group | upper }} - {{ project_title | upper }}</b></span><span>{% if type == "sna_graph" %}GRAFICO RETE SNA{% elif type == "sna_raw_scores" %}PUNTEGGI SNA GREZZI{% elif type == "sna_ranks" %}PUNTEGGI SNA DI RANGO{% elif type == "sna_rankings" %}NODI SNA ORDINATI PER METRICA{% elif type == "sna_edges_types" %}LEGAMI SNA RAGGRUPPATI PER TIPO{% elif type == "sna_components" %}SOTTOGRAFI SNA{% elif type == "sociogram_micro" %}SOCIOGRAMMA{% elif type == "sociogram_rankings" %}NODI SOCIOGRAMMA ORDINATI PER METRICA{% elif type == "sociogram_macro" %}SOCIOGRAMMA STATISTICHE{% endif %}</span>
-</div>
-{% endmacro %}
-
 {% macro render_sna_legend(show_macro=False, show_micro=False, show_arrows=False, show_colors=False) %}
-<div class="report-table-legend">
+<div class="table-data-legend">
     {% if show_macro %}<b>NN</b> Nodi <b>NE</b> Legami <b>ND</b> Densità <b>NC</b> Centralizzazione <b>NT</b> Transitività <b>NR</b> Reciprocità {% endif %}{% if show_micro%}<b>IC</b> In-Degree <b>PR</b> PageRank <b>BT</b> Betweenness <b>CL</b> Closenness <b>HU</b> Hub {% endif %}{% if show_arrows %}<b>ND</b> No In-Degree (&larr; ) No Out-Degree (&rarr;) No In o Out-Degree (&rlarr;) {% endif %}{% if show_colors %}<span class="square highlight-very-low-values"></span> Molto basso <span class="square highlight-low-values"></span> Basso <span class="square highlight-high-values"></span> Alto <span class="square highlight-very-high-values"></span> Molto alto{% endif %}
 </div>
 {% endmacro %}
 
 {% macro render_sociogram_legend(show_macro=False, show_micro=False, show_rankings=False, show_colors=False) %}
-<div class="report-table-legend">
+<div class="table-data-legend">
     {% if show_macro %}<b>Count</b> Frequenza <b>Median</b> Mediana <b>IQR</b> Range interquartilico <b>Mean</b> Media <b>SD</b> Deviazione standard <b>Min</b> Valore minimo <b>P25</b> 25° percentile <b>P50</b> 50° percentile <b>P75</b> 75° percentile <b>Max</b> Valore massimo {% endif %}{% if show_micro %}<b>RP</b> Preferenze ricevute <b>RR</b> Rifiuti ricevuti <b>GP</b> Preferenze date <b>GR</b> Rifiuti dati <b>MP</b> Preferenze reciproche <b>MR</b> Rifiuti reciproci <b>BL</b> Saldo <b>OR</b> Orientamento <b>IM</b> Impatto <b>AC</b> Coefficiente di affiliazione <b>IC</b> Coefficiente di influenza <b>ST</b> Status sociometrico {% endif %}{%if show_rankings %}<b>RP</b> Preferenze ricevute <b>RR</b> Rifiuti ricevuti <b>GP</b> Preferenze date <b>GR</b> Rifiuti dati <b>BL</b> Saldo <b>IM</b> Impatto <b>AC</b> Coefficiente di affiliazione <b>IC</b> Coefficiente di influenza {% endif %}{% if show_colors %}<span class="square highlight-very-low-values"></span> Molto basso <span class="square highlight-low-values"></span> Basso <span class="square highlight-high-values"></span> Alto <span class="square highlight-very-high-values"></span> Molto alto{% endif %}
 </div>
 {% endmacro %}
@@ -131,7 +131,7 @@
 {% endmacro %}
 
 {% macro render_footer(year) %}
-<div class="report-footer">
+<div class="footer mt-xl">
     <b>Autori</b>: Dr. Pierpaolo CALANNA, PhD, Dr. Gaetano BUONAIUTO (2021-{{ year }}), <b>Licenza d'uso</b>: l'impaginazione del report, la personalizzazione dei grafici, nonché la scelta degli indici quantitativi è soggetta a copyright.
 </div>
 {% endmacro %}

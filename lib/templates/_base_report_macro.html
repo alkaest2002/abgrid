@@ -52,7 +52,7 @@
     (95/100, 1, "highlight-very-high-values"),
 ] %}
 <div>
-    <table class="report-table table-bordered table-striped full-width table-sna-micro-stats">
+    <table class="table-data table-bordered table-striped full-width table-sna-micro-stats">
         <tr>
             <th>ID</th>
             <th>{{ render_choices_label() }}</th>
@@ -143,10 +143,10 @@
 {% endmacro %}
 
 {% macro render_rankings(rankings, render_rank_label) %}
-<div class="rankings-tables-container">
+<div class="rankings-container">
     {% for metric, data in rankings.items() %}
     <div>
-        <table class="report-table table-bordered table-striped full-width table-rankings">
+        <table class="table-data table-bordered table-striped full-width table-rankings">
             <tr>
                 <th>{{ render_rank_label() }}</th>
                 <th>{{ metric[:2] | upper }}</th>
@@ -168,10 +168,10 @@
 {% endmacro %}
 
 {% macro render_edges_type(network_type, edges_types, render_edges_types_label, render_edges_type_empty_list) %}
-<div class="sna-edges-types">
+<div class="sna-edges-types-container mt-xl">
     {% for edges_type, edges in edges_types.items() %}
         {% set edges_length = edges | length %}
-        <div class="sna-edges-type-header">
+        <div class="mb-md sna-edges-type-header">
             {{ render_edges_types_label(network_type, edges_type, edges_length) }}
         </div>
         <div class="sna-edges-type-list">
@@ -192,25 +192,25 @@
 {% endmacro %}
 
 {% macro render_sna_components(all_components, render_components_label, render_components_empty_list) %}
-<div class="sna-components">
+<div class="sna-components-container mt-xl">
     {% for type, components in all_components.items() %}
         {% set current = namespace(length=None) %}
-        <div class="sna-components-type-header" >
+        <div class="sna-components-type-header mt-xl" >
             {{ render_components_label(type) }}
         </div>
-        <div class="sna-components-list">
+        <div class="sna-components-list mt-md mb-lg">
             {% if  components | length > 0 %}
                 {% for component in components %}
                     <div class="sna-component">
                         {% if not current.length or current.length != (component | length) %}
-                            {% set current.length = (component | length) %}
+                            {% set current.length = component | length %}
                             <span class="sna-component-length">{{ current.length }}</span>
                             {% for node in component %}
                                 <span>{{ node }}</span>{% if not loop.last %} &middot;{% endif %}
                             {% endfor %}
                         {% else %}
                             {% for node in component %}
-                                <span {% if loop.first%}style="margin-left:6px"{% endif %}>
+                                <span {% if loop.first %}style="margin-left:5pt"{% endif %}>
                                     {{ node }}</span>{% if not loop.last %} &middot;{% endif %}
                             {% endfor %}
                         {% endif %}           
@@ -231,7 +231,7 @@
     (115, 130, "highlight-high-values"),
     (130, 500, "highlight-very-high-values"),
 ] %}
-<table class="report-table table-bordered table-striped full-width sociogram-micro-stats-table">
+<table class="table-data table-bordered table-striped full-width sociogram-micro-stats-table">
     <tr>
         <th>ID</th>
         <th>RP</th>
@@ -282,7 +282,7 @@
 {% endmacro %}
 
 {% macro render_sociogram_macro_statistics(macro_stats, supplemental, render_sociogram_measures_label) %}
-<div class="sociogram-supplemental-container">
+<div class="sociogram-supplemental-container mb-lg">
     <p>
         <span class="text-italic">
             {{- render_sociogram_measures_label("ui_i") -}}: 
@@ -305,7 +305,7 @@
     </p>
 </div>
 <div>
-    <table class="report-table table-bordered table-striped full-width sociogram-macro-stats-table">
+    <table class="table-data table-bordered table-striped full-width sociogram-macro-stats-table">
         <tr>
             <th class="text-left">ID</th>
             <th>Count</th>

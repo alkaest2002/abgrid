@@ -9,10 +9,11 @@
         line-height: 12pt;
     }
     
-    .report-header {
+    .section-header {
         display: flex;
         justify-content: space-between;
-        margin: 9pt 0pt;
+        margin-top: 9pt;
+        margin-bottom: 9pt;
         padding-bottom: 6pt;
         font-size: 1.5em;
         font-weight: bold;
@@ -20,7 +21,8 @@
     }
     
     .question-container {
-        margin: 18pt 0pt 9pt 0pt;
+        margin-top: 18pt;
+        margin-bottom: 9pt;
         padding-bottom: 6pt;
         border-bottom: .75pt dashed var(--base-border-color);
     }
@@ -31,32 +33,32 @@
         align-items: center;
     }
     
-    .report-table th {
+    .table-data th {
         padding: 6pt 3pt;
         background-color: var(--base-background-color-dark);
         border-bottom: .75pt solid var(--base-border-color);
     }
     
-    .report-table td {
+    .table-data td {
         padding: 1.5pt;
     }
     
-    .report-table th, .report-table td {
+    .table-data th, .table-data td {
         text-align: center;
     } 
     
-    .report-table td > div > div {
+    .table-data td > div > div {
         height: 12pt;
     }
 
-    .report-table-legend, .report-table-legend b {
+    .table-data-legend, .table-data-legend b {
         margin-top: 6pt;
         font-size: 9pt;
         line-height: 11pt;
         text-align: justify;
     }
     
-    .report-table-legend .square {
+    .table-data-legend .square {
         display: inline-block;
         position: relative;
         top: 2pt;
@@ -64,45 +66,26 @@
         width: 8pt;
     }
 
-    .sna-graph-main .report-table-legend {
+    .sna-graph-main .table-data-legend {
         padding-top: 6pt;
         border-top: .75pt solid var(--base-border-color);
     }
     
-    .rankings-tables-container {
+    .rankings-container {
         display: flex;
     }
     
-    .rankings-tables-container > div {
+    .rankings-container > div {
         width: 20%;
         padding-right: 6pt;
     }
     
-    .rankings-tables-container > div:last-child {
+    .rankings-container > div:last-child {
         padding-right: 0pt;
     }
     
-    .rankings-tables-container > div > table td {
+    .rankings-container > div > table td {
         width: 50%;
-    
-    }
-
-    
-    
-    .sna-edges-types {
-        margin-top: 18pt;
-    }
-    
-    .sna-edges-type {
-        margin-bottom: 18pt;
-    }
-    
-    .sna-edges-type-header {
-        margin-bottom: 9pt;
-    }
-    
-    .sna-edges-type-header p:last-child {
-        margin-top: 3pt;
     }
     
     .sna-edges-type-list {
@@ -118,23 +101,6 @@
         margin-bottom: 5pt;
         border: .75pt solid var(--base-border-color);
         border-radius: 5pt;
-    }
-    
-    .sna-components {
-        margin-top: 18pt;
-    }
-    
-    .sna-components-type-header {
-        margin-top: 18pt;
-    }
-    
-    .sna-components-list {
-        margin-top: 8pt;
-        margin-bottom: 16pt;
-    }
-    
-    .sna-components-type-header p:last-child {
-        margin-top: 3pt;
     }
     
     .sna-component-length {
@@ -162,10 +128,6 @@
         margin-right: 5pt;
     }
     
-    .sociogram-supplemental-container {
-        margin-bottom: 12pt;
-    }
-    
     .sociogram-micro-stats-table td:nth-last-child(-n+12) {
         width: 40pt;
     }
@@ -180,17 +142,10 @@
     
     .sociogram-graphs-container-header {
         padding-bottom: 6pt;
-        border-bottom: 1pt dashed var(--base-border-color);
         margin-bottom: 48pt;
+        border-bottom: 1pt dashed var(--base-border-color);
     }
     
-    .report-footer, .report-footer b {
-        margin-top: 18pt;
-        font-size: 9pt;
-        line-height: 11pt;
-        text-align: justify;
-    }
-
     /* Highlight values */
 
     .highlight-very-low-values {
