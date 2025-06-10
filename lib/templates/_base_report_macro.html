@@ -304,26 +304,28 @@
 {% macro render_sociogram_macro_statistics(macro_stats, supplemental, render_sociogram_measures_label) %}
 <div class="sociogram-macro-stats-container mt-lg">
     <div class="sociogram-macro-stats-container-main">
-        <p class="mt-md">
-            <span class="text-italic">
-                {{- render_sociogram_measures_label("ui_i") -}}: 
+        <table class="mt-md mb-md">
+            <tr>
+                <td class="text-italic pr-md">
+                    {{- render_sociogram_measures_label("ui_i") -}}: 
                     {{ "%0.2f"| format(supplemental["ui_i"] * 100 | round(0)) }}%
-            </span>,
-            <span class="text-italic">,
-                {{- render_sociogram_measures_label("ui_ii") -}}: 
+                </td>
+                <td class="text-italic">
+                    {{- render_sociogram_measures_label("ui_ii") -}}: 
                     {{ "%0.2f"| format(supplemental["ui_ii"] | round(2)) }}
-            </span>
-        </p>
-        <p class="mb-md">
-            <span class="text-italic">
-                {{- render_sociogram_measures_label("wi_i") -}}: 
+                </td>
+            </tr>
+            <tr>
+                <td class="text-italic pr-md">
+                    {{- render_sociogram_measures_label("wi_i") -}}: 
                     {{ "%0.2f"| format(supplemental["wi_i"] * 100 | round(0)) }}%
-            </span>
-            <span class="text-italic">,
-                {{- render_sociogram_measures_label("wi_ii") -}}: 
+                </td>
+                <td class="text-italic">
+                     {{- render_sociogram_measures_label("wi_ii") -}}: 
                     {{ "%0.2f"| format(supplemental["wi_ii"] | round(2)) }}
-            </span>
-        </p>
+                </td>
+            </tr>
+        </table>
         <table class="table-data table-bordered table-striped full-width">
             <tr>
                 <th class="text-left">ID</th>
