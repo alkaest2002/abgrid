@@ -1,8 +1,8 @@
 {% extends "_base_answersheet.html" %}
 
 {% macro render_answersheet_header(group, participant) %}
-<div class="answersheet-header">
-    <span>Gruppo: {{ group }}, Partecipante: {{ participant }}</span><span>{{ project_title | upper }} FOGLIO DELLE RISPOSTE</span>
+<div class="section-header">
+    <span>Gruppo {{ group }} &middot; Partecipante {{ participant }}</span><span>{{ project_title | upper }} - FOGLIO RISPOSTE</span>
 </div>
 {% endmacro %}
 

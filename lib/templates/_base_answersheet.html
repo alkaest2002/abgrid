@@ -5,7 +5,7 @@
     <div class="likert-container">
         {% for option in likert %}
             {% if option != participant %}
-                <div class="likert-main">
+                <div class="likert-main mr-md mb-md">
                     <div class="likert-option">{{ option }}</div>
                     <div class="likert-bubble"></div>
                 </div>
@@ -21,25 +21,33 @@
 {% macro answersheet_body() %}
     {% for participant in likert %}
         <div class="page">
-            <div class="main-wrapper">
+            <div>
                 {{ base_macro.render_logo() }}
                 {{ render_answersheet_header(group, participant) }}
-                <div class="explanation">
-                    <p>{{ explanation }}</p>
+                <div class="explanation-container mb-xxl">
+                    <div class="explanation-main">
+                        <p>{{ explanation }}</p>
+                    </div>
                 </div>
-                <div class="question">
-                    <p class="question-a"><b>A. {{ question_a }}</b></p>
-                    <p class="question-hint">{{ question_a_choices }}</p>
-                    {{ answersheet_likert(likert, participant) }}
+                <div class="question-container mb-xxl">
+                    <div class="question-main">
+                        <p class="question-a"><b>A. {{ question_a }}</b></p>
+                        <p class="text-small text-dimmed mt-xs">{{ question_a_choices }}</p>
+                        {{ answersheet_likert(likert, participant) }}
+                    </div>
                 </div>
-                <div class="question">
-                    <p class="question-b"><b>B. {{ question_b }}</b></p>
-                    <p class="question-hint">{{ question_b_choices }}</p>
-                    {{ answersheet_likert(likert, participant) }}
+                <div class="question-container">
+                    <div class="question-main">
+                        <p class="question-b"><b>B. {{ question_b }}</b></p>
+                        <p class="text-small text-dimmed mt-xs">{{ question_b_choices }}</p>
+                        {{ answersheet_likert(likert, participant) }}
+                    </div>
                 </div>
             </div>
-            <div class="barcode-wrapper">
-                <p class="barcode">{{ answersheet_barcode(group, participant) }}</p>
+            <div class="barcode-container">
+                <div class="barcode-main">
+                    <p class="barcode">{{ answersheet_barcode(group, participant) }}</p>
+                </div>
             </div>
         </div>
     {% endfor %}
@@ -47,38 +55,22 @@
 
 {% block base_answersheet_style %}
 <style>
-    .answersheet-header {
-        font-size: 1.5em;
-        margin: 24pt auto;
-        font-weight: bold;
-        padding-bottom: 18pt;
-        border-bottom: .75pt solid var(--base-border-color);
-        display: flex;
-        justify-content: space-between;
-    }
-    
-    .explanation {
-        margin-bottom: 48pt;
-    }
-    
-    .question {
-        margin-bottom: 28pt;
-    }
-    
-    .question-hint {
-        margin-top: 6pt;
+
+    .text-small {
         font-size: 10pt;
-        color: var(--base-font-color-light);
+        line-height: 12pt;
+    }
+
+    .section-header {
+        margin-top: 24pt;
     }
     
     .likert-container {
-        margin-top: 12pt;
+        margin-top: 18pt;
     }
     
     .likert-main {
         display: inline-block;
-        margin-right: 24pt;
-        margin-bottom: 12pt;
     }
     
     .likert-option {
@@ -90,18 +82,9 @@
         font-size: 11pt;
     }
     
-    .barcode-wrapper {
-        position: relative;
-        display: inline-block;
-        padding: 12pt;
-        border: .75pt solid var(--base-border-color);
-        border-radius: 6pt;
-    }
-    
-    .barcode-wrapper .barcode {
+    .barcode-main .barcode {
         font-family: "3 of 9 Barcode";
         font-size: 25pt;
-        text-align: center;
     }
 </style>
 {% endblock %}
