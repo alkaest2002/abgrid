@@ -14,9 +14,9 @@
 
 {% macro render_question(network_type, question) %}
 <div class="question-container">
-    <div class="question-main">
-        <p><b>{{ network_type }}. {{ question }}</b></p> 
-    </div>
+<div class="question-main">
+    <p><b>{{ network_type }}. {{ question }}</b></p> 
+</div>
 </div>
 {% endmacro %}
 
@@ -302,8 +302,8 @@
 {% endmacro %}
 
 {% macro render_sociogram_macro_statistics(macro_stats, supplemental, render_sociogram_measures_label) %}
-<div class="sociogram-supplemental-container mt-lg">
-    <div class="sociogram-supplemental-container-main">
+<div class="sociogram-macro-stats-container mt-lg">
+    <div class="sociogram-macro-stats-container-main">
         <p class="mt-md">
             <span class="text-italic">
                 {{- render_sociogram_measures_label("ui_i") -}}: 
@@ -328,6 +328,7 @@
             <tr>
                 <th class="text-left">ID</th>
                 <th>Count</th>
+                <th>Sum</th>
                 <th>Median</th>
                 <th>IQR</th>
                 <th>Mean</th>
@@ -343,6 +344,7 @@
                     <tr>
                         <td class="text-left"><div><div>{{ render_sociogram_measures_label(k) }}</div></div></td>
                         <td><div><div>{{ macro_stats[k].count }}</div></div></td>
+                        <td><div><div>{{ macro_stats[k].sum_tot }}</div></div></td>
                         <td><div><div>{{ macro_stats[k].median | int }}</div></div></td>
                         <td><div><div>{{ macro_stats[k].iqr | int }}</div></div></td>
                         <td><div><div>{{ "%0.2f" | format(macro_stats[k].mean | round(2)) }}</div></div></td>
