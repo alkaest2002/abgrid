@@ -182,7 +182,7 @@
     {% for edges_type, edges in edges_types.items() %}
         <div class="sna-edges-type-main">
             {% set edges_length = edges | length %}
-            <div class="mb-md sna-edges-type-header">
+            <div class="mb-md sna-edges-type-header mt-lg">
                 {{ render_edges_types_label(network_type, edges_type, edges_length) }}
             </div>
             <div class="sna-edges-type-list">
@@ -208,7 +208,7 @@
     {% for type, components in all_components.items() %}
         <div class="sna-components-main">
             {% set current = namespace(length=None) %}
-            <div class="sna-components-type-header mt-xl" >
+            <div class="sna-components-type-header mt-lg" >
                 {{ render_components_label(type) }}
             </div>
             <div class="sna-components-list mt-md mb-lg">
