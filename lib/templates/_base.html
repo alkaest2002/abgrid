@@ -5,6 +5,9 @@
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <meta http-equiv="X-UA-Compatible" content="ie=edge">
         <style>
+            
+            /* Base css */
+
             :root {
                 --ab-grid-sans-serif: "Trebuchet MS", "Lucida Sans Unicode", "Lucida Grande", "Lucida Sans", Arial, sans-serif;
                 --ab-grid-serif: "Times New Roman", Times, serif;
@@ -29,17 +32,17 @@
                 line-height: 14pt;
                 box-sizing: border-box;
             }
-
-            table {
-                border-collapse: collapse;
-            }
-
+            
             @page {
                 position: relative;
                 width: 210mm;
                 height: 297mm;
                 min-height: 297mm;
                 margin: 1.5cm;
+            }
+
+            table {
+                border-collapse: collapse;
             }
             
             .page {
@@ -67,36 +70,6 @@
 
             .full-width {
                 width: 100%;
-            }
-
-            .logo {
-                display: flex;
-                align-items: center;
-            }
-
-            .logo * {
-                font-family: var(--ab-grid-sans-serif);
-            }
-
-            .logo > div {
-                font-size: 2em;
-                font-weight: bold;
-            }
-
-            .logo .logo-letter {
-                padding: 9pt 6pt;
-                margin-right: 3pt;
-                border-radius: 3pt;
-            }
-
-            .logo .logo-letter.letter-A-reversed {
-                background-color: var(--abgrid-blue);
-                color: var(--abgrid-white);
-            }
-
-            .logo .logo-letter.letter-B-reversed {
-                background-color: var(--abgrid-red);
-                color: var(--abgrid-white);
             }
 
             .table-bordered {
@@ -134,33 +107,69 @@
                 font-style: italic;
             }
 
-            /* Additional utility classes for better flexibility */
+            .text-left {
+                text-align: left !important;
+            }
+
             .text-right {
                 text-align: right !important;
+            }
+
+            .text-justify {
+                text-align: justify !important;
             }
 
             .text-bold {
                 font-weight: bold;
             }
 
-            .highlight-very-low-values {
-                color: var(--abgrid-white);
-                background-color: var(--highlight-very-low-values);
+            .mt-xs  { margin-top: 3pt; }
+            .mt-sm  { margin-top: 6pt; }
+            .mt-md  { margin-top: 9pt; }
+            .mt-lg  { margin-top: 12pt; }
+            .mt-xl  { margin-top: 18pt; }
+            .mt-xxl { margin-top: 24pt; }
+
+            .mb-xs  { margin-bottom: 3pt; }
+            .mb-sm  { margin-bottom: 6pt; }
+            .mb-md  { margin-bottom: 9pt; }
+            .mb-lg  { margin-bottom: 12pt; }
+            .mb-xl  { margin-bottom: 18pt; }
+            .mb-xxl { margin-bottom: 24pt; }
+        </style>
+
+        <style>
+
+            /* Logo */
+
+            .logo {
+                display: flex;
+                align-items: center;
             }
-            
-            .highlight-low-values {
-                color: var(--abgrid-white);
-                background-color: var(--highlight-low-values);
+
+            .logo * {
+                font-family: var(--ab-grid-sans-serif);
             }
-            
-            .highlight-very-high-values {
-                color: var(--abgrid-white);
-                background: var(--highlight-very-high-values);
+
+            .logo > div {
+                font-size: 2em;
+                font-weight: bold;
             }
-            
-            .highlight-high-values {
+
+            .logo .logo-letter {
+                padding: 9pt 6pt;
+                margin-right: 3pt;
+                border-radius: 3pt;
+            }
+
+            .logo .logo-letter.letter-A-reversed {
+                background-color: var(--abgrid-blue);
                 color: var(--abgrid-white);
-                background: var(--highlight-high-values);
+            }
+
+            .logo .logo-letter.letter-B-reversed {
+                background-color: var(--abgrid-red);
+                color: var(--abgrid-white);
             }
         </style>
         

@@ -9,11 +9,6 @@
         line-height: 12pt;
     }
     
-    .report-disclaimer {
-        margin: 18pt 0pt;
-        text-align: justify;
-    }
-    
     .report-header {
         display: flex;
         justify-content: space-between;
@@ -34,10 +29,6 @@
         display: flex;
         justify-content: center;
         align-items: center;
-    }
-    
-    .macro-container {
-        margin: 9pt 0pt;
     }
     
     .report-table th {
@@ -198,6 +189,28 @@
         font-size: 9pt;
         line-height: 11pt;
         text-align: justify;
+    }
+
+    /* Highlight values */
+
+    .highlight-very-low-values {
+        color: var(--abgrid-white);
+        background-color: var(--highlight-very-low-values);
+    }
+
+    .highlight-low-values {
+        color: var(--abgrid-white);
+        background-color: var(--highlight-low-values);
+    }
+    
+    .highlight-very-high-values {
+        color: var(--abgrid-white);
+        background: var(--highlight-very-high-values);
+    }
+    
+    .highlight-high-values {
+        color: var(--abgrid-white);
+        background: var(--highlight-high-values);
     }
 </style>
 {% endblock %}
