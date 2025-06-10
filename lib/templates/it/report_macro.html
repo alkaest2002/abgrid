@@ -1,6 +1,6 @@
 {% macro render_report_header(project_title, group, type) %}
 <div class="section-header">
-    <span><b>GRUPPO {{ group | upper }} - {{ project_title | upper }}</b></span><span>{% if type == "sna_graph" %}GRAFICO RETE SNA{% elif type == "sna_raw_scores" %}PUNTEGGI SNA GREZZI{% elif type == "sna_ranks" %}PUNTEGGI SNA DI RANGO{% elif type == "sna_rankings" %}NODI SNA ORDINATI PER METRICA{% elif type == "sna_edges_types" %}LEGAMI SNA RAGGRUPPATI PER TIPO{% elif type == "sna_components" %}SOTTOGRAFI SNA{% elif type == "sociogram_micro" %}SOCIOGRAMMA{% elif type == "sociogram_rankings" %}NODI SOCIOGRAMMA ORDINATI PER METRICA{% elif type == "sociogram_macro" %}SOCIOGRAMMA STATISTICHE{% endif %}</span>
+    <span><b>{{ project_title | upper }} | GRUPPO {{ group | upper }}</b></span><span>{% if type == "sna_graph" %}GRAFICO RETE SNA{% elif type == "sna_raw_scores" %}PUNTEGGI SNA GREZZI{% elif type == "sna_ranks" %}PUNTEGGI SNA DI RANGO{% elif type == "sna_rankings" %}NODI SNA ORDINATI PER METRICA{% elif type == "sna_edges_types" %}LEGAMI SNA RAGGRUPPATI PER TIPO{% elif type == "sna_components" %}SOTTOGRAFI SNA{% elif type == "sociogram_micro" %}SOCIOGRAMMA{% elif type == "sociogram_rankings" %}NODI SOCIOGRAMMA ORDINATI PER METRICA{% elif type == "sociogram_macro" %}SOCIOGRAMMA STATISTICHE{% endif %}</span>
 </div>
 {% endmacro %}
 
