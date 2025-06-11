@@ -422,10 +422,10 @@ class ABGridSna:
                 The matplotlib figure containing the network plot.
         """
         
-        # Set color based on graph type (A or B)
+        # Set color based on graph type (a or b)
         color = A_COLOR if network_type == "a" else B_COLOR
         
-        # Determine dimensions of matplotlib graph based upon number of nodes
+        # Set dimensions of matplotlib graph
         fig_size = (17 * CM_TO_INCHES, 19 * CM_TO_INCHES)
         
         # Create a matplotlib figure
@@ -450,6 +450,7 @@ class ABGridSna:
         non_reciprocal_edges = [e for e in network.edges if e not in reciprocal_edges]
         nx.draw_networkx_edges(network, loc, edgelist=non_reciprocal_edges, edge_color=color, 
                             style="--", arrowstyle='-|>', arrowsize=15, ax=ax)
+        
         # Return figure
         return fig
     
@@ -469,7 +470,7 @@ class ABGridSna:
         Returns:
             Dict[Any, np.ndarray]: Updated node layout including isolated nodes.
         """
-        # Get isolated nodes, if any
+        # Get isolated nodes
         isolates = list(nx.isolates(network))
         
         # If there are no isolated nodes, just return loc
@@ -482,7 +483,7 @@ class ABGridSna:
         # Compute centroid of coordinates
         coordinates_centroid = np.mean(coordinates, axis=0)
         
-        # Compute convex hull
+        # Compute convex hull around coordinates
         hull = ConvexHull(coordinates)
         
         # Get hull vertices
@@ -492,10 +493,9 @@ class ABGridSna:
         isolate_iter = iter(isolates)
 
         # Keep track of loop rounds
-        # as isolated nodes may be greater than hull vertices
         round_num = 1
         
-        # Loop through rounds until all isolated nodes are placed
+        # Loop until all isolated nodes are placed
         try:
             while True:
                 
@@ -505,11 +505,11 @@ class ABGridSna:
                     # Get next isolated node
                     isolate = next(isolate_iter)
                     
-                    # Create direction vector from coordinates centroid to hull vertex
+                    # Create direction vector from coordinates centroid to current hull vertex
                     direction = vertex - coordinates_centroid
                     direction /= np.linalg.norm(direction)
                     
-                    # Distance multiplier increases with each round
+                    # Set distance multiplier (increases with each round)
                     distance_multiplier = 0.15 * round_num
                     
                     # Add some randomness to position
@@ -518,10 +518,11 @@ class ABGridSna:
                     # Calculate final position
                     candidate_pos = vertex + direction * distance_multiplier + random_offset
                     
-                    # Place the isolated node
+                    # Update isolated node position
                     loc[isolate] = candidate_pos
                 
-                # Move to next round with increased distance
+                # Move to next round, as hull vertices have been fully exploited
+                # but other isolated nodes need to be placed
                 round_num += 1
         
         # All isolated nodes have been placed
