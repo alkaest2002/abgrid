@@ -3143,23 +3143,23 @@
             },
             "components_a": {
                 "cliques": [
-                    "EMbj",
                     "JYkl",
+                    "EMbj",
                     "ANPe",
-                    "EGM",
-                    "EMg",
-                    "CEM",
-                    "Yhi",
-                    "Ddl",
                     "Ydl",
+                    "Ddl",
                     "Rcd",
                     "FIW",
-                    "CPZ",
-                    "PZe",
-                    "BYf",
-                    "NVe",
                     "FIN",
-                    "GMi"
+                    "BYf",
+                    "GMi",
+                    "EMg",
+                    "EGM",
+                    "CEM",
+                    "Yhi",
+                    "NVe",
+                    "CPZ",
+                    "PZe"
                 ],
                 "strongly_connected": [
                     "ACEGJMNPQRSYZbdefhijkl",
@@ -3171,14 +3171,14 @@
             },
             "components_b": {
                 "cliques": [
-                    "HWb",
-                    "HKW",
-                    "HMX",
-                    "OST",
                     "BOT",
-                    "HOS",
+                    "OST",
+                    "HMO",
                     "HOe",
-                    "HMO"
+                    "HOS",
+                    "HKW",
+                    "HWb",
+                    "HMX"
                 ],
                 "strongly_connected": [
                     "HKOPQSTWaf"
