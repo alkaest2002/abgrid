@@ -8,6 +8,7 @@ Date Created: May 3, 2025
 The code is part of the AB-Grid project and is licensed under the MIT License.
 """
 
+import re
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
@@ -116,7 +117,11 @@ class ABGridSociogram:
         sociogram_macro_df.insert(1, "median", median)
         sociogram_macro_df.insert(2, "iqr", iqr)
         sociogram_macro_df.insert(1, "sum_tot", sum_tot)
-        
+        sociogram_macro_df = (sociogram_macro_df
+            .drop(["ac", "ic"])
+            .rename(index={ "ac_raw": "ac", "ic_raw": "ic" })
+        )
+
         # Return sociogram macro stats
         return sociogram_macro_df.apply(pd.to_numeric, downcast="integer")
     
@@ -288,7 +293,8 @@ class ABGridSociogram:
                     .to_frame()
                     .reset_index()
                     .sort_values(by=[metric_label, "index"])
-                    .set_index("index").squeeze()
+                    .set_index("index")
+                    .squeeze()
             )
             series = pd.to_numeric(series, downcast="integer")
             nodes_ordered_by_rank[metric_label] = series.to_dict()
