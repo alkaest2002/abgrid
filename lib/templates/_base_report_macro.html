@@ -342,22 +342,20 @@
                 <th>Max</th>
             </tr>
             {% for k in macro_stats.keys() %}
-                {% if k not in ["ac", "ic"] %}
-                    <tr>
-                        <td class="text-left"><div><div>{{ render_sociogram_measures_label(k) }}</div></div></td>
-                        <td><div><div>{{ macro_stats[k].count }}</div></div></td>
-                        <td><div><div>{{ macro_stats[k].sum_tot }}</div></div></td>
-                        <td><div><div>{{ macro_stats[k].median | int }}</div></div></td>
-                        <td><div><div>{{ macro_stats[k].iqr | int }}</div></div></td>
-                        <td><div><div>{{ "%0.2f" | format(macro_stats[k].mean | round(2)) }}</div></div></td>
-                        <td><div><div>{{ "%0.2f" | format(macro_stats[k].std | round(2)) }}</div></div></td>
-                        <td><div><div>{{ macro_stats[k].min |int }}</div></div></td>
-                        <td><div><div>{{ macro_stats[k]["25%"] | int }}</div></div></td>
-                        <td><div><div>{{ macro_stats[k]["50%"] | int }}</div></div></td>
-                        <td><div><div>{{ macro_stats[k]["75%"] | int }}</div></div></td>
-                        <td><div><div>{{ macro_stats[k]["max"] | int }}</div></div></td>
-                    </tr>
-                {% endif %}
+                <tr>
+                    <td class="text-left"><div><div>{{ render_sociogram_measures_label(k) }}</div></div></td>
+                    <td><div><div>{{ macro_stats[k].count }}</div></div></td>
+                    <td><div><div>{{ macro_stats[k].sum_tot }}</div></div></td>
+                    <td><div><div>{{ macro_stats[k].median | int }}</div></div></td>
+                    <td><div><div>{{ macro_stats[k].iqr | int }}</div></div></td>
+                    <td><div><div>{{ "%0.2f" | format(macro_stats[k].mean | round(2)) }}</div></div></td>
+                    <td><div><div>{{ "%0.2f" | format(macro_stats[k].std | round(2)) }}</div></div></td>
+                    <td><div><div>{{ macro_stats[k].min |int }}</div></div></td>
+                    <td><div><div>{{ macro_stats[k]["25%"] | int }}</div></div></td>
+                    <td><div><div>{{ macro_stats[k]["50%"] | int }}</div></div></td>
+                    <td><div><div>{{ macro_stats[k]["75%"] | int }}</div></div></td>
+                    <td><div><div>{{ macro_stats[k]["max"] | int }}</div></div></td>
+                </tr>
             {% endfor %}
         </table>
     </div>
