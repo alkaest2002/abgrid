@@ -3143,23 +3143,23 @@
             },
             "components_a": {
                 "cliques": [
-                    "ANPe",
                     "EMbj",
                     "JYkl",
+                    "ANPe",
                     "EGM",
-                    "GMi",
+                    "EMg",
+                    "CEM",
+                    "Yhi",
+                    "Ddl",
+                    "Ydl",
+                    "Rcd",
+                    "FIW",
                     "CPZ",
                     "PZe",
+                    "BYf",
                     "NVe",
                     "FIN",
-                    "FIW",
-                    "BYf",
-                    "Ddl",
-                    "Rcd",
-                    "Ydl",
-                    "Yhi",
-                    "EMg",
-                    "CEM"
+                    "GMi"
                 ],
                 "strongly_connected": [
                     "ACEGJMNPQRSYZbdefhijkl",
@@ -3172,13 +3172,13 @@
             "components_b": {
                 "cliques": [
                     "HWb",
-                    "HOS",
-                    "HMO",
-                    "HOe",
                     "HKW",
                     "HMX",
+                    "OST",
                     "BOT",
-                    "OST"
+                    "HOS",
+                    "HOe",
+                    "HMO"
                 ],
                 "strongly_connected": [
                     "HKOPQSTWaf"
@@ -3919,7 +3919,7 @@
                     "75%": 5,
                     "max": 14
                 },
-                "ac_raw": {
+                "ac": {
                     "count": 38,
                     "sum_tot": 78,
                     "median": 3.5,
@@ -3932,20 +3932,7 @@
                     "75%": 5,
                     "max": 8
                 },
-                "ac": {
-                    "count": 38,
-                    "sum_tot": 3619,
-                    "median": 99.5,
-                    "iqr": 12.0,
-                    "mean": 95.23684210526316,
-                    "std": 15.345453082223404,
-                    "min": 48,
-                    "25%": 92.0,
-                    "50%": 99.5,
-                    "75%": 104,
-                    "max": 113
-                },
-                "ic_raw": {
+                "ic": {
                     "count": 38,
                     "sum_tot": 146,
                     "median": 4.0,
@@ -3957,19 +3944,6 @@
                     "50%": 4.0,
                     "75%": 6,
                     "max": 11
-                },
-                "ic": {
-                    "count": 38,
-                    "sum_tot": 3764,
-                    "median": 100.0,
-                    "iqr": 15.0,
-                    "mean": 99.05263157894737,
-                    "std": 10.626197531041175,
-                    "min": 85,
-                    "25%": 92.0,
-                    "50%": 100.0,
-                    "75%": 107,
-                    "max": 125
                 }
             },
             "graph_ic": null,
