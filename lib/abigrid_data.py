@@ -158,8 +158,8 @@ class ABGridData:
                         "edges_b": sna["edges_b"],
                         "macro_stats_a": sna["macro_stats_a"],
                         "macro_stats_b": sna["macro_stats_b"],
-                        "micro_stats_a": sna["micro_stats_a"].to_dict('index'),
-                        "micro_stats_b": sna["micro_stats_b"].to_dict('index'),
+                        "micro_stats_a": sna["micro_stats_a"],
+                        "micro_stats_b": sna["micro_stats_b"],
                         "rankings_a": sna["rankings_a"],
                         "rankings_b": sna["rankings_b"],
                         "edges_types_a": sna["edges_types_a"],
@@ -181,8 +181,8 @@ class ABGridData:
                     sociogram = abgrid_sociogram.get(sna)
                 
                     report_data["sociogram"] = {
-                            "micro_stats": sociogram["micro_stats"].to_dict("index"),
-                            "macro_stats": sociogram["macro_stats"].to_dict("index"),
+                            "micro_stats": sociogram["micro_stats"],
+                            "macro_stats": sociogram["macro_stats"],
                             "graph_ic": sociogram["graph_ic"],
                             "graph_ac": sociogram["graph_ac"],
                             "rankings": sociogram["rankings"],

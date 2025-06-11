@@ -50,11 +50,11 @@
 {% endmacro %}
 
 {% macro render_sna_micro_statistics(network_type, score_type, data, render_choices_label) %}
-{% set last_rank_ic = data.values()|map(attribute='ic_rank') | max  %}
-{% set last_rank_pr = data.values()|map(attribute='pr_rank') | max  %}
-{% set last_rank_bt = data.values()|map(attribute='bt_rank') | max  %}
-{% set last_rank_cl = data.values()|map(attribute='cl_rank') | max  %}
-{% set last_rank_hu = data.values()|map(attribute='hu_rank') | max  %}
+{% set last_rank_ic = data['ic_rank'].max()  %}
+{% set last_rank_pr = data['pr_rank'].max()  %}
+{% set last_rank_bt = data['bt_rank'].max()  %}
+{% set last_rank_cl = data['cl_rank'].max()  %}
+{% set last_rank_hu = data['hu_rank'].max()  %}
 {% set highlight_values = [
     (0, 5/100, "highlight-very-low-values"),
     (5/100, 10/100, "highlight-low-values"),
@@ -74,78 +74,78 @@
                 <th>HU</th>
                 <th>ND</th>
             </tr>
-            {% for k in data.keys() %}
+            {% for row_label, row in data.iterrows() %}
                 {% if score_type == "ranks" %}
                     <tr>
-                        <td>{{ k }}</td>
-                        <td>{{ data[k].lns | default("-", boolean=True) }}</td>
+                        <td>{{ row_label }}</td>
+                        <td>{{ row["lns"] | default("-", boolean=True) }}</td>
                         <td>
                             <div>
-                                {% set value = data[k].ic_pctile %}
-                                {% set rank = data[k].ic_rank %}
+                                {% set value = row["ic_pctile"] %}
+                                {% set rank = row["ic_rank"] %}
                                 {% set is_first = (rank == 1, "highlight-high-values") %}
                                 {% set is_last = (rank == last_rank_ic, "highlight-low-values") %}
                                 <div class="{{ highlight_value(value, highlight_values, is_first, is_last) }}">
-                                    {{ data[k].ic_rank | int }}
+                                    {{ row["ic_rank"] | int }}
                                 </div>
                             </div>
                         </td>
                         <td>
                             <div>
-                                {% set value = data[k].pr_pctile %}
-                                {% set rank = data[k].pr_rank %}
+                                {% set value = row["pr_pctile"] %}
+                                {% set rank = row["pr_rank"] %}
                                 {% set is_first = (rank == 1, "highlight-high-values") %}
                                 {% set is_last = (rank == last_rank_pr, "highlight-low-values") %}
                                 <div class="{{ highlight_value(value, highlight_values, is_first, is_last) }}">
-                                    {{ data[k].pr_rank | int }}
+                                    {{ row["pr_rank"] | int }}
                                 </div>
                             </div>
                         </td>
                         <td>
                             <div>
-                                {% set value = data[k].bt_pctile %}
-                                {% set rank = data[k].bt_rank %}
+                                {% set value = row["bt_pctile"] %}
+                                {% set rank = row["bt_rank"] %}
                                 {% set is_first = (rank == 1, "highlight-high-values") %}
                                 {% set is_last = (rank == last_rank_bt, "highlight-low-values") %}
                                 <div class="{{ highlight_value(value, highlight_values, is_first, is_last) }}">
-                                    {{ data[k].bt_rank | int }}
+                                    {{ row["bt_rank"] | int }}
                                 </div>
                             </div>
                         </td>
                         <td>
                             <div>
-                                {% set value = data[k].cl_pctile %}
-                                {% set rank = data[k].cl_rank %}
+                                {% set value = row["cl_pctile"] %}
+                                {% set rank = row["cl_rank"] %}
                                 {% set is_first = (rank == 1, "highlight-high-values") %}
                                 {% set is_last = (rank == last_rank_cl, "highlight-low-values") %}
                                 <div class="{{ highlight_value(value, highlight_values, is_first, is_last) }}">
-                                    {{ data[k].cl_rank | int }}
+                                    {{ row["cl_rank"] | int }}
                                 </div>
                             </div>
                         </td>
                         <td>
                             <div>
-                                {% set value = data[k].hu_pctile %}
-                                {% set rank = data[k].hu_rank %}
+                                {% set value = row["hu_pctile"] %}
+                                {% set rank = row["hu_rank"] %}
                                 {% set is_first = (rank == 1, "highlight-high-values") %}
                                 {% set is_last = (rank == last_rank_hu, "highlight-low-values") %}
                                 <div class="{{ highlight_value(value, highlight_values, is_first, is_last) }}">
-                                    {{ data[k].hu_rank | int }}
+                                    {{ row["hu_rank"] | int }}
                                 </div>
                             </div>
                         </td>
-                        <td >{% if data[k].nd == 1 %}&larr;{% elif data[k].nd == 2 %}&rarr;{% elif data[k].nd == 3 %}&rlarr;{% endif %}</td>
+                        <td >{% if row["nd"] == 1 %}&larr;{% elif row["nd"] == 2 %}&rarr;{% elif row["nd"] == 3 %}&rlarr;{% endif %}</td>
                     </tr>
                 {% else %}
                     <tr>
-                        <td>{{ k }}</td>
-                        <td>{{ data[k].lns | default("-", boolean=True) }}</td>
-                        <td>{{ "%0.2f"| format(data[k].ic_raw | round(2)) }}</td>
-                        <td>{{ "%0.2f"| format(data[k].pr_raw | round(2)) }}</td>
-                        <td>{{ "%0.2f"| format(data[k].bt_raw | round(2)) }}</td>
-                        <td>{{ "%0.2f"| format(data[k].cl_raw | round(2)) }}</td>
-                        <td>{{ "%0.2f"| format(data[k].hu_raw | round(2)) }}</td>
-                        <td>{% if data[k].nd == 1 %}&larr;{% elif data[k].nd == 2 %}&rarr;{% elif data[k].nd == 3 %}&rlarr;{% endif %}</td>
+                        <td>{{ row_label }}</td>
+                        <td>{{ row["lns"] | default("-", boolean=True) }}</td>
+                        <td>{{ "%0.2f"| format(row["ic_raw"] ) }}</td>
+                        <td>{{ "%0.2f"| format(row["pr_raw"] ) }}</td>
+                        <td>{{ "%0.2f"| format(row["bt_raw"] ) }}</td>
+                        <td>{{ "%0.2f"| format(row["cl_raw"] ) }}</td>
+                        <td>{{ "%0.2f"| format(row["hu_raw"] ) }}</td>
+                        <td>{% if row["nd"] == 1 %}&larr;{% elif row["nd"] == 2 %}&rarr;{% elif row["nd"] == 3 %}&rlarr;{% endif %}</td>
                     </tr>
                 {% endif %}
             {% endfor %}
@@ -265,35 +265,35 @@
                 <th>IC</th>
                 <th>ST</th>
             </tr>
-            {% for k in data.keys() %}
+            {% for row_label, row in data.iterrows() %}
                 <tr>
-                    <td><div><div>{{ k }}</div></div></td>
-                    <td><div><div>{{ data[k].rp }}</div></div></td>
-                    <td><div><div>{{ data[k].rr }}</div></div></td>
-                    <td><div><div>{{ data[k].gp }}</div></div></td>
-                    <td><div><div>{{ data[k].gr }}</div></div></td>
-                    <td><div><div>{{ data[k].mp }}</div></div></td>
-                    <td><div><div>{{ data[k].mr }}</div></div></td>
-                    <td><div><div>{{ data[k].bl }}</div></div></td>
-                    <td><div><div>{{ data[k].or }}</div></div></td>
-                    <td><div><div>{{ data[k].im }}</div></div></td>
+                    <td><div><div>{{ row_label }}</div></div></td>
+                    <td><div><div>{{ row["rp"] }}</div></div></td>
+                    <td><div><div>{{ row["rr"] }}</div></div></td>
+                    <td><div><div>{{ row["gp"] }}</div></div></td>
+                    <td><div><div>{{ row["gr"] }}</div></div></td>
+                    <td><div><div>{{ row["mp"] }}</div></div></td>
+                    <td><div><div>{{ row["mr"] }}</div></div></td>
+                    <td><div><div>{{ row["bl"] }}</div></div></td>
+                    <td><div><div>{{ row["or"] }}</div></div></td>
+                    <td><div><div>{{ row["im"] }}</div></div></td>
                     <td>
                         <div>
-                            {% set value = data[k].ac %}
+                            {% set value = row["ac"] %}
                             <div class="{{ highlight_value(value, coeff_highlight_values, (False, ''), (False, '')) }}">
-                                {{ data[k].ac_raw }}
+                                {{ row["ac_raw"] }}
                             </div>
                         </div>
                     </td>
                     <td>
                         <div>
-                            {% set value = data[k].ic %}
+                            {% set value = row["ic"] %}
                             <div class="{{ highlight_value(value, coeff_highlight_values, (False, ''), (False, '')) }}">
-                                {{ data[k].ic_raw }}
+                                {{ row["ic_raw"] }}
                             </div>
                         </div>
                     </td>
-                    <td><div><div>{{ render_sociogram_status_label(data[k].st) }}</div></div></td>
+                    <td><div><div>{{ render_sociogram_status_label(row["st"]) }}</div></div></td>
                 </tr>
             {% endfor %}
         </table>
@@ -341,20 +341,20 @@
                 <th>P75</th>
                 <th>Max</th>
             </tr>
-            {% for k in macro_stats.keys() %}
+            {% for row_label, row in macro_stats.iterrows() %}
                 <tr>
-                    <td class="text-left"><div><div>{{ render_sociogram_measures_label(k) }}</div></div></td>
-                    <td><div><div>{{ macro_stats[k].count }}</div></div></td>
-                    <td><div><div>{{ macro_stats[k].sum_tot }}</div></div></td>
-                    <td><div><div>{{ macro_stats[k].median | int }}</div></div></td>
-                    <td><div><div>{{ macro_stats[k].iqr | int }}</div></div></td>
-                    <td><div><div>{{ "%0.2f" | format(macro_stats[k].mean | round(2)) }}</div></div></td>
-                    <td><div><div>{{ "%0.2f" | format(macro_stats[k].std | round(2)) }}</div></div></td>
-                    <td><div><div>{{ macro_stats[k].min |int }}</div></div></td>
-                    <td><div><div>{{ macro_stats[k]["25%"] | int }}</div></div></td>
-                    <td><div><div>{{ macro_stats[k]["50%"] | int }}</div></div></td>
-                    <td><div><div>{{ macro_stats[k]["75%"] | int }}</div></div></td>
-                    <td><div><div>{{ macro_stats[k]["max"] | int }}</div></div></td>
+                    <td class="text-left"><div><div>{{ render_sociogram_measures_label(row_label) }}</div></div></td>
+                    <td><div><div>{{ row["count"] }}</div></div></td>
+                    <td><div><div>{{ row["sum_tot"] }}</div></div></td>
+                    <td><div><div>{{ row["median"] | int }}</div></div></td>
+                    <td><div><div>{{ row["iqr"] | int }}</div></div></td>
+                    <td><div><div>{{ "%0.2f" | format(row["mean"] | round(2)) }}</div></div></td>
+                    <td><div><div>{{ "%0.2f" | format(row["std"] | round(2)) }}</div></div></td>
+                    <td><div><div>{{ row["min"] |int }}</div></div></td>
+                    <td><div><div>{{ row["25%"] | int }}</div></div></td>
+                    <td><div><div>{{ row["50%"] | int }}</div></div></td>
+                    <td><div><div>{{ row["75%"] | int }}</div></div></td>
+                    <td><div><div>{{ row["max"] | int }}</div></div></td>
                 </tr>
             {% endfor %}
         </table>

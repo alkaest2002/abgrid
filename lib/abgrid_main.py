@@ -17,7 +17,7 @@ import jinja2
 from pathlib import Path
 from typing import Literal, Dict, Any
 from weasyprint import HTML
-from lib.abgrid_utils import deep_update
+from lib.abgrid_utils import to_json_serializable
 from lib import SYMBOLS
 from lib.abgrid_yaml import ABGridYAML
 from lib.abigrid_data import ABGridData
@@ -179,18 +179,9 @@ class ABGridMain:
         
             # Add current group data to the collection
             # Omit graphs from final json file
-            all_data[f"{group_file.stem}"] = (
-                deep_update(
-                    report_data, 
-                    { "sna": { 
-                        "graph_a": "Not available in json file",  
-                        "graph_b": "Not available in json file" 
-                    }, 
-                    "sociogram": { 
-                        "graph_ic": "Not available in json file", 
-                        "graph_ac": "Not available in json file" 
-                    }}
-                )
+            all_data[f"{group_file.stem}"] = to_json_serializable(
+                report_data, 
+                keys_to_omit = [ "sna.graph_a", "sna.graph_b", "sociogram.graph_ic", "sociogram.graph_ac" ]    
             )
 
             # Notify user

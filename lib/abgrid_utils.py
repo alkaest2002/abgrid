@@ -9,12 +9,17 @@ The code is part of the AB-Grid project and is licensed under the MIT License.
 """
 
 import io
+import datetime
+import pandas as pd
+import json
+
 from base64 import b64encode
 from pathlib import Path
-from typing import Callable, Any, Dict
+from typing import Callable, Any, Dict, List, Optional, Set
 from functools import wraps
 
 from matplotlib import pyplot as plt
+import pandas as pd
 
 def notify_decorator(operation_name: str) -> Callable:
     """
@@ -98,32 +103,71 @@ def notify_decorator(operation_name: str) -> Callable:
     
     return decorator
 
-def deep_update(mapping: Dict[str, Any], *updating_mappings: Dict[str, Any]) -> Dict[str, Any]:
+def to_json_serializable(
+    data: Any,
+    keys_to_omit: Optional[List[str]] = None,
+    max_depth: int = 100
+) -> Any:
     """
-    Recursively updates a dictionary with the values from one or more additional dictionaries.
-    This function will deep merge nested dictionaries within the provided mappings.
+    Converts data into a JSON-serializable format, supporting nested objects and
+    omitting specified keys or exceeding a certain depth in the object hierarchy.
 
     Args:
-        mapping (Dict[str, Any]): The original dictionary to be updated.
-        *updating_mappings (Dict[str, Any]): One or more dictionaries whose values will be used to update `mapping`.
+        data: The input data to be serialized, which can be of any type.
+        keys_to_omit: Optional list of keys or paths to omit from serialization.
+                      Each key should be given as a string representing the complete
+                      path in dot notation to the key you want to omit.
+        max_depth: The maximum depth to which the object hierarchy should be
+                   serialized. This helps prevent issues with circular references.
 
     Returns:
-        Dict[str, Any]: A new dictionary that is the result of deeply updating `mapping` with `updating_mappings`.
-
-    Example:
-        base = {'a': 1, 'b': {'c': 2}}
-        updates = {'b': {'d': 3}, 'e': 4}
-        result = deep_update(base, updates)
-        # result is {'a': 1, 'b': {'c': 2, 'd': 3}, 'e': 4}
+        A JSON-serializable version of the input data.
     """
-    updated_mapping = mapping.copy()
-    for updating_mapping in updating_mappings:
-        for k, v in updating_mapping.items():
-            if k in updated_mapping and isinstance(updated_mapping[k], dict) and isinstance(v, dict):
-                updated_mapping[k] = deep_update(updated_mapping[k], v)
-            else:
-                updated_mapping[k] = v
-    return updated_mapping
+    keys_to_omit = keys_to_omit or []
+
+    def _serialize(obj, path=None, depth=0):
+        
+        # Avoid circular reference
+        if depth > max_depth:
+            return f"<Max depth {max_depth} exceeded>"
+        
+        # Default path is empty list
+        path = path or []
+        
+        # Run several serialization scenarios
+        if obj is None:
+            return None
+        elif isinstance(obj, (str, int, float, bool)):
+            return obj
+        elif isinstance(obj, pd.DataFrame):
+            return obj.to_dict("index")
+        elif isinstance(obj, pd.Series):
+            return obj.to_dict()
+        elif hasattr(obj, 'tolist') and hasattr(obj, 'dtype'):
+            return obj.tolist()
+        elif isinstance(obj, (datetime.date, datetime.datetime)):
+            return obj.isoformat()
+        elif isinstance(obj, dict):
+            return {
+                k: _serialize(v, path + [str(k)], depth + 1)
+                for k, v in obj.items()
+                    if ".".join(path + [str(k)]) not in keys_to_omit
+            }
+        elif isinstance(obj, (list, tuple)):
+            return [
+                _serialize(item, path + [f"[{i}]"], depth + 1)
+                for i, item in enumerate(obj)
+            ]
+        elif hasattr(obj, '__dict__') and not isinstance(obj, type):
+            return _serialize(obj.__dict__, path, depth + 1)
+        else:
+            try:
+                json.dumps(obj)
+                return obj
+            except (TypeError, ValueError):
+                return str(obj)
+    
+    return _serialize(data)
 
 
 def figure_to_base64_svg(fig: plt.Figure) -> str:

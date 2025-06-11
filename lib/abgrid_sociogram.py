@@ -297,7 +297,7 @@ class ABGridSociogram:
                     .squeeze()
             )
             series = pd.to_numeric(series, downcast="integer")
-            nodes_ordered_by_rank[metric_label] = series.to_dict()
+            nodes_ordered_by_rank[metric_label] = series
         
         # Return the dictionary of nodes ordered by their rank for each metric
         return nodes_ordered_by_rank

@@ -291,7 +291,7 @@ class ABGridSna:
         for rank_label, rank_data in ranks.items():
             series = rank_data.to_frame().reset_index().sort_values(by=[rank_label, "index"]).set_index("index").squeeze()
             series = pd.to_numeric(series, downcast="integer")
-            nodes_ordered_by_rank[rank_label] = series.to_dict()
+            nodes_ordered_by_rank[rank_label] = series
         
         # Return the dictionary of nodes ordered by their rank for each metric
         return nodes_ordered_by_rank
