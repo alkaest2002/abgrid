@@ -101,7 +101,7 @@ class ABGridSna:
             self.sna[f"edges_{network_type}"] = self.unpack_network_edges(packed_edges)
             self.sna[f"network_{network_type}"] = nx.DiGraph(self.sna[f"edges_{network_type}"])
 
-        # Add isolated nodes to network a and b
+        # Add isolated nodes to network a and b and compute nodes layout locations
         for network_type, network, nodes in [
             ("a", self.sna["network_a"], self.sna["nodes_a"]), 
             ("b", self.sna["network_b"], self.sna["nodes_b"])
@@ -110,16 +110,16 @@ class ABGridSna:
             isolated_nodes = set(list(network)).symmetric_difference(set(nodes))
             network.add_nodes_from(isolated_nodes)
             
-            # Generate layout for current network
+            # Generate layout locations (loc) for current network
             loc = nx.kamada_kawai_layout(network)
             
             # Update loc so to push isolated nodes away from other nodes
             updated_loc = self.handle_isolated_nodes(network, loc)
 
-            # Add loc to current network
+            # Store current network loc
             self.sna[f"loc_{network_type}"] = updated_loc
 
-            # add adiacency list of current network
+            # Add current network adiacency list
             self.sna[f"adjacency_{network_type}"] = nx.to_pandas_adjacency(network, nodelist=nodes)
                     
         # Store sna data
