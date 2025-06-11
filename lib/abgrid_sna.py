@@ -358,7 +358,7 @@ class ABGridSna:
     
     def compute_components(self, network_type: Literal["a", "b"]) -> List[str]:
         """
-        Identify and return the unique and significant components of a directed graph as strings.
+        Identify and return significant components of a directed graph as strings.
 
         Args:
             network_type: Literal["a", "b"]
