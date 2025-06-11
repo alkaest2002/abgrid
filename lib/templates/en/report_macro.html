@@ -19,16 +19,22 @@
 {% endmacro %}
 
 {% macro render_components_label(type) %}
-    {% if type == "strongly_connected" %}
-        <p><b>Strongly Connected Subgraphs</b></p>
-        <p class="text-dimmed text-small mt-xs">Structures where each node directly reaches all other nodes</p>
-    {% elif type == "weakly_connected" %}
-        <p><b>Weakly Connected Subgraphs</b></p>
-        <p class="text-dimmed text-small mt-xs">Structures where each node reaches all other nodes directly or indirectly</p>
-    {% elif type == "cliques" %}
-        <p><b>Cliques</b></p>
-        <p class="text-dimmed text-small mt-xs">Structures where each node directly reaches all other nodes, provided the direction of connections is ignored</p>
-    {% endif %}
+{% if type == "cliques" %}
+    <p><b>Cliques</b></p>
+    <p class="text-dimmed text-small mt-xs">
+        Each node can reach every other node: a) without intermediaries; b) ignoring the direction of connections
+    </p>
+{% elif type == "strongly_connected" %}
+    <p><b>Strongly Connected Groups</b></p>
+    <p class="text-dimmed text-small mt-xs">
+        Each node can reach every other node: a) with or without intermediaries; b) following the direction of connections
+    </p>
+ {% elif type == "weakly_connected" %}
+    <p><b>Weakly Connected Groups</b></p>
+    <p class="text-dimmed text-small mt-xs">
+        Each node can reach every other node: a) with or without intermediaries; b) ignoring the direction of connections
+    </p>
+{% endif %}
 {% endmacro %}
 
 
