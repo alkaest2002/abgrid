@@ -172,9 +172,7 @@ class ABGridSna:
             List[str]: A sorted list of unique source node identifiers.
         """
         # Extract nodes and sort them
-        return sorted([
-            node for node_edges in packed_edges for node, _ in node_edges.items()
-        ])
+        return sorted([ node for node_edges in packed_edges for node in node_edges.keys() ])
     
     def compute_macro_stats(self, network_type: Literal["a", "b"]) -> Dict[str, Union[int, float]]:
         """
