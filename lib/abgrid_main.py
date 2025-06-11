@@ -178,10 +178,18 @@ class ABGridMain:
                 raise ValueError(report_errors)
         
             # Add current group data to the collection
+            # Omit graphs from final json file
             all_data[f"{group_file.stem}"] = (
                 deep_update(
                     report_data, 
-                    { "sna": { "graph_a": None,  "graph_b": None }, "sociogram": { "graph_ic": None, "graph_ac": None }}
+                    { "sna": { 
+                        "graph_a": "Not available in json file",  
+                        "graph_b": "Not available in json file" 
+                    }, 
+                    "sociogram": { 
+                        "graph_ic": "Not available in json file", 
+                        "graph_ac": "Not available in json file" 
+                    }}
                 )
             )
 
