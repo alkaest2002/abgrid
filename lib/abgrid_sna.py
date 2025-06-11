@@ -373,9 +373,9 @@ class ABGridSna:
         
         # Compute network components
         components = {
+            "cliques":  [ "".join(sorted(list(c))) for c in sorted(nx.find_cliques(network.to_undirected()), key=len, reverse=True) if len(c) > 2 ],
             "strongly_connected": [ "".join(sorted(list(c))) for c in sorted(nx.strongly_connected_components(network), key=len, reverse=True) if len(c) > 2 ],
             "weakly_connected":   [ "".join(sorted(list(c))) for c in sorted(nx.weakly_connected_components(network), key=len, reverse=True) if len(c) > 2 ],
-            "cliques":  [ "".join(sorted(list(c))) for c in sorted(nx.find_cliques(network.to_undirected()), key=len, reverse=True) if len(c) > 2 ]
         }
 
         # return components
