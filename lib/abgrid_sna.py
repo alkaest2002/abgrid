@@ -34,6 +34,8 @@ class SNADict(TypedDict, total=False):
     micro_stats_b: Optional[pd.DataFrame]
     rankings_a: Optional[Dict[str, Dict[int, int]]]
     rankings_b: Optional[Dict[str, Dict[int, int]]]
+    components_a: Optional[Dict[str, List[str]]]
+    components_b: Optional[Dict[str, List[str]]]
     edges_types_a: Optional[Dict[str, List[Tuple[str, str]]]]
     edges_types_b: Optional[Dict[str, List[Tuple[str, str]]]]
     graph_a: Optional[str]
@@ -63,6 +65,8 @@ class ABGridSna:
             "micro_stats_b": None,
             "rankings_a": None,
             "rankings_b": None,
+            "components_a": None,
+            "components_b": None,
             "edges_types_a": None,
             "edges_types_b": None,
             "graph_a": None,
