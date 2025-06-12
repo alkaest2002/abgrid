@@ -32,8 +32,8 @@ class SNADict(TypedDict, total=False):
     macro_stats_b: Optional[pd.Series]
     micro_stats_a: Optional[pd.DataFrame]
     micro_stats_b: Optional[pd.DataFrame]
-    rankings_a: Optional[list[pd.Series]]
-    rankings_b: Optional[list[pd.Series]]
+    rankings_a: Optional[dict[str, pd.Series]]
+    rankings_b: Optional[dict[str, pd.Series]]
     edges_types_a: Optional[Dict[str, pd.Index]]
     edges_types_b: Optional[Dict[str, pd.Index]]
     components_a: Optional[Dict[str, pd.Series]]
@@ -277,8 +277,8 @@ class ABGridSna:
                 The type identifier for selecting the specific network.
 
         Returns:
-            Dict[str, Dict[int, int]]:
-                A dictionary mapping centrality metric names to dictionaries of nodes sorted by rank.
+            Dict[str, pd.Series]:
+                A dictionary mapping centrality metric names to pandas series of nodes sorted by rank.
         """
         # Get network
         micro_stats = self.sna[f"micro_stats_{network_type}"]
