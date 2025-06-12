@@ -140,11 +140,11 @@
                     <tr>
                         <td>{{ row_label }}</td>
                         <td>{{ row["lns"] | default("-", boolean=True) }}</td>
-                        <td>{{ "%0.2f"| format(row["ic_raw"] ) }}</td>
-                        <td>{{ "%0.2f"| format(row["pr_raw"] ) }}</td>
-                        <td>{{ "%0.2f"| format(row["bt_raw"] ) }}</td>
-                        <td>{{ "%0.2f"| format(row["cl_raw"] ) }}</td>
-                        <td>{{ "%0.2f"| format(row["hu_raw"] ) }}</td>
+                        <td>{{ "%0.2f"| format(row["ic"] ) }}</td>
+                        <td>{{ "%0.2f"| format(row["pr"] ) }}</td>
+                        <td>{{ "%0.2f"| format(row["bt"] ) }}</td>
+                        <td>{{ "%0.2f"| format(row["cl"] ) }}</td>
+                        <td>{{ "%0.2f"| format(row["hu"] ) }}</td>
                         <td>{% if row["nd"] == 1 %}&larr;{% elif row["nd"] == 2 %}&rarr;{% elif row["nd"] == 3 %}&rlarr;{% endif %}</td>
                     </tr>
                 {% endif %}

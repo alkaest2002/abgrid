@@ -10,12 +10,13 @@ The code is part of the AB-Grid project and is licensed under the MIT License.
 
 import io
 import datetime
+import re
 import pandas as pd
 import json
 
 from base64 import b64encode
 from pathlib import Path
-from typing import Callable, Any, Dict, List, Optional, Set
+from typing import Callable, Any, Dict, List, Optional, Set, Union
 from functools import wraps
 
 from matplotlib import pyplot as plt
@@ -106,33 +107,54 @@ def notify_decorator(operation_name: str) -> Callable:
 def to_json_serializable(
     data: Any,
     keys_to_omit: Optional[List[str]] = None,
+    keys_regex_to_omit: Optional[Union[List[str], List[re.Pattern]]] = None,
     max_depth: int = 100
 ) -> Any:
     """
     Converts data into a JSON-serializable format, supporting nested objects and
     omitting specified keys or exceeding a certain depth in the object hierarchy.
-
+    
+    The function works in two phases:
+    1. First converts all data to JSON-serializable format
+    2. Then prunes unwanted keys based on the omit patterns
+    
     Args:
         data: The input data to be serialized, which can be of any type.
-        keys_to_omit: Optional list of keys or paths to omit from serialization.
-                      Each key should be given as a string representing the complete
-                      path in dot notation to the key you want to omit.
+        keys_to_omit: Optional list of exact key paths to omit from serialization.
+                     Each key should be given as a string representing the complete
+                     path in dot notation (e.g., "user.password", "config.api_key").
+        keys_regex_to_omit: Optional list of regex patterns to match key paths for omission.
+                           Can contain:
+                           - Raw regex strings (e.g., r'.*password.*', r'user\\..*secret.*')
+                           - Compiled regex patterns (e.g., re.compile(r'.*token.*'))
         max_depth: The maximum depth to which the object hierarchy should be
-                   serialized. This helps prevent issues with circular references.
-
+                  serialized. This helps prevent issues with circular references.
+    
     Returns:
-        A JSON-serializable version of the input data.
+        A JSON-serializable version of the input data with specified keys omitted.
+    
+    Examples:
+        # Omit exact paths
+        to_json_serializable(data, keys_to_omit=["user.password", "config.database_url"])
+        
+        # Omit using regex patterns
+        to_json_serializable(data, keys_regex_to_omit=[r'.*password.*', r'.*secret.*'])
+        
+        # Use both exact and regex patterns
+        to_json_serializable(
+            data, 
+            keys_to_omit=["user.email"],
+            keys_regex_to_omit=[r'.*password.*', re.compile(r'.*token.*')]
+        )
     """
     keys_to_omit = keys_to_omit or []
-
-    def _serialize(obj, path=None, depth=0):
-        
+    keys_regex_to_omit = keys_regex_to_omit or []
+    
+    def _convert_to_serializable(obj, depth=0):
+        """First phase: Convert all data to JSON-serializable format."""
         # Avoid circular reference
         if depth > max_depth:
             return f"<Max depth {max_depth} exceeded>"
-        
-        # Default path is empty list
-        path = path or []
         
         # Run several serialization scenarios
         if obj is None:
@@ -149,17 +171,16 @@ def to_json_serializable(
             return obj.isoformat()
         elif isinstance(obj, dict):
             return {
-                k: _serialize(v, path + [str(k)], depth + 1)
+                k: _convert_to_serializable(v, depth + 1)
                 for k, v in obj.items()
-                    if ".".join(path + [str(k)]) not in keys_to_omit
             }
         elif isinstance(obj, (list, tuple)):
             return [
-                _serialize(item, path + [f"[{i}]"], depth + 1)
-                for i, item in enumerate(obj)
+                _convert_to_serializable(item, depth + 1)
+                for item in obj
             ]
         elif hasattr(obj, '__dict__') and not isinstance(obj, type):
-            return _serialize(obj.__dict__, path, depth + 1)
+            return _convert_to_serializable(obj.__dict__, depth + 1)
         else:
             try:
                 json.dumps(obj)
@@ -167,7 +188,48 @@ def to_json_serializable(
             except (TypeError, ValueError):
                 return str(obj)
     
-    return _serialize(data)
+    def _should_omit_key(path_str: str) -> bool:
+        """Check if a key path should be omitted based on exact matches or regex patterns."""
+        
+        # Check exact string matches
+        if path_str in keys_to_omit:
+            return True
+        
+        # Check regex patterns
+        for regex_pattern in keys_regex_to_omit:
+            if re.search(regex_pattern, path_str):
+                return True
+        
+        return False
+    
+    def _prune_keys(obj, path=None):
+        """Second phase: Remove unwanted keys from the serialized data."""
+        path = path or []
+        
+        if isinstance(obj, dict):
+            result = {}
+            for k, v in obj.items():
+                current_path = path + [str(k)]
+                path_str = ".".join(current_path)
+                
+                if not _should_omit_key(path_str):
+                    result[k] = _prune_keys(v, current_path)
+            return result
+        elif isinstance(obj, list):
+            return [
+                _prune_keys(item, path + [f"[{i}]"])
+                for i, item in enumerate(obj)
+            ]
+        else:
+            return obj
+    
+    # Phase 1: Convert to JSON-serializable format
+    serialized_data = _convert_to_serializable(data)
+    
+    # Phase 2: Prune unwanted keys
+    pruned_data = _prune_keys(serialized_data)
+    
+    return pruned_data
 
 
 def figure_to_base64_svg(fig: plt.Figure) -> str:
