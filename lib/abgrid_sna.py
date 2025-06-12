@@ -28,16 +28,16 @@ class SNADict(TypedDict, total=False):
     adjacency_b: Optional[pd.DataFrame]
     network_a: Optional[nx.DiGraph]
     network_b: Optional[nx.DiGraph]
-    macro_stats_a: Optional[Dict[str, Union[int, float]]]
-    macro_stats_b: Optional[Dict[str, Union[int, float]]]
+    macro_stats_a: Optional[pd.Series]
+    macro_stats_b: Optional[pd.Series]
     micro_stats_a: Optional[pd.DataFrame]
     micro_stats_b: Optional[pd.DataFrame]
-    rankings_a: Optional[Dict[str, Dict[int, int]]]
-    rankings_b: Optional[Dict[str, Dict[int, int]]]
-    components_a: Optional[Dict[str, List[str]]]
-    components_b: Optional[Dict[str, List[str]]]
-    edges_types_a: Optional[Dict[str, List[Tuple[str, str]]]]
-    edges_types_b: Optional[Dict[str, List[Tuple[str, str]]]]
+    rankings_a: Optional[list[pd.Series]]
+    rankings_b: Optional[list[pd.Series]]
+    edges_types_a: Optional[Dict[str, pd.Index]]
+    edges_types_b: Optional[Dict[str, pd.Index]]
+    components_a: Optional[Dict[str, pd.Series]]
+    components_b: Optional[Dict[str, pd.Series]]
     graph_a: Optional[str]
     graph_b: Optional[str]
 
@@ -187,8 +187,8 @@ class ABGridSna:
                 The type identifier for selecting the specific network.
 
         Returns:
-            Dict[str, Union[int, float]]:
-                A dictionary containing macro-level statistics such as number of nodes,
+            pd.Series:
+                A pandas Series containing macro-level statistics such as number of nodes,
                 number of edges, network density, centralization, transitivity, and reciprocity.
         """
         # Get network
@@ -203,14 +203,14 @@ class ABGridSna:
         network_reciprocity = nx.overall_reciprocity(network)
         
         # Return macro-level statistics
-        return {
+        return pd.Series({
             "network_nodes": network_nodes,
             "network_edges": network_edges,
             "network_density": network_density,
             "network_centralization": network_centralization,
             "network_transitivity": network_transitivity,
             "network_reciprocity": network_reciprocity,
-        }
+        })
     
     def compute_micro_stats(self, network_type: Literal["a", "b"]) -> pd.DataFrame:
         """
@@ -322,22 +322,22 @@ class ABGridSna:
         # Compute type I edges, non reciprocal
         # i.e. same network: A -> B and not B -> A
         type_i_df = adj_df - (adj_df * adj_df.T)
-        type_i = type_i_df.stack().loc[lambda x: x == 1].index.tolist()
+        type_i = type_i_df.stack().loc[lambda x: x == 1].index
 
         # Compute type II edges, reciprocal
         # i.e. same network: A -> B and B -> A
         type_ii_df = pd.DataFrame(np.triu(adj_df) * np.tril(adj_df).T, index=adj_df.index, columns=adj_df.columns)
-        type_ii = type_ii_df.stack().loc[lambda x: x == 1].index.tolist()
+        type_ii = type_ii_df.stack().loc[lambda x: x == 1].index
 
         # Compute type V edges, full simmetrical
         # i.e. A -> B, B -> A in network network and A -> B, B -> A in network G_ref
         type_v_df = type_ii_df * pd.DataFrame(np.triu(adj_ref_df) * np.tril(adj_ref_df).T, index=adj_df.index, columns=adj_df.columns)
-        type_v = type_v_df.stack().loc[lambda x: x == 1].index.tolist()
+        type_v = type_v_df.stack().loc[lambda x: x == 1].index
         
         # Compute type III edges, half simmetrical
         # i.e. A -> B in network network and A -> B in network G_ref
         type_iii_df = pd.DataFrame(np.triu(adj_df) * np.triu(adj_ref_df), index=adj_df.index, columns=adj_df.columns)
-        type_iii = type_iii_df.sub(type_v_df).stack().loc[lambda x: x == 1].index.tolist()
+        type_iii = type_iii_df.sub(type_v_df).stack().loc[lambda x: x == 1].index
         
         # Compute type IV edges, half reversed simmetrical
         # i.e. A -> B in network network and B -> A in network G_ref
@@ -345,7 +345,7 @@ class ABGridSna:
             pd.DataFrame(np.triu(adj_df) * np.tril(adj_ref_df).T, index=adj_df.index, columns=adj_df.columns)
             + pd.DataFrame(np.tril(adj_df) * np.triu(adj_ref_df).T, index=adj_df.index, columns=adj_df.columns)
         )
-        type_iv = type_iv_df.sub(type_v_df).stack().loc[lambda x: x == 1].index.tolist()
+        type_iv = type_iv_df.sub(type_v_df).stack().loc[lambda x: x == 1].index
         
         # Return edges types
         return {
@@ -373,9 +373,9 @@ class ABGridSna:
         
         # Compute network components
         components = {
-            "cliques": [ "".join(sorted(list(c))) for c in sorted(nx.find_cliques(network.to_undirected()), key=len, reverse=True) if len(c) > 2 ],
-            "strongly_connected": [ "".join(sorted(list(c))) for c in sorted(nx.strongly_connected_components(network), key=len, reverse=True) if len(c) > 2 ],
-            "weakly_connected":  [ "".join(sorted(list(c))) for c in sorted(nx.weakly_connected_components(network), key=len, reverse=True) if len(c) > 2 ],
+            "cliques": pd.Series([ "".join(sorted(list(c))) for c in sorted(nx.find_cliques(network.to_undirected()), key=len, reverse=True) if len(c) > 2 ]),
+            "strongly_connected": pd.Series([ "".join(sorted(list(c))) for c in sorted(nx.strongly_connected_components(network), key=len, reverse=True) if len(c) > 2 ]),
+            "weakly_connected": pd.Series([ "".join(sorted(list(c))) for c in sorted(nx.weakly_connected_components(network), key=len, reverse=True) if len(c) > 2 ]),
         }
 
         # return components
