@@ -108,7 +108,7 @@ def to_json_serializable(
     data: Any,
     keys_to_omit: Optional[List[str]] = None,
     keys_regex_to_omit: Optional[Union[List[str], List[re.Pattern]]] = None,
-    max_depth: int = 100
+    max_depth: int = 3
 ) -> Any:
     """
     Converts data into a JSON-serializable format, supporting nested objects and
@@ -153,9 +153,9 @@ def to_json_serializable(
     def _convert_to_serializable(obj, depth=0):
         """First phase: Convert all data to JSON-serializable format."""
         
-        # Avoid circular reference
+        # Limit depth
         if depth > max_depth:
-            return f"<Max depth {max_depth} exceeded>"
+            return obj
         
         # Run several serialization scenarios
         if obj is None:

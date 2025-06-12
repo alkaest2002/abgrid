@@ -172,10 +172,13 @@ class ABGridMain:
 
             # Load report data for the current group
             report_data, report_errors = self.abgrid_data.get_report_data(group_file, with_sociogram)
-        
+            
             # Notify on report data errors
             if report_errors:
                 raise ValueError(report_errors)
+            
+            # Persist current group report to disk
+            self.render_pdf("report", { **report_data, "with_sociogram": with_sociogram }, group_file.stem, language)
         
             # Add current group data to the collection
             # Omit graphs from final json file
@@ -195,10 +198,7 @@ class ABGridMain:
             )
 
             # Notify user
-            print(f"generating report: {group_file.name}")
-        
-            # Persist current group report to disk
-            self.render_pdf("report", { **report_data, "with_sociogram": with_sociogram }, group_file.stem, language)
+            print(f"generating report: {group_file.name}")                   
         
         # Persist all collected to disk
         with open(self.abgrid_data.project_folderpath / f"{self.abgrid_data.project}_data.json", "w") as fout:
