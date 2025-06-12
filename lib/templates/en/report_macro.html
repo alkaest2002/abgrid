@@ -97,7 +97,7 @@
 
 {% macro render_sociogram_legend(show_macro=False, show_micro=False, show_rankings=False, show_colors=False) %}
 <div class="table-data-legend">
-    {% if show_macro %}<b>IQR</b> Interquartile range <b>SD</b> Standard Deviation <b>Min</b> Minimum value <b>P25</b> 25° percentile <b>P50</b> 50° percentile <b>P75</b> 75° percentile <b>Max</b> Maximum value {% endif %}{% if show_micro %}<b>RP</b> Received preferences <b>RR</b> Received rejections <b>GP</b> Given preferences <b>GR</b> Given rejections <b>MP</b> Mutual preferences <b>MR</b> Mutual rejections <b>BL</b> Balance <b>OR</b> Orientation <b>IM</b> Impact <b>AC</b> Affiliation coefficient <b>IC</b> Influence coefficient <b>ST</b> Sociometric status {% endif %}{%if show_rankings %}<b>RP</b> Received preferences <b>RR</b> Received rejections <b>GP</b> Given preferences <b>GR</b> Given rejections <b>BL</b> Balance <b>IM</b> Impact <b>AC</b> Affiliation coefficient <b>IC</b> Influence coefficient {% endif %}{% if show_colors %}<span class="square highlight-very-low-values"></span> Very low <span class="square highlight-low-values"></span> Low <span class="square highlight-high-values"></span> High <span class="square highlight-very-high-values"></span> Very high{% endif %}
+    {% if show_macro %}<b>IQR</b> Interquartile range <b>SD</b> Standard Deviation <b>Min</b> Minimum value <b>P25</b> 25° percentile <b>P50</b> 50° percentile <b>P75</b> 75° percentile <b>Max</b> Maximum value {% endif %}{% if show_micro %}<b>RP</b> Received preferences <b>RR</b> Received rejections <b>GP</b> Given preferences <b>GR</b> Given rejections <b>MP</b> Mutual preferences <b>MR</b> Mutual rejections <b>BL</b> Balance <b>OR</b> Orientation <b>IM</b> Impact <b>AI</b> Affiliation index <b>II</b> Influence index <b>ST</b> Sociometric status {% endif %}{%if show_rankings %}<b>RP</b> Received preferences <b>RR</b> Received rejections <b>GP</b> Given preferences <b>GR</b> Given rejections <b>BL</b> Balance <b>IM</b> Impact <b>AI</b> Affiliation index <b>II</b> Influence index {% endif %}{% if show_colors %}<span class="square highlight-very-low-values"></span> Very low <span class="square highlight-low-values"></span> Low <span class="square highlight-high-values"></span> High <span class="square highlight-very-high-values"></span> Very high{% endif %}
 </div>
 {% endmacro %}
 
@@ -111,8 +111,8 @@
     {% if measure == "or" %}Orientation{% endif%}
     {% if measure == "im" %}Impact{% endif%}
     {% if measure == "bl" %}Balance{% endif%}
-    {% if measure == "ac" %}Affiliation coefficient{% endif%}
-    {% if measure == "ic" %}Influence coefficient{% endif%}
+    {% if measure == "ai" %}Affiliation index{% endif%}
+    {% if measure == "ii" %}Influence index{% endif%}
     {% if measure == "ui_i" %}Type I cohesion index{% endif%}
     {% if measure == "ui_ii" %}Type II cohesion index{% endif%}
     {% if measure == "wi_i" %}Type I conflitct index{% endif%}
@@ -120,10 +120,10 @@
 {% endmacro %}
 
 {% macro render_sociogram_graph_label(type) %}
-    {% if type == "ic" %}
-        Influence coefficient
+    {% if type == "ii" %}
+        Influence index
     {% else %}
-        Affiliation coefficient
+        Affiliation index
     {% endif %}
 {% endmacro %}
 

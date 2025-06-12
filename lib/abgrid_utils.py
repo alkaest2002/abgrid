@@ -152,6 +152,7 @@ def to_json_serializable(
     
     def _convert_to_serializable(obj, depth=0):
         """First phase: Convert all data to JSON-serializable format."""
+        
         # Avoid circular reference
         if depth > max_depth:
             return f"<Max depth {max_depth} exceeded>"
@@ -229,6 +230,7 @@ def to_json_serializable(
     # Phase 2: Prune unwanted keys
     pruned_data = _prune_keys(serialized_data)
     
+    # Return json_serialized data
     return pruned_data
 
 

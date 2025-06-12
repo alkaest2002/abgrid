@@ -92,8 +92,8 @@ class ABGridSociogram:
         }
     
         # Add sociogram graphs
-        self.sociogram["graph_ic"] = self.create_graph("ic_raw")
-        self.sociogram["graph_ac"] = self.create_graph("ac_raw")
+        self.sociogram["graph_ic"] = self.create_graph("ii")
+        self.sociogram["graph_ac"] = self.create_graph("ai")
 
         # return sociogram data
         return self.sociogram
@@ -117,10 +117,7 @@ class ABGridSociogram:
         sociogram_macro_df.insert(1, "median", median)
         sociogram_macro_df.insert(2, "iqr", iqr)
         sociogram_macro_df.insert(1, "sum_tot", sum_tot)
-        sociogram_macro_df = (sociogram_macro_df
-            .drop(["ac", "ic"])
-            .rename(index={ "ac_raw": "ac", "ic_raw": "ic" })
-        )
+        sociogram_macro_df = sociogram_macro_df.drop(["ai_robust_z", "ii_robust_z"])
 
         # Return sociogram macro stats
         return sociogram_macro_df.apply(pd.to_numeric, downcast="integer")
@@ -182,20 +179,20 @@ class ABGridSociogram:
                 .add(sociogram_micro_df["rr"])
         )
 
-        # Add affiliation coefficient raw: balance + orientation
-        sociogram_micro_df["ac_raw"] = (
+        # Add affiliation index: balance + orientation
+        sociogram_micro_df["ai"] = (
             sociogram_micro_df["bl"]
                 .add(sociogram_micro_df["or"])
         )
 
-        # Add affiliation coefficient
-        affiliation_coeff = sociogram_micro_df["ac_raw"]
-        median_affiliation_coeff = affiliation_coeff.median()
+        # Add affiliation index robust z score
+        affiliation_idx = sociogram_micro_df["ai"]
+        median_affiliation_coeff = affiliation_idx.median()
         mad_affiliation_coeff = (
-            max(affiliation_coeff.sub(median_affiliation_coeff).abs().median(), 1e-6) # ensure no zero division
+            max(affiliation_idx.sub(median_affiliation_coeff).abs().median(), 1e-6) # ensure no zero division
         )
-        sociogram_micro_df["ac"] = (
-            affiliation_coeff
+        sociogram_micro_df["ai_robust_z"] = (
+            affiliation_idx
                 .sub(median_affiliation_coeff)
                 .div(mad_affiliation_coeff)
                 .mul(ROBUST_THRESHOLD)
@@ -204,20 +201,20 @@ class ABGridSociogram:
                 .astype(int)
         )
 
-        # Add influence coefficient raw: received preferences + mutual preferences
-        sociogram_micro_df["ic_raw"] = (
+        # Add influence index: received preferences + mutual preferences
+        sociogram_micro_df["ii"] = (
             sociogram_micro_df["rp"]
                 .add(sociogram_micro_df["mp"])
         )
 
-        # Add influence coefficient
-        influence_coeff = sociogram_micro_df["ic_raw"]
-        median_influence_coeff = influence_coeff.median()
+        # Add influence index robust z score
+        influence_idx = sociogram_micro_df["ii"]
+        median_influence_coeff = influence_idx.median()
         mad_influence_coeff = (
-            max(influence_coeff.sub(median_influence_coeff).abs().median(), 1e-6) # ensure no zero division
+            max(influence_idx.sub(median_influence_coeff).abs().median(), 1e-6) # ensure no zero division
         )
-        sociogram_micro_df["ic"] = (
-            influence_coeff
+        sociogram_micro_df["ii_robust_z"] = (
+            influence_idx
                 .sub(median_influence_coeff)
                 .div(mad_influence_coeff)
                 .mul(ROBUST_THRESHOLD)
@@ -283,7 +280,7 @@ class ABGridSociogram:
         nodes_ordered_by_rank = {}
 
         # Get columns that represent rank data
-        metrics = micro_stats.loc[:, [ "rp", "rr", "gp", "gr", "bl", "im", "ac_raw", "ic_raw" ]]
+        metrics = micro_stats.loc[:, [ "rp", "rr", "gp", "gr", "bl", "im", "ai", "ii" ]]
         
         # For each metric, nodes will be ordered by their relative rank
         for metric_label, metric_data in metrics.items():
@@ -302,7 +299,7 @@ class ABGridSociogram:
         # Return the dictionary of nodes ordered by their rank for each metric
         return nodes_ordered_by_rank
     
-    def create_graph(self, coeffient: Literal["ac_raw", "ic_raw"]) -> str:
+    def create_graph(self, coeffient: Literal["ai", "ii"]) -> str:
         """
         Generate a graphical representation of sociogram rankings and return it encoded in base64 SVG format.
 
@@ -317,12 +314,12 @@ class ABGridSociogram:
         # Convert matplotlib plot to base64 SVG string
         return figure_to_base64_svg(fig)  
     
-    def create_fig(self, coeffient: Literal["ac_raw", "ic_raw"]):
+    def create_fig(self, coeffient: Literal["ai", "ii"]):
         """
         Create a polar plot of sociogram data normalized to [0, 1].
         Args:
-            coefficient (Literal["ac_raw", "ic_raw"]): The coefficient to be used for plotting.
-            Must be one of "ac_raw" or "ic_raw", indicating which micro-level metric to visualize.
+            coefficient (Literal["ai", "ii"]): The coefficient to be used for plotting.
+            Must be one of "ai" or "ii", indicating which micro-level metric to visualize.
         Returns:
             plt.Figure: A matplotlib Figure object containing the plot.
         """

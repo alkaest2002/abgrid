@@ -186,11 +186,11 @@ class ABGridMain:
                     "sna.graph_b", 
                     "sociogram.graph_ic", 
                     "sociogram.graph_ac",
-                    "sna.ic_rank"
                 ],
                 keys_regex_to_omit = [
-                    r".*_rank",
-                    r".*_pctile",
+                    r"sna\.micro_stats\..*_rank",
+                    r"sna\.micro_stats\..*_pctile",
+                    r".*_robust_z",
                 ]
             )
 

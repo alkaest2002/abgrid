@@ -261,8 +261,8 @@
                 <th>BL</th>
                 <th>OR</th>
                 <th>IM</th>
-                <th>AC</th>
-                <th>IC</th>
+                <th>AI</th>
+                <th>II</th>
                 <th>ST</th>
             </tr>
             {% for row_label, row in data.iterrows() %}
@@ -279,17 +279,17 @@
                     <td><div><div>{{ row["im"] }}</div></div></td>
                     <td>
                         <div>
-                            {% set value = row["ac"] %}
+                            {% set value = row["ai_robust_z"] %}
                             <div class="{{ highlight_value(value, coeff_highlight_values, (False, ''), (False, '')) }}">
-                                {{ row["ac_raw"] }}
+                                {{ row["ai"] }}
                             </div>
                         </div>
                     </td>
                     <td>
                         <div>
-                            {% set value = row["ic"] %}
+                            {% set value = row["ii_robust_z"] %}
                             <div class="{{ highlight_value(value, coeff_highlight_values, (False, ''), (False, '')) }}">
-                                {{ row["ic_raw"] }}
+                                {{ row["ii"] }}
                             </div>
                         </div>
                     </td>
