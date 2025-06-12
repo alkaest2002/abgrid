@@ -181,7 +181,17 @@ class ABGridMain:
             # Omit graphs from final json file
             all_data[f"{group_file.stem}"] = to_json_serializable(
                 report_data, 
-                keys_to_omit = [ "sna.graph_a", "sna.graph_b", "sociogram.graph_ic", "sociogram.graph_ac" ]    
+                keys_to_omit = [
+                    "sna.graph_a", 
+                    "sna.graph_b", 
+                    "sociogram.graph_ic", 
+                    "sociogram.graph_ac",
+                    "sna.ic_rank"
+                ],
+                keys_regex_to_omit = [
+                    r".*_rank",
+                    r".*_pctile",
+                ]
             )
 
             # Notify user
