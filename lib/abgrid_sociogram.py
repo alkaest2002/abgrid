@@ -301,7 +301,8 @@ class ABGridSociogram:
         
         # Create plot figure
         fig, ax = plt.subplots(
-            figsize=(25 * CM_TO_INCHES, 25 * CM_TO_INCHES),
+            constrained_layout=True, 
+            figsize=(19 * CM_TO_INCHES, 19 * CM_TO_INCHES),
             subplot_kw={"projection": "polar"}
         )
         
