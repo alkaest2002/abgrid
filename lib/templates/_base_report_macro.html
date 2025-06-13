@@ -156,17 +156,17 @@
 
 {% macro render_rankings(rankings, render_rank_label) %}
 <div class="rankings-container mt-lg">
-    {% for metric in rankings %}
+    {% for metric_label, data in rankings.items() %}
         <div class="rankings-main">
             <table class="table-data table-bordered table-striped full-width">
                 <tr>
                     <th>{{ render_rank_label() }}</th>
-                    <th>{{ metric | upper }}</th>
+                    <th>{{ metric_label[:2] | upper }}</th>
                 </tr>
-                {% for letter, rank in rankings[metric].items() %}
+                {% for letter, rank in data.sort_values().items() %}
                     <tr>
                         <td>
-                            <div><div>{{ rank }}</div></div>
+                            <div><div>{{ rank | int }}</div></div>
                         </td>
                         <td>
                             <div><div>{{ letter }}</div></div>

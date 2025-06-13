@@ -32,8 +32,8 @@ class SNADict(TypedDict, total=False):
     macro_stats_b: Optional[pd.Series]
     micro_stats_a: Optional[pd.DataFrame]
     micro_stats_b: Optional[pd.DataFrame]
-    rankings_a: Optional[Dict[str, pd.Series]]
-    rankings_b: Optional[Dict[str, pd.Series]]
+    rankings_a: Optional[pd.DataFrame]
+    rankings_b: Optional[pd.DataFrame]
     edges_types_a: Optional[Dict[str, pd.Index]]
     edges_types_b: Optional[Dict[str, pd.Index]]
     components_a: Optional[Dict[str, pd.Series]]
@@ -226,7 +226,7 @@ class ABGridSna:
             pd.DataFrame: 
                 A DataFrame with micro-level statistics for each node, including
                 metrics like in-degree centrality, PageRank, betweenness, closeness centrality,
-                hubs score, and nodes rankings.
+                hubs score, and nodes rankings and percentiles.
         """
         # Get network and adjacency
         network = self.sna[f"network_{network_type}"]
@@ -250,14 +250,14 @@ class ABGridSna:
         # Compute node ranks relative to each network centrality metric
         micro_level_stats_ranks = (
             micro_level_stats.iloc[:, 1:-1]  # omit first column (LNS) and last column (ND)
-                .apply(lambda x: x.rank(method="dense", ascending=False))
+                .rank(method="dense", ascending=False)
                 .add_suffix("_rank")
         )
         
         # Compute node percentiles relative to each network centrality metric
         micro_level_stats_pct = (
             micro_level_stats.iloc[:, 1:-1]
-                .apply(lambda x: x.rank(pct=True))
+                .rank(pct=True)
                 .add_suffix("_pctile")
         )
         
@@ -271,7 +271,7 @@ class ABGridSna:
                 .sort_index()
         )
         
-    def compute_rankings(self, network_type: Literal["a", "b"]) -> Dict[str, pd.Series]:
+    def compute_rankings(self, network_type: Literal["a", "b"]) -> pd.DataFrame:
         """
         Generate and return the order of nodes based on their rank scores for each centrality metric.
 
@@ -279,28 +279,13 @@ class ABGridSna:
             network_type (Literal["a", "b"]):
                 The type identifier for selecting the specific network.
 
-        Returns:
-            Dict[str, pd.Series]:
-                A dictionary mapping centrality metric names to pandas series of nodes sorted by rank.
+        pd.DataFrame:
+            A pandas DataFrame containing nodes sorted by their rank across various centrality 
+            metrics.
         """
-        # Get network
-        micro_stats = self.sna[f"micro_stats_{network_type}"]
-
-        # Initialize dictionary to store ordered node rankings
-        nodes_ordered_by_rank = {}
-
-        # Get columns that represent rank data
-        ranks = micro_stats.filter(regex=r"_rank$")
-        
-        # For each metric, nodes will be ordered by their relative rank
-        for rank_label, rank_data in ranks.items():
-            series = rank_data.to_frame().reset_index().sort_values(by=[rank_label, "index"]).set_index("index").squeeze()
-            series = pd.to_numeric(series, downcast="integer")
-            nodes_ordered_by_rank[rank_label[:2]] = series
-        
-        # Return the dictionary of nodes ordered by their rank for each metric
-        return nodes_ordered_by_rank
-        
+        # Return columns that represent rank data
+        return self.sna[f"micro_stats_{network_type}"].filter(regex=r"_rank$")
+              
     def compute_edges_types(self, network_type: Literal["a", "b"]) -> Dict[str, pd.Index]:
         """
         Classify edges in a directed network graph into various types based on relationships within

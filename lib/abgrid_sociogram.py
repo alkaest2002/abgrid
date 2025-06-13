@@ -8,7 +8,6 @@ Date Created: May 3, 2025
 The code is part of the AB-Grid project and is licensed under the MIT License.
 """
 
-import re
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
@@ -20,6 +19,7 @@ from lib.abgrid_utils import figure_to_base64_svg
 class SociogramDict(TypedDict, total=False):
     macro_stats: Optional[Dict[str, Union[int, float]]]
     micro_stats: Optional[pd.DataFrame]
+    rankings: Optional[pd.DataFrame]
     supplemental: Optional[Dict[str, float]]
     graph_ic: Optional[str]
     graph_ac: Optional[str]
@@ -35,6 +35,7 @@ class ABGridSociogram:
         self.sociogram: SociogramDict = {
             "macro_stats": None,
             "micro_stats": None,
+            "rankings": None,
             "supplemental": None,
             "graph_ic": None,
             "graph_ac": None,
@@ -51,7 +52,7 @@ class ABGridSociogram:
             SociogramDict: A dictionary containing detailed sociogram data, structured as follows:
                 - "micro_stats": DataFrame of individual-level statistics.
                 - "macro_stats": DataFrame of network-level statistics.
-                - "rankings": A dictionary mapping metrics to node rank orders.
+                - "rankings": DataFrame of metrics to node rank orders.
                 - "supplemental": Dictionary with cohesion and conflict indices.
                 - "graph_ic" and "graph_ac": Strings of base64-encoded SVGs representing graph visualizations.
 
@@ -274,28 +275,12 @@ class ABGridSociogram:
                 (ordinal position) based on the metric scores.
         """
 
-        # Initialize dictionary to store ordered node rankings
-        nodes_ordered_by_rank = {}
-
         # Get columns that represent rank data
         metrics = micro_stats.loc[:, [ "rp", "rr", "gp", "gr", "bl", "im", "ai", "ii" ]]
+
+        # Compute nodes ranks for each metric
+        return metrics.rank(method="dense", ascending=False)
         
-        # For each metric, nodes will be ordered by their relative rank
-        for metric_label, metric_data in metrics.items():
-            series = (
-                metric_data
-                    .rank(method="dense", ascending=False)
-                    .to_frame()
-                    .reset_index()
-                    .sort_values(by=[metric_label, "index"])
-                    .set_index("index")
-                    .squeeze()
-            )
-            series = pd.to_numeric(series, downcast="integer")
-            nodes_ordered_by_rank[metric_label] = series
-        
-        # Return the dictionary of nodes ordered by their rank for each metric
-        return nodes_ordered_by_rank
     
     def create_graph(self, coefficient: Literal["ai", "ii"]) -> str:
         """
