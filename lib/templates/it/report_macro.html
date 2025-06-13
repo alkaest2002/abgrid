@@ -98,7 +98,7 @@
 
 {% macro render_sna_legend(show_macro=False, show_micro=False, show_arrows=False, show_colors=False) %}
 <div class="table-data-legend">
-    {% if show_macro %}<b>NN</b> Nodi <b>NE</b> Legami <b>ND</b> Densità <b>NC</b> Centralizzazione <b>NT</b> Transitività <b>NR</b> Reciprocità {% endif %}{% if show_micro%}<b>IC</b> In-Degree <b>PR</b> PageRank <b>BT</b> Betweenness <b>CL</b> Closenness <b>HU</b> Hub {% endif %}{% if show_arrows %}<b>ND</b> No In-Degree (&larr; ) No Out-Degree (&rarr;) No In o Out-Degree (&rlarr;) {% endif %}{% if show_colors %}<span class="square highlight-very-low-values"></span> Molto basso <span class="square highlight-low-values"></span> Basso <span class="square highlight-high-values"></span> Alto <span class="square highlight-very-high-values"></span> Molto alto{% endif %}
+    {% if show_macro %}<b>NN</b> Nodi <b>NE</b> Legami <b>NR</b> Legami reciproci <b>ND</b> Densità <b>NC</b> Centralizzazione <b>NT</b> Transitività <b>NR</b> Reciprocità {% endif %}{% if show_micro%}<b>IC</b> In-Degree <b>PR</b> PageRank <b>BT</b> Betweenness <b>CL</b> Closenness <b>HU</b> Hub {% endif %}{% if show_arrows %}<b>ND</b> No In-Degree (&larr; ) No Out-Degree (&rarr;) No In o Out-Degree (&rlarr;) {% endif %}{% if show_colors %}<span class="square highlight-very-low-values"></span> Molto basso <span class="square highlight-low-values"></span> Basso <span class="square highlight-high-values"></span> Alto <span class="square highlight-very-high-values"></span> Molto alto{% endif %}
 </div>
 {% endmacro %}
 
