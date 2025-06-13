@@ -15,6 +15,7 @@ import networkx as nx
 
 from typing import Literal, List, Dict, Optional, Tuple, TypedDict
 from functools import reduce
+from matplotlib.patches import ArrowStyle
 from scipy.spatial import ConvexHull
 from lib import A_COLOR, B_COLOR, CM_TO_INCHES
 from lib.abgrid_utils import figure_to_base64_svg
@@ -433,13 +434,17 @@ class ABGridSna:
         
         # Draw reciprocal edges with specific style
         reciprocal_edges = [e for e in network.edges if e[::-1] in network.edges]
-        nx.draw_networkx_edges(network, loc, edgelist=reciprocal_edges, edge_color=color, 
-                            arrowstyle='-', width=3, ax=ax)
+        nx.draw_networkx_edges(
+            network, loc, edgelist=reciprocal_edges, 
+            edge_color=color, arrowstyle='-', alpha=.5, width=4, ax=ax
+        )
         
         # Draw non-reciprocal edges with specific style
         non_reciprocal_edges = [e for e in network.edges if e not in reciprocal_edges]
-        nx.draw_networkx_edges(network, loc, edgelist=non_reciprocal_edges, edge_color=color, 
-                            style="--", arrowstyle='-|>', arrowsize=15, ax=ax)
+        nx.draw_networkx_edges(
+            network, loc, edgelist=non_reciprocal_edges, 
+            edge_color=color, arrowstyle="->", style="-", width=.4,
+        )
         
         # Return figure
         return fig
