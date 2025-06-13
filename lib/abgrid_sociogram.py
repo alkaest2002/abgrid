@@ -163,35 +163,38 @@ class ABGridSociogram:
         sociogram_micro_df["or"] = sociogram_micro_df["gp"].sub(sociogram_micro_df["gr"])
         sociogram_micro_df["im"] = sociogram_micro_df["rp"].add(sociogram_micro_df["rr"])
         sociogram_micro_df["ai"] = sociogram_micro_df["bl"].add(sociogram_micro_df["or"])
+        sociogram_micro_df["ii"] = sociogram_micro_df["rp"].add(sociogram_micro_df["mp"])
         
         # Compute robust z-scores for affiliation index (ai)
-        affiliation_idx = sociogram_micro_df["ai"]
-        median_affiliation_coeff = affiliation_idx.median()
-        mad_affiliation_coeff = max(affiliation_idx.sub(median_affiliation_coeff).abs().median(), 1e-6)
+        affiliation = sociogram_micro_df["ai"]
+        median_affiliation = affiliation.median()
+        mad_affiliation = max(affiliation.sub(median_affiliation).abs().median(), 1e-6)
         sociogram_micro_df["ai_robust_z"] = (
-            affiliation_idx
-                .sub(median_affiliation_coeff)
-                .div(mad_affiliation_coeff)
+            affiliation
+                .sub(median_affiliation)
+                .div(mad_affiliation)
                 .mul(robust_threshold * 10)
                 .add(100)
                 .astype(int)
         )
 
         # Compute robust z-scores for influence index (ii)
-        sociogram_micro_df["ii"] = sociogram_micro_df["rp"].add(sociogram_micro_df["mp"])
-        influence_idx = sociogram_micro_df["ii"]
-        median_influence_coeff = influence_idx.median()
-        mad_influence_coeff = max(influence_idx.sub(median_influence_coeff).abs().median(), 1e-6)
+        influence = sociogram_micro_df["ii"]
+        median_influence = influence.median()
+        mad_influence = max(influence.sub(median_influence).abs().median(), 1e-6)
         sociogram_micro_df["ii_robust_z"] = (
-            influence_idx
-                .sub(median_influence_coeff)
-                .div(mad_influence_coeff)
+            influence
+                .sub(median_influence)
+                .div(mad_influence)
                 .mul(robust_threshold * 10)
                 .add(100)
                 .astype(int)
         )
 
+        # Compute status interpretation
         sociogram_micro_df["st"] = self.compute_status_interpretation(sociogram_micro_df, robust_threshold)
+
+        # Return sociogram micro statistics
         return sociogram_micro_df.sort_index()
 
     def compute_status_interpretation(self, sociogram_micro_df: pd.DataFrame, robust_threshold: float) -> pd.Series:
