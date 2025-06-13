@@ -279,8 +279,7 @@ class ABGridSociogram:
         metrics = micro_stats.loc[:, [ "rp", "rr", "gp", "gr", "bl", "im", "ai", "ii" ]]
 
         # Compute nodes ranks for each metric
-        return metrics.rank(method="dense", ascending=False)
-        
+        return metrics.rank(method="dense", ascending=False)    
     
     def create_graph(self, coefficient: Literal["ai", "ii"]) -> str:
         """
@@ -293,23 +292,6 @@ class ABGridSociogram:
             str: A base64-encoded SVG string representing the sociogram plot.
         """
 
-        # Create matplotlib plot
-        fig = self.create_fig(coefficient)
-        
-        # Convert matplotlib plot to base64 SVG string
-        return figure_to_base64_svg(fig)  
-    
-    def create_fig(self, coefficient: Literal["ai", "ii"]) -> plt.Figure:
-        """
-        Create a polar plot of sociogram data normalized to [0, 1].
-
-        Args:
-            coefficient (Literal["ai", "ii"]): The coefficient to be used for plotting.
-                Must be one of "ai" or "ii", indicating which micro-level metric to visualize.
-        
-        Returns:
-            plt.Figure: A matplotlib Figure object containing the plot.
-        """
         # Get values
         data = self.sociogram["micro_stats"].loc[:, [coefficient]].copy()
         
@@ -375,4 +357,4 @@ class ABGridSociogram:
                 )
 
         # Return figure
-        return fig
+        return figure_to_base64_svg(fig)
