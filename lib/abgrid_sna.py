@@ -243,6 +243,7 @@ class ABGridSna:
         ], axis=1)
         
         # Identify nodes with no in-degree and/or out-degree
+        # 3 -> no in or out degree, 2 -> no out-degree, 1 -> no in-degree
         micro_level_stats["nd"] = 0
         micro_level_stats["nd"] += (micro_level_stats["ic"] == 0).astype(int)
         micro_level_stats["nd"] += (micro_level_stats["lns"].str.len() == 0).astype(int) * 2
@@ -256,7 +257,7 @@ class ABGridSna:
         
         # Compute node percentiles relative to each network centrality metric
         micro_level_stats_pct = (
-            micro_level_stats.iloc[:, 1:-1]
+            micro_level_stats.iloc[:, 1:-1] # omit first column (LNS) and last column (ND)
                 .rank(pct=True)
                 .add_suffix("_pctile")
         )
