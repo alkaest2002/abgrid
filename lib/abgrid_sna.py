@@ -19,7 +19,7 @@ from scipy.spatial import ConvexHull
 from lib import A_COLOR, B_COLOR, CM_TO_INCHES
 from lib.abgrid_utils import figure_to_base64_svg
 
-class SNADict(TypedDict, total=False):
+class SNADict(TypedDict):
     nodes_a: Optional[List[str]]
     nodes_b: Optional[List[str]]
     edges_a: Optional[List[Tuple[str, str]]]
