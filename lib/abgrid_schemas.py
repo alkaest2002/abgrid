@@ -13,7 +13,16 @@ from typing import Dict, List
 
 class ProjectSchema(BaseModel):
     """
-    A Pydantic model that represents a project's data schema.
+    A Pydantic model that represents a project's data schema. This includes the project's basic 
+    descriptors and related questions, with answer choices for each.
+
+    Attributes:
+        project_title (str): The title of the project, with a minimum of 1 and a maximum of 80 characters.
+        explanation (str): An explanation of the project, constrained to 1-500 characters.
+        question_a (str): A question associated with the project, constrained to 1-300 characters.
+        question_a_choices (str): Choices for question A, constrained to 1-150 characters.
+        question_b (str): Another project-related question, constrained to 1-300 characters.
+        question_b_choices (str): Choices for question B, constrained to 1-150 characters.
     """
     project_title: constr(min_length=1, max_length=80) # type: ignore
     explanation: constr(min_length=1, max_length=500) # type: ignore
@@ -25,7 +34,15 @@ class ProjectSchema(BaseModel):
 
 class GroupSchema(BaseModel):
     """
-    A Pydantic model that represents the schema for a group within a project.
+    A Pydantic model that represents the schema for a group within a project, covering the 
+    structure of choices and their interrelationships.
+
+    Attributes:
+        group (int): The group number, must be between 1 and 20.
+        choices_a (List[Dict[str, Union[str, None]]]): A list of dictionaries for choices in question A,
+            ensuring each dictionary has a single letter key associated with single letter values.
+        choices_b (List[Dict[str, Union[str, None]]]): A list of dictionaries for choices in question B,
+            structured similarly to choices_a.
     """
     group: int = Field(ge=1, le=20)
     choices_a: List[Dict[str, str | None]]
@@ -38,13 +55,13 @@ class GroupSchema(BaseModel):
         Validator for choices_a and choices_b fields to ensure each choice is well-formed.
 
         Args:
-            value: A list of dictionaries representing choices.
+            value: A list of dictionaries representing choices, keyed by single letters.
 
         Returns:
             The validated list of choices.
 
         Raises:
-            ValueError: If any validation check fails.
+            ValueError: If any validation rule is breached, such as malformed keys/values.
         """
         for choice_dict in value:
             
@@ -79,13 +96,15 @@ class GroupSchema(BaseModel):
     @model_validator(mode='after')
     def validate_schema_constraints(self) -> 'GroupSchema':
         """
-        Root validator to ensure the logical constraints between choices_a and choices_b are upheld.
+        Ensure logical constraints between choices_a and choices_b.
+
+        Verifies that keys in choices_a are identical to those in choices_b, and all values are valid.
 
         Returns:
             The validated GroupSchema instance.
 
         Raises:
-            ValueError: If any logical constraints between choices_a and choices_b are violated.
+            ValueError: If coherence rules between choices_a and choices_b are violated.
         """
         # Extract all keys from choices_a and choices_b
         choices_a_keys = {next(iter(choice.keys())) for choice in self.choices_a}
