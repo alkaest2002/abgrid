@@ -16,7 +16,7 @@ from typing import Any, Literal, Dict, Optional, TypedDict, Union
 from lib import CM_TO_INCHES
 from lib.abgrid_utils import figure_to_base64_svg
 
-class SociogramDict(TypedDict, total=False):
+class SociogramDict(TypedDict):
     macro_stats: Optional[Dict[str, Union[int, float]]]
     micro_stats: Optional[pd.DataFrame]
     rankings: Optional[pd.DataFrame]
