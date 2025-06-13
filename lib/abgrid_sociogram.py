@@ -191,19 +191,29 @@ class ABGridSociogram:
                 .astype(int)
         )
 
+        # Compute robust impact
+        impact = sociogram_micro_df["im"]
+        median_impact = impact.median()
+        mad_impact = max(impact.sub(median_impact).abs().median(), 1e-6)
+        robust_z_impact = (
+            impact.sub(median_impact).div(mad_impact).mul(robust_threshold)
+        )
+
         # Compute status interpretation
-        sociogram_micro_df["st"] = self.compute_status_interpretation(sociogram_micro_df, robust_threshold)
+        sociogram_micro_df["st"] = (
+            self.compute_status_interpretation(sociogram_micro_df, robust_z_impact)
+        )
 
         # Return sociogram micro statistics
         return sociogram_micro_df.sort_index()
 
-    def compute_status_interpretation(self, sociogram_micro_df: pd.DataFrame, robust_threshold: float) -> pd.Series:
+    def compute_status_interpretation(self, sociogram_micro_df: pd.DataFrame, robust_z_impact: float) -> pd.Series:
         """
         Determine sociometric status for each node based on sociogram statistics.
 
         Args:
             sociogram_micro_df (pd.DataFrame): DataFrame containing micro-level statistics.
-            robust_threshold (float): The robustness threshold used for calculating certain metrics.
+            robust_z_impact (float): The robustness threshold used for calculating certain metrics.
 
         Returns:
             pd.Series: Series with sociometric status for each node, indicating states such as isolated, marginal, etc.
@@ -213,25 +223,15 @@ class ABGridSociogram:
         b_choices = sociogram_micro_df["rr"]
         impact = sociogram_micro_df["im"]
         balance = sociogram_micro_df["bl"]
-        
-        # Compute robust impact
-        median_impact = impact.median()
-        mad_impact = max(impact.sub(median_impact).abs().median(), 1e-6)
-        robust_z_impact = (
-            impact
-                .sub(median_impact)
-                .div(mad_impact)
-                .mul(robust_threshold)
-        )
-
+    
         # Compute absolute balance
         abs_balance = balance.abs()
 
         # Compute a-dominant, b-dominant, and neutral evaluations
-        a_dominant = np.logical_and(balance > 0, abs_balance > median_impact)
-        b_dominant = np.logical_and(balance < 0, abs_balance > median_impact)
-        neutral = np.logical_and(a_choices.mul(b_choices).gt(0), abs_balance.between(1, abs_balance.median()))
-
+        a_dominant = np.logical_and(balance > 0, abs_balance >= impact.median())
+        b_dominant = np.logical_and(balance < 0, abs_balance >= impact.median())
+        neutral = np.logical_and(a_choices.mul(b_choices).gt(0), abs_balance < impact.median())
+        
         # Init status as a pandas Series with "-"
         status = pd.Series(["-"] * sociogram_micro_df.shape[0], index=sociogram_micro_df.index)
         
