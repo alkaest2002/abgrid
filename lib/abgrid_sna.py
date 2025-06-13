@@ -55,6 +55,8 @@ class ABGridSna:
             "nodes_b": None,
             "edges_a": None,
             "edges_b": None,
+            "edges_types_a": None,
+            "edges_types_b": None,
             "adjacency_a": None,
             "adjacency_b": None,
             "network_a": None,
@@ -67,8 +69,6 @@ class ABGridSna:
             "rankings_b": None,
             "components_a": None,
             "components_b": None,
-            "edges_types_a": None,
-            "edges_types_b": None,
             "graph_a": None,
             "graph_b": None
         }
@@ -129,11 +129,11 @@ class ABGridSna:
                     
         # Store SNA data
         for network_type in ("a", "b"):
+            self.sna[f"edges_types_{network_type}"] = self.compute_edges_types(network_type)
+            self.sna[f"components_{network_type}"] = self.compute_components(network_type)
             self.sna[f"macro_stats_{network_type}"] = self.compute_macro_stats(network_type)
             self.sna[f"micro_stats_{network_type}"] = self.compute_micro_stats(network_type)
             self.sna[f"rankings_{network_type}"] = self.compute_rankings(network_type)
-            self.sna[f"edges_types_{network_type}"] = self.compute_edges_types(network_type)
-            self.sna[f"components_{network_type}"] = self.compute_components(network_type)
             self.sna[f"graph_{network_type}"] = self.create_graph(network_type)
 
         # Return SNA data
@@ -195,10 +195,14 @@ class ABGridSna:
         """
         # Get network
         network = self.sna[f"network_{network_type}"]
+
+        # Get network edges types
+        edges_types = self.sna[f"edges_types_{network_type}"]
         
         # Compute macro-level statistics
         network_nodes = network.number_of_nodes()
         network_edges = network.number_of_edges()
+        network_edges_reciprocal = edges_types["type_ii"]
         network_density = nx.density(network)
         network_centralization = self.compute_network_centralization(network.to_undirected())
         network_transitivity = nx.transitivity(network)
@@ -208,6 +212,7 @@ class ABGridSna:
         return pd.Series({
             "network_nodes": network_nodes,
             "network_edges": network_edges,
+            "network_edges_reciprocal": network_edges_reciprocal.shape[0],
             "network_density": network_density,
             "network_centralization": network_centralization,
             "network_transitivity": network_transitivity,
