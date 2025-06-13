@@ -389,29 +389,9 @@ class ABGridSna:
         # Get network locations
         loc = self.sna[f"loc_{network_type}"]
 
-        # Create matplotlib plot
-        fig = self.create_fig(network, loc, network_type)
-    
-        # Convert matplotlib plot to base64 SVG string
-        return figure_to_base64_svg(fig)
-    
-    def create_fig(self, network: nx.DiGraph, loc: Dict[str, Tuple[float, float]], network_type: Literal["a","b"]) -> plt.Figure:
-        """
-        Create a matplotlib plot of a network graph.
+        # Get networl micro_stats
+        micro_stats =  self.sna[f"micro_stats_{network_type}"]
 
-        Args:
-            network (nx.DiGraph):
-                The directed graph to plot.
-            loc (Dict[str, Tuple[float, float]]):
-                Node positions for layout.
-            network_type (Literal["a", "b"]):
-                Type of the network ('a' or 'b'), used to determine node colors.
-
-        Returns:
-            plt.Figure: 
-                The matplotlib figure containing the network plot.
-        """
-        
         # Set color based on graph type (a or b)
         color = A_COLOR if network_type == "a" else B_COLOR
         
@@ -425,7 +405,12 @@ class ABGridSna:
         ax.axis('off')
         
         # Draw nodes
-        nx.draw_networkx_nodes(network, loc, node_color=color, edgecolors=color, ax=ax)
+        nx.draw_networkx_nodes(
+            network, loc, 
+            node_color=color, edgecolors=color, ax=ax
+        )
+        
+        # Draw isolated nodes
         nx.draw_networkx_nodes(nx.isolates(network), loc, node_color="#000", edgecolors="#000", ax=ax)
         
         # Draw nodes labels
@@ -446,7 +431,7 @@ class ABGridSna:
         )
         
         # Return figure
-        return fig
+        return figure_to_base64_svg(fig)
     
     def handle_isolated_nodes(self, network: nx.DiGraph, loc: Dict[str, np.ndarray]) -> Dict[str, np.ndarray]:
         """
