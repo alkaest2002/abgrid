@@ -30,7 +30,7 @@ class ABGridSociogram:
     rankings, and graphical representations of sociograms.
     """
 
-    def __init__(self):
+    def __init__(self) -> None:
         """
         Initialize internal dictionary for storing sociogram data.
         """
@@ -52,20 +52,20 @@ class ABGridSociogram:
 
         Returns:
             SociogramDict: A dictionary containing detailed sociogram data, structured as follows:
+                - "macro_stats": Dictionary of network-level statistics.
                 - "micro_stats": DataFrame of individual-level statistics.
-                - "macro_stats": DataFrame of network-level statistics.
                 - "rankings": DataFrame of metrics to node rank orders.
                 - "supplemental": Dictionary with cohesion and conflict indices.
                 - "graph_ic" and "graph_ac": Strings of base64-encoded SVGs representing graph visualizations.
 
         Side Effects:
             Updates the `self.sociogram` attribute with the computed sociogram data.
-        """    
+        """
         # Retrieve SNA data
         network_a = sna["network_a"]
         network_b = sna["network_b"]
 
-        # Compute robust threshold (needed for some media/mad related computatios)
+        # Compute robust threshold (needed for some media/mad related computations)
         robust_threshold = max(0.6745, 1.5 - (len(sna["nodes_a"]) / 50))
         
         # Compute micro and macro statistics
@@ -82,7 +82,7 @@ class ABGridSociogram:
         conflict_index_type_ii = len(sna["edges_types_b"]["type_ii"]) / len(network_b)
 
         # Store sociogram data
-        self.sociogram =  {
+        self.sociogram = {
             "micro_stats": sociogram_micro_df,
             "macro_stats": sociogram_macro_df,
             "rankings": rankings,
@@ -108,7 +108,7 @@ class ABGridSociogram:
             sociogram_micro_df (pd.DataFrame): DataFrame containing micro-level statistics.
 
         Returns:
-            pd.DataFrame: DataFrame with macro-level descriptive statistics.
+            pd.DataFrame: DataFrame with macro-level descriptive statistics including median, IQR, and total sum.
         """
         # Select numeric columns only
         sociogram_numeric_columns = sociogram_micro_df.select_dtypes(np.number)
@@ -140,7 +140,7 @@ class ABGridSociogram:
             sna (Dict[str, Any]): Dictionary containing network data with relevant keys.
 
         Returns:
-            pd.DataFrame: DataFrame with micro-level statistics for each node.
+            pd.DataFrame: DataFrame with micro-level statistics for each node, including metrics like rp, rr, gp, gr, etc.
         """
         # Retrieve network and adjacency matrices
         network_a = sna["network_a"]
@@ -200,9 +200,10 @@ class ABGridSociogram:
 
         Args:
             sociogram_micro_df (pd.DataFrame): DataFrame containing micro-level statistics.
+            robust_threshold (float): The robustness threshold used for calculating certain metrics.
 
         Returns:
-            pd.Series: Series with sociometric status for each node.
+            pd.Series: Series with sociometric status for each node, indicating states such as isolated, marginal, etc.
         """
         # Cache relevant columns
         received_preferences = sociogram_micro_df["rp"]
@@ -223,7 +224,7 @@ class ABGridSociogram:
         # Compute absolute balance
         abs_balance = balance.abs()
 
-        # Computed positive, neutral, abd negative evalutaions
+        # Compute positive, neutral, and negative evaluations
         positive_eval = np.logical_and(balance > 0, abs_balance > median_impact)
         negative_eval = np.logical_and(balance < 0, abs_balance > median_impact)
         neutral_eval = np.logical_and(
@@ -262,8 +263,8 @@ class ABGridSociogram:
         metrics = micro_stats.loc[:, ["rp", "rr", "gp", "gr", "bl", "im", "ai", "ii"]]
 
         # Compute and return rankings
-        return metrics.rank(method="dense", ascending=False)    
-    
+        return metrics.rank(method="dense", ascending=False)
+
     def create_graph(self, coefficient: Literal["ai", "ii"]) -> str:
         """
         Generate a graphical representation of sociogram rankings and return it encoded in base64 SVG format.
