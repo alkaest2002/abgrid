@@ -209,8 +209,8 @@ class ABGridSociogram:
             pd.Series: Series with sociometric status for each node, indicating states such as isolated, marginal, etc.
         """
         # Cache relevant columns
-        received_preferences = sociogram_micro_df["rp"]
-        received_rejections = sociogram_micro_df["rr"]
+        a_choices = sociogram_micro_df["rp"]
+        b_choices = sociogram_micro_df["rr"]
         impact = sociogram_micro_df["im"]
         balance = sociogram_micro_df["bl"]
         
@@ -227,24 +227,23 @@ class ABGridSociogram:
         # Compute absolute balance
         abs_balance = balance.abs()
 
-        # Compute positive, neutral, and negative evaluations
-        positive_eval = np.logical_and(balance > 0, abs_balance > median_impact)
-        negative_eval = np.logical_and(balance < 0, abs_balance > median_impact)
-        neutral_eval = np.logical_and(
-            received_preferences
-                .mul(received_rejections).gt(0), abs_balance.between(1, abs_balance.median())
-        )
+        # Compute a-dominant, b-dominant, and neutral evaluations
+        a_dominant = np.logical_and(balance > 0, abs_balance > median_impact)
+        b_dominant = np.logical_and(balance < 0, abs_balance > median_impact)
+        neutral = np.logical_and(a_choices.mul(b_choices).gt(0), abs_balance.between(1, abs_balance.median()))
 
-        # Compute status
+        # Init status as a pandas Series with "-"
         status = pd.Series(["-"] * sociogram_micro_df.shape[0], index=sociogram_micro_df.index)
+        
+        # Compute status
         status.loc[sociogram_micro_df.iloc[:, :4].sum(axis=1).eq(0)] = "isolated"
         status.loc[robust_z_impact < -1] = "marginal"
-        status.loc[np.logical_and(positive_eval, robust_z_impact.between(-1, 1))] = "appreciated"
-        status.loc[np.logical_and(negative_eval, robust_z_impact.between(-1, 1))] = "disliked"
-        status.loc[np.logical_and(neutral_eval, robust_z_impact.between(-1, 1))] = "ambivalent"
-        status.loc[np.logical_and(positive_eval, robust_z_impact > 1)] = "popular"
-        status.loc[np.logical_and(negative_eval, robust_z_impact > 1)] = "rejected"
-        status.loc[np.logical_and(neutral_eval, robust_z_impact > 1)] = "controversial"
+        status.loc[np.logical_and(a_dominant, robust_z_impact.between(-1, 1))] = "appreciated"
+        status.loc[np.logical_and(b_dominant, robust_z_impact.between(-1, 1))] = "disliked"
+        status.loc[np.logical_and(neutral, robust_z_impact.between(-1, 1))] = "ambivalent"
+        status.loc[np.logical_and(a_dominant, robust_z_impact > 1)] = "popular"
+        status.loc[np.logical_and(b_dominant, robust_z_impact > 1)] = "rejected"
+        status.loc[np.logical_and(neutral, robust_z_impact > 1)] = "controversial"
 
         # Return status
         return status
