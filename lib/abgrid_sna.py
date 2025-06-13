@@ -15,7 +15,6 @@ import networkx as nx
 
 from typing import Literal, List, Dict, Optional, Tuple, TypedDict
 from functools import reduce
-from matplotlib.patches import ArrowStyle
 from scipy.spatial import ConvexHull
 from lib import A_COLOR, B_COLOR, CM_TO_INCHES
 from lib.abgrid_utils import figure_to_base64_svg
