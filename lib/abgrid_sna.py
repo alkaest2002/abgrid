@@ -420,14 +420,16 @@ class ABGridSna:
         reciprocal_edges = [e for e in network.edges if e[::-1] in network.edges]
         nx.draw_networkx_edges(
             network, loc, edgelist=reciprocal_edges, 
-            edge_color=color, arrowstyle='-', alpha=.5, width=4, ax=ax
+            edge_color=color, arrowstyle='-', width=4, min_target_margin=0, 
+            ax=ax
         )
         
         # Draw non-reciprocal edges with specific style
         non_reciprocal_edges = [e for e in network.edges if e not in reciprocal_edges]
         nx.draw_networkx_edges(
             network, loc, edgelist=non_reciprocal_edges, 
-            edge_color=color, arrowstyle="->", style="-", width=.4,
+            edge_color=color, arrowstyle="->", width=.4, min_target_margin=10,
+            ax=ax 
         )
         
         # Return figure
