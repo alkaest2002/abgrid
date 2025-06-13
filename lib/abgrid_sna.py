@@ -1,5 +1,5 @@
 """
-Filename: abgrid_network.py
+Filename: abgrid_sna.py
 Description: Provides functionality to analyze directed networks (graphs) for a given set of edges.
 
 Author: Pierpaolo Calanna
