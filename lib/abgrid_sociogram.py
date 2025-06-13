@@ -219,32 +219,40 @@ class ABGridSociogram:
             pd.Series: Series with sociometric status for each node, indicating states such as isolated, marginal, etc.
         """
         # Cache relevant columns
-        a_choices = sociogram_micro_df["rp"]
-        b_choices = sociogram_micro_df["rr"]
-        impact = sociogram_micro_df["im"]
-        balance = sociogram_micro_df["bl"]
-    
-        # Compute absolute balance
-        abs_balance = balance.abs()
 
-        # Compute a-dominant, b-dominant, and neutral evaluations
-        a_dominant = np.logical_and(balance > 0, abs_balance >= impact.median())
-        b_dominant = np.logical_and(balance < 0, abs_balance >= impact.median())
-        neutral = np.logical_and(a_choices.mul(b_choices).gt(0), abs_balance < impact.median())
+        # Compute impact 
+        impact = sociogram_micro_df["im"]
+        low_impact = impact.lt(impact.quantile(.3))
+        high_impact = impact.gt(impact.quantile(.7))
+        median_impact = impact.between(impact.quantile(.3), impact.quantile(.7), inclusive="both")
         
-        # Init status as a pandas Series with "-"
+        # Compute absolute balnce
+        balance = sociogram_micro_df["bl"]
+        abs_balance = balance.abs()
+        
+        # Compute dominance, prevalence and neutrality
+        neutral = abs_balance.between(0, abs_balance.median(), inclusive="both")
+        a_prevalent = balance.gt(0) & abs_balance.between(abs_balance.median(), abs_balance.quantile(.75), inclusive="neither")
+        b_prevalent = balance.lt(0) & abs_balance.between(abs_balance.median(), abs_balance.quantile(.75), inclusive="neither")
+        a_dominant = balance.gt(0) & abs_balance.ge(abs_balance.quantile(.75))
+        b_dominant = balance.lt(0) & abs_balance.ge(abs_balance.quantile(.75))
+        
+        # Init status as a pandas Series with default value of "-"
         status = pd.Series(["-"] * sociogram_micro_df.shape[0], index=sociogram_micro_df.index)
         
-        # Compute status
+        # Compute statuses
         status.loc[sociogram_micro_df.iloc[:, :4].sum(axis=1).eq(0)] = "isolated"
-        status.loc[robust_z_impact < -1] = "marginal"
-        status.loc[np.logical_and(a_dominant, robust_z_impact.between(-1, 1))] = "appreciated"
-        status.loc[np.logical_and(b_dominant, robust_z_impact.between(-1, 1))] = "disliked"
-        status.loc[np.logical_and(neutral, robust_z_impact.between(-1, 1))] = "ambivalent"
-        status.loc[np.logical_and(a_dominant, robust_z_impact > 1)] = "popular"
-        status.loc[np.logical_and(b_dominant, robust_z_impact > 1)] = "rejected"
-        status.loc[np.logical_and(neutral, robust_z_impact > 1)] = "controversial"
+        status.loc[low_impact] = "marginal"
 
+        status.loc[a_dominant & ~low_impact] = "popular"
+        status.loc[a_prevalent & ~low_impact] = "appreciated"
+                
+        status.loc[b_dominant & ~low_impact] = "rejected"
+        status.loc[b_prevalent & ~low_impact] = "disliked"
+
+        status.loc[neutral & median_impact] = "ambivalent"
+        status.loc[neutral & high_impact] = "controversial"
+        
         # Return status
         return status
 
