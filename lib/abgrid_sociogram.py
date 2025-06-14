@@ -176,6 +176,7 @@ class ABGridSociogram:
                 .mul(robust_threshold * 10)
                 .add(100)
                 .astype(int)
+                .clip(lower=0, upper=200)
         )
 
         # Compute robust z-scores for influence index (ii)
@@ -189,6 +190,7 @@ class ABGridSociogram:
                 .mul(robust_threshold * 10)
                 .add(100)
                 .astype(int)
+                .clip(lower=0, upper=200)
         )
 
         # Compute status interpretation
