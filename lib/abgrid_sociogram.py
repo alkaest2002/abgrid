@@ -199,13 +199,12 @@ class ABGridSociogram:
         # Return sociogram micro statistics
         return sociogram_micro_df.sort_index()
 
-    def compute_status(self, sociogram_micro_df: pd.DataFrame, epsilon: float = 0.05) -> pd.Series:
+    def compute_status(self, sociogram_micro_df: pd.DataFrame) -> pd.Series:
         """
         Determine sociometric status for each node based on sociogram statistics.
         
         Args:
             sociogram_micro_df (pd.DataFrame): DataFrame containing micro-level statistics.
-            epsilon (float): Tolerance for quantile proportion matching (default: 0.05)
             
         Returns:
             pd.Series: Series with sociometric status for each node, indicating states such as isolated, marginal, etc.
@@ -266,7 +265,7 @@ class ABGridSociogram:
         
         # Get absolute balance quantiles
         abs_balance = balance.abs()
-        _, abs_balance_quantile_high = select_best_quantiles(abs_balance, quantile_pairs, 0.05)
+        abs_balance_quantile_low, abs_balance_quantile_high = select_best_quantiles(abs_balance, quantile_pairs, 0.05)
         abs_balance_high = abs_balance.gt(abs_balance_quantile_high)
         
         # Compute balance boolean series
@@ -274,7 +273,7 @@ class ABGridSociogram:
         b_prevalent = balance.lt(0) & ~abs_balance_high
         a_dominant = balance.gt(0) & abs_balance_high
         b_dominant = balance.lt(0) & abs_balance_high
-        neutral = abs_balance.between(0, abs_balance.median(), inclusive="both")
+        neutral = abs_balance.lt(abs_balance_quantile_low)
         
         # Init status as a pandas Series with default value of "-"
         status = pd.Series(["-"] * sociogram_micro_df.shape[0], index=sociogram_micro_df.index)
@@ -295,6 +294,8 @@ class ABGridSociogram:
         status.loc[b_prevalent & impact_high] = "disliked"
         status.loc[b_prevalent & impact_median] = "disliked"
         
+        status.loc[balance.eq(0) & impact_median] = "ambitendent"
+        status.loc[balance.eq(0) & impact_high] = "controversial"
         status.loc[prefs_a.mul(prefs_b).gt(0) & neutral & impact_median] = "ambitendent"
         status.loc[prefs_a.mul(prefs_b).gt(0) & neutral & impact_high] = "controversial"
         
