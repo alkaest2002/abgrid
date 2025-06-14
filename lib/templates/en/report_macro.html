@@ -1,6 +1,6 @@
 {% macro render_report_header(project_title, group, type) %}
 <div class="section-header">
-    <span><b>{{ project_title | upper }} | GROUP {{ group | upper }}</b></span><span>{% if type == "sna_graph" %}SNA NETWORK GRAPH{% elif type == "sna_raw_scores" %}SNA RAW SCORES{% elif type == "sna_ranks" %}SNA RANK SCORES{% elif type == "sna_rankings" %}SNA NODES ORDERED BY RANKS{% elif type == "sna_edges_types" %}SNA EDGES GROUPED BY TYPE{% elif type == "sna_components" %}SNA SUBGRAPHS{% elif type == "sociogram_micro" %}SOCIOGRAM{% elif type == "sociogram_rankings" %}SOCIOGRAM NODES ORDERED BY RANKS{% elif type == "sociogram_macro" %}SOCIOGRAM STATISTICS{% endif %}</span>
+    <span><b>{{ project_title | upper }} | GROUP {{ group | upper }}</b></span><span>{% if type == "sna_graph" %}SNA NETWORK GRAPH{% elif type == "sna_raw_scores" %}SNA RAW SCORES{% elif type == "sna_ranks" %}SNA RANK SCORES{% elif type == "sna_rankings" %}SNA NODES ORDERED BY RANKS{% elif type == "sna_edges_types" %}SNA EDGES GROUPED BY TYPE{% elif type == "sna_components" %}SNA SUBGRAPHS{% elif type == "sociogram_micro" %}SOCIOGRAM{% elif type == "sociogram_rankings" %}SOCIOGRAM NODES ORDERED BY RANKS{% elif type == "sociogram_graph" %}SOCIOGRAM GRAPH{% elif type == "sociogram_macro" %}SOCIOGRAM STATISTICS{% endif %}</span>
 </div>
 {% endmacro %}
 
