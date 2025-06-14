@@ -97,13 +97,13 @@
     <span class="text-italic">Nessun componente di questo tipo</span>
 {% endmacro %}
 
-{% macro render_sna_legend(show_macro=False, show_micro=False, show_arrows=False, show_colors=False) %}
+{% macro render_sna_legend(show_macro=False, show_micro=False, show_arrows=False) %}
 <div class="table-data-legend">
     {% if show_macro %}<b>NN</b> Nodi <b>NE</b> Legami <b>NR</b> Legami reciproci <b>ND</b> Densità <b>NC</b> Centralizzazione <b>NT</b> Transitività <b>NR</b> Reciprocità {% endif %}{% if show_micro%}<b>IC</b> In-Degree <b>PR</b> PageRank <b>BT</b> Betweenness <b>CL</b> Closenness <b>HU</b> Hub {% endif %}{% if show_arrows %}<b>ND</b> No In-Degree (&larr; ) No Out-Degree (&rarr;) No In o Out-Degree (&rlarr;) {% endif %}
 </div>
 {% endmacro %}
 
-{% macro render_sociogram_legend(show_macro=False, show_micro=False, show_rankings=False, show_colors=False) %}
+{% macro render_sociogram_legend(show_macro=False, show_micro=False, show_rankings=False) %}
 <div class="table-data-legend">
     {% if show_macro %}<b>Count</b> Frequenza <b>Sum</b> Somma <b>Median</b> Mediana <b>IQR</b> Range interquartilico <b>Mean</b> Media <b>SD</b> Deviazione standard <b>Min</b> Valore minimo <b>P25</b> 25° percentile <b>P50</b> 50° percentile <b>P75</b> 75° percentile <b>Max</b> Valore massimo {% endif %}{% if show_micro %}<b>RP</b> Preferenze ricevute <b>RR</b> Rifiuti ricevuti <b>GP</b> Preferenze date <b>GR</b> Rifiuti dati <b>MP</b> Preferenze reciproche <b>MR</b> Rifiuti reciproci <b>BL</b> Saldo <b>OR</b> Orientamento <b>IM</b> Impatto <b>AI</b> Indice di affiliazione <b>II</b> Indice di influenza <b>ST</b> Status sociometrico {% endif %}{%if show_rankings %}<b>RP</b> Preferenze ricevute <b>RR</b> Rifiuti ricevuti <b>GP</b> Preferenze date <b>GR</b> Rifiuti dati <b>BL</b> Saldo <b>IM</b> Impatto <b>AI</b> Indice di affiliazione <b>II</b> Indice di influenza {% endif %}
 </div>
