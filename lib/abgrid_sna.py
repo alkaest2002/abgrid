@@ -32,8 +32,8 @@ class SNADict(TypedDict):
     macro_stats_b: Optional[pd.Series]
     micro_stats_a: Optional[pd.DataFrame]
     micro_stats_b: Optional[pd.DataFrame]
-    rankings_a: Optional[pd.DataFrame]
-    rankings_b: Optional[pd.DataFrame]
+    rankings_a: Optional[Dict[str, pd.Series]]
+    rankings_b: Optional[Dict[str, pd.Series]]
     edges_types_a: Optional[Dict[str, pd.Index]]
     edges_types_b: Optional[Dict[str, pd.Index]]
     components_a: Optional[Dict[str, pd.Series]]
@@ -277,20 +277,31 @@ class ABGridSna:
                 .sort_index()
         )
         
-    def compute_rankings(self, network_type: Literal["a", "b"]) -> pd.DataFrame:
+    def compute_rankings(self, network_type: Literal["a", "b"]) -> Dict[str, pd.Series]:
         """
         Generate and return the order of nodes based on their rank scores for each centrality metric.
-
+        
         Args:
-            network_type (Literal["a", "b"]):
-                The type identifier for selecting the specific network.
-
-        pd.DataFrame:
-            A pandas DataFrame containing nodes sorted by their rank across various centrality 
-            metrics.
+            network_type (Literal["a", "b"]): The type identifier for selecting the specific network.
+        
+        Returns:
+            Dict[str, pd.Series]: A dictionary where each key corresponds to a metric from the input DataFrame.
+                The value is a pandas Series mapping node identifiers to their rank order
+                (ordinal position) based on the metric scores.
         """
-        # Return columns that represent rank data
-        return self.sna[f"micro_stats_{network_type}"].filter(regex=r"_rank$")
+        # Get the micro stats DataFrame for the specified network type
+        micro_stats_df = self.sna[f"micro_stats_{network_type}"]
+        
+        # Filter columns that end with '_rank' to get ranking data
+        rank_columns = micro_stats_df.filter(regex=r"_rank$").astype(int)
+        
+        # Convert to dictionary with metric names as keys and Series as values
+        rankings = {}
+        for metric_name in rank_columns.columns:
+            rankings[metric_name] = rank_columns[metric_name].sort_values()
+        
+        # Return rankings
+        return rankings
               
     def compute_edges_types(self, network_type: Literal["a", "b"]) -> Dict[str, pd.Index]:
         """

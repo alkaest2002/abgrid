@@ -19,7 +19,7 @@ from lib.abgrid_utils import figure_to_base64_svg
 class SociogramDict(TypedDict):
     macro_stats: Optional[Dict[str, Union[int, float]]]
     micro_stats: Optional[pd.DataFrame]
-    rankings: Optional[pd.DataFrame]
+    rankings: Optional[Dict[str, pd.Series]]
     supplemental: Optional[Dict[str, float]]
     graph_ic: Optional[str]
     graph_ac: Optional[str]
@@ -248,24 +248,52 @@ class ABGridSociogram:
         # Return status
         return status
 
-    def compute_rankings(self, micro_stats: pd.DataFrame) -> Dict[str, pd.Series]:
+    def compute_rankings(self, sociogram_micro_df: pd.DataFrame) -> Dict[str, pd.Series]:
         """
         Generate and return the order of nodes based on their rank scores for each specified centrality metric.
-
+        
         Args:
-            micro_stats (pd.DataFrame): A DataFrame containing micro-level statistics for nodes
+            sociogram_micro_df (pd.DataFrame): A DataFrame containing micro-level statistics for nodes
                 indexed by node identifiers with columns representing metrics.
-
+        
         Returns:
             Dict[str, pd.Series]: A dictionary where each key corresponds to a metric from the input DataFrame.
                 The value is a pandas Series mapping node identifiers to their rank order
                 (ordinal position) based on the metric scores.
         """
-        # Select metrics
-        metrics = micro_stats.loc[:, ["rp", "rr", "gp", "gr", "bl", "im", "ai", "ii"]]
-
-        # Compute and return rankings
-        return metrics.rank(method="dense", ascending=False)
+        # Define metrics to rank
+        CENTRALITY_METRICS = ["bl", "im", "ai", "ii"]
+        
+        # Define status ordering (from highest to lowest social status)
+        STATUS_ORDER = [
+            "popular", "appreciated", "marginal", "ambivalent",
+            "controversial", "disliked", "rejected", "isolated"
+        ]
+        
+        rankings = {}
+        
+        # Rank centrality metrics (higher scores get better ranks)
+        centrality_data = sociogram_micro_df.loc[:, CENTRALITY_METRICS]
+        ranked_metrics = centrality_data.rank(method="dense", ascending=False).astype(int)
+        
+        # Add centrality rankings to results
+        for metric in CENTRALITY_METRICS:
+            rankings[metric] = ranked_metrics[metric].sort_values()
+        
+        # Handle status ordering (categorical ranking)
+        status_series = sociogram_micro_df["st"]
+        
+        # Create a mapping from status to order position
+        status_to_order = {status: idx for idx, status in enumerate(STATUS_ORDER)}
+        
+        # Convert status to numerical order for sorting
+        status_with_order = status_series.map(status_to_order)
+        
+        # Sort by status order and return the sorted status series
+        sorted_indices = status_with_order.sort_values().index
+        rankings["st"] = status_series.loc[sorted_indices]
+        # Return rankings
+        return rankings
 
     def create_graph(self, coefficient: Literal["ai", "ii"]) -> str:
         """

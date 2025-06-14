@@ -154,7 +154,7 @@
 </div>
 {% endmacro %}
 
-{% macro render_rankings(rankings, render_rank_label) %}
+{% macro render_rankings(rankings, render_rank_label, render_sociogram_status_label) %}
 <div class="rankings-container mt-lg">
     {% for metric_label, data in rankings.items() %}
         <div class="rankings-main">
@@ -163,13 +163,26 @@
                     <th>{{ render_rank_label() }}</th>
                     <th>{{ metric_label[:2] | upper }}</th>
                 </tr>
-                {% for letter, rank in data.sort_values().items() %}
+                {% for letter, rank in data.items() %}
                     <tr>
                         <td>
-                            <div><div>{{ rank | int }}</div></div>
+                            <div>
+                                <div>
+                                    {% if metric_label == "st" %}
+                                        {{ render_sociogram_status_label(rank) }}
+                                    {% else %}
+                                        {{ rank }}
+                                    {% endif %}
+                                   
+                                </div>
+                            </div>
                         </td>
                         <td>
-                            <div><div>{{ letter }}</div></div>
+                            <div>
+                                <div>
+                                    {{ letter }}
+                                </div>
+                            </div>
                         </td>
                     </tr>
                 {% endfor %}
