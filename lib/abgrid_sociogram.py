@@ -199,20 +199,60 @@ class ABGridSociogram:
         # Return sociogram micro statistics
         return sociogram_micro_df.sort_index()
 
-    def compute_status(self, sociogram_micro_df: pd.DataFrame) -> pd.Series:
+    def compute_status(self, sociogram_micro_df: pd.DataFrame, epsilon: float = 0.05) -> pd.Series:
         """
         Determine sociometric status for each node based on sociogram statistics.
-
+        
         Args:
             sociogram_micro_df (pd.DataFrame): DataFrame containing micro-level statistics.
-
+            epsilon (float): Tolerance for quantile proportion matching (default: 0.05)
+            
         Returns:
             pd.Series: Series with sociometric status for each node, indicating states such as isolated, marginal, etc.
         """
-        # Cache impact column and compute quantiles
+        def select_best_quantiles(series: pd.Series, quantile_pairs: list, epsilon: float) -> tuple:
+            """
+            Select the first quantile pair that matches theoretical proportions within epsilon tolerance.
+            
+            Args:
+                series: The data series to analyze
+                quantile_pairs: List of (low, high) quantile pairs to test
+                epsilon: Tolerance for proportion matching
+                
+            Returns:
+                tuple: (low_value, high_value) for first reasonable match
+            """
+            n = len(series)
+            
+            for low_q, high_q in quantile_pairs:
+                # Calculate quantile values
+                low_val = series.quantile(low_q)
+                high_val = series.quantile(high_q)
+                
+                # Calculate actual proportions
+                actual_low_prop = (series < low_val).sum() / n
+                actual_high_prop = (series > high_val).sum() / n
+                
+                # Calculate deviations from theoretical proportions
+                low_deviation = abs(actual_low_prop - low_q)
+                high_deviation = abs(actual_high_prop - (1 - high_q))
+
+                # Return first quantile pair within epsilon tolerance
+                if low_deviation <= epsilon and high_deviation <= epsilon:
+                    return (low_val, high_val)
+            
+            # If no quantiles within epsilon, return the last pair as fallback
+            low_q, high_q = quantile_pairs[-1]
+            low_val = series.quantile(low_q)
+            high_val = series.quantile(high_q)
+            return (low_val, high_val)
+        
+        # Define quantile pairs to test
+        quantile_pairs = [(0.25, 0.85), (0.2, 0.8), (0.15, 0.85), (0.10, 0.90), (0.05, 0.95)]
+        
+        # Cache impact column and select best quantiles
         impact = sociogram_micro_df["im"]
-        impact_quantile_low = impact.quantile(.3)
-        impact_quantile_high = impact.quantile(.7)
+        impact_quantile_low, impact_quantile_high = select_best_quantiles(impact, quantile_pairs, 0.05)
         
         # Compute relevant impact boolean series
         impact_low = impact.lt(impact_quantile_low)
@@ -222,27 +262,38 @@ class ABGridSociogram:
         # Cache balance column and compute quantiles
         balance = sociogram_micro_df["bl"]
         abs_balance = balance.abs()
-        abs_balance_quantile_median = abs_balance.median()
-        abs_balance_quantile_high = abs_balance.quantile(.75)        
+        abs_balance_quantile_low, abs_balance_quantile_high = select_best_quantiles(abs_balance, quantile_pairs, 0.05)
+        abs_balance_high = abs_balance.gt(abs_balance_quantile_high)
+        abs_balance_low = abs_balance.lt(abs_balance_quantile_low)
+        abs_balance_median = abs_balance.between(abs_balance_low, abs_balance_high, inclusive="both")
         
         # Compute relevant balance boolean series
-        a_prevalent = balance.gt(0) & abs_balance.between(abs_balance_quantile_median, abs_balance_quantile_high, inclusive="neither")
-        b_prevalent = balance.lt(0) & abs_balance.between(abs_balance_quantile_median, abs_balance_quantile_high, inclusive="neither")
-        a_dominant = balance.gt(0) & abs_balance.ge(abs_balance_quantile_high)
-        b_dominant = balance.lt(0) & abs_balance.ge(abs_balance_quantile_high)
-        neutral = abs_balance.between(0, abs_balance_quantile_median, inclusive="both")
+        a_prevalent = balance.gt(0) & ~abs_balance_high
+        b_prevalent = balance.lt(0) & ~abs_balance_high
+        a_dominant = balance.gt(0) & abs_balance_high
+        b_dominant = balance.lt(0) & abs_balance_high
+        neutral = abs_balance.between(0, abs_balance.median(), inclusive="both")
         
         # Init status as a pandas Series with default value of "-"
-        status = pd.Series(["-"] * sociogram_micro_df.shape[0], index = sociogram_micro_df.index)
+        status = pd.Series(["-"] * sociogram_micro_df.shape[0], index=sociogram_micro_df.index)
         
         # Compute statuses
         status.loc[sociogram_micro_df.iloc[:, :4].sum(axis=1).eq(0)] = "isolated"
         status.loc[impact_low] = "marginal"
-        status.loc[a_dominant & ~impact_low] = "popular"
-        status.loc[a_prevalent & ~impact_low] = "appreciated"
-        status.loc[b_dominant & ~impact_low] = "rejected"
-        status.loc[b_prevalent & ~impact_low] = "disliked"
-        status.loc[neutral & impact_median] = "ambivalent"
+        
+        status.loc[a_dominant & impact_high] = "popular"
+        status.loc[a_dominant & impact_median] = "popular"
+        
+        status.loc[a_prevalent & impact_high] = "appreciated"
+        status.loc[a_prevalent & impact_median] = "appreciated"
+        
+        status.loc[b_dominant & impact_high] = "rejected"
+        status.loc[b_dominant & impact_median] = "rejected"
+        
+        status.loc[b_prevalent & impact_high] = "disliked"
+        status.loc[b_prevalent & impact_median] = "disliked"
+        
+        status.loc[neutral & impact_median] = "ambitendent"
         status.loc[neutral & impact_high] = "controversial"
         
         # Return status
@@ -251,25 +302,24 @@ class ABGridSociogram:
     def compute_rankings(self, sociogram_micro_df: pd.DataFrame) -> Dict[str, pd.Series]:
         """
         Generate and return the order of nodes based on their rank scores for each specified centrality metric.
-        
         Args:
             sociogram_micro_df (pd.DataFrame): A DataFrame containing micro-level statistics for nodes
-                indexed by node identifiers with columns representing metrics.
-        
+                                            indexed by node identifiers with columns representing metrics.
         Returns:
             Dict[str, pd.Series]: A dictionary where each key corresponds to a metric from the input DataFrame.
-                The value is a pandas Series mapping node identifiers to their rank order
-                (ordinal position) based on the metric scores.
+                                The value is a pandas Series mapping node identifiers to their rank order
+                                (ordinal position) based on the metric scores.
         """
         # Define metrics to rank
         CENTRALITY_METRICS = ["bl", "im", "ai", "ii"]
         
         # Define status ordering (from highest to lowest social status)
         STATUS_ORDER = [
-            "popular", "appreciated", "marginal", "ambivalent",
+            "popular", "appreciated", "ambitendent", "marginal",
             "controversial", "disliked", "rejected", "isolated"
         ]
         
+        # Init dict
         rankings = {}
         
         # Rank centrality metrics (higher scores get better ranks)
@@ -289,9 +339,19 @@ class ABGridSociogram:
         # Convert status to numerical order for sorting
         status_with_order = status_series.map(status_to_order)
         
-        # Sort by status order and return the sorted status series
-        sorted_indices = status_with_order.sort_values().index
+        # Sort by status order FIRST, then by index as secondary sort
+        # Create a DataFrame with both status order and original index for sorting
+        sort_df = pd.DataFrame({
+            'status_order': status_with_order,
+            'original_index': sociogram_micro_df.index
+        })
+        
+        # Sort by status_order first, then by original_index
+        sorted_indices = sort_df.sort_values(['status_order', 'original_index']).index
+        
+        # Return the status series in the new order
         rankings["st"] = status_series.loc[sorted_indices]
+        
         # Return rankings
         return rankings
 
