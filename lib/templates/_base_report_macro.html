@@ -55,41 +55,11 @@
                     <tr>
                         <td>{{ row_label }}</td>
                         <td>{{ row["lns"] | default("-", boolean=True) }}</td>
-                        <td>
-                            <div>
-                                <div>
-                                    {{ row["ic_rank"] | int }}
-                                </div>
-                            </div>
-                        </td>
-                        <td>
-                            <div>
-                                <div>
-                                    {{ row["pr_rank"] | int }}
-                                </div>
-                            </div>
-                        </td>
-                        <td>
-                            <div>
-                                <div>
-                                    {{ row["bt_rank"] | int }}
-                                </div>
-                            </div>
-                        </td>
-                        <td>
-                            <div>
-                                <div>
-                                    {{ row["cl_rank"] | int }}
-                                </div>
-                            </div>
-                        </td>
-                        <td>
-                            <div>
-                                <div>
-                                    {{ row["hu_rank"] | int }}
-                                </div>
-                            </div>
-                        </td>
+                        <td>{{ row["ic_rank"] | int }}</td>
+                        <td>{{ row["pr_rank"] | int }}</td>
+                        <td>{{ row["bt_rank"] | int }}</td>
+                        <td>{{ row["cl_rank"] | int }}</td>
+                        <td>{{ row["hu_rank"] | int }}</td>
                         <td >{% if row["nd"] == 1 %}&larr;{% elif row["nd"] == 2 %}&rarr;{% elif row["nd"] == 3 %}&rlarr;{% endif %}</td>
                     </tr>
                 {% else %}
@@ -122,23 +92,14 @@
                 {% for letter, rank in data.items() %}
                     <tr>
                         <td>
-                            <div>
-                                <div>
-                                    {% if metric_label == "st" %}
-                                        {{ render_sociogram_status_label(rank) }}
-                                    {% else %}
-                                        {{ rank }}
-                                    {% endif %}
-                                   
-                                </div>
-                            </div>
+                            {% if metric_label == "st" %}
+                                {{ render_sociogram_status_label(rank) }}
+                            {% else %}
+                                {{ rank }}
+                            {% endif %}
                         </td>
                         <td>
-                            <div>
-                                <div>
-                                    {{ letter }}
-                                </div>
-                            </div>
+                            {{ letter }}
                         </td>
                     </tr>
                 {% endfor %}

@@ -95,7 +95,17 @@
                 {{ report_macro.render_disclaimer() }}
                 {{ report_macro.render_report_header(project_title, group, "sociogram_micro") }}
                 {{ base_report_macro.render_sociogram_micro_statistics(sociogram.micro_stats, report_macro.render_sociogram_status_label) }}
-                {{ report_macro.render_sociogram_legend(show_micro=True, show_colors=True)}}
+                {{ report_macro.render_sociogram_legend(show_micro=True)}}
+            </div>
+            {{ report_macro.render_footer(year) }}
+        </div>
+        <div class="page">
+            <div>
+                {{ base_macro.render_logo() }}
+                {{ report_macro.render_disclaimer() }}
+                {{ report_macro.render_report_header(project_title, group, "sociogram_rankings") }}
+                {{ base_report_macro.render_rankings(sociogram["rankings"], report_macro.render_rank_label, report_macro.render_sociogram_status_label) }}
+                {{ report_macro.render_sociogram_legend(show_rankings=True) }}
             </div>
             {{ report_macro.render_footer(year) }}
         </div>
@@ -114,16 +124,6 @@
                 {{ report_macro.render_disclaimer() }}
                 {{ report_macro.render_report_header(project_title, group, "sociogram_micro") }}
                 {{ base_report_macro.render_sociogram_graphs(sociogram["graph_ac"], report_macro.render_sociogram_graph_label("ai")) }}
-            </div>
-            {{ report_macro.render_footer(year) }}
-        </div>
-        <div class="page">
-            <div>
-                {{ base_macro.render_logo() }}
-                {{ report_macro.render_disclaimer() }}
-                {{ report_macro.render_report_header(project_title, group, "sociogram_rankings") }}
-                {{ base_report_macro.render_rankings(sociogram["rankings"], report_macro.render_rank_label, report_macro.render_sociogram_status_label) }}
-                {{ report_macro.render_sociogram_legend(show_rankings=True) }}
             </div>
             {{ report_macro.render_footer(year) }}
         </div>
