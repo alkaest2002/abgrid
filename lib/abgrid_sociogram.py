@@ -167,12 +167,12 @@ class ABGridSociogram:
         
         # Compute robust z-scores for affiliation index (ai)
         affiliation = sociogram_micro_df["ai"]
-        median_affiliation = affiliation.median()
-        mad_affiliation = max(affiliation.sub(median_affiliation).abs().median(), 1e-6)
+        affiliation_median = affiliation.median()
+        affiliation_mad = max(affiliation.sub(affiliation_median).abs().median(), 1e-6)
         sociogram_micro_df["ai_robust_z"] = (
             affiliation
-                .sub(median_affiliation)
-                .div(mad_affiliation)
+                .sub(affiliation_median)
+                .div(affiliation_mad)
                 .mul(robust_threshold * 10)
                 .add(100)
                 .astype(int)
@@ -180,78 +180,70 @@ class ABGridSociogram:
 
         # Compute robust z-scores for influence index (ii)
         influence = sociogram_micro_df["ii"]
-        median_influence = influence.median()
-        mad_influence = max(influence.sub(median_influence).abs().median(), 1e-6)
+        influence_median = influence.median()
+        influence_mad = max(influence.sub(influence_median).abs().median(), 1e-6)
         sociogram_micro_df["ii_robust_z"] = (
             influence
-                .sub(median_influence)
-                .div(mad_influence)
+                .sub(influence_median)
+                .div(influence_mad)
                 .mul(robust_threshold * 10)
                 .add(100)
                 .astype(int)
         )
 
-        # Compute robust impact
-        impact = sociogram_micro_df["im"]
-        median_impact = impact.median()
-        mad_impact = max(impact.sub(median_impact).abs().median(), 1e-6)
-        robust_z_impact = (
-            impact.sub(median_impact).div(mad_impact).mul(robust_threshold)
-        )
-
         # Compute status interpretation
         sociogram_micro_df["st"] = (
-            self.compute_status_interpretation(sociogram_micro_df, robust_z_impact)
+            self.compute_status(sociogram_micro_df)
         )
 
         # Return sociogram micro statistics
         return sociogram_micro_df.sort_index()
 
-    def compute_status_interpretation(self, sociogram_micro_df: pd.DataFrame, robust_z_impact: float) -> pd.Series:
+    def compute_status(self, sociogram_micro_df: pd.DataFrame) -> pd.Series:
         """
         Determine sociometric status for each node based on sociogram statistics.
 
         Args:
             sociogram_micro_df (pd.DataFrame): DataFrame containing micro-level statistics.
-            robust_z_impact (float): The robustness threshold used for calculating certain metrics.
 
         Returns:
             pd.Series: Series with sociometric status for each node, indicating states such as isolated, marginal, etc.
         """
-        # Cache relevant columns
-
-        # Compute impact 
+        # Cache impact column and compute quantiles
         impact = sociogram_micro_df["im"]
-        low_impact = impact.lt(impact.quantile(.3))
-        high_impact = impact.gt(impact.quantile(.7))
-        median_impact = impact.between(impact.quantile(.3), impact.quantile(.7), inclusive="both")
+        impact_quantile_low = impact.quantile(.3)
+        impact_quantile_high = impact.quantile(.7)
         
-        # Compute absolute balnce
+        # Compute relevant impact boolean series
+        impact_low = impact.lt(impact_quantile_low)
+        impact_high = impact.gt(impact_quantile_high)
+        impact_median = impact.between(impact_quantile_low, impact_quantile_high, inclusive="both")
+        
+        # Cache balance column and compute quantiles
         balance = sociogram_micro_df["bl"]
         abs_balance = balance.abs()
+        abs_balance_quantile_median = abs_balance.median()
+        abs_balance_quantile_high = abs_balance.quantile(.75)        
         
-        # Compute dominance, prevalence and neutrality
-        neutral = abs_balance.between(0, abs_balance.median(), inclusive="both")
-        a_prevalent = balance.gt(0) & abs_balance.between(abs_balance.median(), abs_balance.quantile(.75), inclusive="neither")
-        b_prevalent = balance.lt(0) & abs_balance.between(abs_balance.median(), abs_balance.quantile(.75), inclusive="neither")
-        a_dominant = balance.gt(0) & abs_balance.ge(abs_balance.quantile(.75))
-        b_dominant = balance.lt(0) & abs_balance.ge(abs_balance.quantile(.75))
+        # Compute relevant balance boolean series
+        a_prevalent = balance.gt(0) & abs_balance.between(abs_balance_quantile_median, abs_balance_quantile_high, inclusive="neither")
+        b_prevalent = balance.lt(0) & abs_balance.between(abs_balance_quantile_median, abs_balance_quantile_high, inclusive="neither")
+        a_dominant = balance.gt(0) & abs_balance.ge(abs_balance_quantile_high)
+        b_dominant = balance.lt(0) & abs_balance.ge(abs_balance_quantile_high)
+        neutral = abs_balance.between(0, abs_balance_quantile_median, inclusive="both")
         
         # Init status as a pandas Series with default value of "-"
         status = pd.Series(["-"] * sociogram_micro_df.shape[0], index=sociogram_micro_df.index)
         
         # Compute statuses
         status.loc[sociogram_micro_df.iloc[:, :4].sum(axis=1).eq(0)] = "isolated"
-        status.loc[low_impact] = "marginal"
-
-        status.loc[a_dominant & ~low_impact] = "popular"
-        status.loc[a_prevalent & ~low_impact] = "appreciated"
-                
-        status.loc[b_dominant & ~low_impact] = "rejected"
-        status.loc[b_prevalent & ~low_impact] = "disliked"
-
-        status.loc[neutral & median_impact] = "ambivalent"
-        status.loc[neutral & high_impact] = "controversial"
+        status.loc[impact_low] = "marginal"
+        status.loc[a_dominant & ~impact_low] = "popular"
+        status.loc[a_prevalent & ~impact_low] = "appreciated"
+        status.loc[b_dominant & ~impact_low] = "rejected"
+        status.loc[b_prevalent & ~impact_low] = "disliked"
+        status.loc[neutral & impact_median] = "ambivalent"
+        status.loc[neutral & impact_high] = "controversial"
         
         # Return status
         return status
