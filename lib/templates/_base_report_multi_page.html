@@ -52,7 +52,7 @@
                 {{ report_macro.render_report_header(project_title, group, "sna_ranks") }}
                 {{ base_report_macro.render_question(network_type, question) }}
                 {{ base_report_macro.render_sna_micro_statistics(network_type, "ranks", micro_stats, report_macro.render_choices_label) }}
-                {{ report_macro.render_sna_legend(show_micro=True, show_arrows=True, show_colors=True) }}
+                {{ report_macro.render_sna_legend(show_micro=True, show_arrows=True) }}
             </div>
             {{ report_macro.render_footer(year) }}
         </div>
