@@ -233,7 +233,7 @@ class ABGridSociogram:
         neutral = abs_balance.between(0, abs_balance_quantile_median, inclusive="both")
         
         # Init status as a pandas Series with default value of "-"
-        status = pd.Series(["-"] * sociogram_micro_df.shape[0], index=sociogram_micro_df.index)
+        status = pd.Series(["-"] * sociogram_micro_df.shape[0], index = sociogram_micro_df.index)
         
         # Compute statuses
         status.loc[sociogram_micro_df.iloc[:, :4].sum(axis=1).eq(0)] = "isolated"
