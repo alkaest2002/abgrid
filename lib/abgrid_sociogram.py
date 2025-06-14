@@ -248,26 +248,28 @@ class ABGridSociogram:
             return (low_val, high_val)
         
         # Define quantile pairs to test
-        quantile_pairs = [(0.25, 0.85), (0.2, 0.8), (0.15, 0.85), (0.10, 0.90), (0.05, 0.95)]
+        quantile_pairs = [(0.25, 0.75), (0.2, 0.8), (0.15, 0.85), (0.10, 0.90), (0.05, 0.95)]
         
-        # Cache impact column and select best quantiles
+        # Cache relevant columns
         impact = sociogram_micro_df["im"]
+        balance = sociogram_micro_df["bl"]
+        prefs_a = sociogram_micro_df["rp"]
+        prefs_b = sociogram_micro_df["rr"]
+        
+        # Get best impact quantiles
         impact_quantile_low, impact_quantile_high = select_best_quantiles(impact, quantile_pairs, 0.05)
         
-        # Compute relevant impact boolean series
+        # Compute impact boolean series
         impact_low = impact.lt(impact_quantile_low)
         impact_high = impact.gt(impact_quantile_high)
         impact_median = impact.between(impact_quantile_low, impact_quantile_high, inclusive="both")
         
-        # Cache balance column and compute quantiles
-        balance = sociogram_micro_df["bl"]
+        # Get absolute balance quantiles
         abs_balance = balance.abs()
-        abs_balance_quantile_low, abs_balance_quantile_high = select_best_quantiles(abs_balance, quantile_pairs, 0.05)
+        _, abs_balance_quantile_high = select_best_quantiles(abs_balance, quantile_pairs, 0.05)
         abs_balance_high = abs_balance.gt(abs_balance_quantile_high)
-        abs_balance_low = abs_balance.lt(abs_balance_quantile_low)
-        abs_balance_median = abs_balance.between(abs_balance_low, abs_balance_high, inclusive="both")
         
-        # Compute relevant balance boolean series
+        # Compute balance boolean series
         a_prevalent = balance.gt(0) & ~abs_balance_high
         b_prevalent = balance.lt(0) & ~abs_balance_high
         a_dominant = balance.gt(0) & abs_balance_high
@@ -293,8 +295,8 @@ class ABGridSociogram:
         status.loc[b_prevalent & impact_high] = "disliked"
         status.loc[b_prevalent & impact_median] = "disliked"
         
-        status.loc[neutral & impact_median] = "ambitendent"
-        status.loc[neutral & impact_high] = "controversial"
+        status.loc[prefs_a.mul(prefs_b).gt(0) & neutral & impact_median] = "ambitendent"
+        status.loc[prefs_a.mul(prefs_b).gt(0) & neutral & impact_high] = "controversial"
         
         # Return status
         return status
@@ -319,7 +321,7 @@ class ABGridSociogram:
             "controversial", "disliked", "rejected", "isolated"
         ]
         
-        # Init dict
+        # Init dicts
         rankings = {}
         
         # Rank centrality metrics (higher scores get better ranks)
