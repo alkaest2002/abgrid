@@ -34,6 +34,10 @@ class ABGridSociogram:
         """
         Initialize the internal dictionary for storing sociogram data.
         """
+        # Init sna data
+        self.sna = None
+
+        # Init sociogram data
         self.sociogram: SociogramDict = {
             "macro_stats": None,
             "micro_stats": None,
