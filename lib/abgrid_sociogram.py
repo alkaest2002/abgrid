@@ -11,31 +11,48 @@ The code is part of the AB-Grid project and is licensed under the MIT License.
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
+import networkx as nx
 
-from typing import Any, Literal, Dict, Optional, TypedDict, Union
+from typing import Any, Literal, Dict, Optional, TypedDict, Tuple
 from lib import CM_TO_INCHES
 from lib.abgrid_utils import compute_descriptives, figure_to_base64_svg
 
+
 class SociogramDict(TypedDict):
-    macro_stats: Optional[Dict[str, Union[int, float]]]
+    """Dictionary structure for storing sociogram analysis results."""
+    macro_stats: Optional[pd.Series]
     micro_stats: Optional[pd.DataFrame]
     descriptives: Optional[pd.DataFrame]
     rankings: Optional[Dict[str, pd.Series]]
     graph_ii: Optional[str]
     graph_ai: Optional[str]
 
+
 class ABGridSociogram:
     """
     Analyzes and visualizes social networks by constructing components like macro/micro statistics,
     rankings, and graphical representations of sociograms.
+    
+    This class provides comprehensive social network analysis capabilities including:
+    - Macro-level network statistics (cohesion and conflict indices)
+    - Micro-level node statistics (centrality measures, status classification)
+    - Node rankings based on various centrality metrics
+    - Visualization of sociometric status distributions
+    
+    Attributes:
+        sna: Social network analysis data containing network graphs and adjacency matrices.
+        sociogram: Dictionary containing all computed sociogram data and visualizations.
     """
 
     def __init__(self) -> None:
         """
-        Initialize the internal dictionary for storing sociogram data.
+        Initialize the ABGridSociogram instance.
+        
+        Sets up internal data structures for storing social network analysis data
+        and computed sociogram results.
         """
         # Init sna data
-        self.sna = None
+        self.sna: Optional[Dict[str, Any]] = None
 
         # Init sociogram data
         self.sociogram: SociogramDict = {
@@ -52,18 +69,25 @@ class ABGridSociogram:
         Compute and store sociogram-related data from the provided social network analysis (SNA) data.
 
         Args:
-            sna (Dict[str, Any]): A dictionary containing the social network analysis data.
+            sna: A dictionary containing social network analysis data with the following structure:
+                - "network_a": NetworkX graph for positive relationships
+                - "network_b": NetworkX graph for negative relationships  
+                - "adjacency_a": Adjacency matrix for positive relationships
+                - "adjacency_b": Adjacency matrix for negative relationships
+                - "edges_types_a": Dictionary of edge types for network A
+                - "edges_types_b": Dictionary of edge types for network B
 
         Returns:
-            SociogramDict: A dictionary containing detailed sociogram data, structured as follows:
-                - "macro_stats": Dictionary of network-level statistics.
-                - "micro_stats": DataFrame of individual-level statistics.
-                - "descriptives": DataFrame with macro-level descriptive statistics.
-                - "rankings": Dictionary with rankings of nodes based on different centrality metrics.
-                - "graph_ii" and "graph_ai": Strings of base64-encoded SVGs representing graph visualizations.
+            A dictionary containing detailed sociogram data with the following structure:
+                - "macro_stats": Series of network-level statistics (cohesion/conflict indices)
+                - "micro_stats": DataFrame of individual-level statistics for each node
+                - "descriptives": DataFrame with macro-level descriptive statistics
+                - "rankings": Dictionary with node rankings based on centrality metrics
+                - "graph_ii": Base64-encoded SVG string of integration index visualization
+                - "graph_ai": Base64-encoded SVG string of activity index visualization
 
         Side Effects:
-            Updates the `self.sociogram` attribute with the computed sociogram data.
+            Updates the instance's `sna` and `sociogram` attributes with the computed data.
         """
         # Store sna data
         self.sna = sna
@@ -73,19 +97,32 @@ class ABGridSociogram:
         self.sociogram["micro_stats"] = self.compute_micro_stats()
         self.sociogram["descriptives"] = self.compute_descriptives()
         self.sociogram["rankings"] = self.compute_rankings()
-        self.sociogram["graph_ai"] = self.create_graph("ii")
-        self.sociogram["graph_ii"] = self.create_graph("ai")
+        self.sociogram["graph_ai"] = self.create_graph("ai")
+        self.sociogram["graph_ii"] = self.create_graph("ii")
 
         # Return sociogram data
         return self.sociogram
 
     def compute_macro_stats(self) -> pd.Series:
         """
-        Compute macro-level sociogram statistics.
+        Compute macro-level sociogram statistics including cohesion and conflict indices.
+        
+        Calculates network-level metrics that summarize the overall structure and
+        dynamics of positive and negative relationships in the network.
 
         Returns:
-            pd.Series: Series containing cohesion and conflict indices for the network.
+            A pandas Series containing:
+                - "ui_i": Type I cohesion index (ratio of mutual positive edges to total positive edges)
+                - "ui_ii": Type II cohesion index (ratio of mutual positive edges to network size)
+                - "wi_i": Type I conflict index (ratio of mutual negative edges to total negative edges)
+                - "wi_ii": Type II conflict index (ratio of mutual negative edges to network size)
+                
+        Raises:
+            AttributeError: If sna data has not been set via the get() method.
         """
+        if self.sna is None:
+            raise AttributeError("SNA data must be set before computing statistics")
+            
         # Calculate cohesion and conflict indices
         cohesion_index_type_i = (
             len(self.sna["edges_types_a"]["type_ii"]) * 2) / len(self.sna["network_a"].edges()
@@ -110,17 +147,38 @@ class ABGridSociogram:
     
     def compute_micro_stats(self) -> pd.DataFrame:
         """
-        Compute micro-level sociogram statistics for individual nodes based on social network data.
+        Compute micro-level sociogram statistics for individual nodes.
+        
+        Calculates comprehensive node-level metrics including centrality measures,
+        preference indices, and sociometric status classification for each node
+        in the network.
 
         Returns:
-            pd.DataFrame: DataFrame with micro-level statistics for each node, including metrics like rp, rr, gp, gr, etc.
+            A DataFrame with rows representing nodes and columns containing:
+                - "rp": Received positive nominations (in-degree from positive network)
+                - "rr": Received negative nominations (in-degree from negative network)
+                - "gp": Given positive nominations (out-degree from positive network)
+                - "gr": Given negative nominations (out-degree from negative network)
+                - "mp": Mutual positive connections
+                - "mr": Mutual negative connections
+                - "bl": Balance index (difference between positive and negative received)
+                - "or": Orientation index (difference between positive and negative given)
+                - "im": Impact index (sum of all received nominations)
+                - "ai": Activity index (sum of balance and orientation indices)
+                - "ii": Integration index (sum of received positive and mutual positive)
+                - "st": Sociometric status classification
+                
+        Raises:
+            AttributeError: If sna data has not been set via the get() method.
         """
-        
+        if self.sna is None:
+            raise AttributeError("SNA data must be set before computing statistics")
+            
         # Retrieve network and adjacency matrices
-        network_a = self.sna["network_a"]
-        network_b = self.sna["network_b"]
-        adjacency_a = self.sna["adjacency_a"]
-        adjacency_b = self.sna["adjacency_b"]
+        network_a: nx.DiGraph = self.sna["network_a"]
+        network_b: nx.DiGraph = self.sna["network_b"]
+        adjacency_a: np.ndarray = self.sna["adjacency_a"]
+        adjacency_b: np.ndarray = self.sna["adjacency_b"]
         
         # Init sociogram micro df
         sociogram_micro_stats = pd.concat([
@@ -147,27 +205,50 @@ class ABGridSociogram:
 
     def compute_descriptives(self) -> pd.DataFrame:
         """
-        Compute macro-level descriptive statistics based on micro-level statistics.
+        Compute macro-level descriptive statistics based on micro-level node statistics.
+        
+        Aggregates individual node statistics to provide network-level summaries
+        including measures of central tendency, dispersion, and distribution.
 
         Returns:
-            pd.DataFrame: DataFrame with macro-level descriptive statistics including median, IQR, and total sum.
+            A DataFrame containing descriptive statistics (median, IQR, total sum, etc.)
+            for all numeric columns in the micro-level statistics.
+            
+        Raises:
+            AttributeError: If micro_stats have not been computed yet.
         """
+        if self.sociogram["micro_stats"] is None:
+            raise AttributeError("Micro stats must be computed before descriptives")
+            
         # Select numeric columns only
         sociogram_numeric_columns = self.sociogram["micro_stats"].select_dtypes(np.number)
         
         # Return sociogram macro statistics
         return compute_descriptives(sociogram_numeric_columns)
         
-
     def compute_rankings(self) -> Dict[str, pd.Series]:
         """
-        Generate and return the order of nodes based on their rank scores for each specified centrality metric.
+        Generate node rankings based on centrality metrics and sociometric status.
+        
+        Creates ordinal rankings for nodes based on their scores in various centrality
+        measures and their sociometric status categories, with higher scores receiving
+        better (lower) rank numbers.
 
         Returns:
-            Dict[str, pd.Series]: A dictionary where each key corresponds to a metric from the input DataFrame.
-                                The value is a pandas Series mapping node identifiers to their rank order
-                                (ordinal position) based on the metric scores.
+            A dictionary where keys are metric names and values are pandas Series
+            containing node-to-rank mappings:
+                - "bl": Balance index rankings (higher balance = better rank)
+                - "im": Impact index rankings (higher impact = better rank)  
+                - "ai": Activity index rankings (higher activity = better rank)
+                - "ii": Integration index rankings (higher integration = better rank)
+                - "st": Status rankings (ordered by social desirability)
+                
+        Raises:
+            AttributeError: If micro_stats have not been computed yet.
         """
+        if self.sociogram["micro_stats"] is None:
+            raise AttributeError("Micro stats must be computed before rankings")
+            
         # Define metrics to rank
         CENTRALITY_METRICS = ["bl", "im", "ai", "ii"]
         
@@ -178,10 +259,10 @@ class ABGridSociogram:
         ]
         
         # Init dicts
-        rankings = {}
+        rankings: Dict[str, pd.Series] = {}
         
         # Rank centrality metrics (higher scores get better ranks)
-        sociogram_micro_stats =  self.sociogram["micro_stats"]
+        sociogram_micro_stats = self.sociogram["micro_stats"]
         centrality_data = sociogram_micro_stats.loc[:, CENTRALITY_METRICS]
         ranked_metrics = centrality_data.rank(method="dense", ascending=False).astype(int)
         
@@ -216,33 +297,52 @@ class ABGridSociogram:
     
     def compute_status(self, sociogram_micro_stats: pd.DataFrame) -> pd.Series:
         """
-        Determine sociometric status for each node based on sociogram statistics.
+        Determine sociometric status for each node based on relationship patterns.
+        
+        Classifies nodes into sociometric status categories based on their pattern
+        of positive and negative relationships received and given. Uses quantile-based
+        thresholds to distinguish between different levels of social impact and balance.
         
         Args:
-            sociogram_micro_stats (pd.DataFrame): DataFrame containing micro-level statistics.
+            sociogram_micro_stats: DataFrame containing micro-level statistics with
+                columns for received/given positive/negative nominations and derived indices.
             
         Returns:
-            pd.Series: Series with sociometric status for each node, indicating states such as isolated, marginal, etc.
+            A pandas Series with sociometric status labels for each node:
+                - "isolated": No incoming or outgoing relationships
+                - "marginal": Low overall social impact
+                - "popular": High positive impact with strong positive dominance
+                - "appreciated": Moderate positive impact with positive prevalence  
+                - "rejected": High negative impact with strong negative dominance
+                - "disliked": Moderate negative impact with negative prevalence
+                - "controversial": High impact with balanced positive/negative reception
+                - "ambitendent": Moderate impact with balanced positive/negative reception
+                
+        Note:
+            Uses adaptive quantile selection to find thresholds that best match
+            theoretical proportions for different impact and balance levels.
         """
         
-        # Inner function
-        def select_best_quantiles(series: pd.Series) -> tuple:
+        def select_best_quantiles(series: pd.Series) -> Tuple[float, float]:
             """
-            Select the first quantile pair that matches theoretical proportions within epsilon tolerance.
+            Select quantile thresholds that best match theoretical proportions.
+            
+            Tests multiple quantile pairs to find the first one where actual
+            proportions are within epsilon tolerance of theoretical values.
             
             Args:
-                series (pd.Series): The data series to analyze
+                series: The data series to analyze for quantile selection.
                 
             Returns:
-                tuple: (low_value, high_value) for the first reasonable match
+                A tuple containing (low_threshold, high_threshold) values.
             """
-            # Set epsilon
-            epsilon = .05
+            # Set epsilon tolerance for quantile matching
+            epsilon = 0.05
 
-            # Set qunatiles
+            # Define quantile pairs to test (low_quantile, high_quantile)
             quantile_pairs = [(0.25, 0.75), (0.2, 0.8), (0.15, 0.85), (0.10, 0.90), (0.05, 0.95)]
 
-            # Test each quatile tuple for best match
+            # Test each quantile tuple for best match
             for low_q, high_q in quantile_pairs:
                 
                 # Calculate quantile values
@@ -265,36 +365,36 @@ class ABGridSociogram:
             # return the last pair as a fallback
             return (low_val, high_val)
         
-        # Cache relevant columns
+        # Cache relevant columns for efficiency
         impact = sociogram_micro_stats["im"]
         balance = sociogram_micro_stats["bl"]
         prefs_a = sociogram_micro_stats["rp"]
         prefs_b = sociogram_micro_stats["rr"]
         
-        # Get best impact quantiles
+        # Get best impact quantiles for classification thresholds
         impact_quantile_low, impact_quantile_high = select_best_quantiles(impact)
         
-        # Compute impact boolean series
+        # Compute impact level boolean series
         impact_low = impact.lt(impact_quantile_low)
         impact_high = impact.gt(impact_quantile_high)
         impact_median = impact.between(impact_quantile_low, impact_quantile_high, inclusive="both")
         
-        # Get absolute balance quantiles
+        # Get absolute balance quantiles for relationship type classification
         abs_balance = balance.abs()
         abs_balance_quantile_low, abs_balance_quantile_high = select_best_quantiles(abs_balance)
         abs_balance_high = abs_balance.gt(abs_balance_quantile_high)
         
-        # Compute balance boolean series
+        # Compute balance type boolean series
         a_prevalent = balance.gt(0) & ~abs_balance_high
         b_prevalent = balance.lt(0) & ~abs_balance_high
         a_dominant = balance.gt(0) & abs_balance_high
         b_dominant = balance.lt(0) & abs_balance_high
         neutral = abs_balance.lt(abs_balance_quantile_low)
         
-        # Init status as a pandas Series with default value of "-"
+        # Initialize status series with default values
         status = pd.Series(["-"] * sociogram_micro_stats.shape[0], index=sociogram_micro_stats.index)
         
-        # Compute statuses
+        # Assign status classifications based on relationship patterns
         status.loc[sociogram_micro_stats.iloc[:, :4].sum(axis=1).eq(0)] = "isolated"
         status.loc[impact_low] = "marginal"
         
@@ -315,64 +415,75 @@ class ABGridSociogram:
         status.loc[prefs_a.mul(prefs_b).gt(0) & neutral & impact_median] = "ambitendent"
         status.loc[prefs_a.mul(prefs_b).gt(0) & neutral & impact_high] = "controversial"
         
-        # Return status
+        # Return status classifications
         return status
 
     def create_graph(self, coefficient: Literal["ai", "ii"]) -> str:
         """
-        Generate a graphical representation of sociogram rankings and return it encoded in base64 SVG format.
+        Generate a polar visualization of sociogram rankings.
+        
+        Creates a circular plot showing the distribution of nodes based on their
+        scores in the specified centrality coefficient, with nodes arranged in
+        concentric circles and grouped by score levels.
 
         Args:
-            coefficient (Literal["ai", "ii"]): The coefficient to be used for plotting the sociogram.
+            coefficient: The centrality coefficient to visualize. Must be either:
+                - "ai": Activity index (balance + orientation)
+                - "ii": Integration index (received positive + mutual positive)
         
         Returns:
-            str: A base64-encoded SVG string representing the sociogram plot.
+            A base64-encoded SVG string representing the polar sociogram visualization.
+            Nodes are plotted as points with labels, arranged in groups by score level
+            with applied jitter to reduce overlap.
+            
+        Raises:
+            AttributeError: If micro_stats have not been computed yet.
         """
-        # Get values
+        if self.sociogram["micro_stats"] is None:
+            raise AttributeError("Micro stats must be computed before creating graphs")
+            
+        # Get values for the specified coefficient
         data = self.sociogram["micro_stats"].loc[:, [coefficient]].copy()
         
-        # Normalize values
+        # Normalize values to [0, 1] range and invert for radial display
         plot_data = data.sub(data.min()).div(data.max() - data.min())
         plot_data = plot_data.max() - plot_data
         
-        # Create plot figure
+        # Create polar plot figure
         fig, ax = plt.subplots(
             constrained_layout=True, 
             figsize=(19 * CM_TO_INCHES, 19 * CM_TO_INCHES),
             subplot_kw={"projection": "polar"}
         )
         
-        # Customize plot figure
+        # Customize plot appearance
         ax.set_xticklabels([])
         ax.set_yticklabels([])
         ax.get_xaxis().set_visible(False)
         ax.set_ylim(0, 1.1)
         ax.grid(color="#bbb", linestyle="--", linewidth=.8)
         
-        # Set jitter parameters
+        # Set jitter parameters to reduce point overlap
         theta_jitter_scale = 0.03
         r_jitter_scale = 0.01
         
-        # Plot data points for each group
+        # Plot data points grouped by coefficient value
         for idx, (_, group_plot_data) in enumerate(plot_data.groupby(by=coefficient)):
-            # Define starting offset for the current bunch of data points
+            # Define angular offset for current group
             offset = idx % 2 * -np.pi + idx * 0.25
             
-            # Divide the 360 degree pie into equal size slices 
-            # based on the number of dots to be plotted
+            # Calculate angular spacing for points in this group
             slice_angle = (2 * np.pi) / group_plot_data[coefficient].shape[0]
 
-            # Reset index
+            # Reset index to get node labels
             group_plot_data = group_plot_data.reset_index(names="node_labels")
 
-            # Set r and theta data for the polar plot
+            # Set polar coordinates
             r = group_plot_data[coefficient]
             theta = pd.Series(group_plot_data[coefficient].index.values).mul(slice_angle).add(offset)
             
-            # Seed random state for reproducibility
+            # Apply reproducible jitter
             np.random.seed(42 + idx)
-
-            # Generate jitter
             theta_jitter = np.random.normal(0, theta_jitter_scale, len(theta))
             r_jitter = np.random.normal(0, r_jitter_scale, len(r))
             
@@ -383,9 +494,10 @@ class ABGridSociogram:
             # Plot data points
             ax.scatter(theta_jittered, r_jittered, c="#bbb", s=20)
 
-            # Annotate point labels
+            # Add node labels
             for i, txt in enumerate(group_plot_data["node_labels"]):
-                ax.annotate(txt, (theta_jittered.iloc[i], r_jittered.iloc[i]), color="blue", fontsize=12)
+                ax.annotate(txt, (theta_jittered.iloc[i], r_jittered.iloc[i]), 
+                          color="blue", fontsize=12)
 
-        # Return figure
+        # Return base64-encoded SVG
         return figure_to_base64_svg(fig)
