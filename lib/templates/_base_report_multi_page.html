@@ -100,16 +100,12 @@
             {{ base_macro.render_logo() }}
             {{ report_macro.render_disclaimer() }}
             {{ report_macro.render_report_header(project_title, group, "sna_descriptives") }}
-            <div class="mt-xl">
-                {{ base_report_macro.render_question("A", question_a) }}
-                {{ base_report_macro.render_descriptives(sna.descriptives_a, report_macro.render_sna_measures_label) }}
-                {{ report_macro.render_descriptive_legend(show_descriptives=True) }}
-            </div>
-            <div class="mt-xl">
-                {{ base_report_macro.render_question("B", question_b) }}
-                {{ base_report_macro.render_descriptives(sna.descriptives_b, report_macro.render_sna_measures_label) }}
-                {{ report_macro.render_descriptive_legend(show_descriptives=True) }}
-            </div>
+            {{ base_report_macro.render_question("A", question_a) }}
+            {{ base_report_macro.render_descriptives(sna.descriptives_a, report_macro.render_sna_measures_label) }}
+            {{ report_macro.render_descriptive_legend(show_descriptives=True) }}
+            {{ base_report_macro.render_question("B", question_b) }}
+            {{ base_report_macro.render_descriptives(sna.descriptives_b, report_macro.render_sna_measures_label) }}
+            {{ report_macro.render_descriptive_legend(show_descriptives=True) }}
         </div>
         {{ report_macro.render_footer(year) }}
     </div>
