@@ -313,7 +313,8 @@ class ABGridSna:
         micro_level_stats = pd.concat([
             pd.Series(adjacency.apply(lambda x: ", ".join(x[x > 0].index.values), axis=1), name="lns"),
             pd.Series(nx.in_degree_centrality(network), name="ic"),
-            pd.Series(nx.pagerank(network, max_iter=1000), name="pr"),
+            pd.Series(nx.pagerank(network), name="pr"),
+            pd.Series(nx.katz_centrality(network), name="kz"),
             pd.Series(nx.betweenness_centrality(network), name="bt"),
             pd.Series(nx.closeness_centrality(network), name="cl"),
             pd.Series(nx.hits(network)[0], name="hu").abs(),
@@ -365,7 +366,7 @@ class ABGridSna:
             raise ValueError(f"Micro statistics for network '{network_type}' are not available. Call get() method first.")
    
         # Select columns to retain
-        columns_to_retain = ["ic", "pr", "bt", "cl", "hu"]
+        columns_to_retain = ["ic", "pr", "kz", "bt", "cl", "hu"]
 
         # Select numeric columns only
         sna_numeric_columns = self.sna[f"micro_stats_{network_type}"].loc[:, columns_to_retain]
