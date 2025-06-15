@@ -262,14 +262,14 @@
                 <th>Sum</th>
                 <th>Min</th>
                 <th>Max</th>
-                <th>P25</th>
-                <th>P75</th>
                 <th>Median</th>
                 <th>Mean</th>
                 <th>SD</th>
                 <th>CV</th>
                 <th>SK</th>
                 <th>KT</th>
+                <th>P25</th>
+                <th>P75</th>
             </tr>
             {% for row_label, row in descriptives.iterrows() %}
                 <tr>
@@ -278,14 +278,14 @@
                     <td><div><div>{{ row["sum_tot"] | int }}</div></div></td>
                     <td><div><div>{{ row["min"] |int }}</div></div></td>
                     <td><div><div>{{ row["max"] | int }}</div></div></td>
-                    <td><div><div>{{ row["25%"] | int }}</div></div></td>
-                    <td><div><div>{{ row["75%"] | int }}</div></div></td>
                     <td><div><div>{{ row["median"] | int }}</div></div></td>
                     <td><div><div>{{ "%0.2f" | format(row["mean"] | round(2)) }}</div></div></td>
                     <td><div><div>{{ "%0.2f" | format(row["std"] | round(2)) }}</div></div></td>
                     <td><div><div>{{ "%0.2f" | format(row["cv"] | round(2)) }}</div></div></td>
                     <td><div><div>{{ "%0.2f" | format(row["sk"] | round(2)) }}</div></div></td>
                     <td><div><div>{{ "%0.2f" | format(row["kt"] | round(2)) }}</div></div></td>
+                    <td><div><div>{{ row["25%"] }}</div></div></td>
+                    <td><div><div>{{ row["75%"] }}</div></div></td>
                 </tr>
             {% endfor %}
         </table>
