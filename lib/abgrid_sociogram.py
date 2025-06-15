@@ -64,23 +64,11 @@ class ABGridSociogram:
         # Store sna data
         self.sna = sna
 
-        # Compute micro and macro statistics
-        sociogram_macro_stats = self.compute_macro_stats()
-        sociogram_micro_stats = self.compute_micro_stats()
-        sociogram_descriptives = self.compute_descriptives(sociogram_micro_stats)
-
-        # Compute rankings
-        rankings = self.compute_rankings(sociogram_micro_stats)
-
-        # Store sociogram data
-        self.sociogram = {
-            "macro_stats": sociogram_macro_stats,
-            "micro_stats": sociogram_micro_stats,
-            "descriptives": sociogram_descriptives,
-            "rankings": rankings,
-        }
-
         # Create graphs
+        self.sociogram["macro_stats"] = self.compute_macro_stats()
+        self.sociogram["micro_stats"] = self.compute_micro_stats()
+        self.sociogram["descriptives"] = self.compute_descriptives()
+        self.sociogram["rankings"] = self.compute_rankings()
         self.sociogram["graph_ai"] = self.create_graph("ii")
         self.sociogram["graph_ii"] = self.create_graph("ai")
 
@@ -186,18 +174,15 @@ class ABGridSociogram:
         # Return sociogram micro statistics
         return sociogram_micro_stats.sort_index()
 
-    def compute_descriptives(self, sociogram_micro_stats: pd.DataFrame) -> pd.DataFrame:
+    def compute_descriptives(self) -> pd.DataFrame:
         """
         Compute macro-level descriptive statistics based on micro-level statistics.
-
-        Args:
-            sociogram_micro_stats (pd.DataFrame): DataFrame containing micro-level statistics.
 
         Returns:
             pd.DataFrame: DataFrame with macro-level descriptive statistics including median, IQR, and total sum.
         """
         # Select numeric columns only
-        sociogram_numeric_columns = sociogram_micro_stats.select_dtypes(np.number)
+        sociogram_numeric_columns = self.sociogram["micro_stats"].select_dtypes(np.number)
         
         # Compute some relecant stats
         median = sociogram_numeric_columns.median()
@@ -228,12 +213,9 @@ class ABGridSociogram:
         # Return sociogram macro statistics
         return descriptives.apply(pd.to_numeric, downcast="integer")
 
-    def compute_rankings(self, sociogram_micro_stats: pd.DataFrame) -> Dict[str, pd.Series]:
+    def compute_rankings(self) -> Dict[str, pd.Series]:
         """
         Generate and return the order of nodes based on their rank scores for each specified centrality metric.
-        Args:
-            sociogram_micro_stats (pd.DataFrame): A DataFrame containing micro-level statistics for nodes
-                                            indexed by node identifiers with columns representing metrics.
 
         Returns:
             Dict[str, pd.Series]: A dictionary where each key corresponds to a metric from the input DataFrame.
@@ -253,6 +235,7 @@ class ABGridSociogram:
         rankings = {}
         
         # Rank centrality metrics (higher scores get better ranks)
+        sociogram_micro_stats =  self.sociogram["micro_stats"]
         centrality_data = sociogram_micro_stats.loc[:, CENTRALITY_METRICS]
         ranked_metrics = centrality_data.rank(method="dense", ascending=False).astype(int)
         
@@ -295,28 +278,33 @@ class ABGridSociogram:
         Returns:
             pd.Series: Series with sociometric status for each node, indicating states such as isolated, marginal, etc.
         """
-        def select_best_quantiles(series: pd.Series, quantile_pairs: list, epsilon: float) -> tuple:
+        
+        # Inner function
+        def select_best_quantiles(series: pd.Series) -> tuple:
             """
             Select the first quantile pair that matches theoretical proportions within epsilon tolerance.
             
             Args:
                 series (pd.Series): The data series to analyze
-                quantile_pairs (list): List of (low, high) quantile pairs to test
-                epsilon (float): Tolerance for proportion matching
                 
             Returns:
                 tuple: (low_value, high_value) for the first reasonable match
             """
-            n = len(series)
-            
+            # Set epsilon
+            epsilon = .05
+
+            # Set qunatiles
+            quantile_pairs = [(0.25, 0.75), (0.2, 0.8), (0.15, 0.85), (0.10, 0.90), (0.05, 0.95)]
+
+            # Test each quatile tuple for best match
             for low_q, high_q in quantile_pairs:
                 # Calculate quantile values
                 low_val = series.quantile(low_q)
                 high_val = series.quantile(high_q)
                 
                 # Calculate actual proportions
-                actual_low_prop = (series < low_val).sum() / n
-                actual_high_prop = (series > high_val).sum() / n
+                actual_low_prop = (series < low_val).sum() / series.shape[0]
+                actual_high_prop = (series > high_val).sum() / series.shape[0]
                 
                 # Calculate deviations from theoretical proportions
                 low_deviation = abs(actual_low_prop - low_q)
@@ -332,9 +320,6 @@ class ABGridSociogram:
             high_val = series.quantile(high_q)
             return (low_val, high_val)
         
-        # Define quantile pairs to test
-        quantile_pairs = [(0.25, 0.75), (0.2, 0.8), (0.15, 0.85), (0.10, 0.90), (0.05, 0.95)]
-        
         # Cache relevant columns
         impact = sociogram_micro_stats["im"]
         balance = sociogram_micro_stats["bl"]
@@ -342,7 +327,7 @@ class ABGridSociogram:
         prefs_b = sociogram_micro_stats["rr"]
         
         # Get best impact quantiles
-        impact_quantile_low, impact_quantile_high = select_best_quantiles(impact, quantile_pairs, 0.05)
+        impact_quantile_low, impact_quantile_high = select_best_quantiles(impact)
         
         # Compute impact boolean series
         impact_low = impact.lt(impact_quantile_low)
@@ -351,7 +336,7 @@ class ABGridSociogram:
         
         # Get absolute balance quantiles
         abs_balance = balance.abs()
-        abs_balance_quantile_low, abs_balance_quantile_high = select_best_quantiles(abs_balance, quantile_pairs, 0.05)
+        abs_balance_quantile_low, abs_balance_quantile_high = select_best_quantiles(abs_balance)
         abs_balance_high = abs_balance.gt(abs_balance_quantile_high)
         
         # Compute balance boolean series
