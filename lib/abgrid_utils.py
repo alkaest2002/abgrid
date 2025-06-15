@@ -244,18 +244,17 @@ def compute_descriptives(data) -> pd.DataFrame:
     """
 
     # Compute descriptive statistics with pandas descrive
-    descriptives = data.describe(percentiles=[.25, .75]).T
+    descriptives = data.describe().T
     
     # Return descriptive statistics
     return (
         descriptives
             .rename(columns={ "50%": "median" })
             .assign(
-                sum_tot=descriptives["mean"].mul(descriptives["count"]).astype(int),
                 cv=descriptives["75%"].div(descriptives["mean"]),
                 sk=data.skew(),
                 kt=data.kurt()
             )
-            .loc[:, ["count", "sum_tot","min", "max", "25%", "75%", "median", "mean", "std", "cv", "sk", "kt" ]]
+            .loc[:, ["count", "min", "max", "median", "mean", "std", "cv", "sk", "kt", "25%", "75%" ]]
             .apply(pd.to_numeric, downcast="integer")
     )
