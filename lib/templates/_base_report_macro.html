@@ -223,31 +223,38 @@
 </div>
 {% endmacro %}
 
-{% macro render_sociogram_macro_statistics(macro_stats, supplemental, render_sociogram_measures_label) %}
+{% macro render_sociogram_macro_statistics(macro_stats, render_sociogram_measures_label) %}
 <div class="sociogram-macro-stats-container mt-lg">
     <div class="sociogram-macro-stats-container-main">
         <table class="mt-md mb-md">
             <tr>
                 <td class="text-italic pr-md">
                     {{- render_sociogram_measures_label("ui_i") -}}: 
-                    {{ "%0.2f"| format(supplemental["ui_i"] * 100 | round(0)) }}%
+                    {{ "%0.2f"| format(macro_stats["ui_i"] * 100 | round(0)) }}%
                 </td>
                 <td class="text-italic">
                     {{- render_sociogram_measures_label("ui_ii") -}}: 
-                    {{ "%0.2f"| format(supplemental["ui_ii"] | round(2)) }}
+                    {{ "%0.2f"| format(macro_stats["ui_ii"] | round(2)) }}
                 </td>
             </tr>
             <tr>
                 <td class="text-italic pr-md">
                     {{- render_sociogram_measures_label("wi_i") -}}: 
-                    {{ "%0.2f"| format(supplemental["wi_i"] * 100 | round(0)) }}%
+                    {{ "%0.2f"| format(macro_stats["wi_i"] * 100 | round(0)) }}%
                 </td>
                 <td class="text-italic">
                      {{- render_sociogram_measures_label("wi_ii") -}}: 
-                    {{ "%0.2f"| format(supplemental["wi_ii"] | round(2)) }}
+                    {{ "%0.2f"| format(macro_stats["wi_ii"] | round(2)) }}
                 </td>
             </tr>
         </table>
+    </div>
+</div>
+{% endmacro %}
+
+{% macro render_sociogram_descriptives(descriptives, render_sociogram_measures_label) %}
+<div class="sociogram-descriptives-container mt-lg">
+    <div class="ociogram-descriptives-container-main">
         <table class="table-data table-bordered table-striped full-width">
             <tr>
                 <th class="text-left">ID</th>
@@ -263,7 +270,7 @@
                 <th>P75</th>
                 <th>Max</th>
             </tr>
-            {% for row_label, row in macro_stats.iterrows() %}
+            {% for row_label, row in descriptives.iterrows() %}
                 <tr>
                     <td class="text-left"><div><div>{{ render_sociogram_measures_label(row_label) }}</div></div></td>
                     <td><div><div>{{ row["count"] }}</div></div></td>

@@ -104,7 +104,7 @@
                 {{ base_macro.render_logo() }}
                 {{ report_macro.render_disclaimer() }}
                 {{ report_macro.render_report_header(project_title, group, "sociogram_rankings") }}
-                {{ base_report_macro.render_rankings(sociogram["rankings"], report_macro.render_rank_label, report_macro.render_sociogram_status_label) }}
+                {{ base_report_macro.render_rankings(sociogram.rankings, report_macro.render_rank_label, report_macro.render_sociogram_status_label) }}
                 {{ report_macro.render_sociogram_legend(show_rankings=True) }}
             </div>
             {{ report_macro.render_footer(year) }}
@@ -114,7 +114,7 @@
                 {{ base_macro.render_logo() }}
                 {{ report_macro.render_disclaimer() }}
                 {{ report_macro.render_report_header(project_title, group, "sociogram_graph") }}
-                {{ base_report_macro.render_sociogram_graphs(sociogram["graph_ic"], report_macro.render_sociogram_graph_label("ii")) }}
+                {{ base_report_macro.render_sociogram_graphs(sociogram.graph_ai, report_macro.render_sociogram_graph_label("ii")) }}
             </div>
             {{ report_macro.render_footer(year) }}
         </div>
@@ -123,7 +123,7 @@
                 {{ base_macro.render_logo() }}
                 {{ report_macro.render_disclaimer() }}
                 {{ report_macro.render_report_header(project_title, group, "sociogram_graph") }}
-                {{ base_report_macro.render_sociogram_graphs(sociogram["graph_ac"], report_macro.render_sociogram_graph_label("ai")) }}
+                {{ base_report_macro.render_sociogram_graphs(sociogram.graph_ii, report_macro.render_sociogram_graph_label("ai")) }}
             </div>
             {{ report_macro.render_footer(year) }}
         </div>
@@ -132,7 +132,8 @@
                 {{ base_macro.render_logo() }}
                 {{ report_macro.render_disclaimer() }}
                 {{ report_macro.render_report_header(project_title, group, "sociogram_macro") }}
-                {{ base_report_macro.render_sociogram_macro_statistics(sociogram["macro_stats"], sociogram["supplemental"], report_macro.render_sociogram_measures_label) }}
+                {{ base_report_macro.render_sociogram_macro_statistics(sociogram.macro_stats, report_macro.render_sociogram_measures_label) }}
+                {{ base_report_macro.render_sociogram_descriptives(sociogram.descriptives, report_macro.render_sociogram_measures_label) }}
                 {{ report_macro.render_sociogram_legend(show_macro=True) }}
             </div>
             {{ report_macro.render_footer(year) }}
