@@ -16,45 +16,68 @@ import json
 from pathlib import Path
 from typing import Literal, Dict, Any, List
 from weasyprint import HTML
+
 from lib import SYMBOLS, jinja_env
-from lib.abgrid_utils import to_json_serializable
 from lib.abgrid_yaml import ABGridYAML
 from lib.abgrid_data import ABGridData
-from lib.abgrid_utils import notify_decorator
+from lib.abgrid_utils import notify_decorator, to_json_serializable
 
 
 class ABGridMain:
     """
-    Main class to manage project initialization, file generation, and report rendering for a grid-based project.
+    Main class for managing project initialization, file generation, and report rendering 
+    for grid-based projects.
+    
+    This class provides a comprehensive interface for creating and managing AB-Grid projects,
+    including project initialization, group file generation, answer sheet creation, and 
+    report generation with optional sociograms.
+    
+    Attributes:
+        abgrid_data (ABGridData): Instance containing all project-related data and file paths.
     """
     
-    def __init__(self, project: str, project_folderpath: Path, project_filepath: Path, groups_filepaths: List[Path]):
+    def __init__(
+        self, 
+        project: str, 
+        project_folderpath: Path, 
+        project_filepath: Path, 
+        groups_filepaths: List[Path]
+    ) -> None:
         """
-        Initialize the main handler for grid projects by setting up relevant file paths.
+        Initialize the ABGridMain instance with project configuration.
 
         Args:
-            project (str): The name of the project.
-            project_folderpath (Path): The folder path where the project files are stored.
-            project_filepath (Path): The full path to the main project file.
-            groups_filepaths (List[Path]): A list of Paths to group files that are associated with the project.
+            project: The name of the project.
+            project_folderpath: The folder path where the project files are stored.
+            project_filepath: The full path to the main project file.
+            groups_filepaths: A list of Paths to group files associated with the project.
 
-        This method sets up the initial configuration for handling grid-related projects by storing these configurations
-        into the `ABGridData` data class instance. The paths provided are essential for accessing and managing project data.
+        Note:
+            This method creates an ABGridData instance to manage all project-related data
+            and file operations throughout the project lifecycle.
         """
-        # Store an instance of ABGrid data class
         self.abgrid_data = ABGridData(
-            project, project_folderpath, project_filepath, groups_filepaths, ABGridYAML())
+            project, project_folderpath, project_filepath, groups_filepaths, ABGridYAML()
+        )
 
     @staticmethod
     @notify_decorator("init project")
     def init_project(project: str, project_folderpath: Path, language: str) -> None:
         """
-        Initialize a new project folder structure with necessary files.
+        Initialize a new project with the required folder structure and configuration files.
+        
+        Creates the necessary directory structure and generates the main project configuration
+        file from a language-specific template.
         
         Args:
-            project (str): The name of the project.
-            project_folderpath (Path): The path to the project folder.
-            language (str): The language in which the answer sheets should be rendered.
+            project: The name of the project to initialize.
+            project_folderpath: The path where the project folder will be created.
+            language: The language code for template selection (e.g., 'en', 'it').
+            
+        Raises:
+            OSError: If directory creation fails due to permissions or disk space.
+            FileNotFoundError: If the language template file doesn't exist.
+            yaml.YAMLError: If there's an error processing the YAML template.
         """
         # Create necessary directories for the project
         os.makedirs(project_folderpath)
@@ -73,14 +96,30 @@ class ABGridMain:
             yaml.dump(yaml_data, fout, sort_keys=False)
 
     @notify_decorator("generate group inputs files")
-    def generate_group_inputs(self, groups: range, members_per_group: int, language: str) -> None:
+    def generate_group_inputs(
+        self, 
+        groups: range, 
+        members_per_group: int, 
+        language: str
+    ) -> None:
         """
-        Generate input files for each group.
+        Generate input YAML files for each group in the project.
+
+        Creates individual group configuration files based on a template, with each group
+        containing the specified number of members identified by letters (A, B, C, etc.).
 
         Args:
-            groups (range): A range object representing the groups to create.
-            members_per_group (int): Number of members in each group.
-            language (str): The language in which the answer sheets should be rendered.
+            groups: A range object representing the group numbers to create.
+            members_per_group: The number of members in each group (determines letter assignments).
+            language: The language code for template selection.
+            
+        Raises:
+            TemplateNotFound: If the group template for the specified language doesn't exist.
+            OSError: If file writing fails due to permissions or disk space issues.
+            
+        Note:
+            Member identification uses the first N letters from the SYMBOLS constant,
+            where N is the value of members_per_group.
         """
         # Get group template
         group_template = jinja_env.get_template(f"/{language}/group.html")
@@ -95,22 +134,37 @@ class ABGridMain:
             
             # Render the current group with the data (+ remove blank lines)
             rendered_group_template = group_template.render(template_data)
-            rendered_group_template = "\n".join([line for line in rendered_group_template.split("\n") if line.strip()])
+            rendered_group_template = "\n".join([
+                line for line in rendered_group_template.split("\n") if line.strip()
+            ])
                 
             # Save the current group to disk
-            with open(self.abgrid_data.project_folderpath / f"{self.abgrid_data.project}_g{group}.yaml", "w") as file:
+            with open(
+                self.abgrid_data.project_folderpath / f"{self.abgrid_data.project}_g{group}.yaml", 
+                "w"
+            ) as file:
                 file.write(rendered_group_template)
             
     @notify_decorator("generate answersheet file")
     def generate_answer_sheets(self, language: str) -> None:
         """
-        Generate and render answer sheets for the project using PDF format.
+        Generate and render PDF answer sheets for all project groups.
+
+        Creates PDF answer sheets for each group using project data and group-specific
+        configurations. The sheets are saved in the project's answersheets folder.
 
         Args:
-            language (str): The language in which the answer sheets should be rendered.
+            language: The language code for template selection and rendering.
 
         Raises:
-            ValueError: If there are errors in the answersheet data validation or report data validation for any group.
+            ValueError: If there are validation errors in project data or group data.
+            TemplateNotFound: If the answersheet template doesn't exist for the language.
+            OSError: If PDF generation or file saving fails.
+            
+        Note:
+            This method validates both project-level and group-level data before
+            generating answer sheets. All validation errors are collected and
+            reported together.
         """
         # Load sheets data
         sheets_data, sheets_data_errors = self.abgrid_data.get_project_data()
@@ -138,17 +192,26 @@ class ABGridMain:
     @notify_decorator("generate AB-Grid reports")
     def generate_reports(self, language: str, with_sociogram: bool = False) -> None:
         """
-        Generate and render reports for project groups, and save the summarized data 
-        in a JSON format.
+        Generate comprehensive reports for all project groups and export summarized data.
+
+        Creates detailed PDF reports for each group and exports all data to a JSON file
+        for further analysis. Reports can optionally include sociogram visualizations.
 
         Args:
-            language (str): The language in which the reports should be rendered.
-            with_sociogram (bool): A flag indicating whether to include sociograms in the reports.
+            language: The language code for template selection and rendering.
+            with_sociogram: Whether to include sociogram visualizations in reports.
+                          Defaults to False.
 
         Raises:
-            ValueError: If any errors occur during report data validation, such as missing 
-            or invalid data, the process is halted and a ValueError is raised with 
-            specific error information.
+            ValueError: If there are validation errors in report data for any group.
+            TemplateNotFound: If the report template doesn't exist for the language.
+            OSError: If PDF generation, JSON export, or file operations fail.
+            json.JSONEncodeError: If data serialization to JSON fails.
+            
+        Note:
+            The exported JSON data excludes graphics and certain statistical rankings
+            to reduce file size and improve readability. All reports are saved in
+            the project's reports folder.
         """
         all_data = {}
         
@@ -186,16 +249,34 @@ class ABGridMain:
         with open(self.abgrid_data.project_folderpath / f"{self.abgrid_data.project}_data.json", "w") as fout:
             json.dump(all_data, fout, indent=4)
 
-    def render_pdf(self, doc_type: Literal["report", "answersheet"], doc_data: Dict[str, Any], doc_suffix: str, language: str) -> None:
+    def render_pdf(
+        self, 
+        doc_type: Literal["report", "answersheet"], 
+        doc_data: Dict[str, Any], 
+        doc_suffix: str, 
+        language: str
+    ) -> None:
         """
-        Render the document template as a PDF file and save to the specified location.
+        Render a document template as a PDF file and save it to the appropriate location.
+
+        Processes the specified document type using Jinja2 templates and converts the
+        rendered HTML to PDF format using WeasyPrint.
 
         Args:
-            doc_type (Literal["report", "answersheet"]): Type of document to render (either 'report' or 'answersheet').
-            doc_data (Dict[str, Any]): Data dictionary to be used for template rendering.
-            doc_suffix (str): Suffix to append to the filename.
-            language (str): The language used for template selection.
+            doc_type: The type of document to render ('report' or 'answersheet').
+            doc_data: Data dictionary containing all variables needed for template rendering.
+            doc_suffix: Suffix to append to the generated filename (typically group identifier).
+            language: The language code for template selection.
 
+        Raises:
+            TemplateNotFound: If the specified template doesn't exist for the language.
+            OSError: If PDF generation or file saving fails.
+            weasyprint.HTML.Error: If HTML to PDF conversion fails.
+            
+        Note:
+            The generated PDF files are saved in language-specific subfolders within
+            the project directory. Filenames are automatically sanitized to remove
+            leading or trailing underscores.
         """
         # Select and render the appropriate template for the document type
         match doc_type:
