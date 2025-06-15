@@ -32,7 +32,7 @@ class ABGridSociogram:
 
     def __init__(self) -> None:
         """
-        Initialize internal dictionary for storing sociogram data.
+        Initialize the internal dictionary for storing sociogram data.
         """
         self.sociogram: SociogramDict = {
             "macro_stats": None,
@@ -54,9 +54,9 @@ class ABGridSociogram:
             SociogramDict: A dictionary containing detailed sociogram data, structured as follows:
                 - "macro_stats": Dictionary of network-level statistics.
                 - "micro_stats": DataFrame of individual-level statistics.
-                - "rankings": DataFrame of metrics to node rank orders.
-                - "supplemental": Dictionary with cohesion and conflict indices.
-                - "graph_ic" and "graph_ac": Strings of base64-encoded SVGs representing graph visualizations.
+                - "descriptives": DataFrame with macro-level descriptive statistics.
+                - "rankings": Dictionary with rankings of nodes based on different centrality metrics.
+                - "graph_ii" and "graph_ai": Strings of base64-encoded SVGs representing graph visualizations.
 
         Side Effects:
             Updates the `self.sociogram` attribute with the computed sociogram data.
@@ -88,7 +88,12 @@ class ABGridSociogram:
         return self.sociogram
 
     def compute_macro_stats(self) -> pd.Series:
+        """
+        Compute macro-level sociogram statistics.
 
+        Returns:
+            pd.Series: Series containing cohesion and conflict indices for the network.
+        """
         # Calculate cohesion and conflict indices
         cohesion_index_type_i = (
             len(self.sna["edges_types_a"]["type_ii"]) * 2) / len(self.sna["network_a"].edges()
@@ -183,7 +188,7 @@ class ABGridSociogram:
 
     def compute_descriptives(self, sociogram_micro_stats: pd.DataFrame) -> pd.DataFrame:
         """
-        Compute macro-level sociogram statistics based on micro-level statistics.
+        Compute macro-level descriptive statistics based on micro-level statistics.
 
         Args:
             sociogram_micro_stats (pd.DataFrame): DataFrame containing micro-level statistics.
@@ -228,12 +233,12 @@ class ABGridSociogram:
             Select the first quantile pair that matches theoretical proportions within epsilon tolerance.
             
             Args:
-                series: The data series to analyze
-                quantile_pairs: List of (low, high) quantile pairs to test
-                epsilon: Tolerance for proportion matching
+                series (pd.Series): The data series to analyze
+                quantile_pairs (list): List of (low, high) quantile pairs to test
+                epsilon (float): Tolerance for proportion matching
                 
             Returns:
-                tuple: (low_value, high_value) for first reasonable match
+                tuple: (low_value, high_value) for the first reasonable match
             """
             n = len(series)
             
@@ -254,7 +259,7 @@ class ABGridSociogram:
                 if low_deviation <= epsilon and high_deviation <= epsilon:
                     return (low_val, high_val)
             
-            # If no quantiles within epsilon, return the last pair as fallback
+            # If no quantiles within epsilon, return the last pair as a fallback
             low_q, high_q = quantile_pairs[-1]
             low_val = series.quantile(low_q)
             high_val = series.quantile(high_q)
@@ -322,6 +327,7 @@ class ABGridSociogram:
         Args:
             sociogram_micro_stats (pd.DataFrame): A DataFrame containing micro-level statistics for nodes
                                             indexed by node identifiers with columns representing metrics.
+
         Returns:
             Dict[str, pd.Series]: A dictionary where each key corresponds to a metric from the input DataFrame.
                                 The value is a pandas Series mapping node identifiers to their rank order
