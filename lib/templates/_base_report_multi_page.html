@@ -138,7 +138,7 @@
                 {{ base_macro.render_logo() }}
                 {{ report_macro.render_disclaimer() }}
                 {{ report_macro.render_report_header(project_title, group, "sociogram_graph") }}
-                {{ base_report_macro.render_sociogram_graphs(sociogram.graph_ai, report_macro.render_sociogram_graph_label("ii")) }}
+                {{ base_report_macro.render_sociogram_graphs(sociogram.graph_ii, report_macro.render_sociogram_graph_label("ii")) }}
             </div>
             {{ report_macro.render_footer(year) }}
         </div>
@@ -148,7 +148,7 @@
                 {{ base_macro.render_logo() }}
                 {{ report_macro.render_disclaimer() }}
                 {{ report_macro.render_report_header(project_title, group, "sociogram_graph") }}
-                {{ base_report_macro.render_sociogram_graphs(sociogram.graph_ii, report_macro.render_sociogram_graph_label("ai")) }}
+                {{ base_report_macro.render_sociogram_graphs(sociogram.graph_ai, report_macro.render_sociogram_graph_label("ai")) }}
             </div>
             {{ report_macro.render_footer(year) }}
         </div>
