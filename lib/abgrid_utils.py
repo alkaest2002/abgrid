@@ -227,3 +227,35 @@ def get_robust_threshold(n: float) -> float:
     """
     # Define robust threshold for median/mad computations
     return max(0.6745, 1.5 - (n / 50))
+
+def compute_descriptives(data) -> pd.DataFrame:
+    """
+    Compute descriptive statistics for a given DataFrame.
+
+    The function calculates standard descriptive statistics such as mean, std, min, max, quartiles,
+    along with additional metrics like the median, interquartile range (IQR), total sum, coefficient of variation (CV),
+    skewness (sk), and kurtosis (kt).
+
+    Args:
+        data (pd.DataFrame): The input DataFrame for which descriptive statistics are to be computed.
+
+    Returns:
+        pd.DataFrame: A DataFrame containing the computed descriptive statistics, with columns for each statistic.
+    """
+
+    # Compute descriptive statistics with pandas descrive
+    descriptives = data.describe(percentiles=[.25, .75]).T
+    
+    # Return descriptive statistics
+    return (
+        descriptives
+            .rename(columns={ "50%": "median" })
+            .assign(
+                sum_tot=descriptives["mean"].mul(descriptives["count"]).astype(int),
+                cv=descriptives["75%"].div(descriptives["mean"]),
+                sk=data.skew(),
+                kt=data.kurt()
+            )
+            .loc[:, ["count", "sum_tot","min", "max", "25%", "75%", "median", "mean", "std", "cv", "sk", "kt" ]]
+            .apply(pd.to_numeric, downcast="integer")
+    )
