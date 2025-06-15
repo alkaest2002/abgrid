@@ -39,10 +39,11 @@
 
 {% macro render_sna_measures_label(measure) %}
     {% if measure == "ic" %}Centralità In degree{% endif%}
-    {% if measure == "pr" %}Centralità PageRank{% endif%}
+    {% if measure == "pr" %}Centralità Page Rank{% endif%}
+    {% if measure == "kz" %}Centralità Katz{% endif%}
     {% if measure == "bt" %}Centralità Betweenness{% endif%}
     {% if measure == "cl" %}Centralità Closeness{% endif%}
-    {% if measure == "hu" %}Centralità di Hub{% endif%}
+    {% if measure == "hu" %}Centralità Hub{% endif%}
 {% endmacro %}
 
 {% macro render_sociogram_measures_label(measure) %}
@@ -133,7 +134,7 @@
 
 {% macro render_sna_legend(show_macro=False, show_micro=False, show_arrows=False) %}
 <div class="table-data-legend">
-    {% if show_macro %}<b>NN</b> Nodi <b>NE</b> Legami <b>NR</b> Legami reciproci <b>ND</b> Densità <b>NC</b> Centralizzazione <b>NT</b> Transitività <b>NR</b> Reciprocità {% endif %}{% if show_micro%}<b>IC</b> In-Degree <b>PR</b> PageRank <b>BT</b> Betweenness <b>CL</b> Closeness <b>HU</b> Hub {% endif %}{% if show_arrows %}<b>ND</b> No In-Degree (&larr; ) No Out-Degree (&rarr;) No In o Out-Degree (&rlarr;) {% endif %}
+    {% if show_macro %}<b>NN</b> Nodi <b>NE</b> Legami <b>NR</b> Legami reciproci <b>ND</b> Densità <b>NC</b> Centralizzazione <b>NT</b> Transitività <b>NR</b> Reciprocità {% endif %}{% if show_micro%}<b>IC</b> In-Degree <b>PR</b> PageRank <b>KZ</b> Katz <b>BT</b> Betweenness <b>CL</b> Closeness <b>HU</b> Hub {% endif %}{% if show_arrows %}<b>ND</b> No In-Degree (&larr; ) No Out-Degree (&rarr;) No In o Out-Degree (&rlarr;) {% endif %}
 </div>
 {% endmacro %}
 

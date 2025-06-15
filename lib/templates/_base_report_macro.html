@@ -45,6 +45,7 @@
                 <th>{{ render_choices_label() }}</th>
                 <th>IC</th>
                 <th>PR</th>
+                <th>KZ</th>
                 <th>BT</th>
                 <th>CL</th>
                 <th>HU</th>
@@ -57,6 +58,7 @@
                         <td>{{ row["lns"] | default("-", boolean=True) }}</td>
                         <td>{{ row["ic_rank"] | int }}</td>
                         <td>{{ row["pr_rank"] | int }}</td>
+                        <td>{{ row["kz_rank"] | int }}</td>
                         <td>{{ row["bt_rank"] | int }}</td>
                         <td>{{ row["cl_rank"] | int }}</td>
                         <td>{{ row["hu_rank"] | int }}</td>
@@ -68,6 +70,7 @@
                         <td>{{ row["lns"] | default("-", boolean=True) }}</td>
                         <td>{{ "%0.2f"| format(row["ic"] ) }}</td>
                         <td>{{ "%0.2f"| format(row["pr"] ) }}</td>
+                        <td>{{ "%0.2f"| format(row["kz"] ) }}</td>
                         <td>{{ "%0.2f"| format(row["bt"] ) }}</td>
                         <td>{{ "%0.2f"| format(row["cl"] ) }}</td>
                         <td>{{ "%0.2f"| format(row["hu"] ) }}</td>
