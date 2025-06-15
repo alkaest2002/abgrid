@@ -259,7 +259,6 @@
             <tr>
                 <th class="text-left">ID</th>
                 <th>Count</th>
-                <th>Sum</th>
                 <th>Min</th>
                 <th>Max</th>
                 <th>Median</th>
@@ -274,11 +273,10 @@
             {% for row_label, row in descriptives.iterrows() %}
                 <tr>
                     <td class="text-left"><div><div>{{ render_measures_label(row_label) }}</div></div></td>
-                    <td><div><div>{{ row["count"] | int }}</div></div></td>
-                    <td><div><div>{{ row["sum_tot"] | int }}</div></div></td>
-                    <td><div><div>{{ row["min"] |int }}</div></div></td>
-                    <td><div><div>{{ row["max"] | int }}</div></div></td>
-                    <td><div><div>{{ row["median"] | int }}</div></div></td>
+                    <td><div><div>{{ "%0.2f" | format(row["count"] | round(2)) }}</div></div></td>
+                    <td><div><div>{{ "%0.2f" | format(row["min"] | round(2)) }}</div></div></td>
+                    <td><div><div>{{ "%0.2f" | format(row["max"] | round(2)) }}</div></div></td>
+                    <td><div><div>{{ "%0.2f" | format(row["median"] | round(2)) }}</div></div></td>
                     <td><div><div>{{ "%0.2f" | format(row["mean"] | round(2)) }}</div></div></td>
                     <td><div><div>{{ "%0.2f" | format(row["std"] | round(2)) }}</div></div></td>
                     <td><div><div>{{ "%0.2f" | format(row["cv"] | round(2)) }}</div></div></td>
