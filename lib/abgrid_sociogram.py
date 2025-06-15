@@ -298,6 +298,7 @@ class ABGridSociogram:
 
             # Test each quatile tuple for best match
             for low_q, high_q in quantile_pairs:
+                
                 # Calculate quantile values
                 low_val = series.quantile(low_q)
                 high_val = series.quantile(high_q)
@@ -314,10 +315,8 @@ class ABGridSociogram:
                 if low_deviation <= epsilon and high_deviation <= epsilon:
                     return (low_val, high_val)
             
-            # If no quantiles within epsilon, return the last pair as a fallback
-            low_q, high_q = quantile_pairs[-1]
-            low_val = series.quantile(low_q)
-            high_val = series.quantile(high_q)
+            # If no quantiles are within epsilon tolerance, 
+            # return the last pair as a fallback
             return (low_val, high_val)
         
         # Cache relevant columns
