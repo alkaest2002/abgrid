@@ -91,13 +91,15 @@
                 </tr>
                 {% for letter, rank in data.items() %}
                     <tr>
-                        <td>
-                            {% if metric_label == "st" %}
+                        {% if metric_label == "st" %}
+                            <td style="width: 65%;">
                                 {{ render_sociogram_status_label(rank) }}
-                            {% else %}
-                                {{ rank }}
-                            {% endif %}
+                            </td>
+                        {% else %}
+                        <td>
+                            {{ rank }}
                         </td>
+                        {% endif %}
                         <td>
                             {{ letter }}
                         </td>
