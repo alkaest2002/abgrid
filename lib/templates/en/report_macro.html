@@ -126,7 +126,7 @@
 
 {% macro render_sna_legend(show_macro=False, show_micro=False, show_arrows=False) %}
 <div class="table-data-legend">
-    {% if show_macro %}<b>NN</b> Nodes <b>NE</b> Edges <b>NR</b> Reciprocal edges <b>ND</b> Density <b>NC</b> Centralization <b>NT</b> Transitivity <b>NR</b> Reciprocity {% endif %}{% if show_micro %}<b>IC</b> In-Degree <b>PR</b> PageRank <b>KZ</b> Katz <b>BT</b> Betweenness <b>CL</b> Closeness <b>HU</b> Hub {% endif %}{% if show_arrows %}<b>ND</b> No In-Degree (&larr; ) No Out-Degree (&rarr;) No In or Out-Degree (&rlarr;) {% endif %}
+    {% if show_macro %}<b>NN</b> Nodes <b>NE</b> Edges <b>NR</b> Reciprocal edges <b>ND</b> Density <b>NC</b> Centralization <b>NT</b> Transitivity <b>NR</b> Reciprocity {% endif %}{% if show_micro %}<b>IC</b> In-Degree <b>KZ</b> Katz <b>PR</b> PageRank <b>BT</b> Betweenness <b>CL</b> Closeness <b>HU</b> Hub {% endif %}{% if show_arrows %}<b>ND</b> No In-Degree (&larr; ) No Out-Degree (&rarr;) No In or Out-Degree (&rlarr;) {% endif %}
 </div>
 {% endmacro %}
 
