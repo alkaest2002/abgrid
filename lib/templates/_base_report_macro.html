@@ -252,9 +252,9 @@
 </div>
 {% endmacro %}
 
-{% macro render_sociogram_descriptives(descriptives, render_sociogram_measures_label) %}
-<div class="sociogram-descriptives-container mt-lg">
-    <div class="sociogram-descriptives-container-main">
+{% macro render_descriptives(descriptives, render_measures_label) %}
+<div class="descriptives-container mt-lg">
+    <div class="descriptives-container-main">
         <table class="table-data table-bordered table-striped full-width">
             <tr>
                 <th class="text-left">ID</th>
@@ -273,7 +273,7 @@
             </tr>
             {% for row_label, row in descriptives.iterrows() %}
                 <tr>
-                    <td class="text-left"><div><div>{{ render_sociogram_measures_label(row_label) }}</div></div></td>
+                    <td class="text-left"><div><div>{{ render_measures_label(row_label) }}</div></div></td>
                     <td><div><div>{{ row["count"] | int }}</div></div></td>
                     <td><div><div>{{ row["sum_tot"] | int }}</div></div></td>
                     <td><div><div>{{ row["min"] |int }}</div></div></td>
@@ -284,8 +284,8 @@
                     <td><div><div>{{ "%0.2f" | format(row["cv"] | round(2)) }}</div></div></td>
                     <td><div><div>{{ "%0.2f" | format(row["sk"] | round(2)) }}</div></div></td>
                     <td><div><div>{{ "%0.2f" | format(row["kt"] | round(2)) }}</div></div></td>
-                    <td><div><div>{{ row["25%"] }}</div></div></td>
-                    <td><div><div>{{ row["75%"] }}</div></div></td>
+                    <td><div><div>{{ "%0.2f" | format(row["25%"] | round(2)) }}</div></div></td>
+                    <td><div><div>{{ "%0.2f" | format(row["75%"] | round(2)) }}</div></div></td>
                 </tr>
             {% endfor %}
         </table>

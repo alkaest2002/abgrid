@@ -1,6 +1,6 @@
 {% macro render_report_header(project_title, group, type) %}
 <div class="section-header">
-    <span><b>{{ project_title | upper }} | GRUPPO {{ group | upper }}</b></span><span>{% if type == "sna_graph" %}GRAFICO RETE SNA{% elif type == "sna_raw_scores" %}PUNTEGGI SNA GREZZI{% elif type == "sna_ranks" %}PUNTEGGI SNA DI RANGO{% elif type == "sna_rankings" %}NODI SNA ORDINATI PER METRICA{% elif type == "sna_edges_types" %}LEGAMI SNA RAGGRUPPATI PER TIPO{% elif type == "sna_components" %}SOTTOGRAFI SNA{% elif type == "sociogram_micro" %}SOCIOGRAMMA{% elif type == "sociogram_rankings" %}NODI SOCIOGRAMMA ORDINATI PER METRICA{% elif type == "sociogram_graph" %}GRAFICO SOCIOGRAMMA{% elif type == "sociogram_macro" %}SOCIOGRAMMA STATISTICHE{% endif %}</span>
+    <span><b>{{ project_title | upper }} &#124; GRUPPO {{ group | upper }}</b></span><span>{% if type == "sna_graph" %}SNA &#124; GRAFICO RETE{% elif type == "sna_raw_scores" %}SNA &#124; PUNTEGGI GREZZI{% elif type == "sna_ranks" %}SNA &#124; PUNTEGGI DI RANGO{% elif type == "sna_rankings" %}SNA &#124; NODI ORDINATI PER METRICA{% elif type == "sna_edges_types" %}SNA &#124; LEGAMI RAGGRUPPATI PER TIPO{% elif type == "sna_components" %}SNA &#124; SOTTOGRAFI{% elif type == "sna_descriptives" %}SNA &#124; DESCRITTIVE {% elif type == "sociogram_micro" %}SOCIOGRAMMA{% elif type == "sociogram_rankings" %}SOCIOGRAMMA &#124; NODI ORDINATI PER METRICA{% elif type == "sociogram_graph" %}SOCIOGRAMMA &#124; GRAFICO{% elif type == "sociogram_macro" %}SOCIOGRAMMA &#124; DESCRITTIVE{% endif %}</span>
 </div>
 {% endmacro %}
 
@@ -35,6 +35,40 @@
         Ogni nodo può raggiungere ogni altro nodo: a) con o senza intermediari; b) ignorando la direzione dei legami
     </p>
 {% endif %}
+{% endmacro %}
+
+{% macro render_sna_measures_label(measure) %}
+    {% if measure == "ic" %}Centralità In degree{% endif%}
+    {% if measure == "pr" %}Centralità PageRank{% endif%}
+    {% if measure == "bt" %}Centralità Betweenness{% endif%}
+    {% if measure == "cl" %}Centralità Closeness{% endif%}
+    {% if measure == "hu" %}Centralità di Hub{% endif%}
+{% endmacro %}
+
+{% macro render_sociogram_measures_label(measure) %}
+    {% if measure == "rp" %}Preferenze ricevute{% endif%}
+    {% if measure == "rr" %}Rifiuti ricevuti{% endif%}
+    {% if measure == "gp" %}Preferenze date{% endif%}
+    {% if measure == "gr" %}Rifiuti dati{% endif%}
+    {% if measure == "mp" %}Preferenze reciproche{% endif%}
+    {% if measure == "mr" %}Rifiuti reciproci{% endif%}
+    {% if measure == "im" %}Impatto{% endif%}
+    {% if measure == "or" %}Orientamento{% endif%}
+    {% if measure == "bl" %}Saldo{% endif%}
+    {% if measure == "ai" %}Indice di affiliazione{% endif%}
+    {% if measure == "ii" %}Indice di influenza{% endif%}
+    {% if measure == "ui_i" %}Indice di coesione tipo I{% endif%}
+    {% if measure == "ui_ii" %}Indice di coesione tipo II{% endif%}
+    {% if measure == "wi_i" %}Indice di conflitto tipo I{% endif%}
+    {% if measure == "wi_ii" %}Indice di conflitto tipo II{% endif%}
+{% endmacro %}
+
+{% macro render_sociogram_graph_label(type) %}
+    {% if type == "ii" %}
+        Indice di influenza
+    {% else %}
+        Indice di affiliazione
+    {% endif %}
 {% endmacro %}
 
 {% macro render_sociogram_status_label(status) %}
@@ -99,40 +133,14 @@
 
 {% macro render_sna_legend(show_macro=False, show_micro=False, show_arrows=False) %}
 <div class="table-data-legend">
-    {% if show_macro %}<b>NN</b> Nodi <b>NE</b> Legami <b>NR</b> Legami reciproci <b>ND</b> Densità <b>NC</b> Centralizzazione <b>NT</b> Transitività <b>NR</b> Reciprocità {% endif %}{% if show_micro%}<b>IC</b> In-Degree <b>PR</b> PageRank <b>BT</b> Betweenness <b>CL</b> Closenness <b>HU</b> Hub {% endif %}{% if show_arrows %}<b>ND</b> No In-Degree (&larr; ) No Out-Degree (&rarr;) No In o Out-Degree (&rlarr;) {% endif %}
+    {% if show_macro %}<b>NN</b> Nodi <b>NE</b> Legami <b>NR</b> Legami reciproci <b>ND</b> Densità <b>NC</b> Centralizzazione <b>NT</b> Transitività <b>NR</b> Reciprocità {% endif %}{% if show_micro%}<b>IC</b> In-Degree <b>PR</b> PageRank <b>BT</b> Betweenness <b>CL</b> Closeness <b>HU</b> Hub {% endif %}{% if show_arrows %}<b>ND</b> No In-Degree (&larr; ) No Out-Degree (&rarr;) No In o Out-Degree (&rlarr;) {% endif %}
 </div>
 {% endmacro %}
 
-{% macro render_sociogram_legend(show_descriptives=False, show_micro=False, show_rankings=False) %}
+{% macro render_descriptive_legend(show_descriptives=False, show_micro=False, show_rankings=False) %}
 <div class="table-data-legend">
     {% if show_descriptives %}<b>Count</b> Frequenza <b>Sum</b> Somma <b>Min</b> Valore minimo <b>Max</b> Valore massimo <b>Median</b> Mediana <b>Mean</b> Media <b>SD</b> Deviazione standard <b>CV</b> Coefficiente di variazione <b>SK</b> Asimmetria  <b>KT</b> Curtosi <b>P25</b> 25° percentile <b>P75</b> 75° percentile {% endif %}{% if show_micro %}<b>RP</b> Preferenze ricevute <b>RR</b> Rifiuti ricevuti <b>GP</b> Preferenze date <b>GR</b> Rifiuti dati <b>MP</b> Preferenze reciproche <b>MR</b> Rifiuti reciproci <b>BL</b> Saldo <b>OR</b> Orientamento <b>IM</b> Impatto <b>AI</b> Indice di affiliazione <b>II</b> Indice di influenza <b>ST</b> Status sociometrico {% endif %}{%if show_rankings %}<b>RP</b> Preferenze ricevute <b>RR</b> Rifiuti ricevuti <b>GP</b> Preferenze date <b>GR</b> Rifiuti dati <b>BL</b> Saldo <b>IM</b> Impatto <b>AI</b> Indice di affiliazione <b>II</b> Indice di influenza {% endif %}
 </div>
-{% endmacro %}
-
-{% macro render_sociogram_measures_label(measure) %}
-    {% if measure == "rp" %}Preferenze ricevute{% endif%}
-    {% if measure == "rr" %}Rifiuti ricevuti{% endif%}
-    {% if measure == "gp" %}Preferenze date{% endif%}
-    {% if measure == "gr" %}Rifiuti dati{% endif%}
-    {% if measure == "mp" %}Preferenze reciproche{% endif%}
-    {% if measure == "mr" %}Rifiuti reciproci{% endif%}
-    {% if measure == "im" %}Impatto{% endif%}
-    {% if measure == "or" %}Orientamento{% endif%}
-    {% if measure == "bl" %}Saldo{% endif%}
-    {% if measure == "ai" %}Indice di affiliazione{% endif%}
-    {% if measure == "ii" %}Indice di influenza{% endif%}
-    {% if measure == "ui_i" %}Indice di coesione tipo I{% endif%}
-    {% if measure == "ui_ii" %}Indice di coesione tipo II{% endif%}
-    {% if measure == "wi_i" %}Indice di conflitto tipo I{% endif%}
-    {% if measure == "wi_ii" %}Indice di conflitto tipo II{% endif%}
-{% endmacro %}
-
-{% macro render_sociogram_graph_label(type) %}
-    {% if type == "ii" %}
-        Indice di influenza
-    {% else %}
-        Indice di affiliazione
-    {% endif %}
 {% endmacro %}
 
 {% macro render_footer(year) %}

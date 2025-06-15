@@ -20,6 +20,7 @@
             ("B", question_b, sna.graph_b, sna.macro_stats_b, sna.micro_stats_b, sna.rankings_b, sna.edges_types_b, sna.components_b)
         ] 
     %}
+        <!-- SNA GRAPH -->
         <div class="page">
             <div>
                 {{ base_macro.render_logo() }}
@@ -34,6 +35,7 @@
                 {{ report_macro.render_footer(year) }}
             </div>
         </div>
+        <!-- SNA MICRO STATISTICS RAW SCORES -->
         <div class="page">
             <div>
                 {{ base_macro.render_logo() }}
@@ -45,6 +47,7 @@
             </div>
             {{ report_macro.render_footer(year) }}
         </div>
+        <!-- SNA MICRO STATISTICS RANK SCORES -->
         <div class="page">
             <div>
                 {{ base_macro.render_logo() }}
@@ -56,6 +59,7 @@
             </div>
             {{ report_macro.render_footer(year) }}
         </div>
+        <!-- SNA RANKINGS -->
         <div class="page">
             <div>
                 {{ base_macro.render_logo() }}
@@ -67,6 +71,7 @@
             </div>
             {{ report_macro.render_footer(year) }}
         </div>
+        <!-- SNA EDGES TYPES -->
         <div class="page">
             <div>
                 {{ base_macro.render_logo() }}
@@ -77,6 +82,7 @@
             </div>
             {{ report_macro.render_footer(year) }}
         </div>
+        <!-- SNA COMPONENTS -->
         <div class="page">
             <div>
                 {{ base_macro.render_logo() }}
@@ -88,27 +94,49 @@
             {{ report_macro.render_footer(year) }}
         </div>
     {% endfor %}
+    <!-- SNA DESCRIPTIVES -->
+    <div class="page">
+        <div>
+            {{ base_macro.render_logo() }}
+            {{ report_macro.render_disclaimer() }}
+            {{ report_macro.render_report_header(project_title, group, "sna_descriptives") }}
+            <div class="mt-xl">
+                {{ base_report_macro.render_question("A", question_a) }}
+                {{ base_report_macro.render_descriptives(sna.descriptives_a, report_macro.render_sna_measures_label) }}
+                {{ report_macro.render_descriptive_legend(show_descriptives=True) }}
+            </div>
+            <div class="mt-xl">
+                {{ base_report_macro.render_question("B", question_b) }}
+                {{ base_report_macro.render_descriptives(sna.descriptives_b, report_macro.render_sna_measures_label) }}
+                {{ report_macro.render_descriptive_legend(show_descriptives=True) }}
+            </div>
+        </div>
+        {{ report_macro.render_footer(year) }}
+    </div>
     {% if with_sociogram %}
+        <!-- SOCIOGRAM MICRO STATISTICS -->
         <div class="page">
             <div>
                 {{ base_macro.render_logo() }}
                 {{ report_macro.render_disclaimer() }}
                 {{ report_macro.render_report_header(project_title, group, "sociogram_micro") }}
                 {{ base_report_macro.render_sociogram_micro_statistics(sociogram.micro_stats, report_macro.render_sociogram_status_label) }}
-                {{ report_macro.render_sociogram_legend(show_micro=True)}}
+                {{ report_macro.render_descriptive_legend(show_micro=True)}}
             </div>
             {{ report_macro.render_footer(year) }}
         </div>
+        <!-- SOCIOGRAM RANKINGS -->
         <div class="page">
             <div>
                 {{ base_macro.render_logo() }}
                 {{ report_macro.render_disclaimer() }}
                 {{ report_macro.render_report_header(project_title, group, "sociogram_rankings") }}
                 {{ base_report_macro.render_rankings(sociogram.rankings, report_macro.render_rank_label, report_macro.render_sociogram_status_label) }}
-                {{ report_macro.render_sociogram_legend(show_rankings=True) }}
+                {{ report_macro.render_descriptive_legend(show_rankings=True) }}
             </div>
             {{ report_macro.render_footer(year) }}
         </div>
+        <!-- SOCIOGRAM GRAPH AI -->
         <div class="page">
             <div>
                 {{ base_macro.render_logo() }}
@@ -118,6 +146,7 @@
             </div>
             {{ report_macro.render_footer(year) }}
         </div>
+        <!-- SOCIOGRAM GRAPH II -->
         <div class="page">
             <div>
                 {{ base_macro.render_logo() }}
@@ -127,14 +156,15 @@
             </div>
             {{ report_macro.render_footer(year) }}
         </div>
+        <!-- SOCIOGRAM DESCRIPTIVES -->
         <div class="page">
             <div>
                 {{ base_macro.render_logo() }}
                 {{ report_macro.render_disclaimer() }}
                 {{ report_macro.render_report_header(project_title, group, "sociogram_macro") }}
                 {{ base_report_macro.render_sociogram_macro_statistics(sociogram.macro_stats, report_macro.render_sociogram_measures_label) }}
-                {{ base_report_macro.render_sociogram_descriptives(sociogram.descriptives, report_macro.render_sociogram_measures_label) }}
-                {{ report_macro.render_sociogram_legend(show_descriptives=True) }}
+                {{ base_report_macro.render_descriptives(sociogram.descriptives, report_macro.render_sociogram_measures_label) }}
+                {{ report_macro.render_descriptive_legend(show_descriptives=True) }}
             </div>
             {{ report_macro.render_footer(year) }}
         </div>
