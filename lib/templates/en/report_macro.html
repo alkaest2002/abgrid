@@ -95,9 +95,9 @@
 </div>
 {% endmacro %}
 
-{% macro render_sociogram_legend(show_macro=False, show_micro=False, show_rankings=False) %}
+{% macro render_sociogram_legend(show_descriptives=False, show_micro=False, show_rankings=False) %}
 <div class="table-data-legend">
-    {% if show_macro %}<b>IQR</b> Interquartile range <b>SD</b> Standard Deviation <b>Min</b> Minimum value <b>P25</b> 25° percentile <b>P50</b> 50° percentile <b>P75</b> 75° percentile <b>Max</b> Maximum value {% endif %}{% if show_micro %}<b>RP</b> Received preferences <b>RR</b> Received rejections <b>GP</b> Given preferences <b>GR</b> Given rejections <b>MP</b> Mutual preferences <b>MR</b> Mutual rejections <b>BL</b> Balance <b>OR</b> Orientation <b>IM</b> Impact <b>AI</b> Affiliation index <b>II</b> Influence index <b>ST</b> Sociometric status {% endif %}{%if show_rankings %}<b>RP</b> Received preferences <b>RR</b> Received rejections <b>GP</b> Given preferences <b>GR</b> Given rejections <b>BL</b> Balance <b>IM</b> Impact <b>AI</b> Affiliation index <b>II</b> Influence index {% endif %}
+    {% if show_descriptives %}<b>Min</b> Minumum value <b>Max</b> Maximum value <b>P25</b> 25° percentile <b>P75</b> 75° percentile <b>SD</b> Standard deviation <b>CV</b> Coefficient of variation <b>SK</b> Skewness <b>KT</b> Kurtosis {% endif %}{% if show_micro %}<b>RP</b> Received preferences <b>RR</b> Received rejections <b>GP</b> Given preferences <b>GR</b> Given rejections <b>MP</b> Mutual preferences <b>MR</b> Mutual rejections <b>BL</b> Balance <b>OR</b> Orientation <b>IM</b> Impact <b>AI</b> Affiliation index <b>II</b> Influence index <b>ST</b> Sociometric status {% endif %}{%if show_rankings %}<b>RP</b> Received preferences <b>RR</b> Received rejections <b>GP</b> Given preferences <b>GR</b> Given rejections <b>BL</b> Balance <b>IM</b> Impact <b>AI</b> Affiliation index <b>II</b> Influence index {% endif %}
 </div>
 {% endmacro %}
 

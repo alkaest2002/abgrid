@@ -254,36 +254,38 @@
 
 {% macro render_sociogram_descriptives(descriptives, render_sociogram_measures_label) %}
 <div class="sociogram-descriptives-container mt-lg">
-    <div class="ociogram-descriptives-container-main">
+    <div class="sociogram-descriptives-container-main">
         <table class="table-data table-bordered table-striped full-width">
             <tr>
                 <th class="text-left">ID</th>
                 <th>Count</th>
                 <th>Sum</th>
+                <th>Min</th>
+                <th>Max</th>
+                <th>P25</th>
+                <th>P75</th>
                 <th>Median</th>
-                <th>IQR</th>
                 <th>Mean</th>
                 <th>SD</th>
-                <th>Min</th>
-                <th>P25</th>
-                <th>P50</th>
-                <th>P75</th>
-                <th>Max</th>
+                <th>CV</th>
+                <th>SK</th>
+                <th>KT</th>
             </tr>
             {% for row_label, row in descriptives.iterrows() %}
                 <tr>
                     <td class="text-left"><div><div>{{ render_sociogram_measures_label(row_label) }}</div></div></td>
-                    <td><div><div>{{ row["count"] }}</div></div></td>
-                    <td><div><div>{{ row["sum_tot"] }}</div></div></td>
+                    <td><div><div>{{ row["count"] | int }}</div></div></td>
+                    <td><div><div>{{ row["sum_tot"] | int }}</div></div></td>
+                    <td><div><div>{{ row["min"] |int }}</div></div></td>
+                    <td><div><div>{{ row["max"] | int }}</div></div></td>
+                    <td><div><div>{{ row["25%"] | int }}</div></div></td>
+                    <td><div><div>{{ row["75%"] | int }}</div></div></td>
                     <td><div><div>{{ row["median"] | int }}</div></div></td>
-                    <td><div><div>{{ row["iqr"] | int }}</div></div></td>
                     <td><div><div>{{ "%0.2f" | format(row["mean"] | round(2)) }}</div></div></td>
                     <td><div><div>{{ "%0.2f" | format(row["std"] | round(2)) }}</div></div></td>
-                    <td><div><div>{{ row["min"] |int }}</div></div></td>
-                    <td><div><div>{{ row["25%"] | int }}</div></div></td>
-                    <td><div><div>{{ row["50%"] | int }}</div></div></td>
-                    <td><div><div>{{ row["75%"] | int }}</div></div></td>
-                    <td><div><div>{{ row["max"] | int }}</div></div></td>
+                    <td><div><div>{{ "%0.2f" | format(row["cv"] | round(2)) }}</div></div></td>
+                    <td><div><div>{{ "%0.2f" | format(row["sk"] | round(2)) }}</div></div></td>
+                    <td><div><div>{{ "%0.2f" | format(row["kt"] | round(2)) }}</div></div></td>
                 </tr>
             {% endfor %}
         </table>
