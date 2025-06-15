@@ -313,8 +313,8 @@ class ABGridSna:
         micro_level_stats = pd.concat([
             pd.Series(adjacency.apply(lambda x: ", ".join(x[x > 0].index.values), axis=1), name="lns"),
             pd.Series(nx.in_degree_centrality(network), name="ic"),
-            pd.Series(nx.pagerank(network), name="pr"),
             pd.Series(nx.katz_centrality(network), name="kz"),
+            pd.Series(nx.pagerank(network), name="pr"),
             pd.Series(nx.betweenness_centrality(network), name="bt"),
             pd.Series(nx.closeness_centrality(network), name="cl"),
             pd.Series(nx.hits(network)[0], name="hu").abs(),
