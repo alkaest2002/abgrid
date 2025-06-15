@@ -1,5 +1,5 @@
 """
-Filename: abgrid_schema.py
+Filename: abgrid_schemas.py
 Description: Defines Pydantic models for project and group schemas, ensuring data integrity and validation.
 
 Author: Pierpaolo Calanna
@@ -9,121 +9,163 @@ The code is part of the AB-Grid project and is licensed under the MIT License.
 """
 
 from pydantic import BaseModel, Field, constr, field_validator, model_validator
-from typing import Dict, List
+from typing import Dict, List, Union
+
 
 class ProjectSchema(BaseModel):
     """
-    A Pydantic model that represents a project's data schema. This includes the project's basic 
-    descriptors and related questions, with answer choices for each.
+    Pydantic model representing a project's data schema.
+    
+    This model validates project information including title, description, 
+    and two questions with their associated answer choices.
 
     Attributes:
-        project_title (str): The title of the project, with a minimum of 1 and a maximum of 80 characters.
-        explanation (str): An explanation of the project, constrained to 1-500 characters.
-        question_a (str): A question associated with the project, constrained to 1-300 characters.
-        question_a_choices (str): Choices for question A, constrained to 1-150 characters.
-        question_b (str): Another project-related question, constrained to 1-300 characters.
-        question_b_choices (str): Choices for question B, constrained to 1-150 characters.
+        project_title: The project title (1-80 characters)
+        explanation: Project description/explanation (1-500 characters)
+        question_a: First question text (1-300 characters)
+        question_a_choices: Answer choices for question A (1-150 characters)
+        question_b: Second question text (1-300 characters)
+        question_b_choices: Answer choices for question B (1-150 characters)
     """
-    project_title: constr(min_length=1, max_length=80) # type: ignore
-    explanation: constr(min_length=1, max_length=500) # type: ignore
-    question_a: constr(min_length=1, max_length=300) # type: ignore
-    question_a_choices: constr(min_length=1, max_length=150) # type: ignore
-    question_b: constr(min_length=1, max_length=300) # type: ignore
-    question_b_choices: constr(min_length=1, max_length=150) # type: ignore
+    project_title: constr(min_length=1, max_length=80)  # type: ignore
+    explanation: constr(min_length=1, max_length=500)  # type: ignore
+    question_a: constr(min_length=1, max_length=300)  # type: ignore
+    question_a_choices: constr(min_length=1, max_length=150)  # type: ignore
+    question_b: constr(min_length=1, max_length=300)  # type: ignore
+    question_b_choices: constr(min_length=1, max_length=150)  # type: ignore
+    
     model_config = {"extra": "forbid"}
+
 
 class GroupSchema(BaseModel):
     """
-    A Pydantic model that represents the schema for a group within a project, covering the 
-    structure of choices and their interrelationships.
+    Pydantic model representing a group within a project.
+    
+    This model validates the structure of answer choices for both questions
+    within a group, ensuring consistency and logical relationships between
+    the choices.
 
     Attributes:
-        group (int): The group number, must be between 1 and 20.
-        choices_a (List[Dict[str, Union[str, None]]]): A list of dictionaries for choices in question A,
-            ensuring each dictionary has a single letter key associated with single letter values.
-        choices_b (List[Dict[str, Union[str, None]]]): A list of dictionaries for choices in question B,
-            structured similarly to choices_a.
+        group: Group identifier (1-20)
+        choices_a: List of choice dictionaries for question A. Each dictionary
+                  contains a single letter key mapped to a comma-separated string
+                  of single letter values (or None)
+        choices_b: List of choice dictionaries for question B. Each dictionary
+                  contains a single letter key mapped to a comma-separated string
+                  of single letter values (or None)
+    
+    Note:
+        - Keys in choices_a and choices_b must be identical
+        - All values must reference valid keys from either choices_a or choices_b
+        - Keys and values must be single alphabetic characters
     """
     group: int = Field(ge=1, le=20)
-    choices_a: List[Dict[str, str | None]]
-    choices_b: List[Dict[str, str | None]]
+    choices_a: List[Dict[str, Union[str, None]]]
+    choices_b: List[Dict[str, Union[str, None]]]
+    
     model_config = {"extra": "forbid"}
 
     @field_validator("choices_a", "choices_b")
-    def validate_choices(cls, value: List[Dict[str, str]]) -> List[Dict[str, str]]:
+    @classmethod
+    def validate_choices(cls, value: List[Dict[str, Union[str, None]]]) -> List[Dict[str, Union[str, None]]]:
         """
-        Validator for choices_a and choices_b fields to ensure each choice is well-formed.
+        Validate the structure and content of choice dictionaries.
 
         Args:
-            value: A list of dictionaries representing choices, keyed by single letters.
+            value: List of choice dictionaries to validate
 
         Returns:
-            The validated list of choices.
+            The validated list of choice dictionaries
 
         Raises:
-            ValueError: If any validation rule is breached, such as malformed keys/values.
+            ValueError: If any validation rule fails:
+                - Choice is not a dictionary
+                - Dictionary doesn't have exactly one key-value pair
+                - Key is not a single alphabetic character
+                - Value contains empty entries or non-alphabetic characters
+                - Value contains duplicate entries
+                - Key appears in its own value list
         """
         for choice_dict in value:
-            
-            # Get key and its corresponding value string
-            key = next(iter(choice_dict.keys()))
-            value_str = choice_dict[key]
-            value_parts = value_str.split(',') if value_str else []
-
-            # Validate each choice
             if not isinstance(choice_dict, dict):
                 raise ValueError("Each choice must be a dictionary")
+            
             if len(choice_dict) != 1:
                 raise ValueError("Each choice must have exactly one key-value pair")
-            if len(key) != 1:
-                raise ValueError(f"Key '{key}' must be a single letter")
-            if not key.isalpha():
-                raise ValueError(f"Key '{key}' must be a letter")
+            
+            # Get the single key-value pair
+            key = next(iter(choice_dict.keys()))
+            value_str = choice_dict[key]
+            
+            # Validate key
+            if len(key) != 1 or not key.isalpha():
+                raise ValueError(f"Key '{key}' must be a single alphabetic character")
+            
+            # Skip validation if value is None
+            if value_str is None:
+                continue
+                
+            # Parse and validate value string
+            value_parts = value_str.split(',') if value_str else []
+            
             if any(not part for part in value_parts):
                 raise ValueError(f"Value '{value_str}' contains empty entries due to misplaced commas")
-            if any(len(part) != 1 for part in value_parts):
-                raise ValueError(f"Value '{value_str}' must be a list of single letters")
-            if any(not part.isalpha() for part in value_parts):
-                raise ValueError(f"Value '{value_str}' must be a list of single letters")
+            
+            if any(len(part) != 1 or not part.isalpha() for part in value_parts):
+                raise ValueError(f"Value '{value_str}' must contain only single alphabetic characters")
+            
             if key in value_parts:
                 raise ValueError(f"Key '{key}' cannot be present in its own values")
+            
             if len(value_parts) != len(set(value_parts)):
                 raise ValueError(f"Values for key '{key}' contain duplicates: {value_str}")
-            
-        # If legit, return the original value
+        
         return value
 
     @model_validator(mode='after')
     def validate_schema_constraints(self) -> 'GroupSchema':
         """
-        Ensure logical constraints between choices_a and choices_b.
+        Validate logical constraints between choices_a and choices_b.
 
-        Verifies that keys in choices_a are identical to those in choices_b, and all values are valid.
+        Ensures that:
+        - Keys in choices_a and choices_b are identical
+        - All values reference valid keys from the combined key set
+        - Cross-references between choices are consistent
 
         Returns:
-            The validated GroupSchema instance.
+            The validated GroupSchema instance
 
         Raises:
-            ValueError: If coherence rules between choices_a and choices_b are violated.
+            ValueError: If coherence rules between choices_a and choices_b are violated:
+                - Key sets are not identical
+                - Values reference non-existent keys
         """
-        # Extract all keys from choices_a and choices_b
+        # Extract all keys from both choice sets
         choices_a_keys = {next(iter(choice.keys())) for choice in self.choices_a}
         choices_b_keys = {next(iter(choice.keys())) for choice in self.choices_b}
 
-        # Check if the sets of keys are identical
+        # Verify key sets are identical
         if choices_a_keys != choices_b_keys:
-            raise ValueError("Keys in choices_a and choices_b are not equal.")
+            raise ValueError("Keys in choices_a and choices_b must be identical")
 
-        # Ensure all values in choices_a come from choices_a and choices_b keys
-        for choices_type, choices_list in (("a", self.choices_a), ("b", self.choices_b)):
+        # Validate that all values reference valid keys
+        all_valid_keys = choices_a_keys  # Same as choices_b_keys due to above check
+        
+        for choices_type, choices_list in [("a", self.choices_a), ("b", self.choices_b)]:
             for choice in choices_list:
                 key = next(iter(choice.keys()))
                 value_str = choice[key]
+                
+                if value_str is None:
+                    continue
+                    
                 value_parts = value_str.split(',') if value_str else []
-                invalid_values = [v for v in value_parts if v not in choices_a_keys]
+                invalid_values = [v for v in value_parts if v not in all_valid_keys]
+                
                 if invalid_values:
                     raise ValueError(
-                        f"Values for key '{key}' in choices_{choices_type} contain the following illegal characters: {', '.join(invalid_values)}")
+                        f"Values for key '{key}' in choices_{choices_type} contain "
+                        f"invalid references: {', '.join(invalid_values)}"
+                    )
 
-        # If legit, return self
         return self
