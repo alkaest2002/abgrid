@@ -14,7 +14,7 @@ import matplotlib.pyplot as plt
 
 from typing import Any, Literal, Dict, Optional, TypedDict, Union
 from lib import CM_TO_INCHES
-from lib.abgrid_utils import figure_to_base64_svg
+from lib.abgrid_utils import compute_descriptives, figure_to_base64_svg
 
 class SociogramDict(TypedDict):
     macro_stats: Optional[Dict[str, Union[int, float]]]
@@ -155,31 +155,9 @@ class ABGridSociogram:
         # Select numeric columns only
         sociogram_numeric_columns = self.sociogram["micro_stats"].select_dtypes(np.number)
         
-        # Compute some relecant stats
-        median = sociogram_numeric_columns.median()
-        iqr = sociogram_numeric_columns.quantile([.75, .25]).apply(lambda x: x.iat[0] - x.iat[1])
-        sum_tot = sociogram_numeric_columns.sum(axis=0)
-        cv = sociogram_numeric_columns.std().div(sociogram_numeric_columns.mean())
-        skew = sociogram_numeric_columns.skew()
-        kurt = sociogram_numeric_columns.kurt()
-        
-        # Get descriptive statistics from pandas describe function
-        descriptives = (
-            sociogram_numeric_columns
-                .describe(percentiles=[.25, .75])
-                .T
-        )
-
-        # Add median, IQR and total sum statistics
-        descriptives.insert(1, "median", median)
-        descriptives.insert(2, "iqr", iqr)
-        descriptives.insert(1, "sum_tot", sum_tot)
-        descriptives.insert(6, "cv", cv)
-        descriptives.insert(7, "sk", skew)
-        descriptives.insert(8, "kt", kurt)
-
         # Return sociogram macro statistics
-        return descriptives.apply(pd.to_numeric, downcast="integer")
+        return compute_descriptives(sociogram_numeric_columns)
+        
 
     def compute_rankings(self) -> Dict[str, pd.Series]:
         """
