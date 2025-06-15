@@ -19,10 +19,10 @@ from lib.abgrid_utils import figure_to_base64_svg
 class SociogramDict(TypedDict):
     macro_stats: Optional[Dict[str, Union[int, float]]]
     micro_stats: Optional[pd.DataFrame]
+    descriptives: Optional[pd.DataFrame]
     rankings: Optional[Dict[str, pd.Series]]
-    supplemental: Optional[Dict[str, float]]
-    graph_ic: Optional[str]
-    graph_ac: Optional[str]
+    graph_ii: Optional[str]
+    graph_ai: Optional[str]
 
 class ABGridSociogram:
     """
@@ -37,10 +37,10 @@ class ABGridSociogram:
         self.sociogram: SociogramDict = {
             "macro_stats": None,
             "micro_stats": None,
+            "descriptives": None,
             "rankings": None,
-            "supplemental": None,
-            "graph_ic": None,
-            "graph_ac": None,
+            "graph_ii": None,
+            "graph_ai": None,
         }
 
     def get(self, sna: Dict[str, Any]) -> SociogramDict:
@@ -61,57 +61,138 @@ class ABGridSociogram:
         Side Effects:
             Updates the `self.sociogram` attribute with the computed sociogram data.
         """
-        # Retrieve SNA data
-        network_a = sna["network_a"]
-        network_b = sna["network_b"]
+        # Store sna data
+        self.sna = sna
 
-        # Compute robust threshold (needed for some media/mad related computations)
-        robust_threshold = max(0.6745, 1.5 - (len(sna["nodes_a"]) / 50))
-        
         # Compute micro and macro statistics
-        sociogram_micro_df = self.compute_micro_stats(sna, robust_threshold)
-        sociogram_macro_df = self.compute_macro_stats(sociogram_micro_df)
+        sociogram_macro_stats = self.compute_macro_stats()
+        sociogram_micro_stats = self.compute_micro_stats()
+        sociogram_descriptives = self.compute_descriptives(sociogram_micro_stats)
 
         # Compute rankings
-        rankings = self.compute_rankings(sociogram_micro_df)
-
-        # Calculate cohesion and conflict indices
-        cohesion_index_type_i = (len(sna["edges_types_a"]["type_ii"]) * 2) / len(network_a.edges())
-        cohesion_index_type_ii = len(sna["edges_types_a"]["type_ii"]) / len(network_a)
-        conflict_index_type_i = (len(sna["edges_types_b"]["type_ii"]) * 2) / len(network_b.edges())
-        conflict_index_type_ii = len(sna["edges_types_b"]["type_ii"]) / len(network_b)
+        rankings = self.compute_rankings(sociogram_micro_stats)
 
         # Store sociogram data
         self.sociogram = {
-            "micro_stats": sociogram_micro_df,
-            "macro_stats": sociogram_macro_df,
+            "macro_stats": sociogram_macro_stats,
+            "micro_stats": sociogram_micro_stats,
+            "descriptives": sociogram_descriptives,
             "rankings": rankings,
-            "supplemental": {
-                "ui_i": cohesion_index_type_i,
-                "ui_ii": cohesion_index_type_ii,
-                "wi_i": conflict_index_type_i,
-                "wi_ii": conflict_index_type_ii
-            },
         }
-        
-        # Generate sociogram graphs
-        self.sociogram["graph_ic"] = self.create_graph("ii")
-        self.sociogram["graph_ac"] = self.create_graph("ai")
 
+        # Create graphs
+        self.sociogram["graph_ai"] = self.create_graph("ii")
+        self.sociogram["graph_ii"] = self.create_graph("ai")
+
+        # Return sociogram data
         return self.sociogram
 
-    def compute_macro_stats(self, sociogram_micro_df: pd.DataFrame) -> pd.DataFrame:
+    def compute_macro_stats(self) -> pd.Series:
+
+        # Calculate cohesion and conflict indices
+        cohesion_index_type_i = (
+            len(self.sna["edges_types_a"]["type_ii"]) * 2) / len(self.sna["network_a"].edges()
+        )
+        cohesion_index_type_ii = (
+            len(self.sna["edges_types_a"]["type_ii"]) / len(self.sna["network_a"])
+        )
+        conflict_index_type_i = (
+            len(self.sna["edges_types_b"]["type_ii"]) * 2) / len(self.sna["network_b"].edges()
+        )
+        conflict_index_type_ii = (
+            len(self.sna["edges_types_b"]["type_ii"]) / len(self.sna["network_b"])
+        )
+
+        # Return sociogram macro statistics
+        return pd.Series({
+            "ui_i": cohesion_index_type_i,
+            "ui_ii": cohesion_index_type_ii,
+            "wi_i": conflict_index_type_i,
+            "wi_ii": conflict_index_type_ii
+        })
+    
+    def compute_micro_stats(self) -> pd.DataFrame:
+        """
+        Compute micro-level sociogram statistics for individual nodes based on social network data.
+
+        Returns:
+            pd.DataFrame: DataFrame with micro-level statistics for each node, including metrics like rp, rr, gp, gr, etc.
+        """
+        
+        # Define robust threshold for median/mad computations
+        ROBUST_THRESHOLD = max(0.6745, 1.5 - (len(self.sna["nodes_a"]) / 50))
+
+        # Retrieve network and adjacency matrices
+        network_a = self.sna["network_a"]
+        network_b = self.sna["network_b"]
+        adjacency_a = self.sna["adjacency_a"]
+        adjacency_b = self.sna["adjacency_b"]
+        
+        # Init sociogram micro df
+        sociogram_micro_stats = pd.concat([
+            pd.Series(dict(network_a.in_degree()), name="rp"), 
+            pd.Series(dict(network_b.in_degree()), name="rr"),
+            pd.Series(dict(network_a.out_degree()), name="gp"), 
+            pd.Series(dict(network_b.out_degree()), name="gr"), 
+        ], axis=1)
+
+        # Add relevant metrics
+        sociogram_micro_stats["mp"] = (adjacency_a * adjacency_a.T).sum(axis=1).astype(int)
+        sociogram_micro_stats["mr"] = (adjacency_b * adjacency_b.T).sum(axis=1).astype(int)
+        sociogram_micro_stats["bl"] = sociogram_micro_stats["rp"].sub(sociogram_micro_stats["rr"])
+        sociogram_micro_stats["or"] = sociogram_micro_stats["gp"].sub(sociogram_micro_stats["gr"])
+        sociogram_micro_stats["im"] = sociogram_micro_stats["rp"].add(sociogram_micro_stats["rr"])
+        sociogram_micro_stats["ai"] = sociogram_micro_stats["bl"].add(sociogram_micro_stats["or"])
+        sociogram_micro_stats["ii"] = sociogram_micro_stats["rp"].add(sociogram_micro_stats["mp"])
+        
+        # Compute robust z-scores for affiliation index (ai)
+        affiliation = sociogram_micro_stats["ai"]
+        affiliation_median = affiliation.median()
+        affiliation_mad = max(affiliation.sub(affiliation_median).abs().median(), 1e-6)
+        sociogram_micro_stats["ai_robust_z"] = (
+            affiliation
+                .sub(affiliation_median)
+                .div(affiliation_mad)
+                .mul(ROBUST_THRESHOLD * 10)
+                .add(100)
+                .astype(int)
+                .clip(lower=0, upper=200)
+        )
+
+        # Compute robust z-scores for influence index (ii)
+        influence = sociogram_micro_stats["ii"]
+        influence_median = influence.median()
+        influence_mad = max(influence.sub(influence_median).abs().median(), 1e-6)
+        sociogram_micro_stats["ii_robust_z"] = (
+            influence
+                .sub(influence_median)
+                .div(influence_mad)
+                .mul(ROBUST_THRESHOLD * 10)
+                .add(100)
+                .astype(int)
+                .clip(lower=0, upper=200)
+        )
+
+        # Compute status interpretation
+        sociogram_micro_stats["st"] = (
+            self.compute_status(sociogram_micro_stats)
+        )
+
+        # Return sociogram micro statistics
+        return sociogram_micro_stats.sort_index()
+
+    def compute_descriptives(self, sociogram_micro_stats: pd.DataFrame) -> pd.DataFrame:
         """
         Compute macro-level sociogram statistics based on micro-level statistics.
 
         Args:
-            sociogram_micro_df (pd.DataFrame): DataFrame containing micro-level statistics.
+            sociogram_micro_stats (pd.DataFrame): DataFrame containing micro-level statistics.
 
         Returns:
             pd.DataFrame: DataFrame with macro-level descriptive statistics including median, IQR, and total sum.
         """
         # Select numeric columns only
-        sociogram_numeric_columns = sociogram_micro_df.select_dtypes(np.number)
+        sociogram_numeric_columns = sociogram_micro_stats.select_dtypes(np.number)
         
         # Compute median, IQR and total sum
         median = sociogram_numeric_columns.median()
@@ -131,82 +212,13 @@ class ABGridSociogram:
 
         # Return sociogram macro statistics
         return sociogram_macro_df.apply(pd.to_numeric, downcast="integer")
-    
-    def compute_micro_stats(self, sna: Dict[str, Any], robust_threshold: float) -> pd.DataFrame:
-        """
-        Compute micro-level sociogram statistics for individual nodes based on social network data.
 
-        Args:
-            sna (Dict[str, Any]): Dictionary containing network data with relevant keys.
-
-        Returns:
-            pd.DataFrame: DataFrame with micro-level statistics for each node, including metrics like rp, rr, gp, gr, etc.
-        """
-        # Retrieve network and adjacency matrices
-        network_a = sna["network_a"]
-        network_b = sna["network_b"]
-        adjacency_a = sna["adjacency_a"]
-        adjacency_b = sna["adjacency_b"]
-        
-        # Init sociogram micro df
-        sociogram_micro_df = pd.concat([
-            pd.Series(dict(network_a.in_degree()), name="rp"), 
-            pd.Series(dict(network_b.in_degree()), name="rr"),
-            pd.Series(dict(network_a.out_degree()), name="gp"), 
-            pd.Series(dict(network_b.out_degree()), name="gr"), 
-        ], axis=1)
-
-        # Add relevant metrics
-        sociogram_micro_df["mp"] = (adjacency_a * adjacency_a.T).sum(axis=1).astype(int)
-        sociogram_micro_df["mr"] = (adjacency_b * adjacency_b.T).sum(axis=1).astype(int)
-        sociogram_micro_df["bl"] = sociogram_micro_df["rp"].sub(sociogram_micro_df["rr"])
-        sociogram_micro_df["or"] = sociogram_micro_df["gp"].sub(sociogram_micro_df["gr"])
-        sociogram_micro_df["im"] = sociogram_micro_df["rp"].add(sociogram_micro_df["rr"])
-        sociogram_micro_df["ai"] = sociogram_micro_df["bl"].add(sociogram_micro_df["or"])
-        sociogram_micro_df["ii"] = sociogram_micro_df["rp"].add(sociogram_micro_df["mp"])
-        
-        # Compute robust z-scores for affiliation index (ai)
-        affiliation = sociogram_micro_df["ai"]
-        affiliation_median = affiliation.median()
-        affiliation_mad = max(affiliation.sub(affiliation_median).abs().median(), 1e-6)
-        sociogram_micro_df["ai_robust_z"] = (
-            affiliation
-                .sub(affiliation_median)
-                .div(affiliation_mad)
-                .mul(robust_threshold * 10)
-                .add(100)
-                .astype(int)
-                .clip(lower=0, upper=200)
-        )
-
-        # Compute robust z-scores for influence index (ii)
-        influence = sociogram_micro_df["ii"]
-        influence_median = influence.median()
-        influence_mad = max(influence.sub(influence_median).abs().median(), 1e-6)
-        sociogram_micro_df["ii_robust_z"] = (
-            influence
-                .sub(influence_median)
-                .div(influence_mad)
-                .mul(robust_threshold * 10)
-                .add(100)
-                .astype(int)
-                .clip(lower=0, upper=200)
-        )
-
-        # Compute status interpretation
-        sociogram_micro_df["st"] = (
-            self.compute_status(sociogram_micro_df)
-        )
-
-        # Return sociogram micro statistics
-        return sociogram_micro_df.sort_index()
-
-    def compute_status(self, sociogram_micro_df: pd.DataFrame) -> pd.Series:
+    def compute_status(self, sociogram_micro_stats: pd.DataFrame) -> pd.Series:
         """
         Determine sociometric status for each node based on sociogram statistics.
         
         Args:
-            sociogram_micro_df (pd.DataFrame): DataFrame containing micro-level statistics.
+            sociogram_micro_stats (pd.DataFrame): DataFrame containing micro-level statistics.
             
         Returns:
             pd.Series: Series with sociometric status for each node, indicating states such as isolated, marginal, etc.
@@ -252,10 +264,10 @@ class ABGridSociogram:
         quantile_pairs = [(0.25, 0.75), (0.2, 0.8), (0.15, 0.85), (0.10, 0.90), (0.05, 0.95)]
         
         # Cache relevant columns
-        impact = sociogram_micro_df["im"]
-        balance = sociogram_micro_df["bl"]
-        prefs_a = sociogram_micro_df["rp"]
-        prefs_b = sociogram_micro_df["rr"]
+        impact = sociogram_micro_stats["im"]
+        balance = sociogram_micro_stats["bl"]
+        prefs_a = sociogram_micro_stats["rp"]
+        prefs_b = sociogram_micro_stats["rr"]
         
         # Get best impact quantiles
         impact_quantile_low, impact_quantile_high = select_best_quantiles(impact, quantile_pairs, 0.05)
@@ -278,10 +290,10 @@ class ABGridSociogram:
         neutral = abs_balance.lt(abs_balance_quantile_low)
         
         # Init status as a pandas Series with default value of "-"
-        status = pd.Series(["-"] * sociogram_micro_df.shape[0], index=sociogram_micro_df.index)
+        status = pd.Series(["-"] * sociogram_micro_stats.shape[0], index=sociogram_micro_stats.index)
         
         # Compute statuses
-        status.loc[sociogram_micro_df.iloc[:, :4].sum(axis=1).eq(0)] = "isolated"
+        status.loc[sociogram_micro_stats.iloc[:, :4].sum(axis=1).eq(0)] = "isolated"
         status.loc[impact_low] = "marginal"
         
         status.loc[a_dominant & impact_high] = "popular"
@@ -304,11 +316,11 @@ class ABGridSociogram:
         # Return status
         return status
 
-    def compute_rankings(self, sociogram_micro_df: pd.DataFrame) -> Dict[str, pd.Series]:
+    def compute_rankings(self, sociogram_micro_stats: pd.DataFrame) -> Dict[str, pd.Series]:
         """
         Generate and return the order of nodes based on their rank scores for each specified centrality metric.
         Args:
-            sociogram_micro_df (pd.DataFrame): A DataFrame containing micro-level statistics for nodes
+            sociogram_micro_stats (pd.DataFrame): A DataFrame containing micro-level statistics for nodes
                                             indexed by node identifiers with columns representing metrics.
         Returns:
             Dict[str, pd.Series]: A dictionary where each key corresponds to a metric from the input DataFrame.
@@ -328,7 +340,7 @@ class ABGridSociogram:
         rankings = {}
         
         # Rank centrality metrics (higher scores get better ranks)
-        centrality_data = sociogram_micro_df.loc[:, CENTRALITY_METRICS]
+        centrality_data = sociogram_micro_stats.loc[:, CENTRALITY_METRICS]
         ranked_metrics = centrality_data.rank(method="dense", ascending=False).astype(int)
         
         # Add centrality rankings to results
@@ -336,7 +348,7 @@ class ABGridSociogram:
             rankings[metric] = ranked_metrics[metric].sort_values()
         
         # Handle status ordering (categorical ranking)
-        status_series = sociogram_micro_df["st"]
+        status_series = sociogram_micro_stats["st"]
         
         # Create a mapping from status to order position
         status_to_order = {status: idx for idx, status in enumerate(STATUS_ORDER)}
@@ -348,7 +360,7 @@ class ABGridSociogram:
         # Create a DataFrame with both status order and original index for sorting
         sort_df = pd.DataFrame({
             'status_order': status_with_order,
-            'original_index': sociogram_micro_df.index
+            'original_index': sociogram_micro_stats.index
         })
         
         # Sort by status_order first, then by original_index
