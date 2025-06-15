@@ -199,24 +199,34 @@ class ABGridSociogram:
         # Select numeric columns only
         sociogram_numeric_columns = sociogram_micro_stats.select_dtypes(np.number)
         
-        # Compute median, IQR and total sum
+        # Compute some relecant stats
         median = sociogram_numeric_columns.median()
         iqr = sociogram_numeric_columns.quantile([.75, .25]).apply(lambda x: x.iat[0] - x.iat[1])
         sum_tot = sociogram_numeric_columns.sum(axis=0)
+        cv = sociogram_numeric_columns.std().div(sociogram_numeric_columns.mean())
+        skew = sociogram_numeric_columns.skew()
+        kurt = sociogram_numeric_columns.kurt()
         
         # Get descriptive statistics from pandas describe function
-        sociogram_macro_df = sociogram_numeric_columns.describe().T
+        descriptives = (
+            sociogram_numeric_columns
+                .describe(percentiles=[.25, .75])
+                .T
+        )
 
         # Add median, IQR and total sum statistics
-        sociogram_macro_df.insert(1, "median", median)
-        sociogram_macro_df.insert(2, "iqr", iqr)
-        sociogram_macro_df.insert(1, "sum_tot", sum_tot)
+        descriptives.insert(1, "median", median)
+        descriptives.insert(2, "iqr", iqr)
+        descriptives.insert(1, "sum_tot", sum_tot)
+        descriptives.insert(6, "cv", cv)
+        descriptives.insert(7, "sk", skew)
+        descriptives.insert(8, "kt", kurt)
 
         # Drop unused metrics
-        sociogram_macro_df = sociogram_macro_df.drop(["ai_robust_z", "ii_robust_z"])
-
+        descriptives = descriptives.drop(["ai_robust_z", "ii_robust_z"])
+        
         # Return sociogram macro statistics
-        return sociogram_macro_df.apply(pd.to_numeric, downcast="integer")
+        return descriptives.apply(pd.to_numeric, downcast="integer")
 
     def compute_rankings(self, sociogram_micro_stats: pd.DataFrame) -> Dict[str, pd.Series]:
         """
