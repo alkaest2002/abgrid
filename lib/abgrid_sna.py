@@ -13,13 +13,14 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import networkx as nx
 
-from typing import Literal, List, Dict, Optional, Tuple, TypedDict
+from typing import Literal, List, Dict, Optional, Tuple, TypedDict, Union
 from functools import reduce
 from scipy.spatial import ConvexHull
 from lib import A_COLOR, B_COLOR, CM_TO_INCHES
 from lib.abgrid_utils import compute_descriptives, figure_to_base64_svg
 
 class SNADict(TypedDict):
+    """Type definition for the SNA dictionary containing network analysis results."""
     nodes_a: Optional[List[str]]
     nodes_b: Optional[List[str]]
     edges_a: Optional[List[Tuple[str, str]]]
@@ -44,11 +45,24 @@ class SNADict(TypedDict):
     graph_b: Optional[str]
 
 class ABGridSna:
+    """
+    A comprehensive social network analysis class for directed graphs.
+    
+    This class provides functionality to analyze two directed networks (A and B) simultaneously,
+    computing various network metrics, statistics, and visualizations. It supports comparative
+    analysis between the two networks and generates detailed reports on network structure,
+    centrality measures, and graph properties.
+    
+    Attributes:
+        sna (SNADict): Dictionary containing all computed network analysis data for both networks.
+    """
 
-    def __init__(self):
+    def __init__(self) -> None:
         """
         Initialize the social network analysis object.
-        This initialization sets up the internal dictionary for storing SNA data.
+        
+        This initialization sets up the internal dictionary for storing SNA data
+        for both networks A and B, with all values initially set to None.
         """
         
         # Init SNA dict
@@ -82,26 +96,30 @@ class ABGridSna:
             packed_edges_b: List[Dict[str, str]], 
     ) -> SNADict:
         """
-        Compute and store graphs, statistics, and visualization layouts for two directed networks (A and B).
+        Compute and store comprehensive network analysis for two directed networks.
+
+        This method performs a complete social network analysis on both input networks,
+        including graph construction, statistical analysis, centrality measures, 
+        component detection, and visualization generation.
 
         Args:
             packed_edges_a (List[Dict[str, str]]): 
-                A list of dictionaries where each dictionary represents an edge for network A.
-                Each dictionary should contain 'source' and 'target' keys that map to node identifiers.
+                Edge data for network A. Each dictionary represents edges from a source node,
+                with keys as source nodes and values as comma-separated target nodes.
             packed_edges_b (List[Dict[str, str]]): 
-                A list of dictionaries where each dictionary represents an edge for network B.
-                Structure should mirror that of `packed_edges_a`.
+                Edge data for network B. Structure should mirror that of `packed_edges_a`.
 
         Returns:
-            SNADict: A comprehensive dictionary containing network analysis data and layouts 
-                     for both networks A and B. This includes attributes such as nodes, edges,
-                     adjacency matrices, layouts, and various statistics.
+            SNADict: A comprehensive dictionary containing all network analysis results
+                     including nodes, edges, adjacency matrices, statistics, rankings,
+                     components, and visualization data for both networks.
 
         Side Effects:
-            - Creates and modifies directed graph objects for networks A and B.
-            - Computes, stores, and organizes macro and micro statistics for each network.
-            - Generates node layout information and adjusts layouts to incorporate isolated nodes.
-            - Updates adjacency matrix representations within the `self.sna` data structure.
+            - Creates NetworkX DiGraph objects for both networks
+            - Computes and stores macro/micro statistics for each network
+            - Generates node layout information with isolated node handling
+            - Updates all fields in the internal `self.sna` dictionary
+            - Creates SVG visualizations of both networks
         """
         
         # Create network a and b
@@ -146,16 +164,24 @@ class ABGridSna:
 
     def unpack_network_edges(self, packed_edges: List[Dict[str, str]]) -> List[Tuple[str, str]]:
         """
-        Unpack a list of packed edge dictionaries into a list of edge tuples.
+        Unpack edge dictionaries into a list of directed edge tuples.
+
+        Takes a list of dictionaries where each dictionary represents outgoing edges
+        from source nodes, and converts them into a flat list of (source, target) tuples.
 
         Args:
             packed_edges (List[Dict[str, str]]): 
-                A list of dictionaries, each with a source node as the key and a 
-                comma-separated string of target nodes as the value.
+                List of dictionaries where keys are source nodes and values are
+                comma-separated strings of target nodes. None values are handled safely.
 
         Returns:
             List[Tuple[str, str]]: 
-                A list of edge tuples (source, target) representing directed edges.
+                Flat list of directed edge tuples (source, target).
+
+        Example:
+            >>> packed_edges = [{"A": "B,C"}, {"B": "C"}]
+            >>> unpack_network_edges(packed_edges)
+            [("A", "B"), ("A", "C"), ("B", "C")]
         """
         # Extract edges as tuples while ensuring no errors with None values
         return reduce(
@@ -172,31 +198,48 @@ class ABGridSna:
         
     def unpack_network_nodes(self, packed_edges: List[Dict[str, str]]) -> List[str]:
         """
-        Extract and return a sorted list of unique source nodes from a list of packed edge dictionaries.
+        Extract unique source nodes from packed edge dictionaries.
 
         Args:
             packed_edges (List[Dict[str, str]]): 
-                A list of dictionaries where each dictionary's key represents a "source" node.
+                List of dictionaries where keys represent source nodes.
 
         Returns:
             List[str]: 
-                A sorted list of unique source node identifiers.
+                Sorted list of unique source node identifiers.
+
+        Example:
+            >>> packed_edges = [{"A": "B,C"}, {"B": "C"}, {"A": "D"}]
+            >>> unpack_network_nodes(packed_edges)
+            ["A", "B"]
         """
         # Extract nodes and sort them
         return sorted([node for node_edges in packed_edges for node in node_edges.keys()])
     
     def compute_macro_stats(self, network_type: Literal["a", "b"]) -> pd.Series:
         """
-        Calculate and return macro-level statistics for a directed network.
+        Calculate macro-level network statistics.
+
+        Computes network-wide metrics including structural properties, centralization,
+        and relationship patterns for the specified network.
 
         Args:
             network_type (Literal["a", "b"]):
-                The type identifier for selecting the specific network.
+                Network identifier ('a' or 'b') for selecting the target network.
 
         Returns:
             pd.Series:
-                A pandas Series containing macro-level statistics such as number of nodes,
-                number of edges, network density, centralization, transitivity, and reciprocity.
+                Series containing macro-level statistics with the following metrics:
+                - network_nodes: Total number of nodes
+                - network_edges: Total number of edges  
+                - network_edges_reciprocal: Number of reciprocal edge pairs
+                - network_density: Edge density (0-1 scale)
+                - network_centralization: Degree centralization measure
+                - network_transitivity: Global clustering coefficient
+                - network_reciprocity: Overall reciprocity measure
+
+        Raises:
+            KeyError: If the specified network_type is not found in self.sna.
         """
         # Get network
         network = self.sna[f"network_{network_type}"]
@@ -226,17 +269,30 @@ class ABGridSna:
     
     def compute_micro_stats(self, network_type: Literal["a", "b"]) -> pd.DataFrame:
         """
-        Calculate and return micro-level statistics for each node in a directed network graph.
+        Calculate node-level (micro) statistics for the specified network.
+
+        Computes various centrality measures and node properties for each node
+        in the network, including degree-based and path-based centralities.
 
         Args:
             network_type (Literal["a", "b"]):
-                The type identifier for selecting the specific network.
+                Network identifier ('a' or 'b') for selecting the target network.
 
         Returns:
             pd.DataFrame: 
-                A DataFrame with micro-level statistics for each node, including
-                metrics like in-degree centrality, PageRank, betweenness, closeness centrality,
-                hubs score and nodes rankings.
+                DataFrame indexed by node identifiers with the following columns:
+                - lns: Comma-separated list of neighbor nodes
+                - ic: In-degree centrality
+                - pr: PageRank score
+                - bt: Betweenness centrality
+                - cl: Closeness centrality  
+                - hu: Hubs score (absolute value)
+                - nd: Node degree status (0=normal, 1=no in-degree, 2=no out-degree, 3=isolated)
+                - *_rank: Rank columns for each centrality measure
+
+        Raises:
+            KeyError: If the specified network_type is not found in self.sna.
+            nx.NetworkXError: If PageRank computation fails to converge.
         """
         # Get network and adjacency
         network = self.sna[f"network_{network_type}"]
@@ -253,7 +309,7 @@ class ABGridSna:
         ], axis=1)
         
         # Identify nodes with no in-degree and/or out-degree
-        # 3 -> no in or out degree, 2 -> no out-degree, 1 -> no in-degree
+        # 3 -> no in or out degree, 2 -> no out-degree, 1 -> no in-degree, 0 -> normal
         micro_level_stats["nd"] = 0
         micro_level_stats["nd"] += (micro_level_stats["ic"] == 0).astype(int)
         micro_level_stats["nd"] += (micro_level_stats["lns"].str.len() == 0).astype(int) * 2
@@ -276,31 +332,60 @@ class ABGridSna:
 
     def compute_descriptives(self, network_type: Literal["a", "b"]) -> pd.DataFrame:
         """
-        Compute macro-level descriptive statistics based on micro-level statistics.
+        Compute descriptive statistics for centrality measures.
+
+        Generates summary statistics (mean, std, min, max, etc.) for the main
+        centrality measures of the specified network.
+
+        Args:
+            network_type (Literal["a", "b"]):
+                Network identifier ('a' or 'b') for selecting the target network.
 
         Returns:
-            pd.DataFrame: DataFrame with macro-level descriptive statistics.
+            pd.DataFrame: 
+                DataFrame with descriptive statistics for centrality measures.
+                Columns correspond to centrality measures (ic, pr, bt, cl, hu).
+                Rows contain statistical summaries (count, mean, std, min, max, etc.).
+
+        Raises:
+            KeyError: If the specified network_type is not found in self.sna.
         """
         # Select columns to retain
         columns_to_retain = ["ic", "pr", "bt", "cl", "hu"]
 
         # Select numeric columns only
-        sna_numeric_columns = self.sna[f"micro_stats_{network_type}"].loc[: ,columns_to_retain]
+        sna_numeric_columns = self.sna[f"micro_stats_{network_type}"].loc[:, columns_to_retain]
         
         # Return sociogram macro statistics
         return compute_descriptives(sna_numeric_columns)
 
     def compute_rankings(self, network_type: Literal["a", "b"]) -> Dict[str, pd.Series]:
         """
-        Generate and return the order of nodes based on their rank scores for each centrality metric.
+        Generate node rankings based on centrality measures.
+        
+        Creates ordered rankings of nodes for each centrality metric, where
+        nodes are sorted by their rank scores in ascending order.
         
         Args:
-            network_type (Literal["a", "b"]): The type identifier for selecting the specific network.
+            network_type (Literal["a", "b"]): 
+                Network identifier ('a' or 'b') for selecting the target network.
         
         Returns:
-            Dict[str, pd.Series]: A dictionary where each key corresponds to a metric from the input DataFrame.
-                The value is a pandas Series mapping node identifiers to their rank order
-                (ordinal position) based on the metric scores.
+            Dict[str, pd.Series]: 
+                Dictionary mapping centrality metric names (with '_rank' suffix) to
+                pandas Series containing nodes ordered by their rank (best to worst).
+                Each Series is indexed by node identifiers and contains rank values.
+
+        Example:
+            >>> rankings = compute_rankings("a")
+            >>> rankings["ic_rank"]  # Returns nodes ordered by in-degree centrality rank
+            node_A    1.0
+            node_C    2.0  
+            node_B    3.0
+            dtype: float64
+
+        Raises:
+            KeyError: If the specified network_type is not found in self.sna.
         """
         # Get the micro stats DataFrame for the specified network type
         micro_stats_df = self.sna[f"micro_stats_{network_type}"]
@@ -318,16 +403,33 @@ class ABGridSna:
               
     def compute_edges_types(self, network_type: Literal["a", "b"]) -> Dict[str, pd.Index]:
         """
-        Classify edges in a directed network graph into various types based on relationships within
-        the same network and a reference network.
+        Classify edges into five types based on reciprocity and cross-network relationships.
+
+        Analyzes edge patterns within the specified network and compares them with
+        the reference network to classify edges into five distinct types based on
+        reciprocity and symmetry patterns.
 
         Args:
             network_type (Literal["a", "b"]):
-                The type identifier for selecting the specific network.
+                Network identifier ('a' or 'b') for selecting the target network.
+                The other network serves as the reference for comparison.
 
         Returns:
             Dict[str, pd.Index]:
-                A dictionary classifying edges into five types: I, II, III, IV, and V.
+                Dictionary containing five edge classifications:
+                - type_i: Non-reciprocal edges (A→B but not B→A in same network)
+                - type_ii: Reciprocal edges (A↔B in same network)  
+                - type_iii: Half symmetrical (A→B in both networks, but not B→A)
+                - type_iv: Half reversed symmetrical (A→B in one, B→A in other)
+                - type_v: Fully symmetrical (A↔B in both networks)
+
+        Note:
+            Edge classification uses upper triangular matrices to avoid double-counting
+            reciprocal relationships. The reference network is determined automatically
+            (network 'b' is reference for 'a', and vice versa).
+
+        Raises:
+            KeyError: If the specified network_type is not found in self.sna.
         """
         # Get adjacency dataframes
         if network_type == "a":
@@ -376,16 +478,35 @@ class ABGridSna:
     
     def compute_components(self, network_type: Literal["a", "b"]) -> Dict[str, pd.Series]:
         """
-        Identify and return significant components of a directed graph as strings.
+        Identify and extract significant network components.
+
+        Finds various types of network components (cliques, strongly connected components,
+        weakly connected components) and returns them as concatenated node strings.
+        Only components with more than 2 nodes are included.
 
         Args:
             network_type (Literal["a", "b"]):
-                The type identifier for selecting the specific network.
+                Network identifier ('a' or 'b') for selecting the target network.
 
         Returns:
             Dict[str, pd.Series]: 
-                A dictionary with component types as keys (e.g., "cliques") and corresponding
-                pandas Series as values, where each series contains the node identifiers for each component.
+                Dictionary containing three types of components:
+                - cliques: Maximal cliques in the undirected version of the graph
+                - strongly_connected: Strongly connected components in the directed graph
+                - weakly_connected: Weakly connected components in the directed graph
+                
+                Each Series contains components as concatenated, sorted node strings.
+                Components are sorted by size (largest first).
+
+        Example:
+            >>> components = compute_components("a")
+            >>> components["cliques"]
+            0    ABC
+            1    BCD
+            dtype: object
+
+        Raises:
+            KeyError: If the specified network_type is not found in self.sna.
         """
         # Get network
         network = self.sna[f"network_{network_type}"]
@@ -402,14 +523,33 @@ class ABGridSna:
 
     def create_graph(self, network_type: Literal["a","b"]) -> str:
         """
-        Generate a graphical representation of a network and return it encoded in base64 SVG format.
+        Generate an SVG visualization of the specified network.
+
+        Creates a matplotlib-based network visualization with nodes, edges, and labels,
+        then converts it to a base64-encoded SVG string for web display.
 
         Args:
             network_type (Literal["a", "b"]):
-                Type of the network ('a' or 'b') used to select which graph to create the plot for.
+                Network identifier ('a' or 'b') for selecting which network to visualize.
 
         Returns:
-            str: The SVG data URI of the network plot.
+            str: Base64-encoded SVG data URI of the network visualization.
+                 The visualization includes:
+                 - Colored nodes (different colors for networks A and B)
+                 - Black nodes for isolated vertices
+                 - Reciprocal edges shown as undirected lines
+                 - Non-reciprocal edges shown as directed arrows
+                 - Node labels with white text
+
+        Note:
+            - Uses Kamada-Kawai layout with special handling for isolated nodes
+            - Network A uses A_COLOR, Network B uses B_COLOR (from lib constants)
+            - Figure size is set to 17cm x 19cm
+            - Isolated nodes are positioned marginally using convex hull positioning
+
+        Raises:
+            KeyError: If the specified network_type is not found in self.sna.
+            ValueError: If the network layout computation fails.
         """
 
         # Get network
@@ -466,20 +606,37 @@ class ABGridSna:
     
     def handle_isolated_nodes(self, network: nx.DiGraph, loc: Dict[str, np.ndarray]) -> Dict[str, np.ndarray]:
         """
-        Add isolated nodes to the network and adjust their positions to appear marginal.
+        Position isolated nodes at the periphery of the network layout.
 
-        Adjust the positions of isolated nodes to appear outside the convex hull of the main node
-        cluster so that they are perceptually distant and marginal.
+        Adjusts the positions of isolated nodes to appear outside the convex hull
+        of connected nodes, making them visually distinct and marginal in the layout.
 
         Args:
             network (nx.DiGraph):
-                The directed graph where isolated nodes are managed.
+                The directed graph containing both connected and isolated nodes.
             loc (Dict[str, np.ndarray]):
-                A dictionary representing the layout of nodes.
+                Dictionary mapping node identifiers to their 2D coordinate positions.
 
         Returns:
             Dict[str, np.ndarray]: 
-                Updated node layout including isolated nodes.
+                Updated node layout dictionary with isolated nodes repositioned
+                at the periphery. Connected nodes retain their original positions.
+
+        Algorithm:
+            1. Identifies isolated nodes using NetworkX
+            2. Computes convex hull around connected nodes
+            3. Places isolated nodes outside the hull in multiple rounds
+            4. Each round places nodes further from the center
+            5. Adds random offset to prevent overlapping
+
+        Note:
+            - If no isolated nodes exist, returns the original layout unchanged
+            - Uses multiple rounds to handle cases with more isolated nodes than hull vertices
+            - Distance multiplier increases with each round (0.15 * round_number)
+            - Random offset range: ±0.05 in both x and y directions
+
+        Raises:
+            ValueError: If convex hull computation fails (e.g., with < 3 connected nodes).
         """
         # Get isolated nodes
         isolates = list(nx.isolates(network))
@@ -542,18 +699,35 @@ class ABGridSna:
         
     def compute_network_centralization(self, network: nx.Graph) -> float:
         """
-        Calculate the centralization of a network.
+        Calculate the degree centralization of an undirected network.
 
-        Centralization indicates how concentrated the network is around its most central node, 
-        comparing the current network structure to an ideal star network structure.
+        Centralization measures how concentrated the network structure is around
+        its most central node, comparing the actual network to a perfect star network.
+        Values range from 0 (completely decentralized) to 1 (perfectly centralized).
 
         Args:
             network (nx.Graph):
-                The graph for which the centralization is calculated.
+                Undirected graph for which to calculate centralization.
+                Should typically be the undirected version of a directed graph.
 
         Returns:
             float: 
-                The centralization value of the network, rounded to three decimal places.
+                Network centralization value between 0 and 1, where:
+                - 0 indicates a completely decentralized network (all nodes have equal degree)
+                - 1 indicates a perfectly centralized network (star topology)
+                - Higher values suggest more centralized structure
+
+        Formula:
+            Centralization = Σ(max_centrality - node_centrality) / ((n-1)(n-2))
+            where n is the number of nodes.
+
+        Note:
+            This implementation uses degree centrality as the basis for centralization.
+            The network should have at least 3 nodes for meaningful centralization values.
+
+        Raises:
+            ZeroDivisionError: If the network has fewer than 3 nodes.
+            nx.NetworkXError: If the network is empty or invalid.
         """
         
         # Get number of nodes
