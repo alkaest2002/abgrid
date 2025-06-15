@@ -208,3 +208,22 @@ def figure_to_base64_svg(fig: plt.Figure) -> str:
     
     # Return the data URI for the SVG
     return f"data:image/svg+xml;base64,{base64_encoded_string}"
+
+
+def get_robust_threshold(n: float) -> float:
+    """
+    Calculate a robust threshold used for median/mad computations.
+
+    This threshold ensures a minimum level of robustness for statistical
+    calculations based on the number of data points provided.
+
+    Args:
+        n (float): The number of data points, typically representing the size of a dataset.
+
+    Returns:
+        float: A robust threshold value calculated based on the input size 'n'.
+               The result is set to a minimum of 0.6745 or adjusted according to
+               the formula (1.5 - (n / 50)), whichever is larger.
+    """
+    # Define robust threshold for median/mad computations
+    return max(0.6745, 1.5 - (n / 50))

@@ -116,9 +116,6 @@ class ABGridSociogram:
             pd.DataFrame: DataFrame with micro-level statistics for each node, including metrics like rp, rr, gp, gr, etc.
         """
         
-        # Define robust threshold for median/mad computations
-        ROBUST_THRESHOLD = max(0.6745, 1.5 - (len(self.sna["nodes_a"]) / 50))
-
         # Retrieve network and adjacency matrices
         network_a = self.sna["network_a"]
         network_b = self.sna["network_b"]
@@ -133,7 +130,7 @@ class ABGridSociogram:
             pd.Series(dict(network_b.out_degree()), name="gr"), 
         ], axis=1)
 
-        # Add relevant metrics
+        # Compute relevant metrics
         sociogram_micro_stats["mp"] = (adjacency_a * adjacency_a.T).sum(axis=1).astype(int)
         sociogram_micro_stats["mr"] = (adjacency_b * adjacency_b.T).sum(axis=1).astype(int)
         sociogram_micro_stats["bl"] = sociogram_micro_stats["rp"].sub(sociogram_micro_stats["rr"])
@@ -142,38 +139,8 @@ class ABGridSociogram:
         sociogram_micro_stats["ai"] = sociogram_micro_stats["bl"].add(sociogram_micro_stats["or"])
         sociogram_micro_stats["ii"] = sociogram_micro_stats["rp"].add(sociogram_micro_stats["mp"])
         
-        # Compute robust z-scores for affiliation index (ai)
-        affiliation = sociogram_micro_stats["ai"]
-        affiliation_median = affiliation.median()
-        affiliation_mad = max(affiliation.sub(affiliation_median).abs().median(), 1e-6)
-        sociogram_micro_stats["ai_robust_z"] = (
-            affiliation
-                .sub(affiliation_median)
-                .div(affiliation_mad)
-                .mul(ROBUST_THRESHOLD * 10)
-                .add(100)
-                .astype(int)
-                .clip(lower=0, upper=200)
-        )
-
-        # Compute robust z-scores for influence index (ii)
-        influence = sociogram_micro_stats["ii"]
-        influence_median = influence.median()
-        influence_mad = max(influence.sub(influence_median).abs().median(), 1e-6)
-        sociogram_micro_stats["ii_robust_z"] = (
-            influence
-                .sub(influence_median)
-                .div(influence_mad)
-                .mul(ROBUST_THRESHOLD * 10)
-                .add(100)
-                .astype(int)
-                .clip(lower=0, upper=200)
-        )
-
-        # Compute status interpretation
-        sociogram_micro_stats["st"] = (
-            self.compute_status(sociogram_micro_stats)
-        )
+        # Compute status
+        sociogram_micro_stats["st"] = self.compute_status(sociogram_micro_stats)
 
         # Return sociogram micro statistics
         return sociogram_micro_stats.sort_index()
@@ -211,9 +178,6 @@ class ABGridSociogram:
         descriptives.insert(7, "sk", skew)
         descriptives.insert(8, "kt", kurt)
 
-        # Drop unused metrics
-        descriptives = descriptives.drop(["ai_robust_z", "ii_robust_z"])
-        
         # Return sociogram macro statistics
         return descriptives.apply(pd.to_numeric, downcast="integer")
 
