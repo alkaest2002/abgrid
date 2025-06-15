@@ -236,8 +236,16 @@ class ABGridSna:
                 - network_reciprocity: Overall reciprocity measure
 
         Raises:
-            KeyError: If the specified network_type is not found in self.sna.
+            ValueError: If required data is not available.
+
         """
+        # Check if required data is available
+        if self.sna[f"network_{network_type}"] is None:
+            raise ValueError(f"Network data for type '{network_type}' is not available. Call get() method first.")
+        
+        if self.sna[f"edges_types_{network_type}"] is None:
+            raise ValueError(f"Edge types data for network '{network_type}' is not available. Call get() method first.")
+    
         # Get network
         network = self.sna[f"network_{network_type}"]
 
@@ -287,9 +295,16 @@ class ABGridSna:
                 - *_rank: Rank columns for each centrality measure
 
         Raises:
-            KeyError: If the specified network_type is not found in self.sna.
+            ValueError: If required network data is not available.
             nx.NetworkXError: If PageRank computation fails to converge.
         """
+        # Check if required data is available
+        if self.sna[f"network_{network_type}"] is None:
+            raise ValueError(f"Network data for type '{network_type}' is not available. Call get() method first.")
+        
+        if self.sna[f"adjacency_{network_type}"] is None:
+            raise ValueError(f"Adjacency matrix for network '{network_type}' is not available. Call get() method first.")
+   
         # Get network and adjacency
         network = self.sna[f"network_{network_type}"]
         adjacency = self.sna[f"adjacency_{network_type}"]
@@ -343,8 +358,12 @@ class ABGridSna:
                 Rows contain statistical summaries (count, mean, std, min, max, etc.).
 
         Raises:
-            KeyError: If the specified network_type is not found in self.sna.
+            ValueError: If required micro statistics data is not available.
         """
+        # Check if required data is available
+        if self.sna[f"micro_stats_{network_type}"] is None:
+            raise ValueError(f"Micro statistics for network '{network_type}' are not available. Call get() method first.")
+   
         # Select columns to retain
         columns_to_retain = ["ic", "pr", "bt", "cl", "hu"]
 
@@ -379,8 +398,12 @@ class ABGridSna:
             dtype: float64
 
         Raises:
-            KeyError: If the specified network_type is not found in self.sna.
+            ValueError: If required micro statistics data is not available.
         """
+        # Check if required data is available
+        if self.sna[f"micro_stats_{network_type}"] is None:
+            raise ValueError(f"Micro statistics for network '{network_type}' are not available. Call get() method first.")
+    
         # Get the micro stats DataFrame for the specified network type
         micro_stats_df = self.sna[f"micro_stats_{network_type}"]
         
@@ -422,9 +445,15 @@ class ABGridSna:
             (network 'b' is reference for 'a', and vice versa).
 
         Raises:
-            KeyError: If the specified network_type is not found in self.sna.
+            ValueError: If required adjacency matrix data is not available.
         """
-        # Get adjacency dataframes
+        # Check if required data is available
+        if self.sna["adjacency_a"] is None:
+                raise ValueError("Adjacency matrix for network 'a' is not available. Call get() method first.")
+        if self.sna["adjacency_b"] is None:
+            raise ValueError("Adjacency matrix for network 'b' is not available. Call get() method first.")
+        
+        # Get the micro adjacency DataFrames for the specified network type
         if network_type == "a":
             adj_df = self.sna["adjacency_a"]
             adj_ref_df = self.sna["adjacency_b"]
@@ -498,8 +527,12 @@ class ABGridSna:
             dtype: object
 
         Raises:
-            KeyError: If the specified network_type is not found in self.sna.
+            ValueError: If required adjacency matrix data is not available.
         """
+        # Check if required data is available
+        if self.sna[f"network_{network_type}"] is None:
+            raise ValueError(f"Network data for type '{network_type}' is not available. Call get() method first.")
+    
         # Get network
         network = self.sna[f"network_{network_type}"]
         
