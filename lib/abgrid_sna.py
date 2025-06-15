@@ -250,7 +250,7 @@ class ABGridSna:
         # Compute macro-level statistics
         network_nodes = network.number_of_nodes()
         network_edges = network.number_of_edges()
-        network_edges_reciprocal = edges_types["type_ii"]
+        network_edges_reciprocal = edges_types["type_ii"].shape[0]
         network_density = nx.density(network)
         network_centralization = self.compute_network_centralization(network.to_undirected())
         network_transitivity = nx.transitivity(network)
@@ -260,7 +260,7 @@ class ABGridSna:
         return pd.Series({
             "network_nodes": network_nodes,
             "network_edges": network_edges,
-            "network_edges_reciprocal": network_edges_reciprocal.shape[0],
+            "network_edges_reciprocal": network_edges_reciprocal,
             "network_density": network_density,
             "network_centralization": network_centralization,
             "network_transitivity": network_transitivity,
