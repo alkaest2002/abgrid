@@ -206,7 +206,6 @@ def figure_to_base64_svg(fig: plt.Figure) -> str:
     # Encode the buffer contents to a base64 string
     base64_encoded_string = b64encode(buffer.getvalue()).decode()
     
-    # Return the data URI for the SVG
     return f"data:image/svg+xml;base64,{base64_encoded_string}"
 
 
@@ -246,7 +245,6 @@ def compute_descriptives(data) -> pd.DataFrame:
     # Compute descriptive statistics with pandas descrive
     descriptives = data.describe().T
     
-    # Return descriptive statistics
     return (
         descriptives
             .rename(columns={ "50%": "median" })

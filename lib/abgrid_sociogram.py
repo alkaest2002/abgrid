@@ -100,7 +100,6 @@ class ABGridSociogram:
         self.sociogram["graph_ai"] = self.create_graph("ai")
         self.sociogram["graph_ii"] = self.create_graph("ii")
 
-        # Return sociogram data
         return self.sociogram
 
     def compute_macro_stats(self) -> pd.Series:
@@ -137,7 +136,6 @@ class ABGridSociogram:
             len(self.sna["edges_types_b"]["type_ii"]) / len(self.sna["network_b"])
         )
 
-        # Return sociogram macro statistics
         return pd.Series({
             "ui_i": cohesion_index_type_i,
             "ui_ii": cohesion_index_type_ii,
@@ -200,7 +198,6 @@ class ABGridSociogram:
         # Compute status
         sociogram_micro_stats["st"] = self.compute_status(sociogram_micro_stats)
 
-        # Return sociogram micro statistics
         return sociogram_micro_stats.sort_index()
 
     def compute_descriptives(self) -> pd.DataFrame:
@@ -223,7 +220,6 @@ class ABGridSociogram:
         # Select numeric columns only
         sociogram_numeric_columns = self.sociogram["micro_stats"].select_dtypes(np.number)
         
-        # Return sociogram macro statistics
         return compute_descriptives(sociogram_numeric_columns)
         
     def compute_rankings(self) -> Dict[str, pd.Series]:
@@ -289,10 +285,9 @@ class ABGridSociogram:
         # Sort by status_order first, then by original_index
         sorted_indices = sort_df.sort_values(['status_order', 'original_index']).index
         
-        # Return the status series in the new order
+        # Store the status series in the new order
         rankings["st"] = status_series.loc[sorted_indices]
         
-        # Return rankings
         return rankings
     
     def compute_status(self, sociogram_micro_stats: pd.DataFrame) -> pd.Series:
@@ -357,7 +352,7 @@ class ABGridSociogram:
                 low_deviation = abs(actual_low_prop - low_q)
                 high_deviation = abs(actual_high_prop - (1 - high_q))
 
-                # Return first quantile pair within epsilon tolerance
+                # Exit on first quantile pair within epsilon tolerance
                 if low_deviation <= epsilon and high_deviation <= epsilon:
                     return (low_val, high_val)
             
@@ -415,7 +410,6 @@ class ABGridSociogram:
         status.loc[prefs_a.mul(prefs_b).gt(0) & neutral & impact_median] = "ambitendent"
         status.loc[prefs_a.mul(prefs_b).gt(0) & neutral & impact_high] = "controversial"
         
-        # Return status classifications
         return status
 
     def create_graph(self, coefficient: Literal["ai", "ii"]) -> str:
@@ -499,5 +493,4 @@ class ABGridSociogram:
                 ax.annotate(txt, (theta_jittered.iloc[i], r_jittered.iloc[i]), 
                           color="blue", fontsize=12)
 
-        # Return base64-encoded SVG
         return figure_to_base64_svg(fig)

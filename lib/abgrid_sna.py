@@ -159,7 +159,6 @@ class ABGridSna:
             self.sna[f"rankings_{network_type}"] = self.compute_rankings(network_type)
             self.sna[f"graph_{network_type}"] = self.create_graph(network_type)
 
-        # Return SNA data
         return self.sna
 
     def unpack_network_edges(self, packed_edges: List[Dict[str, str]]) -> List[Tuple[str, str]]:
@@ -183,7 +182,6 @@ class ABGridSna:
             >>> unpack_network_edges(packed_edges)
             [("A", "B"), ("A", "C"), ("B", "C")]
         """
-        # Extract edges as tuples while ensuring no errors with None values
         return reduce(
             lambda acc, itr: [
                 *acc,
@@ -213,7 +211,6 @@ class ABGridSna:
             >>> unpack_network_nodes(packed_edges)
             ["A", "B"]
         """
-        # Extract nodes and sort them
         return sorted([node for node_edges in packed_edges for node in node_edges.keys()])
     
     def compute_macro_stats(self, network_type: Literal["a", "b"]) -> pd.Series:
@@ -256,7 +253,6 @@ class ABGridSna:
         network_transitivity = nx.transitivity(network)
         network_reciprocity = nx.overall_reciprocity(network)
         
-        # Return macro-level statistics
         return pd.Series({
             "network_nodes": network_nodes,
             "network_edges": network_edges,
@@ -321,7 +317,6 @@ class ABGridSna:
                 .add_suffix("_rank")
         )
 
-        # Return micro-level statistics
         return (
             pd.concat([
                 micro_level_stats,
@@ -356,7 +351,6 @@ class ABGridSna:
         # Select numeric columns only
         sna_numeric_columns = self.sna[f"micro_stats_{network_type}"].loc[:, columns_to_retain]
         
-        # Return sociogram macro statistics
         return compute_descriptives(sna_numeric_columns)
 
     def compute_rankings(self, network_type: Literal["a", "b"]) -> Dict[str, pd.Series]:
@@ -398,7 +392,6 @@ class ABGridSna:
         for metric_name in rank_columns.columns:
             rankings[metric_name] = rank_columns[metric_name].sort_values()
         
-        # Return rankings
         return rankings
               
     def compute_edges_types(self, network_type: Literal["a", "b"]) -> Dict[str, pd.Index]:
@@ -467,7 +460,6 @@ class ABGridSna:
         )
         type_iv = type_iv_df.sub(type_v_df).stack().loc[lambda x: x == 1].index
         
-        # Return edges types
         return {
             "type_i": type_i,
             "type_ii": type_ii,
@@ -601,7 +593,6 @@ class ABGridSna:
             ax=ax 
         )
         
-        # Return figure
         return figure_to_base64_svg(fig)
     
     def handle_isolated_nodes(self, network: nx.DiGraph, loc: Dict[str, np.ndarray]) -> Dict[str, np.ndarray]:
@@ -747,5 +738,4 @@ class ABGridSna:
                 / ((number_of_nodes - 1) * (number_of_nodes - 2))
         )
         
-        # Return network centralization
         return network_centralization
