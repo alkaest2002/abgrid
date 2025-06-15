@@ -17,7 +17,7 @@ from typing import Literal, List, Dict, Optional, Tuple, TypedDict
 from functools import reduce
 from scipy.spatial import ConvexHull
 from lib import A_COLOR, B_COLOR, CM_TO_INCHES
-from lib.abgrid_utils import figure_to_base64_svg
+from lib.abgrid_utils import compute_descriptives, figure_to_base64_svg
 
 class SNADict(TypedDict):
     nodes_a: Optional[List[str]]
@@ -32,6 +32,8 @@ class SNADict(TypedDict):
     macro_stats_b: Optional[pd.Series]
     micro_stats_a: Optional[pd.DataFrame]
     micro_stats_b: Optional[pd.DataFrame]
+    descriptives_a: Optional[pd.DataFrame]
+    descriptives_b: Optional[pd.DataFrame]
     rankings_a: Optional[Dict[str, pd.Series]]
     rankings_b: Optional[Dict[str, pd.Series]]
     edges_types_a: Optional[Dict[str, pd.Index]]
@@ -65,6 +67,8 @@ class ABGridSna:
             "macro_stats_b": None,
             "micro_stats_a": None,
             "micro_stats_b": None,
+            "descriptives_a": None,
+            "descriptives_b": None,
             "rankings_a": None,
             "rankings_b": None,
             "components_a": None,
@@ -133,6 +137,7 @@ class ABGridSna:
             self.sna[f"components_{network_type}"] = self.compute_components(network_type)
             self.sna[f"macro_stats_{network_type}"] = self.compute_macro_stats(network_type)
             self.sna[f"micro_stats_{network_type}"] = self.compute_micro_stats(network_type)
+            self.sna[f"descriptives_{network_type}"] = self.compute_descriptives(network_type)
             self.sna[f"rankings_{network_type}"] = self.compute_rankings(network_type)
             self.sna[f"graph_{network_type}"] = self.create_graph(network_type)
 
@@ -231,7 +236,7 @@ class ABGridSna:
             pd.DataFrame: 
                 A DataFrame with micro-level statistics for each node, including
                 metrics like in-degree centrality, PageRank, betweenness, closeness centrality,
-                hubs score, and nodes rankings and percentiles.
+                hubs score and nodes rankings.
         """
         # Get network and adjacency
         network = self.sna[f"network_{network_type}"]
@@ -259,24 +264,32 @@ class ABGridSna:
                 .rank(method="dense", ascending=False)
                 .add_suffix("_rank")
         )
-        
-        # Compute node percentiles relative to each network centrality metric
-        micro_level_stats_pct = (
-            micro_level_stats.iloc[:, 1:-1] # omit first column (LNS) and last column (ND)
-                .rank(pct=True)
-                .add_suffix("_pctile")
-        )
-        
+
         # Return micro-level statistics
         return (
             pd.concat([
                 micro_level_stats,
                 micro_level_stats_ranks,
-                micro_level_stats_pct,
             ], axis=1)
                 .sort_index()
         )
+
+    def compute_descriptives(self, network_type: Literal["a", "b"]) -> pd.DataFrame:
+        """
+        Compute macro-level descriptive statistics based on micro-level statistics.
+
+        Returns:
+            pd.DataFrame: DataFrame with macro-level descriptive statistics.
+        """
+        # Select columns to retain
+        columns_to_retain = ["ic", "pr", "bt", "cl", "hu"]
+
+        # Select numeric columns only
+        sna_numeric_columns = self.sna[f"micro_stats_{network_type}"].loc[: ,columns_to_retain]
         
+        # Return sociogram macro statistics
+        return compute_descriptives(sna_numeric_columns)
+
     def compute_rankings(self, network_type: Literal["a", "b"]) -> Dict[str, pd.Series]:
         """
         Generate and return the order of nodes based on their rank scores for each centrality metric.
