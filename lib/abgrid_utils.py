@@ -283,7 +283,7 @@ def gini_coefficient(values: Union[Sequence[float], np.ndarray]) -> float:
     gini = gini_coefficient([40000, 50000, 60000, 75000, 80000, 180000])
     print(gini)  # Output: Gini coefficient as a float
     """
-    # Convert to numpu array
+    # Convert to numpu array (make sure values are positive)
     values = np.abs(np.array(values, dtype=np.float64))
     
     # Sort the values
