@@ -132,15 +132,31 @@
     <span class="text-italic">Nessun componente di questo tipo</span>
 {% endmacro %}
 
-{% macro render_sna_legend(show_macro=False, show_micro=False, show_arrows=False) %}
+{% macro render_table_legend(show_sna_macro=False, show_sna_micro=False, show_sociogram_micro=False, show_sociogram_rankings=False, show_sna_arrows=False, show_descriptives=False) %}
 <div class="table-data-legend">
-    {% if show_macro %}<b>NN</b> Nodi <b>NE</b> Legami <b>NR</b> Legami reciproci <b>ND</b> Densità <b>NC</b> Centralizzazione <b>NT</b> Transitività <b>NR</b> Reciprocità {% endif %}{% if show_micro%}<b>IC</b> In-Degree <b>KZ</b> Katz <b>PR</b> PageRank <b>BT</b> Betweenness <b>CL</b> Closeness <b>HU</b> Hub {% endif %}{% if show_arrows %}<b>ND</b> No In-Degree (&larr; ) No Out-Degree (&rarr;) No In o Out-Degree (&rlarr;) {% endif %}
-</div>
-{% endmacro %}
+    {% if show_sna_macro %}
+        <b>NN</b> Nodi <b>NE</b> Legami <b>NR</b> Legami reciproci <b>ND</b> Densità <b>NC</b> Centralizzazione <b>NT</b> Transitività <b>NR</b> Reciprocità 
+    {% endif %}
+    
+    {% if show_sna_micro %}
+        <b>IC</b> In-Degree <b>KZ</b> Katz <b>BT</b> Betweenness <b>CL</b> Closeness <b>HU</b> Hub 
+    {% endif %}
 
-{% macro render_descriptive_legend(show_descriptives=False, show_micro=False, show_rankings=False) %}
-<div class="table-data-legend">
-    {% if show_descriptives %}<b>Count</b> Frequenza <b>Sum</b> Somma <b>Min</b> Valore minimo <b>Max</b> Valore massimo <b>Median</b> Mediana <b>Mean</b> Media <b>SD</b> Deviazione standard <b>CV</b> Coefficiente di variazione <b>SK</b> Asimmetria  <b>KT</b> Curtosi <b>P25</b> 25° percentile <b>P75</b> 75° percentile {% endif %}{% if show_micro %}<b>RP</b> Preferenze ricevute <b>RR</b> Rifiuti ricevuti <b>GP</b> Preferenze date <b>GR</b> Rifiuti dati <b>MP</b> Preferenze reciproche <b>MR</b> Rifiuti reciproci <b>BL</b> Saldo <b>OR</b> Orientamento <b>IM</b> Impatto <b>AI</b> Indice di affiliazione <b>II</b> Indice di influenza <b>ST</b> Status sociometrico {% endif %}{%if show_rankings %}<b>RP</b> Preferenze ricevute <b>RR</b> Rifiuti ricevuti <b>GP</b> Preferenze date <b>GR</b> Rifiuti dati <b>BL</b> Saldo <b>IM</b> Impatto <b>AI</b> Indice di affiliazione <b>II</b> Indice di influenza {% endif %}
+    {% if show_sociogram_micro %}
+        <b>RP</b> Preferenze ricevute <b>RR</b> Rifiuti ricevuti <b>GP</b> Preferenze date <b>GR</b> Rifiuti dati <b>MP</b> Preferenze reciproche <b>MR</b> Rifiuti reciproci <b>BL</b> Saldo <b>OR</b> Orientamento <b>IM</b> Impatto <b>AI</b> Indice di affiliazione <b>II</b> Indice di influenza <b>ST</b> Status sociometrico 
+    {% endif %}
+    
+    {%if show_sociogram_rankings %}
+        <b>RP</b> Preferenze ricevute <b>RR</b> Rifiuti ricevuti <b>GP</b> Preferenze date <b>GR</b> Rifiuti dati <b>BL</b> Saldo <b>IM</b> Impatto <b>AI</b> Indice di affiliazione <b>II</b> Indice di influenza 
+    {% endif %}
+
+    {% if show_sna_arrows %}
+        <b>ND</b> No In-Degree (&larr; ) No Out-Degree (&rarr;) No In o Out-Degree (&rlarr;) 
+    {% endif %}
+
+    {% if show_descriptives %}
+        <b>Count</b> Frequenza <b>Sum</b> Somma <b>Min</b> Valore minimo <b>Max</b> Valore massimo <b>Median</b> Mediana <b>Mean</b> Media <b>SD</b> Deviazione standard <b>CV</b> Coefficiente di variazione <b>SK</b> Asimmetria  <b>KT</b> Curtosi <b>P25</b> 25° percentile <b>P75</b> 75° percentile 
+    {% endif %}
 </div>
 {% endmacro %}
 

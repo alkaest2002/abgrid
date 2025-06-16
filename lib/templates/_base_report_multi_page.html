@@ -31,7 +31,7 @@
                 {{ base_report_macro.render_graph(graph) }}
             </div>
             <div>
-                {{ report_macro.render_sna_legend(show_macro=True) }}
+                {{ report_macro.render_table_legend(show_sna_macro=True) }}
                 {{ report_macro.render_footer(year) }}
             </div>
         </div>
@@ -43,7 +43,7 @@
                 {{ report_macro.render_report_header(project_title, group, "sna_raw_scores") }}
                 {{ base_report_macro.render_question(network_type, question) }}
                 {{ base_report_macro.render_sna_micro_statistics(network_type, "raw_scores", micro_stats, report_macro.render_choices_label) }}
-                {{ report_macro.render_sna_legend(show_micro=True, show_arrows=True) }}
+                {{ report_macro.render_table_legend(show_sna_micro=True, show_sna_arrows=True) }}
             </div>
             {{ report_macro.render_footer(year) }}
         </div>
@@ -55,7 +55,7 @@
                 {{ report_macro.render_report_header(project_title, group, "sna_ranks") }}
                 {{ base_report_macro.render_question(network_type, question) }}
                 {{ base_report_macro.render_sna_micro_statistics(network_type, "ranks", micro_stats, report_macro.render_choices_label) }}
-                {{ report_macro.render_sna_legend(show_micro=True, show_arrows=True) }}
+                {{ report_macro.render_table_legend(show_sna_micro=True, show_sna_arrows=True) }}
             </div>
             {{ report_macro.render_footer(year) }}
         </div>
@@ -67,7 +67,7 @@
                 {{ report_macro.render_report_header(project_title, group, "sna_rankings") }}
                 {{ base_report_macro.render_question(network_type, question) }}
                 {{ base_report_macro.render_rankings(rankings, report_macro.render_rank_label) }}
-                {{ report_macro.render_sna_legend(show_micro=True) }}
+                {{ report_macro.render_table_legend(show_sna_micro=True) }}
             </div>
             {{ report_macro.render_footer(year) }}
         </div>
@@ -101,11 +101,13 @@
             {{ report_macro.render_disclaimer() }}
             {{ report_macro.render_report_header(project_title, group, "sna_descriptives") }}
             {{ base_report_macro.render_question("A", question_a) }}
+            {{ base_report_macro.render_sna_macro_statistics(sna.macro_stats_a) }}
             {{ base_report_macro.render_descriptives(sna.descriptives_a, report_macro.render_sna_measures_label) }}
-            {{ report_macro.render_descriptive_legend(show_descriptives=True) }}
+            {{ report_macro.render_table_legend(show_sna_macro=True, show_descriptives=True) }}
             {{ base_report_macro.render_question("B", question_b) }}
+            {{ base_report_macro.render_sna_macro_statistics(sna.macro_stats_b) }}
             {{ base_report_macro.render_descriptives(sna.descriptives_b, report_macro.render_sna_measures_label) }}
-            {{ report_macro.render_descriptive_legend(show_descriptives=True) }}
+            {{ report_macro.render_table_legend(show_sna_macro=True, show_descriptives=True) }}
         </div>
         {{ report_macro.render_footer(year) }}
     </div>
@@ -117,7 +119,7 @@
                 {{ report_macro.render_disclaimer() }}
                 {{ report_macro.render_report_header(project_title, group, "sociogram_micro") }}
                 {{ base_report_macro.render_sociogram_micro_statistics(sociogram.micro_stats, report_macro.render_sociogram_status_label) }}
-                {{ report_macro.render_descriptive_legend(show_micro=True)}}
+                {{ report_macro.render_table_legend(show_sociogram_micro=True)}}
             </div>
             {{ report_macro.render_footer(year) }}
         </div>
@@ -128,7 +130,7 @@
                 {{ report_macro.render_disclaimer() }}
                 {{ report_macro.render_report_header(project_title, group, "sociogram_rankings") }}
                 {{ base_report_macro.render_rankings(sociogram.rankings, report_macro.render_rank_label, report_macro.render_sociogram_status_label) }}
-                {{ report_macro.render_descriptive_legend(show_rankings=True) }}
+                {{ report_macro.render_table_legend(show_sociogram_rankings=True) }}
             </div>
             {{ report_macro.render_footer(year) }}
         </div>
@@ -160,7 +162,7 @@
                 {{ report_macro.render_report_header(project_title, group, "sociogram_macro") }}
                 {{ base_report_macro.render_sociogram_macro_statistics(sociogram.macro_stats, report_macro.render_sociogram_measures_label) }}
                 {{ base_report_macro.render_descriptives(sociogram.descriptives, report_macro.render_sociogram_measures_label) }}
-                {{ report_macro.render_descriptive_legend(show_descriptives=True) }}
+                {{ report_macro.render_table_legend(show_descriptives=True) }}
             </div>
             {{ report_macro.render_footer(year) }}
         </div>
