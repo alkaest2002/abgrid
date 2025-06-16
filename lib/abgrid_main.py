@@ -239,6 +239,7 @@ class ABGridMain:
                     r"sna\.adjacency_[a|b]",
                     r"sna\.descriptives_[a|b]",
                     r"sna\.micro_stats_[a|b]\..*_rank",
+                    r"sna\.rankings_ab"
                 ]
             )
 
