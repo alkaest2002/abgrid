@@ -14,8 +14,12 @@
     <span>CHOICES</span>
 {% endmacro %}
 
+{% macro render_node_label() %}
+    <span>ND</span>
+{% endmacro %}
+
 {% macro render_rank_label() %}
-    <span>RANK</span>
+    <span>RK</span>
 {% endmacro %}
 
 {% macro render_components_label(type) %}
@@ -123,7 +127,7 @@
     <span class="text-italic">No components of this type</span>
 {% endmacro %}
 
-{% macro render_table_legend(show_sna_macro=False, show_sna_micro=False, show_sociogram_micro=False, show_sociogram_rankings=False, show_sna_arrows=False, show_descriptives=False) %}
+{% macro render_table_legend(show_sna_macro=False, show_sna_micro=False, show_sociogram_micro=False, show_sna_rankings=False,show_sociogram_rankings=False, show_sna_arrows=False, show_descriptives=False) %}
 <div class="table-data-legend">
     {% if show_sna_macro %}
         <b>NN</b> Nodes <b>NE</b> Links <b>NR</b> Reciprocal Links <b>ND</b> Density <b>NC</b> Centralization <b>NT</b> Transitivity <b>NR</b> Reciprocity 
@@ -136,8 +140,12 @@
     {% if show_sociogram_micro %}
         <b>RP</b> Received Preferences <b>RR</b> Received Rejections <b>GP</b> Given Preferences <b>GR</b> Given Rejections <b>MP</b> Mutual Preferences <b>MR</b> Mutual Rejections <b>BL</b> Balance <b>OR</b> Orientation <b>IM</b> Impact <b>AI</b> Affiliation Index <b>II</b> Influence Index <b>ST</b> Sociometric Status 
     {% endif %}
+
+    {% if show_sna_rankings %}
+        <b>RK</b> Rank  <b>IC</b> In-Degree <b>KZ</b> Katz <b>BT</b> Betweenness <b>CL</b> Closeness <b>HU</b> Hub 
+    {% endif %}
     
-    {%if show_sociogram_rankings %}
+    {% if show_sociogram_rankings %}
         <b>RP</b> Received Preferences <b>RR</b> Received Rejections <b>GP</b> Given Preferences <b>GR</b> Given Rejections <b>BL</b> Balance <b>IM</b> Impact <b>AI</b> Affiliation Index <b>II</b> Influence Index 
     {% endif %}
 

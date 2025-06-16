@@ -83,14 +83,14 @@
 </div>
 {% endmacro %}
 
-{% macro render_rankings(rankings, render_rank_label, render_sociogram_status_label) %}
+{% macro render_rankings(rankings, network_type, render_rank_label, render_sociogram_status_label) %}
 <div class="rankings-container mt-lg">
     {% for metric_label, data in rankings.items() %}
         <div class="rankings-main">
             <table class="table-data table-bordered table-striped full-width">
                 <tr>
                     <th>{{ render_rank_label() }}</th>
-                    <th>{{ metric_label[:2] | upper }}</th>
+                    <th>{{ metric_label[:2] | upper }}-{{ network_type }}</th>
                 </tr>
                 {% for letter, rank in data.items() %}
                     <tr>
@@ -105,6 +105,35 @@
                         {% endif %}
                         <td>
                             {{ letter }}
+                        </td>
+                    </tr>
+                {% endfor %}
+            </table>
+        </div>
+    {% endfor %}
+</div>
+{% endmacro %}
+
+{% macro render_rankings_comparison(rankings_ab, render_node_label) %}
+<div class="rankings-comparison-container mt-lg">
+    {% for metric_label, data in rankings_ab.items() %}
+        <div class="rankings-comparison-main">
+            <table class="table-data table-bordered table-striped full-width">
+                <tr>
+                    <th>{{ render_node_label() | upper }}</th>
+                    <th>{{ metric_label[:2] | upper }}-A</th>
+                    <th>{{ metric_label[:2] | upper }}-B</th>
+                </tr>
+                {% for letter, ranks in data.iterrows() %}
+                    <tr>
+                        <td>
+                            {{ letter }}
+                        </td>
+                        <td>
+                            {{ ranks["a"] }}
+                        </td>
+                        <td>
+                            {{ ranks["b"] }}
                         </td>
                     </tr>
                 {% endfor %}
