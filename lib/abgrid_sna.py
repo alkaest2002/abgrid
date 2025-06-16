@@ -37,6 +37,7 @@ class SNADict(TypedDict):
     descriptives_b: Optional[pd.DataFrame]
     rankings_a: Optional[Dict[str, pd.Series]]
     rankings_b: Optional[Dict[str, pd.Series]]
+    rankings_ab: Optional[Dict[str, pd.DataFrame]]
     edges_types_a: Optional[Dict[str, pd.Index]]
     edges_types_b: Optional[Dict[str, pd.Index]]
     components_a: Optional[Dict[str, pd.Series]]
@@ -122,13 +123,14 @@ class ABGridSna:
             - Creates SVG visualizations of both networks
         """
         
-        # Create network a and b
+        # Store network a and b
         for network_type, packed_edges in [("a", packed_edges_a), ("b", packed_edges_b)]:
             self.sna[f"nodes_{network_type}"] = self.unpack_network_nodes(packed_edges)
             self.sna[f"edges_{network_type}"] = self.unpack_network_edges(packed_edges)
             self.sna[f"network_{network_type}"] = nx.DiGraph(self.sna[f"edges_{network_type}"])
 
-        # Add isolated nodes to network a and b and compute nodes layout locations
+        # Add isolated nodes to network a and b and 
+        # store nodes layout locations
         for network_type, network, nodes in [
             ("a", self.sna["network_a"], self.sna["nodes_a"]), 
             ("b", self.sna["network_b"], self.sna["nodes_b"])
@@ -149,7 +151,7 @@ class ABGridSna:
             # Add current network adjacency list
             self.sna[f"adjacency_{network_type}"] = nx.to_pandas_adjacency(network, nodelist=nodes)
                     
-        # Store SNA data
+        # Store edges_types, components, macro stats, micro stats, descriptives, rankings and graphs
         for network_type in ("a", "b"):
             self.sna[f"edges_types_{network_type}"] = self.compute_edges_types(network_type)
             self.sna[f"components_{network_type}"] = self.compute_components(network_type)
@@ -158,6 +160,9 @@ class ABGridSna:
             self.sna[f"descriptives_{network_type}"] = self.compute_descriptives(network_type)
             self.sna[f"rankings_{network_type}"] = self.compute_rankings(network_type)
             self.sna[f"graph_{network_type}"] = self.create_graph(network_type)
+
+        # Store rankings comparison 
+        self.sna["rankings_ab"] = self.compute_rankings_ab()
 
         return self.sna
 
@@ -241,10 +246,10 @@ class ABGridSna:
         """
         # Check if required data is available
         if self.sna[f"network_{network_type}"] is None:
-            raise ValueError(f"Network data for type '{network_type}' is not available. Call get() method first.")
+            raise ValueError(f"Network data for type '{network_type}' is not available.")
         
         if self.sna[f"edges_types_{network_type}"] is None:
-            raise ValueError(f"Edge types data for network '{network_type}' is not available. Call get() method first.")
+            raise ValueError(f"Edge types data for network '{network_type}' is not available.")
     
         # Get network
         network = self.sna[f"network_{network_type}"]
@@ -300,10 +305,10 @@ class ABGridSna:
         """
         # Check if required data is available
         if self.sna[f"network_{network_type}"] is None:
-            raise ValueError(f"Network data for type '{network_type}' is not available. Call get() method first.")
+            raise ValueError(f"Network data for type '{network_type}' is not available.")
         
         if self.sna[f"adjacency_{network_type}"] is None:
-            raise ValueError(f"Adjacency matrix for network '{network_type}' is not available. Call get() method first.")
+            raise ValueError(f"Adjacency matrix for network '{network_type}' is not available.")
    
         # Get network and adjacency
         network = self.sna[f"network_{network_type}"]
@@ -363,7 +368,7 @@ class ABGridSna:
         """
         # Check if required data is available
         if self.sna[f"micro_stats_{network_type}"] is None:
-            raise ValueError(f"Micro statistics for network '{network_type}' are not available. Call get() method first.")
+            raise ValueError(f"Micro statistics for network '{network_type}' are not available.")
    
         # Select columns to retain
         columns_to_retain = ["ic", "pr", "kz", "bt", "cl", "hu"]
@@ -403,7 +408,7 @@ class ABGridSna:
         """
         # Check if required data is available
         if self.sna[f"micro_stats_{network_type}"] is None:
-            raise ValueError(f"Micro statistics for network '{network_type}' are not available. Call get() method first.")
+            raise ValueError(f"Micro statistics for network '{network_type}' are not available.")
     
         # Get the micro stats DataFrame for the specified network type
         micro_stats_df = self.sna[f"micro_stats_{network_type}"]
@@ -417,7 +422,37 @@ class ABGridSna:
             rankings[metric_name] = rank_columns[metric_name].sort_values()
         
         return rankings
-              
+
+    def compute_rankings_ab(self) -> Dict[str, pd.DataFrame]:
+        """
+        Compute combined rankings from two different network sources, 'a' and 'b'.
+
+        This function checks the availability of rankings from two networks (network 'a' and network 'b') 
+        and combines them into a single dictionary structure where each key is associated with a DataFrame
+        containing rankings from both networks.
+
+        Returns:
+            Dict[str, pd.DataFrame]: A dictionary where each key corresponds to a category in the rankings,
+            and the value is a DataFrame with two columns, 'a' and 'b', representing the rankings from the 
+            respective networks.
+
+        Raises:
+            ValueError: If the rankings for network 'a' or 'b' are not available in the provided data structure.
+        """
+        
+        # Check if required data is available
+        if self.sna["rankings_a"] is None or self.sna["rankings_b"] is None:
+            raise ValueError("Rankings for network a and b are not available.")
+        
+        # Get the rankings from network a and b
+        rankings_a = self.sna["rankings_a"]
+        rankings_b = self.sna["rankings_b"]
+
+        # Combine them
+        rankings_ab = {k: pd.DataFrame({"a": v, "b": rankings_b[k]}) for k, v in rankings_a.items()}
+        
+        return rankings_ab
+
     def compute_edges_types(self, network_type: Literal["a", "b"]) -> Dict[str, pd.Index]:
         """
         Classify edges into five types based on reciprocity and cross-network relationships.
@@ -450,9 +485,9 @@ class ABGridSna:
         """
         # Check if required data is available
         if self.sna["adjacency_a"] is None:
-                raise ValueError("Adjacency matrix for network 'a' is not available. Call get() method first.")
+                raise ValueError("Adjacency matrix for network 'a' is not available.")
         if self.sna["adjacency_b"] is None:
-            raise ValueError("Adjacency matrix for network 'b' is not available. Call get() method first.")
+            raise ValueError("Adjacency matrix for network 'b' is not available.")
         
         # Get the micro adjacency DataFrames for the specified network type
         if network_type == "a":
@@ -532,7 +567,7 @@ class ABGridSna:
         """
         # Check if required data is available
         if self.sna[f"network_{network_type}"] is None:
-            raise ValueError(f"Network data for type '{network_type}' is not available. Call get() method first.")
+            raise ValueError(f"Network data for type '{network_type}' is not available.")
     
         # Get network
         network = self.sna[f"network_{network_type}"]
