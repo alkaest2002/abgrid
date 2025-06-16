@@ -12,11 +12,12 @@ import io
 import datetime
 import re
 import pandas as pd
+import numpy as np
 import json
 
 from base64 import b64encode
 from pathlib import Path
-from typing import Callable, Any, List, Optional, Union, Pattern
+from typing import Callable, Any, List, Optional, Sequence, Union, Pattern
 from functools import wraps
 
 from matplotlib import pyplot as plt
@@ -233,7 +234,7 @@ def compute_descriptives(data) -> pd.DataFrame:
 
     The function calculates standard descriptive statistics such as mean, std, min, max, quartiles,
     along with additional metrics like the median, coefficient of variation (CV), skewness (sk), 
-    and kurtosis (kt).
+    and kurtosis (kt) and GINI (gn).
 
     Args:
         data (pd.DataFrame): The input DataFrame for which descriptive statistics are to be computed.
@@ -251,8 +252,59 @@ def compute_descriptives(data) -> pd.DataFrame:
             .assign(
                 cv=descriptives["std"].div(descriptives["mean"]),
                 sk=data.skew(),
-                kt=data.kurt()
+                kt=data.kurt(),
+                gn=data.apply(gini_coefficient)
             )
-            .loc[:, ["count", "min", "max", "median", "mean", "std", "cv", "sk", "kt", "25%", "75%" ]]
+            .loc[:, ["count", "min", "max", "median", "mean", "std", "cv", "gn", "sk", "kt", "25%", "75%" ]]
             .apply(pd.to_numeric, downcast="integer")
     )
+
+def gini_coefficient(values: Union[Sequence[float], np.ndarray]) -> float:
+    """
+    Calculate the Gini coefficient of a 1-dimensional sequence of values.
+
+    The Gini coefficient is a measure of statistical dispersion intended to represent 
+    the income or wealth distribution of a nation's residents. It is the most 
+    commonly used measure of inequality.
+
+    Parameters:
+    values (Union[Sequence[float], np.ndarray]): A 1-dimensional sequence (such as a 
+    list, tuple, or numpy array) which contains the values for which the Gini 
+    coefficient is to be calculated.
+
+    Returns:
+    float: The Gini coefficient, a value between 0 and 1 where 0 indicates 
+    perfect equality and 1 indicates maximal inequality.
+
+    Raises:
+    ValueError: If the input is not a 1-dimensional sequence.
+
+    Example:
+    gini = gini_coefficient([40000, 50000, 60000, 75000, 80000, 180000])
+    print(gini)  # Output: Gini coefficient as a float
+    """
+    # Convert to numpu array
+    values = np.array(values, dtype=np.float64)
+    
+    # Sort the values
+    sorted_values = np.sort(values)
+    n = len(sorted_values)
+    
+    # Handle edge cases
+    if n == 0:
+        return 0.0
+    
+    # Calculate mean
+    mean_value = np.mean(sorted_values)
+    
+    # If all values are zero or mean is zero, return 0
+    if mean_value == 0:
+        return 0.0
+    
+    # Calculate Gini coefficient using the correct formula
+    # G = (2 * sum(i * x_i)) / (n * sum(x_i)) - (n + 1) / n
+    index_weighted_sum = np.sum((np.arange(1, n + 1) * sorted_values))
+    total_sum = np.sum(sorted_values)
+    gini = (2.0 * index_weighted_sum) / (n * total_sum) - (n + 1) / n
+    
+    return gini
