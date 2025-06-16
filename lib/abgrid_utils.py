@@ -290,10 +290,6 @@ def gini_coefficient(values: Union[Sequence[float], np.ndarray]) -> float:
     sorted_values = np.sort(values)
     n = len(sorted_values)
     
-    # Handle edge cases
-    if n == 0:
-        return 0.0
-    
     # Calculate mean
     mean_value = np.mean(sorted_values)
     
