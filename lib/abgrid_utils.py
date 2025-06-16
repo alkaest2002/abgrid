@@ -284,7 +284,7 @@ def gini_coefficient(values: Union[Sequence[float], np.ndarray]) -> float:
     print(gini)  # Output: Gini coefficient as a float
     """
     # Convert to numpu array
-    values = np.array(values, dtype=np.float64)
+    values = np.abs(np.array(values, dtype=np.float64))
     
     # Sort the values
     sorted_values = np.sort(values)
