@@ -449,7 +449,7 @@ class ABGridSna:
         rankings_b = self.sna["rankings_b"]
 
         # Combine them
-        rankings_ab = {k: pd.DataFrame({"a": v, "b": rankings_b[k]}) for k, v in rankings_a.items()}
+        rankings_ab = { k: pd.DataFrame({"a": v, "b": rankings_b[k]} ).sort_index() for k, v in rankings_a.items() }
         
         return rankings_ab
 
