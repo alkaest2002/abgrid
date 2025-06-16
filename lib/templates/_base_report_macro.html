@@ -114,7 +114,7 @@
 </div>
 {% endmacro %}
 
-{% macro render_edges_type(network_type, edges_types, render_edges_types_label, render_edges_type_empty_list) %}
+{% macro render_sna_edges_types(network_type, edges_types, render_edges_types_label, render_edges_type_empty_list) %}
 <div class="sna-edges-types-container mt-lg">
     {% for edges_type, edges in edges_types.items() %}
         <div class="sna-edges-type-main">
@@ -270,6 +270,7 @@
                 <th>Mean</th>
                 <th>SD</th>
                 <th>CV</th>
+                <th>GN</th>
                 <th>SK</th>
                 <th>KT</th>
                 <th>P25</th>
@@ -285,6 +286,7 @@
                     <td><div><div>{{ "%0.2f" | format(row["mean"] | round(2)) }}</div></div></td>
                     <td><div><div>{{ "%0.2f" | format(row["std"] | round(2)) }}</div></div></td>
                     <td><div><div>{{ "%0.2f" | format(row["cv"] | round(2)) }}</div></div></td>
+                    <td><div><div>{{ "%0.2f" | format(row["gn"] | round(2)) }}</div></div></td>
                     <td><div><div>{{ "%0.2f" | format(row["sk"] | round(2)) }}</div></div></td>
                     <td><div><div>{{ "%0.2f" | format(row["kt"] | round(2)) }}</div></div></td>
                     <td><div><div>{{ "%0.2f" | format(row["25%"] | round(2)) }}</div></div></td>
