@@ -232,8 +232,8 @@ def compute_descriptives(data) -> pd.DataFrame:
     Compute descriptive statistics for a given DataFrame.
 
     The function calculates standard descriptive statistics such as mean, std, min, max, quartiles,
-    along with additional metrics like the median, interquartile range (IQR), total sum, coefficient of variation (CV),
-    skewness (sk), and kurtosis (kt).
+    along with additional metrics like the median, coefficient of variation (CV), skewness (sk), 
+    and kurtosis (kt).
 
     Args:
         data (pd.DataFrame): The input DataFrame for which descriptive statistics are to be computed.
