@@ -249,7 +249,7 @@ def compute_descriptives(data) -> pd.DataFrame:
         descriptives
             .rename(columns={ "50%": "median" })
             .assign(
-                cv=descriptives["75%"].div(descriptives["mean"]),
+                cv=descriptives["std"].div(descriptives["mean"]),
                 sk=data.skew(),
                 kt=data.kurt()
             )
