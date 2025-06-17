@@ -26,6 +26,8 @@ class SociogramDict(TypedDict):
     rankings: Optional[Dict[str, pd.Series]]
     graph_ii: Optional[str]
     graph_ai: Optional[str]
+    relevant_nodes: Optional[Dict[str, Dict[str, pd.Series]]]
+
 
 
 class ABGridSociogram:
@@ -62,6 +64,7 @@ class ABGridSociogram:
             "rankings": None,
             "graph_ii": None,
             "graph_ai": None,
+            "relevant_nodes": None
         }
 
     def get(self, sna: Dict[str, Any]) -> SociogramDict:
@@ -97,6 +100,7 @@ class ABGridSociogram:
         self.sociogram["micro_stats"] = self.compute_micro_stats()
         self.sociogram["descriptives"] = self.compute_descriptives()
         self.sociogram["rankings"] = self.compute_rankings()
+        self.sociogram["relevant_nodes"] = self.compute_relevant_nodes()
         self.sociogram["graph_ai"] = self.create_graph("ai")
         self.sociogram["graph_ii"] = self.create_graph("ii")
 
@@ -290,6 +294,119 @@ class ABGridSociogram:
         
         return rankings
     
+    def compute_relevant_nodes(self) -> Dict[str, Dict[str, pd.Series]]:
+        """
+        Identify relevant nodes based on Affiliation Index, Integration Index, and Sociometric Status.
+        
+        This function identifies nodes with high social relevance by analyzing their performance
+        in key sociometric measures. Nodes are considered relevant if they appear in the top 5%
+        for numerical metrics or belong to specific status categories.
+        
+        Returns:
+            Dict[str, Dict[str, pd.Series]]: 
+                Nested dictionary structure where:
+                - First level keys are valence indicators ('a' for positive, 'b' for negative)
+                - Second level keys are metric names ('ai', 'ii', 'st')
+                - Values are Series containing relevant nodes with their metric values,
+                sorted appropriately (high to low for ai/ii, by status hierarchy for st)
+        
+        For Affiliation Index (ai) and Integration Index (ii):
+        - Positive valence ('a'): nodes in top 5% (95th percentile and above)
+        - Negative valence ('b'): nodes in bottom 5% (5th percentile and below)
+        
+        For Sociometric Status (st):
+        - Positive valence ('a'): "popular", "appreciated", "controversial" 
+        - Negative valence ('b'): "rejected", "disliked", "marginal", "isolated"
+        
+        Example:
+            >>> relevant_nodes = compute_relevant_nodes_ab()
+            >>> relevant_nodes['a']['ai']  # High activity index nodes
+            node_A    5.2
+            node_C    4.1
+            dtype: float64
+            >>> relevant_nodes['b']['st']  # Negative status nodes
+            node_X    rejected
+            node_Y    isolated
+            dtype: object
+        
+        Raises:
+            AttributeError: If micro_stats have not been computed yet.
+        """
+        # Check if required data is available
+        if self.sociogram["micro_stats"] is None:
+            raise AttributeError("Micro stats must be computed before identifying relevant nodes")
+        
+        # Define percentile threshold to select most relevant nodes
+        THRESHOLD = 0.05
+        
+        # Get micro stats data
+        micro_stats = self.sociogram["micro_stats"]
+        
+        # Initialize the result dictionary
+        relevant_nodes_ab = {}
+        
+        # Define positive and negative status categories
+        positive_statuses = ["popular", "appreciated"]
+        negative_statuses = ["isolated", "rejected", "disliked"]
+        
+        # Process both valence types
+        for valence_type in ["a", "b"]:
+            
+            # Initialize valence dictionary
+            relevant_nodes_ab[valence_type] = {}
+            
+            # Process Affiliation Index (ai)
+            ai_values = micro_stats["ai"]
+            if valence_type == "a":
+                # Positive valence: top performers (high values)
+                threshold_value = ai_values.quantile(1 - THRESHOLD)  # 95th percentile
+                relevant_ai = ai_values[ai_values >= threshold_value].sort_values(ascending=False)
+            else:
+                # Negative valence: bottom performers (low values)
+                threshold_value = ai_values.quantile(THRESHOLD)  # 5th percentile
+                relevant_ai = ai_values[ai_values <= threshold_value].sort_values(ascending=True)
+            
+            relevant_nodes_ab[valence_type]["ai"] = relevant_ai
+            
+            # Process Integration Index (ii)
+            ii_values = micro_stats["ii"]
+            if valence_type == "a":
+                # Positive valence: top performers (high values)
+                threshold_value = ii_values.quantile(1 - THRESHOLD)  # 95th percentile
+                relevant_ii = ii_values[ii_values >= threshold_value].sort_values(ascending=False)
+            else:
+                # Negative valence: bottom performers (low values)
+                threshold_value = ii_values.quantile(THRESHOLD)  # 5th percentile
+                relevant_ii = ii_values[ii_values <= threshold_value].sort_values(ascending=True)
+            
+            relevant_nodes_ab[valence_type]["ii"] = relevant_ii
+            
+            # Process Sociometric Status (st)
+            st_values = micro_stats["st"]
+            if valence_type == "a":
+                # Positive valence: positive status categories
+                relevant_st = st_values[st_values.isin(positive_statuses)]
+                # Sort by status hierarchy (best to worst)
+                if not relevant_st.empty:
+                    positive_order = {status: idx for idx, status in enumerate(positive_statuses)}
+                    relevant_st = relevant_st.loc[
+                        relevant_st.map(positive_order).sort_values().index
+                    ]
+            else:
+                # Negative valence: negative status categories
+                relevant_st = st_values[st_values.isin(negative_statuses)]
+                # Sort by status hierarchy (least negative to most negative)
+                if not relevant_st.empty:
+                    negative_order = {status: idx for idx, status in enumerate(negative_statuses)}
+                    relevant_st = relevant_st.loc[
+                        relevant_st.map(negative_order).sort_values().index
+                    ]
+            
+            relevant_nodes_ab[valence_type]["st"] = relevant_st
+            
+        return relevant_nodes_ab
+
+
     def compute_status(self, sociogram_micro_stats: pd.DataFrame) -> pd.Series:
         """
         Determine sociometric status for each node based on relationship patterns.

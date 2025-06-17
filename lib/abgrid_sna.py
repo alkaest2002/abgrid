@@ -506,23 +506,19 @@ class ABGridSna:
         # Initialize the result dictionary
         relevant_nodes_ab = {}
         
-        # Process each metric
-        for metric_name in rankings_a.keys():
+        # Process rankings from both networks
+        for type_of_network, rankings in [("a", rankings_a), ("b", rankings_b)]:
+
             # Initialize metric dictionary
-            relevant_nodes_ab[metric_name] = {}
-            
-            # Process network A
-            ranks_a = rankings_a[metric_name]
-            threshold_a = ranks_a.quantile(THRESHOLD)
-            relevant_a = ranks_a[ranks_a <= threshold_a].sort_values()
-            relevant_nodes_ab[metric_name]['network_a'] = relevant_a
-            
-            # Process network B
-            ranks_b = rankings_b[metric_name]
-            threshold_b = ranks_b.quantile(THRESHOLD)
-            relevant_b = ranks_b[ranks_b <= threshold_b].sort_values()
-            relevant_nodes_ab[metric_name]['network_b'] = relevant_b
-            
+            relevant_nodes_ab[type_of_network] = {}
+
+            # Loop through metrics
+            for metric_name in rankings.keys():
+                # Process metric
+                ranks = rankings[metric_name]
+                relevant_nodes = ranks[ranks <= ranks.quantile(THRESHOLD)].sort_values()
+                relevant_nodes_ab[type_of_network][metric_name] = relevant_nodes
+                
         return relevant_nodes_ab
 
     def compute_edges_types(self, network_type: Literal["a", "b"]) -> Dict[str, pd.Index]:
