@@ -37,13 +37,14 @@ class SNADict(TypedDict):
     descriptives_b: Optional[pd.DataFrame]
     rankings_a: Optional[Dict[str, pd.Series]]
     rankings_b: Optional[Dict[str, pd.Series]]
-    rankings_ab: Optional[Dict[str, pd.DataFrame]]
     edges_types_a: Optional[Dict[str, pd.Index]]
     edges_types_b: Optional[Dict[str, pd.Index]]
     components_a: Optional[Dict[str, pd.Series]]
     components_b: Optional[Dict[str, pd.Series]]
     graph_a: Optional[str]
     graph_b: Optional[str]
+    rankings_ab: Optional[Dict[str, pd.DataFrame]]
+    relevant_nodes_ab: Optional[Dict[str, Dict[str, pd.Series]]]
 
 class ABGridSna:
     """
@@ -89,7 +90,9 @@ class ABGridSna:
             "components_a": None,
             "components_b": None,
             "graph_a": None,
-            "graph_b": None
+            "graph_b": None,
+            "rankings_ab": None,
+            "relevant_nodes_ab": None
         }
 
     def get(self, 
@@ -163,6 +166,9 @@ class ABGridSna:
 
         # Store rankings comparison 
         self.sna["rankings_ab"] = self.compute_rankings_ab()
+
+        # Store relevant nodes
+        self.sna["relevant_nodes_ab"] = self.compute_relevant_nodes_ab()
 
         return self.sna
 
@@ -458,6 +464,66 @@ class ABGridSna:
             rankings_ab[k]= pd.concat([series_a, series_b], axis=1) 
 
         return rankings_ab
+    
+    def compute_relevant_nodes_ab(self) -> Dict[str, Dict[str, pd.Series]]:
+        """
+        Identify relevant nodes with low rank values across both networks.
+        
+        This function finds nodes that have consistently low rank values (indicating high centrality/importance)
+        in various network metrics across both networks A and B. Nodes are considered relevant if they
+        appear in the top 20% for each metric.
+        
+        Returns:
+            Dict[str, Dict[str, pd.Series]]: 
+                Nested dictionary structure where:
+                - First level keys are metric names (e.g., 'ic_rank', 'pr_rank', etc.)
+                - Second level keys are network identifiers ('network_a', 'network_b')
+                - Values are Series containing relevant nodes with their rank values,
+                sorted by rank (best performers first)
+        
+        Example:
+            >>> relevant_nodes = compute_relevant_nodes_ab()
+            >>> relevant_nodes['ic_rank']['network_a']
+            node_A    1.0
+            node_C    2.0
+            dtype: float64
+        
+        Raises:
+            ValueError: If rankings data for both networks is not available.
+        """
+        # Check if required data is available
+        if self.sna["rankings_a"] is None or self.sna["rankings_b"] is None:
+            raise ValueError("Rankings for both networks a and b are required.")
+        
+        # Define percentile threshold
+        # to select most relevant nodes 
+        THRESHOLD = .05
+        
+        # Get rankings from both networks
+        rankings_a = self.sna["rankings_a"]
+        rankings_b = self.sna["rankings_b"]
+        
+        # Initialize the result dictionary
+        relevant_nodes_ab = {}
+        
+        # Process each metric
+        for metric_name in rankings_a.keys():
+            # Initialize metric dictionary
+            relevant_nodes_ab[metric_name] = {}
+            
+            # Process network A
+            ranks_a = rankings_a[metric_name]
+            threshold_a = ranks_a.quantile(THRESHOLD)
+            relevant_a = ranks_a[ranks_a <= threshold_a].sort_values()
+            relevant_nodes_ab[metric_name]['network_a'] = relevant_a
+            
+            # Process network B
+            ranks_b = rankings_b[metric_name]
+            threshold_b = ranks_b.quantile(THRESHOLD)
+            relevant_b = ranks_b[ranks_b <= threshold_b].sort_values()
+            relevant_nodes_ab[metric_name]['network_b'] = relevant_b
+            
+        return relevant_nodes_ab
 
     def compute_edges_types(self, network_type: Literal["a", "b"]) -> Dict[str, pd.Index]:
         """
