@@ -1,6 +1,21 @@
 {% macro render_report_header(project_title, group, type) %}
 <div class="section-header">
-    <span><b>{{ project_title | upper }} &#124; GRUPPO {{ group | upper }}</b></span><span>{% if type == "sna_graph" %}SNA &#124; GRAFICO RETE{% elif type == "sna_raw_scores" %}SNA &#124; PUNTEGGI GREZZI{% elif type == "sna_ranks" %}SNA &#124; PUNTEGGI DI RANGO{% elif type == "sna_rankings" %}SNA &#124; NODI ORDINATI PER METRICA{% elif type == "sna_edges_types" %}SNA &#124; LEGAMI RAGGRUPPATI PER TIPO{% elif type == "sna_components" %}SNA &#124; SOTTOGRAFI{% elif type == "sna_descriptives" %}SNA &#124; DESCRITTIVE {% elif type == "sociogram_micro" %}SOCIOGRAMMA{% elif type == "sociogram_rankings" %}SOCIOGRAMMA &#124; NODI ORDINATI PER METRICA{% elif type == "sociogram_graph" %}SOCIOGRAMMA &#124; GRAFICO{% elif type == "sociogram_macro" %}SOCIOGRAMMA &#124; DESCRITTIVE{% endif %}</span>
+    <span><b>{{ project_title | upper }} &#124; GRUPPO {{ group | upper }}</b></span>
+    <span>
+        {% if type == "sna_graph" %}SNA &#124; GRAFICO RETE
+        {% elif type == "sna_raw_scores" %}SNA &#124; PUNTEGGI GREZZI
+        {% elif type == "sna_ranks" %}SNA &#124; PUNTEGGI DI RANGO
+        {% elif type == "sna_rankings" %}SNA &#124; NODI ORDINATI PER RANGO
+        {% elif type == "sna_rankings_comparison" %}SNA &#124; DIFFERENZE DI RANGO A-B
+        {% elif type == "sna_edges_types" %}SNA &#124; LEGAMI RAGGRUPPATI PER TIPO
+        {% elif type == "sna_components" %}SNA &#124; SOTTOGRAFI
+        {% elif type == "sna_descriptives" %}SNA &#124; DESCRITTIVE
+        {% elif type == "sociogram_micro" %}SOCIOGRAMMA &#124; PUNTEGGI GREZZI
+        {% elif type == "sociogram_rankings" %}SOCIOGRAMMA &#124; NODI ORDINATI PER RANGO
+        {% elif type == "sociogram_graph" %}SOCIOGRAMMA &#124; GRAFICO
+        {% elif type == "sociogram_macro" %}SOCIOGRAMMA &#124; DESCRITTIVE
+        {% endif %}
+    </span>
 </div>
 {% endmacro %}
 
@@ -15,7 +30,7 @@
 {% endmacro %}
 
 {% macro render_node_label() %}
-    <span>ND</span>
+    <span>NO</span>
 {% endmacro %}
 
 {% macro render_rank_label() %}
@@ -136,7 +151,7 @@
     <span class="text-italic">Nessun componente di questo tipo</span>
 {% endmacro %}
 
-{% macro render_table_legend(show_sna_macro=False, show_sna_micro=False, show_sociogram_micro=False, show_sna_rankings=False,show_sociogram_rankings=False, show_sna_arrows=False, show_descriptives=False) %}
+{% macro render_table_legend(show_sna_macro=False, show_sna_micro=False, show_sociogram_micro=False, show_sna_rankings=False, show_sna_rankings_comparison=False, show_sociogram_rankings=False, show_sna_arrows=False, show_descriptives=False) %}
 <div class="table-data-legend">
     {% if show_sna_macro %}
         <b>NN</b> Nodi <b>NE</b> Legami <b>NR</b> Legami reciproci <b>ND</b> Densità <b>NC</b> Centralizzazione <b>NT</b> Transitività <b>NR</b> Reciprocità 
@@ -147,6 +162,10 @@
     {% endif %}
 
     {% if show_sna_rankings %}
+        <b>RK</b> Rango  <b>IC</b> In-Degree <b>KZ</b> Katz <b>BT</b> Betweenness <b>CL</b> Closeness <b>HU</b> Hub 
+    {% endif %}
+
+    {% if show_sna_comparison %}
         <b>RK</b> Rango  <b>IC</b> In-Degree <b>KZ</b> Katz <b>BT</b> Betweenness <b>CL</b> Closeness <b>HU</b> Hub 
     {% endif %}
 

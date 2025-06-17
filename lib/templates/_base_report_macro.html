@@ -89,11 +89,14 @@
         <div class="rankings-main">
             <table class="table-data table-bordered table-striped full-width">
                 <tr>
-                    <th>{{ render_rank_label() }}</th>
-                    <th>{{ metric_label[:2] | upper }}-{{ network_type }}</th>
+                    <th>{{ metric_label[:2] | upper }}</th>
+                    <th>{{ render_rank_label() }} </th>
                 </tr>
                 {% for letter, rank in data.items() %}
                     <tr>
+                        <td>
+                            {{ letter }}
+                        </td>
                         {% if metric_label == "st" %}
                             <td style="width: 65%;">
                                 {{ render_sociogram_status_label(rank) }}
@@ -103,9 +106,6 @@
                             {{ rank }}
                         </td>
                         {% endif %}
-                        <td>
-                            {{ letter }}
-                        </td>
                     </tr>
                 {% endfor %}
             </table>
@@ -121,8 +121,7 @@
             <table class="table-data table-bordered table-striped full-width">
                 <tr>
                     <th>{{ render_node_label() | upper }}</th>
-                    <th>{{ metric_label[:2] | upper }}-A</th>
-                    <th>{{ metric_label[:2] | upper }}-B</th>
+                    <th>{{ metric_label[:2] | upper }} A-B</th>
                 </tr>
                 {% for letter, ranks in data.iterrows() %}
                     <tr>
@@ -130,10 +129,7 @@
                             {{ letter }}
                         </td>
                         <td>
-                            {{ ranks["a"] }}
-                        </td>
-                        <td>
-                            {{ ranks["b"] }}
+                            {{ ranks.iloc[0] - ranks.iloc[1] }}
                         </td>
                     </tr>
                 {% endfor %}

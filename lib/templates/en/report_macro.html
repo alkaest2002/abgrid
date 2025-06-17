@@ -1,6 +1,21 @@
 {% macro render_report_header(project_title, group, type) %}
 <div class="section-header">
-    <span><b>{{ project_title | upper }} &#124; GROUP {{ group | upper }}</b></span><span>{% if type == "sna_graph" %}SNA &#124; NETWORK GRAPH{% elif type == "sna_raw_scores" %}SNA &#124; RAW SCORES{% elif type == "sna_ranks" %}SNA &#124; RANK SCORES{% elif type == "sna_rankings" %}SNA &#124; NODES ORDERED BY METRIC{% elif type == "sna_edges_types" %}SNA &#124; LINKS GROUPED BY TYPE{% elif type == "sna_components" %}SNA &#124; SUBGRAPHS{% elif type == "sna_descriptives" %}SNA &#124; DESCRIPTIVE {% elif type == "sociogram_micro" %}SOCIOGRAM{% elif type == "sociogram_rankings" %}SOCIOGRAM &#124; NODES ORDERED BY METRIC{% elif type == "sociogram_graph" %}SOCIOGRAM &#124; GRAPH{% elif type == "sociogram_macro" %}SOCIOGRAM &#124; DESCRIPTIVE{% endif %}</span>
+    <span><b>{{ project_title | upper }} &#124; GROUP {{ group | upper }}</b></span>
+    <span>
+        {% if type == "sna_graph" %}SNA &#124; NETWORK GRAPH
+        {% elif type == "sna_raw_scores" %}SNA &#124; RAW SCORES
+        {% elif type == "sna_ranks" %}SNA &#124; RANK SCORES
+        {% elif type == "sna_rankings" %}SNA &#124; NODES ORDERED BY RANK
+        {% elif type == "sna_rankings_comparison" %}SNA &#124; RANK DIFFERENCE A-B
+        {% elif type == "sna_edges_types" %}SNA &#124; EDGES GROUPED BY TYPE
+        {% elif type == "sna_components" %}SNA &#124; SUBGRAPHS
+        {% elif type == "sna_descriptives" %}SNA &#124; DESCRIPTIVE
+        {% elif type == "sociogram_micro" %}SOCIOGRAM &#124; RAW SCORES
+        {% elif type == "sociogram_rankings" %}SOCIOGRAM &#124; NODES ORDERED BY RANK
+        {% elif type == "sociogram_graph" %}SOCIOGRAM &#124; GRAPH
+        {% elif type == "sociogram_macro" %}SOCIOGRAM &#124; DESCRIPTIVES
+        {% endif %}
+    </span>
 </div>
 {% endmacro %}
 
@@ -15,7 +30,7 @@
 {% endmacro %}
 
 {% macro render_node_label() %}
-    <span>ND</span>
+    <span>NO</span>
 {% endmacro %}
 
 {% macro render_rank_label() %}
@@ -143,6 +158,10 @@
 
     {% if show_sna_rankings %}
         <b>RK</b> Rank  <b>IC</b> In-Degree <b>KZ</b> Katz <b>BT</b> Betweenness <b>CL</b> Closeness <b>HU</b> Hub 
+    {% endif %}
+
+    {% if show_sna_rankings_comparison %}
+        <b>NO</b> Node  <b>IC</b> In-Degree <b>KZ</b> Katz <b>BT</b> Betweenness <b>CL</b> Closeness <b>HU</b> Hub 
     {% endif %}
     
     {% if show_sociogram_rankings %}
