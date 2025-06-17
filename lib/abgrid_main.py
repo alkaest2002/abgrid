@@ -230,16 +230,21 @@ class ABGridMain:
                 report_data, 
                 keys_to_omit=[
                     "sna.graph_a", 
-                    "sna.graph_b", 
-                    
+                    "sna.graph_b",
+                    "sna.network_a", 
+                    "sna.network_b", 
+                    "sna.adjacency_a", 
+                    "sna.adjacency_b",
+                    "sna.descriptives_a",
+                    "sna.descriptives_b",
+                    "sna.rankings_ab",
+                    "sna.loc_a",
+                    "sna.loc_b",
+                    "sociogram.graph_ai",
+                    "sociogram.graph_ii",
                 ],
                 keys_regex_to_omit=[
-                    r"sna\.network_[a|b]",
-                    r"sna\.adjacency_[a|b]",
-                    r"sna\.descriptives_[a|b]",
                     r"sna\.micro_stats_[a|b]\..*_rank",
-                    r"sna\.rankings_ab",
-                    r"sociogram\.graph_"
                 ]
             )
 
