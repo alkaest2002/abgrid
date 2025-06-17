@@ -11,10 +11,28 @@ The code is part of the AB-Grid project and is licensed under the MIT License.
 import re
 import datetime
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Protocol, Tuple, Union
+from typing import Any, Dict, List, Optional, Protocol, Tuple, Union, TypedDict
 
 from lib.abgrid_sna import ABGridSna
 from lib.abgrid_sociogram import ABGridSociogram
+from lib.abgrid_sna import SNADict
+from lib.abgrid_sociogram import SociogramDict
+
+class ReportData(TypedDict, total=False):
+    """
+    Structure for comprehensive report data passed to Jinja templates.
+    
+    This TypedDict defines the expected structure of data used in report generation,
+    ensuring type safety and providing clear documentation of the template context.
+    """
+    project_title: str
+    year: int
+    group: Union[int, str]
+    members_per_group: int
+    question_a: str
+    question_b: str
+    sna: SNADict
+    sociogram: SociogramDict  # Optional field, only present when with_sociogram=True
 
 
 class DataLoader(Protocol):
@@ -179,7 +197,7 @@ class ABGridData:
         self, 
         group_filepath: Path, 
         with_sociogram: bool = False
-    ) -> Tuple[Optional[Dict[str, Any]], Optional[str]]:
+    ) -> Tuple[Optional[ReportData], Optional[str]]:
         """
         Load and prepare comprehensive data for generating a group's analysis report.
 
@@ -248,7 +266,7 @@ class ABGridData:
             group_number = group_filepath.stem
         
         # Prepare the comprehensive report data structure
-        report_data: Dict[str, Any] = {
+        report_data: ReportData = {
             "project_title": project_data["project_title"],
             "year": datetime.datetime.now(datetime.UTC).year,
             "group": group_number,
@@ -267,6 +285,6 @@ class ABGridData:
             sociogram_results = abgrid_sociogram.get(sna_results)
 
             # Add sociogram data to report data
-            report_data["sociogram"] = sociogram_results
+            report_data["sociogram"] = sociogram_results        
         
         return report_data, None
