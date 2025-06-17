@@ -449,8 +449,14 @@ class ABGridSna:
         rankings_b = self.sna["rankings_b"]
 
         # Combine them
-        rankings_ab = { k: pd.DataFrame({"a": v, "b": rankings_b[k]} ).sort_index() for k, v in rankings_a.items() }
-        
+        rankings_ab = {}
+        for k in rankings_a.keys():
+            series_a = rankings_a[k]
+            series_a.name = series_a.name + "_a"
+            series_b = rankings_b[k]
+            series_b.name = series_a.name + "_b"
+            rankings_ab[k]= pd.concat([series_a, series_b], axis=1) 
+
         return rankings_ab
 
     def compute_edges_types(self, network_type: Literal["a", "b"]) -> Dict[str, pd.Index]:
