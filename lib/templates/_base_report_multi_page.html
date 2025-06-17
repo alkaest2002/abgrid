@@ -101,7 +101,7 @@
             {{ report_macro.render_disclaimer() }}
             {{ report_macro.render_report_header(project_title, group, "sna_rankings_comparison") }}
             {{ base_report_macro.render_rankings_comparison(sna.rankings_ab, report_macro.render_node_label) }}
-            {{ report_macro.render_table_legend(show_sna_comparison=True) }}
+            {{ report_macro.render_table_legend(show_sna_rankings_comparison=True) }}
         </div>
         {{ report_macro.render_footer(year) }}
     </div>
