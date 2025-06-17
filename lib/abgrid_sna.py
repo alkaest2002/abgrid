@@ -29,6 +29,8 @@ class SNADict(TypedDict):
     adjacency_b: Optional[pd.DataFrame]
     network_a: Optional[nx.DiGraph]
     network_b: Optional[nx.DiGraph]
+    loc_a: Optional[Dict[str, np.ndarray]]
+    loc_b: Optional[Dict[str, np.ndarray]]
     macro_stats_a: Optional[pd.Series]
     macro_stats_b: Optional[pd.Series]
     micro_stats_a: Optional[pd.DataFrame]
@@ -44,7 +46,7 @@ class SNADict(TypedDict):
     graph_a: Optional[str]
     graph_b: Optional[str]
     rankings_ab: Optional[Dict[str, pd.DataFrame]]
-    relevant_nodes_ab: Optional[Dict[str, Dict[str, pd.Series]]]
+    relevant_nodes_ab: Optional[Dict[str, List[Dict[str, Union[str, List[str], List[int], float]]]]]
 
 class ABGridSna:
     """
@@ -67,7 +69,7 @@ class ABGridSna:
         for both networks A and B, with all values initially set to None.
         """
         
-        # Init SNA dict
+        # Init SNA dict with all possible keys
         self.sna: SNADict = {
             "nodes_a": None,
             "nodes_b": None,
@@ -79,6 +81,8 @@ class ABGridSna:
             "adjacency_b": None,
             "network_a": None,
             "network_b": None,
+            "loc_a": None,
+            "loc_b": None,
             "macro_stats_a": None,
             "macro_stats_b": None,
             "micro_stats_a": None,
@@ -126,7 +130,7 @@ class ABGridSna:
             - Creates SVG visualizations of both networks
         """
         
-        # Store network a and b
+        # Store network a and b nodes and edges
         for network_type, packed_edges in [("a", packed_edges_a), ("b", packed_edges_b)]:
             self.sna[f"nodes_{network_type}"] = self.unpack_network_nodes(packed_edges)
             self.sna[f"edges_{network_type}"] = self.unpack_network_edges(packed_edges)
@@ -145,13 +149,13 @@ class ABGridSna:
             # Generate layout locations (loc) for current network
             loc = nx.kamada_kawai_layout(network)
             
-            # Update loc so to push isolated nodes away from other nodes
+            # Update loc to push isolated nodes away from other nodes
             updated_loc = self.handle_isolated_nodes(network, loc)
 
-            # Store current network loc
+            # Store current network layout locations
             self.sna[f"loc_{network_type}"] = updated_loc
 
-            # Add current network adjacency list
+            # Add current network adjacency matrix
             self.sna[f"adjacency_{network_type}"] = nx.to_pandas_adjacency(network, nodelist=nodes)
                     
         # Store edges_types, components, macro stats, micro stats, descriptives, rankings and graphs
@@ -164,10 +168,10 @@ class ABGridSna:
             self.sna[f"rankings_{network_type}"] = self.compute_rankings(network_type)
             self.sna[f"graph_{network_type}"] = self.create_graph(network_type)
 
-        # Store rankings comparison 
+        # Store rankings comparison between networks
         self.sna["rankings_ab"] = self.compute_rankings_ab()
 
-        # Store relevant nodes
+        # Store relevant nodes analysis
         self.sna["relevant_nodes_ab"] = self.compute_relevant_nodes_ab()
 
         return self.sna
@@ -248,7 +252,6 @@ class ABGridSna:
 
         Raises:
             ValueError: If required data is not available.
-
         """
         # Check if required data is available
         if self.sna[f"network_{network_type}"] is None:
@@ -296,18 +299,19 @@ class ABGridSna:
         Returns:
             pd.DataFrame: 
                 DataFrame indexed by node identifiers with the following columns:
-                - lns: Comma-separated list of neighbor nodes
+                - lns: Comma-separated list of neighbor nodes (out-neighbors)
                 - ic: In-degree centrality
+                - kz: Katz centrality
                 - pr: PageRank score
                 - bt: Betweenness centrality
                 - cl: Closeness centrality  
                 - hu: Hubs score (absolute value)
                 - nd: Node degree status (0=normal, 1=no in-degree, 2=no out-degree, 3=isolated)
-                - *_rank: Rank columns for each centrality measure
+                - *_rank: Rank columns for each centrality measure (ic_rank, kz_rank, etc.)
 
         Raises:
             ValueError: If required network data is not available.
-            nx.NetworkXError: If PageRank computation fails to converge.
+            nx.NetworkXError: If centrality computations fail to converge.
         """
         # Check if required data is available
         if self.sna[f"network_{network_type}"] is None:
@@ -366,7 +370,7 @@ class ABGridSna:
         Returns:
             pd.DataFrame: 
                 DataFrame with descriptive statistics for centrality measures.
-                Columns correspond to centrality measures (ic, pr, bt, cl, hu).
+                Columns correspond to centrality measures (ic, pr, kz, bt, cl, hu).
                 Rows contain statistical summaries (count, mean, std, min, max, etc.).
 
         Raises:
@@ -376,7 +380,7 @@ class ABGridSna:
         if self.sna[f"micro_stats_{network_type}"] is None:
             raise ValueError(f"Micro statistics for network '{network_type}' are not available.")
    
-        # Select columns to retain
+        # Select columns to retain for descriptive statistics
         columns_to_retain = ["ic", "pr", "kz", "bt", "cl", "hu"]
 
         # Select numeric columns only
@@ -431,19 +435,19 @@ class ABGridSna:
 
     def compute_rankings_ab(self) -> Dict[str, pd.DataFrame]:
         """
-        Compute combined rankings from two different network sources, 'a' and 'b'.
+        Compute combined rankings from both networks A and B.
 
-        This function checks the availability of rankings from two networks (network 'a' and network 'b') 
-        and combines them into a single dictionary structure where each key is associated with a DataFrame
-        containing rankings from both networks.
+        This function merges the rankings from both networks into side-by-side DataFrames
+        for easy comparison of node rankings across the two networks.
 
         Returns:
-            Dict[str, pd.DataFrame]: A dictionary where each key corresponds to a category in the rankings,
-            and the value is a DataFrame with two columns, 'a' and 'b', representing the rankings from the 
-            respective networks.
+            Dict[str, pd.DataFrame]: A dictionary where each key corresponds to a ranking metric
+            (e.g., 'ic_rank', 'pr_rank'), and the value is a DataFrame with two columns:
+            - Column ending with '_a': Rankings from network A
+            - Column ending with '_b': Rankings from network B
 
         Raises:
-            ValueError: If the rankings for network 'a' or 'b' are not available in the provided data structure.
+            ValueError: If the rankings for network 'a' or 'b' are not available.
         """
         
         # Check if required data is available
@@ -454,38 +458,51 @@ class ABGridSna:
         rankings_a = self.sna["rankings_a"]
         rankings_b = self.sna["rankings_b"]
 
-        # Combine them
+        # Combine them into side-by-side DataFrames
         rankings_ab = {}
         for k in rankings_a.keys():
             series_a = rankings_a[k]
-            series_a.name = series_a.name + "_a"
+            series_a.name = series_a.name + "_a"  # Rename to include network identifier
             series_b = rankings_b[k]
-            series_b.name = series_a.name + "_b"
-            rankings_ab[k]= pd.concat([series_a, series_b], axis=1) 
+            series_b.name = series_a.name + "_b"  # Rename to include network identifier
+            rankings_ab[k] = pd.concat([series_a, series_b], axis=1) 
 
         return rankings_ab
     
     def compute_relevant_nodes_ab(self, threshold: float = 0.05) -> Dict[str, List[Dict[str, Union[str, List[str], List[int], float]]]]:
         """
         Identify relevant nodes with low rank values across both networks.
-        Entries with the same node ID are collapsed into single entries with lists for metrics, ranks, and summed weights.
+        
+        This method finds nodes that rank highly (low rank values) in various centrality measures
+        and consolidates multiple high rankings for the same node into single entries.
         
         Args:
-            threshold: Percentile threshold for selecting top nodes (default: 0.05 for top 5%)
+            threshold (float): Percentile threshold for selecting top nodes (default: 0.05 for top 5%)
             
         Returns:
-            Dict with keys 'a' and 'b', each containing collapsed node entries:
-            - 'id': node identifier (str)
-            - 'metric': list of metric names (List[str])
-            - 'rank': list of rank positions (List[int])
-            - 'weight': sum of all weights for this node (float)
+            Dict[str, List[Dict[str, Union[str, List[str], List[int], float]]]]: 
+                Dictionary with keys 'a' and 'b', each containing a list of relevant node entries.
+                Each entry is a dictionary with:
+                - 'id': node identifier (str)
+                - 'metric': list of metric names where this node ranks highly (List[str])
+                - 'rank': list of rank positions for each metric (List[int])
+                - 'weight': cumulative weight score based on all high rankings (float)
+
+        Note:
+            - Lower rank values indicate higher centrality (rank 1 = most central)
+            - Weight calculation uses formula: 10.0 / (normalized_rank ** 0.8)
+            - Nodes appearing in multiple metrics have their weights summed
+            - Only nodes ranking in the top threshold percentile are included
+
+        Raises:
+            ValueError: If rankings for both networks are not available.
         """
         # Make sure data is available
         if self.sna["rankings_a"] is None or self.sna["rankings_b"] is None:
             raise ValueError("Rankings for both networks a and b are required.")
         
-        # Init dict
-        relevant_nodes_ab = {"a": {}, "b": {}}  # Use dict for easier collapsing
+        # Init dict with empty sub-dicts for easier node consolidation
+        relevant_nodes_ab = {"a": {}, "b": {}}
         
         # Loop through a and b rankings
         for network_key, rankings in [("a", self.sna["rankings_a"]), ("b", self.sna["rankings_b"])]:
@@ -513,7 +530,7 @@ class ABGridSna:
                             "weight": weight
                         }
                     else:
-                        # Collapse entries: append to lists and sum weights
+                        # Consolidate entries: append to lists and sum weights
                         relevant_nodes_ab[network_key][node_id]["metric"].append(metric_name)
                         relevant_nodes_ab[network_key][node_id]["rank"].append(int(original_rank))
                         relevant_nodes_ab[network_key][node_id]["weight"] += weight
@@ -560,7 +577,7 @@ class ABGridSna:
         if self.sna["adjacency_b"] is None:
             raise ValueError("Adjacency matrix for network 'b' is not available.")
         
-        # Get the micro adjacency DataFrames for the specified network type
+        # Get the adjacency DataFrames for the specified network type and reference
         if network_type == "a":
             adj_df = self.sna["adjacency_a"]
             adj_ref_df = self.sna["adjacency_b"]
@@ -579,17 +596,17 @@ class ABGridSna:
         type_ii = type_ii_df.stack().loc[lambda x: x == 1].index
 
         # Compute type V edges, fully symmetrical
-        # i.e. A -> B, B -> A in network network and A -> B, B -> A in network G_ref
+        # i.e. A -> B, B -> A in network and A -> B, B -> A in reference network
         type_v_df = type_ii_df * pd.DataFrame(np.triu(adj_ref_df) * np.tril(adj_ref_df).T, index=adj_df.index, columns=adj_df.columns)
         type_v = type_v_df.stack().loc[lambda x: x == 1].index
         
         # Compute type III edges, half symmetrical
-        # i.e. A -> B in network and A -> B in network G_ref
+        # i.e. A -> B in network and A -> B in reference network
         type_iii_df = pd.DataFrame(np.triu(adj_df) * np.triu(adj_ref_df), index=adj_df.index, columns=adj_df.columns)
         type_iii = type_iii_df.sub(type_v_df).stack().loc[lambda x: x == 1].index
         
         # Compute type IV edges, half reversed symmetrical
-        # i.e. A -> B in network and B -> A in network G_ref
+        # i.e. A -> B in network and B -> A in reference network
         type_iv_df = (
             pd.DataFrame(np.triu(adj_df) * np.tril(adj_ref_df).T, index=adj_df.index, columns=adj_df.columns)
             + pd.DataFrame(np.tril(adj_df) * np.triu(adj_ref_df).T, index=adj_df.index, columns=adj_df.columns)
@@ -634,7 +651,7 @@ class ABGridSna:
             dtype: object
 
         Raises:
-            ValueError: If required adjacency matrix data is not available.
+            ValueError: If required network data is not available.
         """
         # Check if required data is available
         if self.sna[f"network_{network_type}"] is None:
@@ -677,7 +694,7 @@ class ABGridSna:
             - Uses Kamada-Kawai layout with special handling for isolated nodes
             - Network A uses A_COLOR, Network B uses B_COLOR (from lib constants)
             - Figure size is set to 17cm x 19cm
-            - Isolated nodes are positioned marginally using convex hull positioning
+            - Isolated nodes are positioned at the periphery using convex hull positioning
 
         Raises:
             KeyError: If the specified network_type is not found in self.sna.
@@ -687,11 +704,11 @@ class ABGridSna:
         # Get network
         network = self.sna[f"network_{network_type}"]
 
-        # Get network locations
+        # Get network layout locations
         loc = self.sna[f"loc_{network_type}"]
 
-        # Get networl micro_stats
-        micro_stats =  self.sna[f"micro_stats_{network_type}"]
+        # Get network micro_stats (currently unused but available for future use)
+        micro_stats = self.sna[f"micro_stats_{network_type}"]
 
         # Set color based on graph type (a or b)
         color = A_COLOR if network_type == "a" else B_COLOR
@@ -711,13 +728,13 @@ class ABGridSna:
             node_color=color, edgecolors=color, ax=ax
         )
         
-        # Draw isolated nodes
+        # Draw isolated nodes in black
         nx.draw_networkx_nodes(nx.isolates(network), loc, node_color="#000", edgecolors="#000", ax=ax)
         
         # Draw nodes labels
         nx.draw_networkx_labels(network, loc, font_family="Times New Roman", font_color="#FFF", font_weight="normal", font_size=10, ax=ax)
         
-        # Draw reciprocal edges with specific style
+        # Draw reciprocal edges with specific style (undirected lines)
         reciprocal_edges = [e for e in network.edges if e[::-1] in network.edges]
         nx.draw_networkx_edges(
             network, loc, edgelist=reciprocal_edges, 
@@ -725,7 +742,7 @@ class ABGridSna:
             ax=ax
         )
         
-        # Draw non-reciprocal edges with specific style
+        # Draw non-reciprocal edges with specific style (directed arrows)
         non_reciprocal_edges = [e for e in network.edges if e not in reciprocal_edges]
         nx.draw_networkx_edges(
             network, loc, edgelist=non_reciprocal_edges, 
@@ -772,7 +789,7 @@ class ABGridSna:
         # Get isolated nodes
         isolates = list(nx.isolates(network))
         
-        # If there are no isolated nodes, just return loc
+        # If there are no isolated nodes, just return original layout
         if not isolates:
             return loc
         
@@ -864,7 +881,7 @@ class ABGridSna:
         # Get number of nodes
         number_of_nodes = network.number_of_nodes()
         
-        # Compute node centralities
+        # Compute node centralities (degree values)
         node_centralities = pd.Series(dict(nx.degree(network)))
 
         # Compute Max centrality
