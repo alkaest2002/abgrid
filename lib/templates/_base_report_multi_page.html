@@ -20,6 +20,7 @@
             {{ base_macro.render_logo() }}
             {{ report_macro.render_disclaimer() }}
             {{ report_macro.render_report_header(project_title, group, "relevant_nodes") }}
+            {{ base_report_macro.render_relevant_nodes(relevant_nodes_ab) }}
         </div>
         {{ report_macro.render_footer(year) }}
     </div>
