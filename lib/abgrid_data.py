@@ -242,25 +242,13 @@ class ABGridData:
         if project_data is None:
             error_message = self.pydantic_errors_messages(project_validation_errors or [])
             return None, error_message
-
+        
         # Load and validate group data
         group_data, group_validation_errors = self.data_loader.load_data(
             "group", group_filepath
         )
-        
-        # On error loading group data
-        if group_data is None:
-            error_message = self.pydantic_errors_messages(group_validation_errors or [])
-            return None, error_message
 
-        # Initialize SNA and compute network analysis
-        abgrid_sna = ABGridSna()
-        sna_results = abgrid_sna.get(
-            group_data["choices_a"], 
-            group_data["choices_b"]
-        )
-        
-        # Extract group number from filename (assumes format ending with digits)
+        # Extract group number from group filename (assumes format ending with digits)
         try:
             group_number = int(re.search(r'(\d+)$', group_filepath.stem).group(0))
         
@@ -268,11 +256,23 @@ class ABGridData:
             # Fallback: use filename stem if no trailing digits found
             group_number = group_filepath.stem
         
-        # Init relevant nodes list for both sna and sociogram
-        relevant_nodes_ab_sna = deepcopy(sna_results["relevant_nodes_ab"])
-        relevant_nodes_ab_sociogram = []
-        relevant_nodes_ab = {"a": {}, "b": {}}
+        # On error loading group data
+        if group_data is None:
+            error_message = self.pydantic_errors_messages(group_validation_errors or [])
+            return None, error_message
 
+        # Initialize SNA class
+        abgrid_sna = ABGridSna()
+
+        # Initialize sociogram class
+        abgrid_sociogram = ABGridSociogram()
+        
+        # Compute SNA results
+        sna_results = abgrid_sna.get(group_data["choices_a"], group_data["choices_b"])
+
+        # Compute sociogram results
+        sociogram_results = abgrid_sociogram.get(sna_results)
+        
         # Prepare the comprehensive report data structure
         report_data: ReportData = {
             "project_title": project_data["project_title"],
@@ -286,18 +286,13 @@ class ABGridData:
 
         # Optionally include sociogram data
         if with_sociogram:
-            
-            # Init sociogram class
-            abgrid_sociogram = ABGridSociogram()
-
-            # Compute sociogram
-            sociogram_results = abgrid_sociogram.get(sna_results)
-
             # Add sociogram data to report data
             report_data["sociogram"] = sociogram_results
 
-            # Cache sociogram relevant nodes
-            relevant_nodes_ab_sociogram = deepcopy(sociogram_results["relevant_nodes_ab"])
+        # Init relevant nodes list for both sna and sociogram
+        relevant_nodes_ab_sna = deepcopy(sna_results["relevant_nodes_ab"])
+        relevant_nodes_ab_sociogram = deepcopy(sociogram_results["relevant_nodes_ab"]) if with_sociogram else []
+        relevant_nodes_ab = {"a": {}, "b": {}}
 
         # Consolidate relevant nodes a and b
         for valence_type in relevant_nodes_ab.keys():
@@ -329,7 +324,6 @@ class ABGridData:
                     relevant_nodes_ab[valence_type][node_id]["value"].extend(value)
                     relevant_nodes_ab[valence_type][node_id]["rank"].extend(original_rank)
                     relevant_nodes_ab[valence_type][node_id]["weight"] += weight
-
 
         # Sort relevant nodes
         report_data["relevant_nodes_ab"] = {
