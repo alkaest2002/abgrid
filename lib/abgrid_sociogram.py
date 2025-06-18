@@ -459,7 +459,10 @@ class ABGridSociogram:
         for valence_key in relevant_nodes_ab.keys():
             
             # Iterate through all metric rankings
-            for metric_name, ranks_series in rankings.items():
+            for metric_rank_name, ranks_series in rankings.items():
+
+                # clean metric name
+                metric_name = re.sub("_rank", "", metric_rank_name)
 
                 # Select strategy: a = best performers, b = worst performers
                 if valence_key == "a":
@@ -492,7 +495,7 @@ class ABGridSociogram:
                     weight = float(10.0 / (normalized_rank ** 0.8))
 
                     # Get value
-                    value = micro_stats.loc[node_id, re.sub("_rank", "", metric_name) ]
+                    value = micro_stats.loc[node_id, metric_name]
                     
                     # Initialize new node entry or update existing one
                     if node_id not in relevant_nodes_ab[valence_key]:
