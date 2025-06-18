@@ -1,6 +1,7 @@
 """
 Filename: abgrid_data.py
-Description: Manages and processes data related to AB-Grid networks.
+Description: Manages and processes data related to AB-Grid networks, including project and group data
+loading, validation, and preparation for social network analysis and report generation.
 
 Author: Pierpaolo Calanna
 Date Created: May 3, 2025
@@ -25,6 +26,7 @@ class ReportData(TypedDict, total=False):
     
     This TypedDict defines the expected structure of data used in report generation,
     ensuring type safety and providing clear documentation of the template context.
+    Note: sociogram is optional (total=False) and only present when with_sociogram=True.
     """
     project_title: str
     year: int
@@ -38,7 +40,7 @@ class ReportData(TypedDict, total=False):
 
 
 class DataLoader(Protocol):
-    """Protocol for data loading utilities."""
+    """Protocol defining the interface for data loading utilities."""
     
     def load_data(self, data_type: str, filepath: Path) -> Tuple[Optional[Dict[str, Any]], Optional[List[Dict[str, Any]]]]:
         """Load and validate data from a file.
@@ -48,18 +50,22 @@ class DataLoader(Protocol):
             filepath: Path to the data file
             
         Returns:
-            Tuple of (loaded_data, validation_errors)
+            Tuple of (loaded_data, validation_errors). If loading succeeds,
+            loaded_data contains the parsed data and validation_errors is None.
+            If loading fails, loaded_data is None and validation_errors contains
+            a list of error dictionaries.
         """
         ...
 
 
 class ABGridData:
     """
-    Manages and processes project data related to AB-Grid networks.
+    Manages and processes project data for AB-Grid network analysis.
     
     This class handles loading, validation, and preparation of project and group data
     for AB-Grid network analysis, including Social Network Analysis (SNA) computations
-    and sociogram generation.
+    and sociogram generation. It consolidates data from multiple sources and formats
+    it for report generation.
     
     Attributes:
         project: The name of the project
@@ -85,8 +91,8 @@ class ABGridData:
             project_folderpath: The path to the project folder
             project_filepath: The path to the project's main configuration file
             groups_filepaths: A list of paths to group-specific data files
-            data_loader: A data loading utility for reading and validating YAML 
-                configuration files
+            data_loader: A data loading utility implementing the DataLoader protocol
+                for reading and validating YAML configuration files
                 
         Note:
             Group file paths are automatically sorted numerically based on trailing
@@ -98,7 +104,7 @@ class ABGridData:
         self.project_filepath = project_filepath
         self.data_loader = data_loader
         
-        # Attempt to sort group file paths numerically based on trailing digits
+        # Attempt to sort group file paths numerically based on trailing digits in filenames
         try:
             # Extract trailing digits from filename stems for numerical sorting
             self.groups_filepaths = sorted(
@@ -199,12 +205,13 @@ class ABGridData:
         self, 
         group_filepath: Path, 
         with_sociogram: bool = False
-    ) -> ReportData:
+    ) -> Tuple[Optional[ReportData], Optional[str]]:
         """
         Load and prepare comprehensive data for generating a group's analysis report.
 
         This method combines project and group data, performs Social Network Analysis
-        (SNA) computations, and optionally generates sociogram data for report creation.
+        (SNA) computations, optionally generates sociogram data, and consolidates
+        relevant nodes from both analyses for complete report creation.
 
         Args:
             group_filepath: Path to the group-specific data file
@@ -223,6 +230,7 @@ class ABGridData:
             - Group information (number, size)
             - SNA analysis results
             - Sociogram data (if requested)
+            - Consolidated relevant nodes from both SNA and sociogram analyses
             - Current year for report dating
             
         Example:
@@ -238,7 +246,7 @@ class ABGridData:
             "project", self.project_filepath
         )
 
-        # On error loading project data
+        # Return error if project data loading failed
         if project_data is None:
             error_message = self.pydantic_errors_messages(project_validation_errors or [])
             return None, error_message
@@ -256,21 +264,21 @@ class ABGridData:
             # Fallback: use filename stem if no trailing digits found
             group_number = group_filepath.stem
         
-        # On error loading group data
+        # Return error if group data loading failed
         if group_data is None:
             error_message = self.pydantic_errors_messages(group_validation_errors or [])
             return None, error_message
 
-        # Initialize SNA class
+        # Initialize SNA analysis class
         abgrid_sna = ABGridSna()
 
-        # Initialize sociogram class
+        # Initialize sociogram analysis class
         abgrid_sociogram = ABGridSociogram()
         
-        # Compute SNA results
+        # Compute SNA results from group choice data
         sna_results = abgrid_sna.get(group_data["choices_a"], group_data["choices_b"])
 
-        # Compute sociogram results
+        # Compute sociogram results from SNA data
         sociogram_results = abgrid_sociogram.get(sna_results)
         
         # Prepare the comprehensive report data structure
@@ -284,32 +292,32 @@ class ABGridData:
             "sna": sna_results,
         }
 
-        # Optionally include sociogram data
+        # Conditionally include sociogram data if requested
         if with_sociogram:
             # Add sociogram data to report data
             report_data["sociogram"] = sociogram_results
 
-        # Init relevant nodes list for both sna and sociogram
+        # Initialize relevant nodes consolidation from both SNA and sociogram analyses
         relevant_nodes_ab_sna = deepcopy(sna_results["relevant_nodes_ab"])
-        relevant_nodes_ab_sociogram = deepcopy(sociogram_results["relevant_nodes_ab"]) if with_sociogram else []
+        relevant_nodes_ab_sociogram = deepcopy(sociogram_results["relevant_nodes_ab"]) if with_sociogram else {"a": [], "b": []}
         relevant_nodes_ab = {"a": {}, "b": {}}
 
-        # Consolidate relevant nodes a and b
+        # Consolidate relevant nodes across both positive (a) and negative (b) valences
         for valence_type in relevant_nodes_ab.keys():
             
-            # Consolidate relevant nodes for current valence type
+            # Merge relevant nodes from SNA and sociogram analyses for current valence
             for relevant_nodes in [
                 *relevant_nodes_ab_sna[valence_type], 
                 *relevant_nodes_ab_sociogram[valence_type]
             ]:
-                # Cache relevant node props
+                # Cache relevant node properties for processing
                 node_id = relevant_nodes["id"]
                 metric_name = relevant_nodes["metric"]
                 value = relevant_nodes["value"]
                 original_rank = relevant_nodes["rank"]
                 weight = relevant_nodes["weight"]
 
-                # Initialize new node entry or update existing one
+                # Initialize new node entry or update existing consolidated entry
                 if node_id not in relevant_nodes_ab[valence_type]:
                     relevant_nodes_ab[valence_type][node_id] = {
                         "id": node_id,
@@ -319,13 +327,13 @@ class ABGridData:
                         "weight": weight
                     }
                 else:
-                    # Consolidate multiple metric appearances: append lists and sum weights
+                    # Consolidate multiple metric appearances: extend lists and sum weights
                     relevant_nodes_ab[valence_type][node_id]["metric"].extend(metric_name)
                     relevant_nodes_ab[valence_type][node_id]["value"].extend(value)
                     relevant_nodes_ab[valence_type][node_id]["rank"].extend(original_rank)
                     relevant_nodes_ab[valence_type][node_id]["weight"] += weight
 
-        # Sort relevant nodes
+        # Sort consolidated relevant nodes by inverse weight (higher weight = higher relevance)
         report_data["relevant_nodes_ab"] = {
             "a": sorted(relevant_nodes_ab["a"].values(), key=lambda x: 1 / x["weight"]),
             "b": sorted(relevant_nodes_ab["b"].values(), key=lambda x: 1 / x["weight"]),
