@@ -505,25 +505,29 @@ class ABGridSna:
         relevant_nodes_ab = {"a": {}, "b": {}}
         
         # Loop through a and b rankings
-        for network_key, rankings in [("a", self.sna["rankings_a"]), ("b", self.sna["rankings_b"])]:
+        for valence_key, rankings in [("a", self.sna["rankings_a"]), ("b", self.sna["rankings_b"])]:
+            
             # Loop through metrics and associated ranks
             for metric_name, ranks_series in rankings.items():
+               
                 # Get threshold value for this metric
                 threshold_value = ranks_series.quantile(threshold)
-                # Filter top nodes (assuming lower rank = better)
-                top_nodes = ranks_series[ranks_series <= threshold_value]
-                # Calculate normalized ranks ONCE for all selected nodes
-                normalized_ranks = top_nodes.rank(method="dense", ascending=True)
                 
-                for node_id, original_rank in top_nodes.items():
+                # Filter top nodes (assuming lower rank = better)
+                relevant_nodes = ranks_series[ranks_series <= threshold_value]
+                
+                # Calculate normalized ranks ONCE for all selected nodes
+                normalized_ranks = relevant_nodes.rank(method="dense", ascending=True)
+                
+                for node_id, original_rank in relevant_nodes.items():
                     # Get normalized rank
                     normalized_rank = normalized_ranks[node_id]
                     # Calculate weight for this metric
                     weight = float(10.0 / (normalized_rank ** 0.8))
                     
                     # Initialize or update node entry
-                    if node_id not in relevant_nodes_ab[network_key]:
-                        relevant_nodes_ab[network_key][node_id] = {
+                    if node_id not in relevant_nodes_ab[valence_key]:
+                        relevant_nodes_ab[valence_key][node_id] = {
                             "id": str(node_id),
                             "metric": [metric_name],
                             "rank": [int(original_rank)],
@@ -531,14 +535,14 @@ class ABGridSna:
                         }
                     else:
                         # Consolidate entries: append to lists and sum weights
-                        relevant_nodes_ab[network_key][node_id]["metric"].append(metric_name)
-                        relevant_nodes_ab[network_key][node_id]["rank"].append(int(original_rank))
-                        relevant_nodes_ab[network_key][node_id]["weight"] += weight
+                        relevant_nodes_ab[valence_key][node_id]["metric"].append(metric_name)
+                        relevant_nodes_ab[valence_key][node_id]["rank"].append(int(original_rank))
+                        relevant_nodes_ab[valence_key][node_id]["weight"] += weight
         
         # Convert dict values to lists for final output format
         return {
-            "a": list(relevant_nodes_ab["a"].values()),
-            "b": list(relevant_nodes_ab["b"].values())
+            "a": sorted(list(relevant_nodes_ab["a"].values()), key=lambda x: 1 / x["weight"]),
+            "b": sorted(list(relevant_nodes_ab["b"].values()), key=lambda x: 1 / x["weight"])
         }
 
     def compute_edges_types(self, network_type: Literal["a", "b"]) -> Dict[str, pd.Index]:
