@@ -461,16 +461,22 @@ class ABGridSociogram:
                 if valence_key == "a":
                     # Get threshold for top performers (lower quantile = better ranks)
                     threshold_value = ranks_series.quantile(threshold)
+                    
                     # Filter nodes with ranks at or below threshold (best performers)
                     relevant_nodes = ranks_series[ranks_series <= threshold_value]
+
+                    # Calculate normalized ranks for weight computation (dense ranking, ascending)
+                    normalized_ranks = relevant_nodes.rank(method="dense", ascending=True)
+
                 else:
                     # Get threshold for bottom performers (higher quantile = worse ranks)
                     threshold_value = ranks_series.quantile(1 - threshold)
+                    
                     # Filter nodes with ranks at or above threshold (worst performers)
                     relevant_nodes = ranks_series[ranks_series >= threshold_value]
                 
-                # Calculate normalized ranks for weight computation (dense ranking, ascending)
-                normalized_ranks = relevant_nodes.rank(method="dense", ascending=True)
+                    # Calculate normalized ranks for weight computation (dense ranking, ascending)
+                    normalized_ranks = relevant_nodes.rank(method="dense", ascending=False)
                 
                 # Process each selected node
                 for node_id, original_rank in relevant_nodes.items():
