@@ -8,6 +8,7 @@ Date Created: May 3, 2025
 The code is part of the AB-Grid project and is licensed under the MIT License.
 """
 
+import re
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
@@ -498,14 +499,20 @@ class ABGridSna:
             ValueError: If rankings for both networks are not available.
         """
         # Make sure data is available
-        if self.sna["rankings_a"] is None or self.sna["rankings_b"] is None:
-            raise ValueError("Rankings for both networks a and b are required.")
+        if self.sna["rankings_a"] is None or self.sna["rankings_b"] is None or self.sna["micro_stats_a"] or self.sna["micro_stats_b"]:
+            raise ValueError("SNA micro stats and rankings for both networks a and b are required.")
+        
+        # Cache data
+        micro_stats_a = self.sna["micro_stats_a"]
+        micro_stats_b = self.sna["micro_stats_b"]
+        rankings_a = self.sna["rankings_a"]
+        rankings_b = self.sna["rankings_b"]
         
         # Init dict with empty sub-dicts for easier node consolidation
         relevant_nodes_ab = {"a": {}, "b": {}}
         
         # Loop through a and b rankings
-        for valence_key, rankings in [("a", self.sna["rankings_a"]), ("b", self.sna["rankings_b"])]:
+        for valence_key, rankings in [("a", rankings_a), ("b", rankings_b)]:
             
             # Loop through metrics and associated ranks
             for metric_name, ranks_series in rankings.items():
@@ -520,22 +527,32 @@ class ABGridSna:
                 normalized_ranks = relevant_nodes.rank(method="dense", ascending=True)
                 
                 for node_id, original_rank in relevant_nodes.items():
+                    
                     # Get normalized rank
                     normalized_rank = normalized_ranks[node_id]
+                    
                     # Calculate weight for this metric
                     weight = float(10.0 / (normalized_rank ** 0.8))
+
+                    # Get original value
+                    value = (
+                        micro_stats_a.loc[node_id, re.sub("_rank", "", metric_name)] 
+                            if valence_key == "a" else micro_stats_b.loc[node_id, re.sub("_rank", "", metric_name)] 
+                    )
                     
                     # Initialize or update node entry
                     if node_id not in relevant_nodes_ab[valence_key]:
                         relevant_nodes_ab[valence_key][node_id] = {
-                            "id": str(node_id),
+                            "id": node_id,
                             "metric": [metric_name],
-                            "rank": [int(original_rank)],
+                            "value": [value],
+                            "rank": [original_rank],
                             "weight": weight
                         }
                     else:
                         # Consolidate entries: append to lists and sum weights
                         relevant_nodes_ab[valence_key][node_id]["metric"].append(metric_name)
+                        relevant_nodes_ab[valence_key][node_id]["value"].append(value)
                         relevant_nodes_ab[valence_key][node_id]["rank"].append(int(original_rank))
                         relevant_nodes_ab[valence_key][node_id]["weight"] += weight
         
