@@ -13,7 +13,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import networkx as nx
 
-from typing import Any, Literal, Dict, Optional, TypedDict, Tuple
+from typing import Any, List, Literal, Dict, Optional, TypedDict, Tuple, Union
 from lib import CM_TO_INCHES
 from lib.abgrid_utils import compute_descriptives, figure_to_base64_svg
 
@@ -26,10 +26,17 @@ class SociogramDict(TypedDict):
     rankings: Optional[Dict[str, pd.Series]]
     graph_ii: Optional[str]
     graph_ai: Optional[str]
-    relevant_nodes: Optional[Dict[str, Dict[str, pd.Series]]]
+    relevant_nodes_ab: Optional[Dict[str, Dict[str, pd.Series]]]
 
+# Define metrics to rank
+CENTRALITY_METRICS = ["bl", "im", "ai", "ii"]
 
-
+# Define status ordering (from highest to lowest social status)
+STATUS_ORDER = [
+    "popular", "appreciated", "marginal", "ambitendent",
+    "controversial", "disliked", "rejected", "isolated"
+]
+        
 class ABGridSociogram:
     """
     Analyzes and visualizes social networks by constructing components like macro/micro statistics,
@@ -64,7 +71,7 @@ class ABGridSociogram:
             "rankings": None,
             "graph_ii": None,
             "graph_ai": None,
-            "relevant_nodes": None
+            "relevant_nodes_ab": None
         }
 
     def get(self, sna: Dict[str, Any]) -> SociogramDict:
@@ -100,7 +107,7 @@ class ABGridSociogram:
         self.sociogram["micro_stats"] = self.compute_micro_stats()
         self.sociogram["descriptives"] = self.compute_descriptives()
         self.sociogram["rankings"] = self.compute_rankings()
-        self.sociogram["relevant_nodes"] = self.compute_relevant_nodes()
+        self.sociogram["relevant_nodes_ab"] = self.compute_relevant_nodes_ab()
         self.sociogram["graph_ai"] = self.create_graph("ai")
         self.sociogram["graph_ii"] = self.create_graph("ii")
 
@@ -202,211 +209,20 @@ class ABGridSociogram:
         # Compute status
         sociogram_micro_stats["st"] = self.compute_status(sociogram_micro_stats)
 
+        # compute ranks
+        sociogram_micro_stats = pd.concat([
+            sociogram_micro_stats,
+            sociogram_micro_stats.rank(method="dense", ascending=False).add_suffix("_rank")
+        ], axis=1)
+
+        # Compute status rank
+        sociogram_micro_stats["st_rank"] = (
+            sociogram_micro_stats["st"]
+                .apply(lambda x: STATUS_ORDER.index(x) +1 )
+        )
+
         return sociogram_micro_stats.sort_index()
-
-    def compute_descriptives(self) -> pd.DataFrame:
-        """
-        Compute macro-level descriptive statistics based on micro-level node statistics.
-        
-        Aggregates individual node statistics to provide network-level summaries
-        including measures of central tendency, dispersion, and distribution.
-
-        Returns:
-            A DataFrame containing descriptive statistics (median, IQR, total sum, etc.)
-            for all numeric columns in the micro-level statistics.
-            
-        Raises:
-            AttributeError: If micro_stats have not been computed yet.
-        """
-        if self.sociogram["micro_stats"] is None:
-            raise AttributeError("Micro stats must be computed before descriptives")
-            
-        # Select numeric columns only
-        sociogram_numeric_columns = self.sociogram["micro_stats"].select_dtypes(np.number)
-        
-        return compute_descriptives(sociogram_numeric_columns)
-        
-    def compute_rankings(self) -> Dict[str, pd.Series]:
-        """
-        Generate node rankings based on centrality metrics and sociometric status.
-        
-        Creates ordinal rankings for nodes based on their scores in various centrality
-        measures and their sociometric status categories, with higher scores receiving
-        better (lower) rank numbers.
-
-        Returns:
-            A dictionary where keys are metric names and values are pandas Series
-            containing node-to-rank mappings:
-                - "bl": Balance index rankings (higher balance = better rank)
-                - "im": Impact index rankings (higher impact = better rank)  
-                - "ai": Activity index rankings (higher activity = better rank)
-                - "ii": Integration index rankings (higher integration = better rank)
-                - "st": Status rankings (ordered by social desirability)
-                
-        Raises:
-            AttributeError: If micro_stats have not been computed yet.
-        """
-        if self.sociogram["micro_stats"] is None:
-            raise AttributeError("Micro stats must be computed before rankings")
-            
-        # Define metrics to rank
-        CENTRALITY_METRICS = ["bl", "im", "ai", "ii"]
-        
-        # Define status ordering (from highest to lowest social status)
-        STATUS_ORDER = [
-            "popular", "appreciated", "ambitendent", "marginal",
-            "controversial", "disliked", "rejected", "isolated"
-        ]
-        
-        # Init dicts
-        rankings: Dict[str, pd.Series] = {}
-        
-        # Rank centrality metrics (higher scores get better ranks)
-        sociogram_micro_stats = self.sociogram["micro_stats"]
-        centrality_data = sociogram_micro_stats.loc[:, CENTRALITY_METRICS]
-        ranked_metrics = centrality_data.rank(method="dense", ascending=False).astype(int)
-        
-        # Add centrality rankings to results
-        for metric in CENTRALITY_METRICS:
-            rankings[metric] = ranked_metrics[metric].sort_values()
-        
-        # Handle status ordering (categorical ranking)
-        status_series = sociogram_micro_stats["st"]
-        
-        # Create a mapping from status to order position
-        status_to_order = {status: idx for idx, status in enumerate(STATUS_ORDER)}
-        
-        # Convert status to numerical order for sorting
-        status_with_order = status_series.map(status_to_order)
-        
-        # Sort by status order FIRST, then by index as secondary sort
-        # Create a DataFrame with both status order and original index for sorting
-        sort_df = pd.DataFrame({
-            'status_order': status_with_order,
-            'original_index': sociogram_micro_stats.index
-        })
-        
-        # Sort by status_order first, then by original_index
-        sorted_indices = sort_df.sort_values(['status_order', 'original_index']).index
-        
-        # Store the status series in the new order
-        rankings["st"] = status_series.loc[sorted_indices]
-        
-        return rankings
     
-    def compute_relevant_nodes(self) -> Dict[str, Dict[str, pd.Series]]:
-        """
-        Identify relevant nodes based on Affiliation Index, Integration Index, and Sociometric Status.
-        
-        This function identifies nodes with high social relevance by analyzing their performance
-        in key sociometric measures. Nodes are considered relevant if they appear in the top 5%
-        for numerical metrics or belong to specific status categories.
-        
-        Returns:
-            Dict[str, Dict[str, pd.Series]]: 
-                Nested dictionary structure where:
-                - First level keys are valence indicators ('a' for positive, 'b' for negative)
-                - Second level keys are metric names ('ai', 'ii', 'st')
-                - Values are Series containing relevant nodes with their metric values,
-                sorted appropriately (high to low for ai/ii, by status hierarchy for st)
-        
-        For Affiliation Index (ai) and Integration Index (ii):
-        - Positive valence ('a'): nodes in top 5% (95th percentile and above)
-        - Negative valence ('b'): nodes in bottom 5% (5th percentile and below)
-        
-        For Sociometric Status (st):
-        - Positive valence ('a'): "popular", "appreciated", "controversial" 
-        - Negative valence ('b'): "rejected", "disliked", "marginal", "isolated"
-        
-        Example:
-            >>> relevant_nodes = compute_relevant_nodes_ab()
-            >>> relevant_nodes['a']['ai']  # High activity index nodes
-            node_A    5.2
-            node_C    4.1
-            dtype: float64
-            >>> relevant_nodes['b']['st']  # Negative status nodes
-            node_X    rejected
-            node_Y    isolated
-            dtype: object
-        
-        Raises:
-            AttributeError: If micro_stats have not been computed yet.
-        """
-        # Check if required data is available
-        if self.sociogram["micro_stats"] is None:
-            raise AttributeError("Micro stats must be computed before identifying relevant nodes")
-        
-        # Define percentile threshold to select most relevant nodes
-        THRESHOLD = 0.05
-        
-        # Get micro stats data
-        micro_stats = self.sociogram["micro_stats"]
-        
-        # Initialize the result dictionary
-        relevant_nodes_ab = {}
-        
-        # Define positive and negative status categories
-        positive_statuses = ["popular", "appreciated"]
-        negative_statuses = ["isolated", "rejected", "disliked"]
-        
-        # Process both valence types
-        for valence_type in ["a", "b"]:
-            
-            # Initialize valence dictionary
-            relevant_nodes_ab[valence_type] = {}
-            
-            # Process Affiliation Index (ai)
-            ai_values = micro_stats["ai"]
-            if valence_type == "a":
-                # Positive valence: top performers (high values)
-                threshold_value = ai_values.quantile(1 - THRESHOLD)  # 95th percentile
-                relevant_ai = ai_values[ai_values >= threshold_value].sort_values(ascending=False)
-            else:
-                # Negative valence: bottom performers (low values)
-                threshold_value = ai_values.quantile(THRESHOLD)  # 5th percentile
-                relevant_ai = ai_values[ai_values <= threshold_value].sort_values(ascending=True)
-            
-            relevant_nodes_ab[valence_type]["ai"] = relevant_ai
-            
-            # Process Integration Index (ii)
-            ii_values = micro_stats["ii"]
-            if valence_type == "a":
-                # Positive valence: top performers (high values)
-                threshold_value = ii_values.quantile(1 - THRESHOLD)  # 95th percentile
-                relevant_ii = ii_values[ii_values >= threshold_value].sort_values(ascending=False)
-            else:
-                # Negative valence: bottom performers (low values)
-                threshold_value = ii_values.quantile(THRESHOLD)  # 5th percentile
-                relevant_ii = ii_values[ii_values <= threshold_value].sort_values(ascending=True)
-            
-            relevant_nodes_ab[valence_type]["ii"] = relevant_ii
-            
-            # Process Sociometric Status (st)
-            st_values = micro_stats["st"]
-            if valence_type == "a":
-                # Positive valence: positive status categories
-                relevant_st = st_values[st_values.isin(positive_statuses)]
-                # Sort by status hierarchy (best to worst)
-                if not relevant_st.empty:
-                    positive_order = {status: idx for idx, status in enumerate(positive_statuses)}
-                    relevant_st = relevant_st.loc[
-                        relevant_st.map(positive_order).sort_values().index
-                    ]
-            else:
-                # Negative valence: negative status categories
-                relevant_st = st_values[st_values.isin(negative_statuses)]
-                # Sort by status hierarchy (least negative to most negative)
-                if not relevant_st.empty:
-                    negative_order = {status: idx for idx, status in enumerate(negative_statuses)}
-                    relevant_st = relevant_st.loc[
-                        relevant_st.map(negative_order).sort_values().index
-                    ]
-            
-            relevant_nodes_ab[valence_type]["st"] = relevant_st
-            
-        return relevant_nodes_ab
-
-
     def compute_status(self, sociogram_micro_stats: pd.DataFrame) -> pd.Series:
         """
         Determine sociometric status for each node based on relationship patterns.
@@ -528,6 +344,126 @@ class ABGridSociogram:
         status.loc[prefs_a.mul(prefs_b).gt(0) & neutral & impact_high] = "controversial"
         
         return status
+
+    def compute_descriptives(self) -> pd.DataFrame:
+        """
+        Compute macro-level descriptive statistics based on micro-level node statistics.
+        
+        Aggregates individual node statistics to provide network-level summaries
+        including measures of central tendency, dispersion, and distribution.
+
+        Returns:
+            A DataFrame containing descriptive statistics (median, IQR, total sum, etc.)
+            for all numeric columns in the micro-level statistics.
+            
+        Raises:
+            AttributeError: If micro_stats have not been computed yet.
+        """
+        if self.sociogram["micro_stats"] is None:
+            raise AttributeError("Micro stats must be computed before descriptives")
+            
+        # Select numeric columns only
+        sociogram_numeric_columns = self.sociogram["micro_stats"].select_dtypes(np.number)
+        
+        return compute_descriptives(sociogram_numeric_columns)
+        
+    def compute_rankings(self) -> Dict[str, pd.Series]:
+        """
+        Generate node rankings based on centrality metrics and sociometric status.
+        
+        Creates ordinal rankings for nodes based on their scores in various centrality
+        measures and their sociometric status categories, with higher scores receiving
+        better (lower) rank numbers.
+
+        Returns:
+            A dictionary where keys are metric names and values are pandas Series
+            containing node-to-rank mappings:
+                - "bl": Balance index rankings (higher balance = better rank)
+                - "im": Impact index rankings (higher impact = better rank)  
+                - "ai": Activity index rankings (higher activity = better rank)
+                - "ii": Integration index rankings (higher integration = better rank)
+                - "st": Status rankings (ordered by social desirability)
+                
+        Raises:
+            AttributeError: If micro_stats have not been computed yet.
+        """
+        if self.sociogram["micro_stats"] is None:
+            raise AttributeError("Micro stats must be computed before rankings")
+            
+        # Init dicts
+        rankings: Dict[str, pd.Series] = {}
+        
+        # Rank centrality metrics (higher scores get better ranks)
+        sociogram_micro_stats = self.sociogram["micro_stats"]
+        
+        # Add centrality rankings to results
+        for metric in [ f"{m}_rank" for m in CENTRALITY_METRICS ] + ["st_rank"]:
+            rankings[metric] = sociogram_micro_stats[metric].sort_values()
+        
+        return rankings
+    
+    def compute_relevant_nodes_ab(self, threshold: float = 0.05) -> Dict[str, List[Dict[str, Union[str, List[str], List[int], float]]]]:
+        
+        # Make sure data is available
+        if self.sociogram["rankings"] is None:
+            raise ValueError("Sociogram rankings are required.")
+        
+        # Store sociogram rankings
+        rankings = self.sociogram["rankings"]
+        
+        # Init dict with empty sub-dicts for easier node consolidation
+        relevant_nodes_ab = {"a": {}, "b": {}}
+        
+        # Loop through valence keys
+        for valence_key in relevant_nodes_ab.keys():
+            
+            # Loop through metrics and associated ranks
+            for metric_name, ranks_series in rankings.items():
+
+                # change stratery a: best node b: worst node
+                if valence_key == "a":
+                
+                    # Get threshold value for this metric
+                    threshold_value = ranks_series.quantile(threshold)
+                
+                    # Filter top nodes (assuming lower rank = better)
+                    relevant_nodes = ranks_series[ranks_series <= threshold_value]
+                else:
+                    # Get threshold value for this metric
+                    threshold_value = ranks_series.quantile(1- threshold)
+                    
+                    # Filter worst nodes (assuming higher rank = worse)
+                    relevant_nodes = ranks_series[ranks_series >= threshold_value]
+                
+                # Calculate normalized ranks ONCE for all selected nodes
+                normalized_ranks = relevant_nodes.rank(method="dense", ascending=True)
+                
+                for node_id, original_rank in relevant_nodes.items():
+                    # Get normalized rank
+                    normalized_rank = normalized_ranks[node_id]
+                    # Calculate weight for this metric
+                    weight = float(10.0 / (normalized_rank ** 0.8))
+                    
+                    # Initialize or update node entry
+                    if node_id not in relevant_nodes_ab[valence_key]:
+                        relevant_nodes_ab[valence_key][node_id] = {
+                            "id": str(node_id),
+                            "metric": [metric_name],
+                            "rank": [int(original_rank)],
+                            "weight": weight
+                        }
+                    else:
+                        # Consolidate entries: append to lists and sum weights
+                        relevant_nodes_ab[valence_key][node_id]["metric"].append(metric_name)
+                        relevant_nodes_ab[valence_key][node_id]["rank"].append(int(original_rank))
+                        relevant_nodes_ab[valence_key][node_id]["weight"] += weight
+        
+        # Convert dict values to lists for final output format
+        return {
+            "a": sorted(list(relevant_nodes_ab["a"].values()), key=lambda x: 1 / x["weight"]),
+            "b": sorted(list(relevant_nodes_ab["b"].values()), key=lambda x: 1 / x["weight"])
+        }
+
 
     def create_graph(self, coefficient: Literal["ai", "ii"]) -> str:
         """
