@@ -547,16 +547,16 @@ class ABGridSna:
                     if node_id not in relevant_nodes_ab[valence_key]:
                         relevant_nodes_ab[valence_key][node_id] = {
                             "id": node_id,
-                            "metric": [metric_name],
-                            "value": [value],
-                            "rank": [original_rank],
+                            "metrics": [metric_name],
+                            "values": [value],
+                            "ranks": [original_rank],
                             "weight": weight
                         }
                     else:
                         # Consolidate entries: append to lists and sum weights
-                        relevant_nodes_ab[valence_key][node_id]["metric"].append(metric_name)
-                        relevant_nodes_ab[valence_key][node_id]["value"].append(value)
-                        relevant_nodes_ab[valence_key][node_id]["rank"].append(original_rank)
+                        relevant_nodes_ab[valence_key][node_id]["metrics"].append(metric_name)
+                        relevant_nodes_ab[valence_key][node_id]["values"].append(value)
+                        relevant_nodes_ab[valence_key][node_id]["ranks"].append(original_rank)
                         relevant_nodes_ab[valence_key][node_id]["weight"] += weight
         
         # Convert dict values to lists for final output format

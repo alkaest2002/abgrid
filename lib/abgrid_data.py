@@ -312,25 +312,25 @@ class ABGridData:
             ]:
                 # Cache relevant node properties for processing
                 node_id = relevant_nodes["id"]
-                metric_name = relevant_nodes["metric"]
-                value = relevant_nodes["value"]
-                original_rank = relevant_nodes["rank"]
+                metrics = relevant_nodes["metrics"]
+                values = relevant_nodes["values"]
+                ranks = relevant_nodes["ranks"]
                 weight = relevant_nodes["weight"]
 
                 # Initialize new node entry or update existing consolidated entry
                 if node_id not in relevant_nodes_ab[valence_type]:
                     relevant_nodes_ab[valence_type][node_id] = {
                         "id": node_id,
-                        "metric": metric_name,
-                        "value": value,
-                        "rank": original_rank,
+                        "metrics": metrics,
+                        "values": values,
+                        "ranks": ranks,
                         "weight": weight
                     }
                 else:
                     # Consolidate multiple metric appearances: extend lists and sum weights
-                    relevant_nodes_ab[valence_type][node_id]["metric"].extend(metric_name)
-                    relevant_nodes_ab[valence_type][node_id]["value"].extend(value)
-                    relevant_nodes_ab[valence_type][node_id]["rank"].extend(original_rank)
+                    relevant_nodes_ab[valence_type][node_id]["metrics"].extend(metrics)
+                    relevant_nodes_ab[valence_type][node_id]["values"].extend(values)
+                    relevant_nodes_ab[valence_type][node_id]["ranks"].extend(ranks)
                     relevant_nodes_ab[valence_type][node_id]["weight"] += weight
 
         # Sort consolidated relevant nodes by inverse weight (higher weight = higher relevance)
