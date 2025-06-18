@@ -9,6 +9,7 @@ Date Created: May 3, 2025
 The code is part of the AB-Grid project and is licensed under the MIT License.
 """
 
+import re
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
@@ -442,10 +443,13 @@ class ABGridSociogram:
             ValueError: If sociogram rankings have not been computed yet.
         """
         # Validate that rankings data is available
-        if self.sociogram["rankings"] is None:
-            raise ValueError("Sociogram rankings are required.")
+        if self.sociogram["rankings"] is None or self.sociogram["micro_stats"] is None:
+            raise ValueError("Sociogram micro statistics and rankings are required.")
         
-        # Get precomputed rankings
+        # Cahce micro_stats
+        micro_stats = self.sociogram["micro_stats"]
+        
+        # Cahce rankings
         rankings = self.sociogram["rankings"]
         
         # Initialize nested dictionaries for node consolidation by valence
@@ -480,23 +484,30 @@ class ABGridSociogram:
                 
                 # Process each selected node
                 for node_id, original_rank in relevant_nodes.items():
+                    
                     # Get normalized rank for this node within selected group
                     normalized_rank = normalized_ranks[node_id]
+                    
                     # Calculate inverse exponential weight (better normalized rank = higher weight)
                     weight = float(10.0 / (normalized_rank ** 0.8))
+
+                    # Get value
+                    value = micro_stats.loc[node_id, re.sub("_rank", "", metric_name) ]
                     
                     # Initialize new node entry or update existing one
                     if node_id not in relevant_nodes_ab[valence_key]:
                         relevant_nodes_ab[valence_key][node_id] = {
-                            "id": str(node_id),
+                            "id": node_id,
                             "metric": [metric_name],
-                            "rank": [int(original_rank)],
+                            "value": [value],
+                            "rank": [ original_rank ],
                             "weight": weight
                         }
                     else:
                         # Consolidate multiple metric appearances: append lists and sum weights
                         relevant_nodes_ab[valence_key][node_id]["metric"].append(metric_name)
-                        relevant_nodes_ab[valence_key][node_id]["rank"].append(int(original_rank))
+                        relevant_nodes_ab[valence_key][node_id]["value"].append(value)
+                        relevant_nodes_ab[valence_key][node_id]["rank"].append(original_rank)
                         relevant_nodes_ab[valence_key][node_id]["weight"] += weight
         
         # Convert consolidated dictionaries to sorted lists by relevance weight (descending)
