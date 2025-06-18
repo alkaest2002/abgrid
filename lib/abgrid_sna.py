@@ -499,7 +499,7 @@ class ABGridSna:
             ValueError: If rankings for both networks are not available.
         """
         # Make sure data is available
-        if self.sna["rankings_a"] is None or self.sna["rankings_b"] is None or self.sna["micro_stats_a"] or self.sna["micro_stats_b"]:
+        if self.sna["rankings_a"] is None or self.sna["rankings_b"] is None or self.sna["micro_stats_a"] is None or self.sna["micro_stats_b"] is None:
             raise ValueError("SNA micro stats and rankings for both networks a and b are required.")
         
         # Cache data
@@ -515,7 +515,10 @@ class ABGridSna:
         for valence_key, rankings in [("a", rankings_a), ("b", rankings_b)]:
             
             # Loop through metrics and associated ranks
-            for metric_name, ranks_series in rankings.items():
+            for metric_rank_name, ranks_series in rankings.items():
+                
+                # clean metric name
+                metric_name = re.sub("_rank", "", metric_rank_name)
                
                 # Get threshold value for this metric
                 threshold_value = ranks_series.quantile(threshold)
@@ -527,7 +530,7 @@ class ABGridSna:
                 normalized_ranks = relevant_nodes.rank(method="dense", ascending=True)
                 
                 for node_id, original_rank in relevant_nodes.items():
-                    
+  
                     # Get normalized rank
                     normalized_rank = normalized_ranks[node_id]
                     
@@ -536,7 +539,7 @@ class ABGridSna:
 
                     # Get original value
                     value = (
-                        micro_stats_a.loc[node_id, re.sub("_rank", "", metric_name)] 
+                        micro_stats_a.loc[node_id, re.sub("_rank", "", metric_rank_name)] 
                             if valence_key == "a" else micro_stats_b.loc[node_id, re.sub("_rank", "", metric_name)] 
                     )
                     
@@ -553,7 +556,7 @@ class ABGridSna:
                         # Consolidate entries: append to lists and sum weights
                         relevant_nodes_ab[valence_key][node_id]["metric"].append(metric_name)
                         relevant_nodes_ab[valence_key][node_id]["value"].append(value)
-                        relevant_nodes_ab[valence_key][node_id]["rank"].append(int(original_rank))
+                        relevant_nodes_ab[valence_key][node_id]["rank"].append(original_rank)
                         relevant_nodes_ab[valence_key][node_id]["weight"] += weight
         
         # Convert dict values to lists for final output format
