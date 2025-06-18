@@ -11,6 +11,7 @@ The code is part of the AB-Grid project and is licensed under the MIT License.
 import re
 import datetime
 from pathlib import Path
+from copy import deepcopy
 from typing import Any, Dict, List, Optional, Protocol, Tuple, Union, TypedDict
 
 from lib.abgrid_sna import ABGridSna
@@ -33,6 +34,7 @@ class ReportData(TypedDict, total=False):
     question_b: str
     sna: SNADict
     sociogram: SociogramDict  # Optional field, only present when with_sociogram=True
+    relevant_nodes_ab: Dict[str, List[Dict[str, Any]]]
 
 
 class DataLoader(Protocol):
@@ -197,7 +199,7 @@ class ABGridData:
         self, 
         group_filepath: Path, 
         with_sociogram: bool = False
-    ) -> Tuple[Optional[ReportData], Optional[str]]:
+    ) -> ReportData:
         """
         Load and prepare comprehensive data for generating a group's analysis report.
 
@@ -261,10 +263,16 @@ class ABGridData:
         # Extract group number from filename (assumes format ending with digits)
         try:
             group_number = int(re.search(r'(\d+)$', group_filepath.stem).group(0))
+        
         except (AttributeError, ValueError):
             # Fallback: use filename stem if no trailing digits found
             group_number = group_filepath.stem
         
+        # Init relevant nodes list for both sna and sociogram
+        relevant_nodes_ab_sna = deepcopy(sna_results["relevant_nodes_ab"])
+        relevant_nodes_ab_sociogram = []
+        relevant_nodes_ab = {"a": {}, "b": {}}
+
         # Prepare the comprehensive report data structure
         report_data: ReportData = {
             "project_title": project_data["project_title"],
@@ -278,6 +286,7 @@ class ABGridData:
 
         # Optionally include sociogram data
         if with_sociogram:
+            
             # Init sociogram class
             abgrid_sociogram = ABGridSociogram()
 
@@ -285,6 +294,47 @@ class ABGridData:
             sociogram_results = abgrid_sociogram.get(sna_results)
 
             # Add sociogram data to report data
-            report_data["sociogram"] = sociogram_results        
+            report_data["sociogram"] = sociogram_results
+
+            # Cache sociogram relevant nodes
+            relevant_nodes_ab_sociogram = deepcopy(sociogram_results["relevant_nodes_ab"])
+
+        # Consolidate relevant nodes a and b
+        for valence_type in relevant_nodes_ab.keys():
+            
+            # Consolidate relevant nodes for current valence type
+            for relevant_nodes in [
+                *relevant_nodes_ab_sna[valence_type], 
+                *relevant_nodes_ab_sociogram[valence_type]
+            ]:
+                # Cache relevant node props
+                node_id = relevant_nodes["id"]
+                metric_name = relevant_nodes["metric"]
+                value = relevant_nodes["value"]
+                original_rank = relevant_nodes["rank"]
+                weight = relevant_nodes["weight"]
+
+                # Initialize new node entry or update existing one
+                if node_id not in relevant_nodes_ab[valence_type]:
+                    relevant_nodes_ab[valence_type][node_id] = {
+                        "id": node_id,
+                        "metric": metric_name,
+                        "value": value,
+                        "rank": original_rank,
+                        "weight": weight
+                    }
+                else:
+                    # Consolidate multiple metric appearances: append lists and sum weights
+                    relevant_nodes_ab[valence_type][node_id]["metric"].extend(metric_name)
+                    relevant_nodes_ab[valence_type][node_id]["value"].extend(value)
+                    relevant_nodes_ab[valence_type][node_id]["rank"].extend(original_rank)
+                    relevant_nodes_ab[valence_type][node_id]["weight"] += weight
+
+
+        # Sort relevant nodes
+        report_data["relevant_nodes_ab"] = {
+            "a": sorted(relevant_nodes_ab["a"].values(), key=lambda x: 1 / x["weight"]),
+            "b": sorted(relevant_nodes_ab["b"].values(), key=lambda x: 1 / x["weight"]),
+        } 
         
         return report_data, None
