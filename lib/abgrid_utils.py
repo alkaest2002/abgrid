@@ -92,7 +92,7 @@ def to_json_serializable(
     data: Any,
     keys_to_omit: Optional[List[str]] = None,
     keys_regex_to_omit: Optional[Union[List[str], List[Pattern[str]]]] = None,
-    max_depth: int = 6
+    max_depth: int = 7
 ) -> Any:
     """
     Converts data into a JSON-serializable format, supporting nested objects and
