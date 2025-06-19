@@ -2624,20 +2624,20 @@
                     "0": "JYkl",
                     "1": "EMbj",
                     "2": "ANPe",
-                    "3": "FIW",
-                    "4": "FIN",
+                    "3": "NVe",
+                    "4": "Rcd",
                     "5": "Yhi",
-                    "6": "GMi",
-                    "7": "Ydl",
-                    "8": "BYf",
-                    "9": "CPZ",
-                    "10": "PZe",
-                    "11": "Ddl",
-                    "12": "EGM",
-                    "13": "EMg",
-                    "14": "CEM",
-                    "15": "Rcd",
-                    "16": "NVe"
+                    "6": "Ydl",
+                    "7": "Ddl",
+                    "8": "FIW",
+                    "9": "BYf",
+                    "10": "FIN",
+                    "11": "CEM",
+                    "12": "EMg",
+                    "13": "EGM",
+                    "14": "GMi",
+                    "15": "CPZ",
+                    "16": "PZe"
                 },
                 "strongly_connected": {
                     "0": "ACEGJMNPQRSYZbdefhijkl",
@@ -2649,14 +2649,14 @@
             },
             "components_b": {
                 "cliques": {
-                    "0": "BOT",
-                    "1": "HMX",
-                    "2": "HOe",
-                    "3": "HMO",
+                    "0": "HKW",
+                    "1": "HWb",
+                    "2": "BOT",
+                    "3": "OST",
                     "4": "HOS",
-                    "5": "HKW",
-                    "6": "HWb",
-                    "7": "OST"
+                    "5": "HOe",
+                    "6": "HMO",
+                    "7": "HMX"
                 },
                 "strongly_connected": {
                     "0": "HKOPQSTWaf"
