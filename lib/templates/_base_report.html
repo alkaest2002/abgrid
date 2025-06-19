@@ -41,6 +41,52 @@
         line-height: 11pt;
         text-align: justify;
     }
+
+    .relevant-nodes-container .relevant-nodes-header {
+        padding-bottom: 6pt;
+        border-bottom: .75pt dashed var(--base-border-color);
+    }
+
+    .relevant-nodes-list {
+        display: flex;
+        flex-wrap: wrap;
+    }
+
+    .relevant-nodes-list .node {
+        width: 48%;
+        display: flex;
+        justify-content: space-between;
+        margin-right: 6pt;
+        margin-bottom: 6pt;
+        padding: 2pt 3pt;
+        border-radius: 6pt;
+        border: .75pt solid var(--base-border-color);
+    }
+
+    .relevant-nodes-container .relevant-nodes-list .node .node-id {
+        height: 15pt;
+        width: 15pt;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        border-radius: 50%;
+        margin-right: 6pt;
+    }
+    
+    .relevant-nodes-container .relevant-nodes-list.list-a .node .node-id {
+        background-color: var(--abgrid-blue);
+        color: var(--abgrid-white);
+    }
+    
+    .relevant-nodes-container .relevant-nodes-list.list-b .node .node-id {
+        background-color: var(--abgrid-red);
+        color: var(--abgrid-white);
+    }
+
+    .relevant-nodes-list .node .node-metrics {
+        margin-right: 12pt;
+        text-align: center;
+    }
     
     .rankings-container {
         display: flex;
