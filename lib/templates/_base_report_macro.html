@@ -18,36 +18,32 @@
 {% macro render_relevant_nodes(relevant_nodes_ab) %}
 <div class="relevant-nodes-container">
     <div class="relevant-nodes-main">
-        <div class="relevant-nodes-header">
-            Nodi positivi
-        </div>
-        <div class="relevant-nodes-list">
-            {% for node in relevant_nodes_ab["a"] %}
-                <div class="node node-a" style="display: inline-block;">
-                    <div class="node-id">
-                        {{ node["id"] }}
+        {% for valence_type, relevant_nodes in relevant_nodes_ab.items() %}
+            <div class="relevant-nodes-header mt-xxl">
+                Lista {{ valence_type }}
+            </div>
+            {% for node in relevant_nodes %}
+                <div class="relevant-nodes-list list-{{valence_type}}">
+                    <div class="node" style="display: inline-block;">
+                        <div class="node-id">
+                            {{ node["id"] }}
+                        </div>
+                        <div class="node-metrics">
+                            {% for metric in node["metrics"] %}
+                                {% if metric == "st" %}
+                                    {{ node["values"][loop.index0][:3] }}
+                                {% else %}
+                                    {{ metric }}
+                                {% endif%}
+                            {% endfor %}
+                        </div>
+                    <div class="node-weight">
+                            {{ node["weight"] | int }}
                     </div>
-                    <div class="node-metrics">
-                        {% for metric in node["metrics"] %}
-                            {% if metric == "st" %}
-                                {{ node["values"][loop.index0][:3] }}
-                            {% else %}
-                                {{ metric }}
-                            {% endif%}
-                        {% endfor %}
                     </div>
-                   <div class="node-weight">
-                        {{ node["weight"] | int }}
-                   </div>
                 </div>
             {% endfor %}
-        </div>
-        <div class="relevant-nodes-header">
-            Nodi negativi
-        </div>
-        <div class="relevant-nodes-list">
-            
-        </div>
+        {% endfor %}
     </div>
 </div>
 {% endmacro %}
