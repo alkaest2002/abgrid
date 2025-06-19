@@ -245,6 +245,7 @@ class ABGridMain:
                 ],
                 keys_regex_to_omit=[
                     r"sna\.micro_stats_[a|b]\..*_rank",
+                    r"(sna|sociogram)\.relevant_nodes_ab"
                 ]
             )
 

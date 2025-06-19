@@ -509,7 +509,7 @@ class ABGridSna:
         rankings_b = self.sna["rankings_b"]
         
         # Init dict with empty sub-dicts for easier node consolidation
-        relevant_nodes_ab = {"a": {}, "b": {}}
+        relevant_nodes_ab = {"a": [], "b": []}
         
         # Loop through a and b rankings
         for valence_key, rankings in [("a", rankings_a), ("b", rankings_b)]:
@@ -543,27 +543,17 @@ class ABGridSna:
                             if valence_key == "a" else micro_stats_b.loc[node_id, re.sub("_rank", "", metric_name)] 
                     )
                     
-                    # Initialize or update node entry
-                    if node_id not in relevant_nodes_ab[valence_key]:
-                        relevant_nodes_ab[valence_key][node_id] = {
-                            "id": node_id,
-                            "metrics": [metric_name],
-                            "values": [value],
-                            "ranks": [original_rank],
-                            "weight": weight
-                        }
-                    else:
-                        # Consolidate entries: append to lists and sum weights
-                        relevant_nodes_ab[valence_key][node_id]["metrics"].append(metric_name)
-                        relevant_nodes_ab[valence_key][node_id]["values"].append(value)
-                        relevant_nodes_ab[valence_key][node_id]["ranks"].append(original_rank)
-                        relevant_nodes_ab[valence_key][node_id]["weight"] += weight
+                    # Add node entry to list
+                    relevant_nodes_ab[valence_key].append({
+                        "id": node_id,
+                        "metric": metric_name,
+                        "value": value,
+                        "rank": original_rank,
+                        "weight": weight
+                    })
         
-        # Convert dict values to lists for final output format
-        return {
-            "a": sorted(list(relevant_nodes_ab["a"].values()), key=lambda x: 1 / x["weight"]),
-            "b": sorted(list(relevant_nodes_ab["b"].values()), key=lambda x: 1 / x["weight"])
-        }
+        # Return list of relevant nodes
+        return relevant_nodes_ab
 
     def compute_edges_types(self, network_type: Literal["a", "b"]) -> Dict[str, pd.Index]:
         """

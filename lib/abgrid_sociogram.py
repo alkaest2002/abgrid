@@ -453,7 +453,7 @@ class ABGridSociogram:
         rankings = self.sociogram["rankings"]
         
         # Initialize nested dictionaries for node consolidation by valence
-        relevant_nodes_ab = {"a": {}, "b": {}}
+        relevant_nodes_ab = {"a": [], "b": []}
         
         # Process both positive (a) and negative (b) relevance directions
         for valence_key in relevant_nodes_ab.keys():
@@ -486,7 +486,7 @@ class ABGridSociogram:
                     normalized_ranks = relevant_nodes.rank(method="dense", ascending=False)
                 
                 # Process each selected node
-                for node_id, original_rank in relevant_nodes.items():
+                for node_id, rank in relevant_nodes.items():
                     
                     # Get normalized rank for this node within selected group
                     normalized_rank = normalized_ranks[node_id]
@@ -494,30 +494,20 @@ class ABGridSociogram:
                     # Calculate inverse exponential weight (better normalized rank = higher weight)
                     weight = float(10.0 / (normalized_rank ** 0.8))
 
-                    # Get value
+                    # Get node value
                     value = micro_stats.loc[node_id, metric_name]
                     
-                    # Initialize new node entry or update existing one
-                    if node_id not in relevant_nodes_ab[valence_key]:
-                        relevant_nodes_ab[valence_key][node_id] = {
-                            "id": node_id,
-                            "metrics": [metric_name],
-                            "values": [value],
-                            "ranks": [ original_rank ],
-                            "weight": weight
-                        }
-                    else:
-                        # Consolidate multiple metric appearances: append lists and sum weights
-                        relevant_nodes_ab[valence_key][node_id]["metrics"].append(metric_name)
-                        relevant_nodes_ab[valence_key][node_id]["values"].append(value)
-                        relevant_nodes_ab[valence_key][node_id]["ranks"].append(original_rank)
-                        relevant_nodes_ab[valence_key][node_id]["weight"] += weight
+                    # Add node entry to list
+                    relevant_nodes_ab[valence_key].append({
+                        "id": node_id,
+                        "metric": metric_name,
+                        "value": value,
+                        "rank": rank,
+                        "weight": weight
+                    })
         
-        # Convert consolidated dictionaries to sorted lists by relevance weight (descending)
-        return {
-            "a": sorted(list(relevant_nodes_ab["a"].values()), key=lambda x: 1 / x["weight"]),
-            "b": sorted(list(relevant_nodes_ab["b"].values()), key=lambda x: 1 / x["weight"])
-        }
+        # Return list of relevant nodes
+        return relevant_nodes_ab
 
     def create_graph(self, coefficient: Literal["ai", "ii"]) -> str:
         """

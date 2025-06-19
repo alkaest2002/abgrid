@@ -256,18 +256,13 @@ class ABGridData:
             "group", group_filepath
         )
 
-        # Extract group number from group filename (assumes format ending with digits)
-        try:
-            group_number = int(re.search(r'(\d+)$', group_filepath.stem).group(0))
-        
-        except (AttributeError, ValueError):
-            # Fallback: use filename stem if no trailing digits found
-            group_number = group_filepath.stem
-        
         # Return error if group data loading failed
         if group_data is None:
             error_message = self.pydantic_errors_messages(group_validation_errors or [])
             return None, error_message
+        
+        # Extract group number from group filename (assumes format ending with digits)
+        group_number = int(re.search(r'(\d+)$', group_filepath.stem).group(0))
 
         # Initialize SNA analysis class
         abgrid_sna = ABGridSna()
@@ -312,25 +307,25 @@ class ABGridData:
             ]:
                 # Cache relevant node properties for processing
                 node_id = relevant_nodes["id"]
-                metrics = relevant_nodes["metrics"]
-                values = relevant_nodes["values"]
-                ranks = relevant_nodes["ranks"]
+                metric = relevant_nodes["metric"]
+                value = relevant_nodes["value"]
+                rank = relevant_nodes["rank"]
                 weight = relevant_nodes["weight"]
 
                 # Initialize new node entry or update existing consolidated entry
                 if node_id not in relevant_nodes_ab[valence_type]:
                     relevant_nodes_ab[valence_type][node_id] = {
                         "id": node_id,
-                        "metrics": metrics,
-                        "values": values,
-                        "ranks": ranks,
+                        "metrics": [metric],
+                        "values": [value],
+                        "ranks": [rank],
                         "weight": weight
                     }
                 else:
                     # Consolidate multiple metric appearances: extend lists and sum weights
-                    relevant_nodes_ab[valence_type][node_id]["metrics"].extend(metrics)
-                    relevant_nodes_ab[valence_type][node_id]["values"].extend(values)
-                    relevant_nodes_ab[valence_type][node_id]["ranks"].extend(ranks)
+                    relevant_nodes_ab[valence_type][node_id]["metrics"].append(metric)
+                    relevant_nodes_ab[valence_type][node_id]["values"].append(value)
+                    relevant_nodes_ab[valence_type][node_id]["ranks"].append(rank)
                     relevant_nodes_ab[valence_type][node_id]["weight"] += weight
 
         # Sort consolidated relevant nodes by inverse weight (higher weight = higher relevance)
