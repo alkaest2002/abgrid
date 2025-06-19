@@ -34,7 +34,7 @@
                                 {% if metric == "st" %}
                                     {{ node["values"][loop.index0][:3] }}
                                 {% else %}
-                                    {{ metric }}
+                                    {{ metric | upper }}
                                 {% endif%}
                                 {% if not loop.last %}
                                     &middot;
