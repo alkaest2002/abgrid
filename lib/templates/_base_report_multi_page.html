@@ -2,7 +2,8 @@
 
 {% block report_multi_style %}
 <style>
-    div:has(.graph-container) + div > .table-data-legend {
+    div:has(.graph-container) + div > .table-data-legend, 
+    div:has(.relevant-nodes-container) + div > .table-data-legend {
         padding-top: 6pt;
         border-top: .75pt solid var(--base-border-color);
     }
@@ -22,7 +23,10 @@
             {{ report_macro.render_report_header(project_title, group, "relevant_nodes") }}
             {{ base_report_macro.render_relevant_nodes(relevant_nodes_ab, report_macro.render_relevant_nodes_list_label) }}
         </div>
-        {{ report_macro.render_footer(year) }}
+        <div>
+            {{ report_macro.render_table_legend(show_relevant_nodes=True) }}
+            {{ report_macro.render_footer(year) }}
+        </div>
     </div>
     <!-- NETWORK A AND B PAGES -->
     {% for (network_type, question, graph, macro_stats, micro_stats, rankings, edges_types, components) in 

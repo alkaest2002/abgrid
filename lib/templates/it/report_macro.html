@@ -160,7 +160,7 @@
     <span class="text-italic">Nessun componente di questo tipo</span>
 {% endmacro %}
 
-{% macro render_table_legend(show_sna_macro=False, show_sna_micro=False, show_sociogram_micro=False, show_sna_rankings=False, show_sna_rankings_comparison=False, show_sociogram_rankings=False, show_sna_arrows=False, show_descriptives=False) %}
+{% macro render_table_legend(show_sna_macro=False, show_sna_micro=False, show_sociogram_micro=False, show_sna_rankings=False, show_sna_rankings_comparison=False, show_sociogram_rankings=False, show_sna_arrows=False, show_descriptives=False, show_relevant_nodes=False) %}
 <div class="table-data-legend">
     {% if show_sna_macro %}
         <b>NN</b> Nodi <b>NE</b> Legami <b>NR</b> Legami reciproci <b>ND</b> Densità <b>NC</b> Centralizzazione <b>NT</b> Transitività <b>NR</b> Reciprocità 
@@ -192,6 +192,10 @@
 
     {% if show_descriptives %}
         <b>Count</b> Frequenza <b>Sum</b> Somma <b>Min</b> Valore minimo <b>Max</b> Valore massimo <b>Median</b> Mediana <b>Mean</b> Media <b>SD</b> Deviazione standard <b>CV</b> Coefficiente di variazione <b>GN</b> Coefficiente di Gini <b>SK</b> Asimmetria  <b>KT</b> Curtosi <b>P25</b> 25° percentile <b>P75</b> 75° percentile 
+    {% endif %}
+
+    {% if show_relevant_nodes %}
+         <b>AI</b> Indice di affiliazione <b>APP</b> Apprezzato <b>BT</b> Betweenness <b>CL</b> Closeness <b>DIS</b> Sgradito <b>HU</b> Hub <b>IC</b> In-Degree <b>II</b> Indice di influenza <b>ISO</b> Isolato <b>KZ</b> Katz <b>POP</b> Popolare <b>REJ</b> Rifiutato 
     {% endif %}
 </div>
 {% endmacro %}

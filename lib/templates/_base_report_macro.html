@@ -32,7 +32,7 @@
                         <div class="node-metrics">
                             {% for metric in node["metrics"] %}
                                 {% if metric == "st" %}
-                                    {{ node["values"][loop.index0][:3] }}
+                                    {{ node["values"][loop.index0][:3] | upper }}
                                 {% else %}
                                     {{ metric | upper }}
                                 {% endif%}
