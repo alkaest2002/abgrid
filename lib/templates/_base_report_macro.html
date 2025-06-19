@@ -15,14 +15,10 @@
 </div>
 {% endmacro %}
 
-{% macro render_relevant_nodes(relevant_nodes_ab, render_relevant_nodes_list_label) %}
-<div class="relevant-nodes-container">
+{% macro render_relevant_nodes(valence_type, relevant_nodes) %}
+<div class="relevant-nodes-container mt-xl">
     <div class="relevant-nodes-main">
-        {% for valence_type, relevant_nodes in relevant_nodes_ab.items() %}
-            <div class="relevant-nodes-header mt-xxl mb-xl">
-                <b>{{ render_relevant_nodes_list_label(valence_type) }}</b>
-            </div>
-            <div class="relevant-nodes-list list-{{valence_type}}">
+        <div class="relevant-nodes-list list-{{valence_type}}">
             {% for node in relevant_nodes %}
                 {% if node["metrics"] | length > 1 %}
                     <div class="node">
@@ -47,8 +43,7 @@
                     </div>
                 {% endif %}
             {% endfor %}
-            </div>
-        {% endfor %}
+        </div>
     </div>
 </div>
 {% endmacro %}

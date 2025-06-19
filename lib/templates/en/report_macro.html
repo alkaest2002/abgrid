@@ -38,14 +38,6 @@
     <span>RK</span>
 {% endmacro %}
 
-{% macro render_relevant_nodes_list_label(list_type) %}
-    {% if list_type == "a" %}
-        1. List of salient nodes with functional characteristics
-    {% else %}
-        2. List of salient nodes with non functional characteristics
-    {% endif %}
-{% endmacro %}
-
 {% macro render_components_label(type) %}
 {% if type == "cliques" %}
     <p><b>Cliques</b></p>
