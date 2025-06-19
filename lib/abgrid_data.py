@@ -312,7 +312,7 @@ class ABGridData:
                 rank = relevant_nodes["rank"]
                 weight = relevant_nodes["weight"]
 
-                # Initialize new node entry or update existing consolidated entry
+                # Initialize new node entry
                 if node_id not in relevant_nodes_ab[valence_type]:
                     relevant_nodes_ab[valence_type][node_id] = {
                         "id": node_id,
@@ -322,7 +322,7 @@ class ABGridData:
                         "weight": weight
                     }
                 else:
-                    # Consolidate multiple metric appearances: extend lists and sum weights
+                    # Consolidate multiple node metrics
                     relevant_nodes_ab[valence_type][node_id]["metrics"].append(metric)
                     relevant_nodes_ab[valence_type][node_id]["values"].append(value)
                     relevant_nodes_ab[valence_type][node_id]["ranks"].append(rank)
