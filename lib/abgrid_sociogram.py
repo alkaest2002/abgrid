@@ -19,7 +19,6 @@ from typing import Any, List, Literal, Dict, Optional, TypedDict, Tuple, Union
 from lib import CM_TO_INCHES
 from lib.abgrid_utils import compute_descriptives, figure_to_base64_svg
 
-
 class SociogramDict(TypedDict):
     """Dictionary structure for storing sociogram analysis results."""
     macro_stats: Optional[pd.Series]
@@ -30,15 +29,6 @@ class SociogramDict(TypedDict):
     graph_ai: Optional[str]
     relevant_nodes_ab: Optional[Dict[str, List[Dict[str, Union[str, List[str], List[int], float]]]]]
 
-# Define centrality metrics used for ranking nodes
-CENTRALITY_METRICS = ["bl", "im", "ai", "ii"]
-
-# Define sociometric status categories ordered from highest to lowest social desirability
-STATUS_ORDER = [
-    "popular", "appreciated", "marginal", "ambitendent",
-    "controversial", "disliked", "rejected", "isolated"
-]
-        
 class ABGridSociogram:
     """
     Analyzes and visualizes social networks by constructing sociometric components including 
@@ -228,7 +218,10 @@ class ABGridSociogram:
         # Compute status ranking based on social desirability order
         sociogram_micro_stats["st_rank"] = (
             sociogram_micro_stats["st"]
-                .apply(lambda x: STATUS_ORDER.index(x) + 1)
+                .apply(lambda x: [
+                    "popular", "appreciated", "marginal", "ambitendent",
+                    "controversial", "disliked", "rejected", "isolated"
+                ].index(x) + 1)
         )
 
         return sociogram_micro_stats.sort_index()
@@ -417,7 +410,7 @@ class ABGridSociogram:
         sociogram_micro_stats = self.sociogram["micro_stats"]
         
         # Add sorted rankings for centrality metrics and status
-        for metric in [f"{m}_rank" for m in CENTRALITY_METRICS] + ["st_rank"]:
+        for metric in [f"{m}_rank" for m in ["bl", "im", "ai", "ii", "st"]]:
             rankings[metric] = sociogram_micro_stats[metric].sort_values()
         
         return rankings
