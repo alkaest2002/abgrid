@@ -34,8 +34,8 @@
     <!-- NETWORK A AND B PAGES -->
     {% for (network_type, question, graph, macro_stats, micro_stats, rankings, edges_types, components) in 
         [
-            ("A", question_a, sna.graph_a, sna.macro_stats_a, sna.micro_stats_a, sna.rankings_a, sna.edges_types_a, sna.components_a), 
-            ("B", question_b, sna.graph_b, sna.macro_stats_b, sna.micro_stats_b, sna.rankings_b, sna.edges_types_b, sna.components_b)
+            ("a", question_a, sna.graph_a, sna.macro_stats_a, sna.micro_stats_a, sna.rankings_a, sna.edges_types_a, sna.components_a), 
+            ("b", question_b, sna.graph_b, sna.macro_stats_b, sna.micro_stats_b, sna.rankings_b, sna.edges_types_b, sna.components_b)
         ] 
     %}
         <!-- SNA GRAPH -->
@@ -107,7 +107,7 @@
                 {{ report_macro.render_disclaimer() }}
                 {{ report_macro.render_report_header(project_title, group, "sna_components") }}
                 {{ base_report_macro.render_question(network_type, question) }}
-                {{ base_report_macro.render_sna_components(components, report_macro.render_components_label, report_macro.render_components_empty_list) }}
+                {{ base_report_macro.render_sna_components(network_type, components, report_macro.render_components_label, report_macro.render_components_empty_list) }}
             </div>
             {{ report_macro.render_footer(year) }}
         </div>
@@ -129,11 +129,11 @@
             {{ base_macro.render_logo() }}
             {{ report_macro.render_disclaimer() }}
             {{ report_macro.render_report_header(project_title, group, "sna_descriptives") }}
-            {{ base_report_macro.render_question("A", question_a) }}
+            {{ base_report_macro.render_question("a", question_a) }}
             {{ base_report_macro.render_sna_macro_statistics(sna.macro_stats_a) }}
             {{ base_report_macro.render_descriptives(sna.descriptives_a, report_macro.render_sna_measures_label) }}
             {{ report_macro.render_table_legend(show_sna_macro=True, show_descriptives=True) }}
-            {{ base_report_macro.render_question("B", question_b) }}
+            {{ base_report_macro.render_question("b", question_b) }}
             {{ base_report_macro.render_sna_macro_statistics(sna.macro_stats_b) }}
             {{ base_report_macro.render_descriptives(sna.descriptives_b, report_macro.render_sna_measures_label) }}
             {{ report_macro.render_table_legend(show_sna_macro=True, show_descriptives=True) }}

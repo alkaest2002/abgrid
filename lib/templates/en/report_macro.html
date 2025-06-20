@@ -99,35 +99,35 @@
 {% macro render_edges_types_label(network_type, edge_type, edges_length) %}
     {% if edge_type == "type_i" %}
         <p><b>Non reciprocal edges</b></p>
-        {% if network_type == "A" %}
+        {% if network_type == "a" %}
             <p class="text-dimmed text-small mt-xs">X &rarr; Y in network A &middot; not Y &rarr; X in network A</p>
         {% else %}
             <p class="text-dimmed text-small mt-xs">X &rarr; Y in network B &middot; not Y &rarr; X in network B</p>
         {% endif %}
     {% elif edge_type == "type_ii" %}
         <p><b>Reciprocal edges</b></p>
-        {% if network_type == "A" %}
+        {% if network_type == "a" %}
             <p class="text-dimmed text-small mt-xs">X &rarr; Y in network A &middot; Y &rarr; X in network A</p>
         {% else %}
             <p class="text-dimmed text-small mt-xs">X &rarr; Y in network B &middot; Y &rarr; X in network B</p>
         {% endif %}
     {% elif edge_type == "type_iii" %}
         <p><b>Half symmetrical edges</b></p>
-        {% if network_type == "A" %}
+        {% if network_type == "a" %}
             <p class="text-dimmed text-small mt-xs">X &rarr; Y in network A &middot; X &rarr; Y in network B</p>
         {% else %}
             <p class="text-dimmed text-small mt-xs">X &rarr; Y in network B &middot; X &rarr; Y in network A</p>
         {% endif %}
     {% elif edge_type == "type_iv" %}
         <p><b>Reversed half symmetrical edges</b></p>
-        {% if network_type == "A" %}
+        {% if network_type == "a" %}
             <p class="text-dimmed text-small mt-xs">X &rarr; Y in network A &middot; Y &rarr; X in network B</p>
         {% else %}
             <p class="text-dimmed text-small mt-xs">X &rarr; Y in network B &middot; Y &rarr; X in network A</p>
         {% endif %}
     {% elif edge_type == "type_v" %}
         <p><b>Full symmetrical edges</b></p>
-        {% if network_type == "A" %}
+        {% if network_type == "a" %}
             <p class="text-dimmed text-small mt-xs">X &rarr; Y, Y &rarr; X in network A &middot; X &rarr; Y, Y &rarr; X in network B</p>
         {% else %}
             <p class="text-dimmed text-small mt-xs">X &rarr; Y, Y &rarr; X in network B &middot; X &rarr; Y, Y &rarr; X in network A</p>

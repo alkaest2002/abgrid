@@ -198,7 +198,7 @@
 </div>
 {% endmacro %}
 
-{% macro render_sna_components(all_components, render_components_label, render_components_empty_list) %}
+{% macro render_sna_components(network_type, all_components, render_components_label, render_components_empty_list) %}
 <div class="sna-components-container mt-lg">
     {% for type, components in all_components.items() %}
         <div class="sna-components-main">
@@ -209,7 +209,7 @@
             <div class="sna-components-list mt-md mb-lg">
                 {% if  components | length > 0 %}
                     {% for component in components %}
-                        <div class="sna-component">
+                        <div class="sna-component sna-component-{{network_type}}">
                             {% if not current.length or current.length != (component | length) %}
                                 {% set current.length = component | length %}
                                 <span class="sna-component-length">{{ current.length }}</span>

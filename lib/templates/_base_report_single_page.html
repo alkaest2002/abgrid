@@ -42,7 +42,7 @@
             {{ report_macro.render_report_header(project_title, group, "sna_ranks") }}
             <div class="single-report-content">
                 {% for (network_type, question, graph, network_data_macro_level, network_data_micro_level) in 
-                    [("A", question_a, sna.graph_a, sna.macro_stats_a, sna.micro_stats_a), ("B", question_b, sna.graph_b, sna.macro_stats_b, sna.micro_stats_b)] %}
+                    [("a", question_a, sna.graph_a, sna.macro_stats_a, sna.micro_stats_a), ("b", question_b, sna.graph_b, sna.macro_stats_b, sna.micro_stats_b)] %}
                     <div>
                         {{ base_report_macro.render_question(network_type, question) }}
                         {{ base_report_macro.render_graph(graph) }}
@@ -64,7 +64,7 @@
             {{ report_macro.render_report_header(project_title, group, "sna_raw_scores") }}
             <div class="single-report-content">
                 {% for (network_type, question, graph, network_data_macro_level, network_data_micro_level) in 
-                    [("A", question_a, sna.graph_a, sna.macro_stats_a, sna.micro_stats_a), ("B", question_b, sna.graph_b, sna.macro_stats_b, sna.micro_stats_b)] %}
+                    [("a", question_a, sna.graph_a, sna.macro_stats_a, sna.micro_stats_a), ("b", question_b, sna.graph_b, sna.macro_stats_b, sna.micro_stats_b)] %}
                     <div>
                         {{ base_report_macro.render_question(network_type, question) }}
                         {{ base_report_macro.render_graph(graph) }}
