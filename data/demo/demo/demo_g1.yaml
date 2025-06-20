@@ -1,19 +1,97 @@
+##################################################################################
+#
+# DO NOT CHANGE THE FOLLOWING DATA
+#
+##################################################################################
+# group id
 group: 1
+##################################################################################
+#
+# CHANGE THE FOLLOWING DATA TO SUITE YOUR NEEDS
+#
+##################################################################################
+# add choices of each participant
+# follow strictly this format
+# es. - A: B,C
 choices_a:
-  - A: F,H
-  - B: F,H
-  - C: 
-  - D: A,G
-  - E: A,D
-  - F: A,D
-  - G: A,E
-  - H: A,F
+  - A: N,P,e
+  - B: F,Y,f
+  - C: M,P,V
+  - D: a,d,l
+  - E: C,G,M
+  - F: B,I,N
+  - G: M,f,i
+  - H: C,J,Q
+  - I: F,N,W
+  - J: Y,k,l
+  - K: P,R,h
+  - L: 
+  - M: E,G,j
+  - N: P,V,e
+  - O: A,i
+  - P: A,Z,e
+  - Q: P,V,f
+  - R: N,S,d
+  - S: P,R,V
+  - T: P,b,h
+  - U: 
+  - V: 
+  - W: E,F,I
+  - X: P,V,g
+  - Y: J,i,l
+  - Z: C,e,h
+  - a: D
+  - b: E,M,j
+  - c: F,R,d
+  - d: R,Y,l
+  - e: A,P,V
+  - f: G,Q,Y
+  - g: E,M,X
+  - h: Y,Z,i
+  - i: M,R,h
+  - j: E,M,b
+  - k: J,Y,l
+  - l: J,Q,Y
+
+# add rejects of each participant
+# follow strictly this format
+# es. - A: B,C
 choices_b:
-  - A: B,D
-  - B: D,G
-  - C: B,E
-  - D: B,H
-  - E: B,C
-  - F: C,E
-  - G: B,C
-  - H: C,D
+  - A: H,L,T
+  - B: O,T,g
+  - C: O,W,a
+  - D: 
+  - E: 
+  - F: H,L,T
+  - G: A
+  - H: O,S,W
+  - I: H
+  - J: A,O,R
+  - K: H,U,a
+  - L: 
+  - M: H,O,X
+  - N: 
+  - O: H,Q,U
+  - P: H,a,d
+  - Q: P,V,f
+  - R: 
+  - S: H,O,T
+  - T: O
+  - U: 
+  - V: 
+  - W: H,K
+  - X: H,a
+  - Y: K,O,P
+  - Z: 
+  - a: K,T,g
+  - b: H,W,a
+  - c: H,L
+  - d: 
+  - e: H,O,a
+  - f: H,a
+  - g: 
+  - h: O
+  - i: 
+  - j: 
+  - k: O
+  - l: O,a
