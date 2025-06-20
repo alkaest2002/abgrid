@@ -470,29 +470,27 @@ class ABGridSna:
 
         return rankings_ab
     
-    def compute_relevant_nodes_ab(self, threshold: float = 0.05) -> Dict[str, List[Dict[str, Union[str, List[str], List[int], float]]]]:
+    def compute_relevant_nodes_ab(self, threshold: float = 0.05) -> Dict[str, List[Dict[str, Union[str, int, float]]]]:
         """
         Identify relevant nodes with low rank values across both networks.
         
-        Finds nodes that rank highly (low rank values) in various centrality measures
-        and consolidates multiple high rankings for the same node into single entries.
+        Finds nodes that rank highly (low rank values) in various centrality measures.
         
         Args:
             threshold (float): Percentile threshold for selecting top nodes (default: 0.05 for top 5%)
             
         Returns:
-            Dict[str, List[Dict[str, Union[str, List[str], List[int], float]]]]: 
+            Dict[str, List[Dict[str, Union[str, int, float]]]]: 
                 Dictionary with keys 'a' and 'b', each containing a list of relevant node entries.
                 Each entry is a dictionary with:
                 - 'id': node identifier (str)
-                - 'metric': list of metric names where this node ranks highly (List[str])
-                - 'rank': list of rank positions for each metric (List[int])
-                - 'weight': cumulative weight score based on all high rankings (float)
+                - 'metric': metric nane (str)
+                - 'rank': re-computed rank position (int)
+                - 'weight': weight (float)
 
         Note:
             - Lower rank values indicate higher centrality (rank 1 = most central)
             - Weight calculation uses formula: 10.0 / (normalized_rank ** 0.8)
-            - Nodes appearing in multiple metrics have their weights summed
             - Only nodes ranking in the top threshold percentile are included
 
         Raises:
