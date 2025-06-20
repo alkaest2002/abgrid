@@ -51,11 +51,11 @@ class SNADict(TypedDict):
 
 class ABGridSna:
     """
-    A comprehensive social network analysis class for directed graphs.
+    A class for comprehensive social network analysis on directed graphs.
     
-    This class provides functionality to analyze two directed networks (A and B) simultaneously,
-    computing various network metrics, statistics, and visualizations. It supports comparative
-    analysis between the two networks and generates detailed reports on network structure,
+    Provides functionality to analyze two directed networks (A and B) simultaneously,
+    computing various network metrics, statistics, and visualizations. Supports comparative
+    analysis between the two networks, generating reports on network structure,
     centrality measures, and graph properties.
     
     Attributes:
@@ -66,11 +66,11 @@ class ABGridSna:
         """
         Initialize the social network analysis object.
         
-        This initialization sets up the internal dictionary for storing SNA data
+        Sets up an internal dictionary for storing SNA data
         for both networks A and B, with all values initially set to None.
         """
         
-        # Init SNA dict with all possible keys
+        # Initialize SNA dict with all possible keys
         self.sna: SNADict = {
             "nodes_a": None,
             "nodes_b": None,
@@ -107,7 +107,7 @@ class ABGridSna:
         """
         Compute and store comprehensive network analysis for two directed networks.
 
-        This method performs a complete social network analysis on both input networks,
+        Performs a complete social network analysis on input networks,
         including graph construction, statistical analysis, centrality measures, 
         component detection, and visualization generation.
 
@@ -116,10 +116,10 @@ class ABGridSna:
                 Edge data for network A. Each dictionary represents edges from a source node,
                 with keys as source nodes and values as comma-separated target nodes.
             packed_edges_b (List[Dict[str, str]]): 
-                Edge data for network B. Structure should mirror that of `packed_edges_a`.
+                Edge data for network B. Structure mirrors `packed_edges_a`.
 
         Returns:
-            SNADict: A comprehensive dictionary containing all network analysis results
+            SNADict: A dictionary containing all network analysis results
                      including nodes, edges, adjacency matrices, statistics, rankings,
                      components, and visualization data for both networks.
 
@@ -131,13 +131,13 @@ class ABGridSna:
             - Creates SVG visualizations of both networks
         """
         
-        # Store network a and b nodes and edges
+        # Store network A and B nodes and edges
         for network_type, packed_edges in [("a", packed_edges_a), ("b", packed_edges_b)]:
             self.sna[f"nodes_{network_type}"] = self.unpack_network_nodes(packed_edges)
             self.sna[f"edges_{network_type}"] = self.unpack_network_edges(packed_edges)
             self.sna[f"network_{network_type}"] = nx.DiGraph(self.sna[f"edges_{network_type}"])
 
-        # Add isolated nodes to network a and b and 
+        # Add isolated nodes to networks A and B and 
         # store nodes layout locations
         for network_type, network, nodes in [
             ("a", self.sna["network_a"], self.sna["nodes_a"]), 
@@ -159,7 +159,7 @@ class ABGridSna:
             # Add current network adjacency matrix
             self.sna[f"adjacency_{network_type}"] = nx.to_pandas_adjacency(network, nodelist=nodes)
                     
-        # Store edges_types, components, macro stats, micro stats, descriptives, rankings and graphs
+        # Store edge types, components, macro stats, micro stats, descriptives, rankings and graphs
         for network_type in ("a", "b"):
             self.sna[f"edges_types_{network_type}"] = self.compute_edges_types(network_type)
             self.sna[f"components_{network_type}"] = self.compute_components(network_type)
@@ -187,7 +187,7 @@ class ABGridSna:
         Args:
             packed_edges (List[Dict[str, str]]): 
                 List of dictionaries where keys are source nodes and values are
-                comma-separated strings of target nodes. None values are handled safely.
+                comma-separated strings of target nodes. None values are safely handled.
 
         Returns:
             List[Tuple[str, str]]: 
@@ -438,7 +438,7 @@ class ABGridSna:
         """
         Compute combined rankings from both networks A and B.
 
-        This function merges the rankings from both networks into side-by-side DataFrames
+        Merges the rankings from both networks into side-by-side DataFrames
         for easy comparison of node rankings across the two networks.
 
         Returns:
@@ -455,7 +455,7 @@ class ABGridSna:
         if self.sna["rankings_a"] is None or self.sna["rankings_b"] is None:
             raise ValueError("Rankings for network a and b are not available.")
         
-        # Get the rankings from network a and b
+        # Get the rankings from network A and B
         rankings_a = self.sna["rankings_a"]
         rankings_b = self.sna["rankings_b"]
 
@@ -474,7 +474,7 @@ class ABGridSna:
         """
         Identify relevant nodes with low rank values across both networks.
         
-        This method finds nodes that rank highly (low rank values) in various centrality measures
+        Finds nodes that rank highly (low rank values) in various centrality measures
         and consolidates multiple high rankings for the same node into single entries.
         
         Args:
@@ -511,13 +511,13 @@ class ABGridSna:
         # Init dict with empty sub-dicts for easier node consolidation
         relevant_nodes_ab = {"a": [], "b": []}
         
-        # Loop through a and b rankings
+        # Loop through A and B rankings
         for valence_key, rankings in [("a", rankings_a), ("b", rankings_b)]:
             
             # Loop through metrics and associated ranks
             for metric_rank_name, ranks_series in rankings.items():
                 
-                # clean metric name
+                # Clean metric name
                 metric_name = re.sub("_rank", "", metric_rank_name)
                
                 # Get threshold value for this metric
@@ -560,8 +560,7 @@ class ABGridSna:
         Classify edges into five types based on reciprocity and cross-network relationships.
 
         Analyzes edge patterns within the specified network and compares them with
-        the reference network to classify edges into five distinct types based on
-        reciprocity and symmetry patterns.
+        the reference network to classify edges into five distinct types.
 
         Args:
             network_type (Literal["a", "b"]):
@@ -681,7 +680,7 @@ class ABGridSna:
             "weakly_connected": pd.Series([ "".join(sorted(list(c))) for c in sorted(nx.weakly_connected_components(network), key=len, reverse=True) if len(c) > 2 ]),
         }
 
-        # return components
+        # Return components
         return components
 
     def create_graph(self, network_type: Literal["a","b"]) -> str:
@@ -720,9 +719,6 @@ class ABGridSna:
 
         # Get network layout locations
         loc = self.sna[f"loc_{network_type}"]
-
-        # Get network micro_stats (currently unused but available for future use)
-        micro_stats = self.sna[f"micro_stats_{network_type}"]
 
         # Set color based on graph type (a or b)
         color = A_COLOR if network_type == "a" else B_COLOR
