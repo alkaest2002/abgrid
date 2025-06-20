@@ -378,8 +378,12 @@ class ABGridSociogram:
         if self.sociogram["micro_stats"] is None:
             raise AttributeError("Micro stats must be computed before descriptives")
             
-        # Select only numeric columns for statistical aggregation
-        sociogram_numeric_columns = self.sociogram["micro_stats"].select_dtypes(np.number)
+        # Select only non-rank numeric columns for statistical aggregation
+        sociogram_numeric_columns = (
+            self.sociogram["micro_stats"]
+                .select_dtypes(np.number)
+                .filter(regex=r"^(?!.*_rank$).*")
+        )
         
         return compute_descriptives(sociogram_numeric_columns)
         
