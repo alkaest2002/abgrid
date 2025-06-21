@@ -220,7 +220,7 @@ class ABGridSociogram:
             sociogram_micro_stats["st"]
                 .apply(lambda x: [
                     "popular", "appreciated", "marginal", "ambitendent",
-                    "controversial", "disliked", "rejected", "isolated"
+                    "controversial", "disliked", "isolated", "rejected"
                 ].index(x) + 1)
         )
 
