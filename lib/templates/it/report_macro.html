@@ -152,43 +152,61 @@
     <span class="text-italic">Nessun componente di questo tipo</span>
 {% endmacro %}
 
-{% macro render_table_legend(show_sna_macro=False, show_sna_micro=False, show_sociogram_micro=False, show_sna_rankings=False, show_sna_rankings_comparison=False, show_sociogram_rankings=False, show_sna_arrows=False, show_descriptives=False, show_relevant_nodes=False) %}
-<div class="table-data-legend">
-    {% if show_sna_macro %}
-        <b>NN</b> Nodi <b>NE</b> Legami <b>NR</b> Legami reciproci <b>ND</b> Densità <b>NC</b> Centralizzazione <b>NT</b> Transitività <b>NR</b> Reciprocità 
-    {% endif %}
-    
-    {% if show_sna_micro %}
-        <b>IC</b> In-Degree <b>KZ</b> Katz <b>BT</b> Betweenness <b>CL</b> Closeness <b>HU</b> Hub 
-    {% endif %}
-
-    {% if show_sna_rankings %}
-        <b>RK</b> Rango  <b>IC</b> In-Degree <b>KZ</b> Katz <b>BT</b> Betweenness <b>CL</b> Closeness <b>HU</b> Hub 
-    {% endif %}
-
-    {% if show_sna_rankings_comparison %}
-        <b>NO</b> Nodo  <b>IC</b> In-Degree <b>KZ</b> Katz <b>BT</b> Betweenness <b>CL</b> Closeness <b>HU</b> Hub 
-    {% endif %}
-
-    {% if show_sociogram_micro %}
-        <b>RP</b> Preferenze ricevute <b>RR</b> Rifiuti ricevuti <b>GP</b> Preferenze date <b>GR</b> Rifiuti dati <b>MP</b> Preferenze reciproche <b>MR</b> Rifiuti reciproci <b>BL</b> Saldo <b>OR</b> Orientamento <b>IM</b> Impatto <b>AI</b> Indice di affiliazione <b>II</b> Indice di influenza <b>ST</b> Status sociometrico 
-    {% endif %}
-    
-    {% if show_sociogram_rankings %}
-        <b>RP</b> Preferenze ricevute <b>RR</b> Rifiuti ricevuti <b>GP</b> Preferenze date <b>GR</b> Rifiuti dati <b>BL</b> Saldo <b>IM</b> Impatto <b>AI</b> Indice di affiliazione <b>II</b> Indice di influenza 
-    {% endif %}
-
-    {% if show_sna_arrows %}
-        <b>ND</b> No In-Degree (&larr; ) No Out-Degree (&rarr;) No In o Out-Degree (&rlarr;) 
-    {% endif %}
-
-    {% if show_descriptives %}
-        <b>Count</b> Frequenza <b>Sum</b> Somma <b>Min</b> Valore minimo <b>Max</b> Valore massimo <b>Median</b> Mediana <b>Mean</b> Media <b>SD</b> Deviazione standard <b>CV</b> Coefficiente di variazione <b>GN</b> Coefficiente di Gini <b>SK</b> Asimmetria  <b>KT</b> Curtosi <b>P25</b> 25° percentile <b>P75</b> 75° percentile 
-    {% endif %}
-
-    {% if show_relevant_nodes %}
-         <b>AI</b> Indice di affiliazione <b>APP</b> Apprezzato <b>BT</b> Betweenness <b>CL</b> Closeness <b>DIS</b> Sgradito <b>HU</b> Hub <b>IC</b> In-Degree <b>II</b> Indice di influenza <b>ISO</b> Isolato <b>KZ</b> Katz <b>POP</b> Popolare <b>REJ</b> Rifiutato 
-    {% endif %}
+{% macro render_data_legend(metrics_list=[]) %}
+{% set definitions = {
+    'ai': 'Indice di Affiliazione',
+    'app': 'Apprezzato',
+    'bl': 'Bilancio',
+    'bt': 'Centralità Betweenness',
+    'cl': 'Centralità Closeness',
+    'count': 'Frequenza',
+    'cv': 'Coefficiente di Variazione',
+    'dis': 'Sgradito',
+    'gn': 'Coefficiente di Gini',
+    'gp': 'Preferenze Date',
+    'gr': 'Rifiuti Dati',
+    'hu': 'Centralità Hub',
+    'ic': 'Centralità In-Degree',
+    'ii': 'Indice di Influenza',
+    'im': 'Impatto',
+    'iso': 'Isolato',
+    'kt': 'Curtosi',
+    'kz': 'Centralità Katz',
+    'max': 'Valore Massimo',
+    'mean': 'Media',
+    'median': 'Mediana',
+    'min': 'Valore Minimo',
+    'mp': 'Preferenze Reciproche',
+    'mr': 'Rifiuti Reciproci',
+    'nc': 'Centralizzazione',
+    'nd': 'Nessun legame in entrata (&larr;) Nessun legame in uscita (&rarr;) Nessun legame in entrata o uscita (&rlarr;)',
+    'ne': 'Numero di legami',
+    'nn': 'Numero di nodi',
+    'no': 'Nodo',
+    'nr': 'Reciprocità',
+    'nt': 'Transitività',
+    'or': 'Orientamento',
+    'p25': '25° Percentile',
+    'p75': '75° Percentile',
+    'pop': 'Popolare',
+    'pr': 'Centralità PageRank',
+    're': 'Numero di legami reciproci',
+    'rej': 'Rifiutato',
+    'rk': 'Rango',
+    'rp': 'Preferenze Ricevute',
+    'rr': 'Rifiuti Ricevuti',
+    'sd': 'Deviazione Standard',
+    'sk': 'Asimmetria',
+    'st': 'Status Sociometrico',
+    'sum': 'Somma'
+} %}
+<div class="data-legend">
+    <span class="text-italic">Definizioni in ordine alfabetico:</span>
+    {% for metric in metrics_list %}
+        {% if definitions[metric.lower()] %}
+            <b>{{ metric | upper }}</b> {{ definitions[metric.lower()] | safe }} 
+        {% endif %}
+    {% endfor %}
 </div>
 {% endmacro %}
 
