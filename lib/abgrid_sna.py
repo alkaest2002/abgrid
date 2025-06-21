@@ -133,8 +133,8 @@ class ABGridSna:
         
         # Store network A and B nodes and edges
         for network_type, packed_edges in [("a", packed_edges_a), ("b", packed_edges_b)]:
-            self.sna[f"nodes_{network_type}"] = self.unpack_network_nodes(packed_edges)
-            self.sna[f"edges_{network_type}"] = self.unpack_network_edges(packed_edges)
+            self.sna[f"nodes_{network_type}"] = self._unpack_network_nodes(packed_edges)
+            self.sna[f"edges_{network_type}"] = self._unpack_network_edges(packed_edges)
             self.sna[f"network_{network_type}"] = nx.DiGraph(self.sna[f"edges_{network_type}"])
 
         # Add isolated nodes to networks A and B and 
@@ -151,7 +151,7 @@ class ABGridSna:
             loc = nx.kamada_kawai_layout(network)
             
             # Update loc to push isolated nodes away from other nodes
-            updated_loc = self.handle_isolated_nodes(network, loc)
+            updated_loc = self._handle_isolated_nodes(network, loc)
 
             # Store current network layout locations
             self.sna[f"loc_{network_type}"] = updated_loc
@@ -176,58 +176,6 @@ class ABGridSna:
         self.sna["relevant_nodes_ab"] = self.compute_relevant_nodes_ab()
 
         return self.sna
-
-    def unpack_network_edges(self, packed_edges: List[Dict[str, str]]) -> List[Tuple[str, str]]:
-        """
-        Unpack edge dictionaries into a list of directed edge tuples.
-
-        Takes a list of dictionaries where each dictionary represents outgoing edges
-        from source nodes, and converts them into a flat list of (source, target) tuples.
-
-        Args:
-            packed_edges (List[Dict[str, str]]): 
-                List of dictionaries where keys are source nodes and values are
-                comma-separated strings of target nodes. None values are safely handled.
-
-        Returns:
-            List[Tuple[str, str]]: 
-                Flat list of directed edge tuples (source, target).
-
-        Example:
-            >>> packed_edges = [{"A": "B,C"}, {"B": "C"}]
-            >>> unpack_network_edges(packed_edges)
-            [("A", "B"), ("A", "C"), ("B", "C")]
-        """
-        return reduce(
-            lambda acc, itr: [
-                *acc,
-                *[
-                    (node_from, node_to) for node_from, edges in itr.items() if edges is not None
-                        for node_to in edges.split(",")
-                ]
-            ],
-            packed_edges,
-            []
-        )
-        
-    def unpack_network_nodes(self, packed_edges: List[Dict[str, str]]) -> List[str]:
-        """
-        Extract unique source nodes from packed edge dictionaries.
-
-        Args:
-            packed_edges (List[Dict[str, str]]): 
-                List of dictionaries where keys represent source nodes.
-
-        Returns:
-            List[str]: 
-                Sorted list of unique source node identifiers.
-
-        Example:
-            >>> packed_edges = [{"A": "B,C"}, {"B": "C"}, {"A": "D"}]
-            >>> unpack_network_nodes(packed_edges)
-            ["A", "B"]
-        """
-        return sorted([node for node_edges in packed_edges for node in node_edges.keys()])
     
     def compute_macro_stats(self, network_type: Literal["a", "b"]) -> pd.Series:
         """
@@ -272,7 +220,7 @@ class ABGridSna:
         network_edges = network.number_of_edges()
         network_edges_reciprocal = edges_types["type_ii"].shape[0]
         network_density = nx.density(network)
-        network_centralization = self.compute_network_centralization(network.to_undirected())
+        network_centralization = self._compute_network_centralization(network.to_undirected())
         network_transitivity = nx.transitivity(network)
         network_reciprocity = nx.overall_reciprocity(network)
         
@@ -759,8 +707,60 @@ class ABGridSna:
         )
         
         return figure_to_base64_svg(fig)
-    
-    def handle_isolated_nodes(self, network: nx.DiGraph, loc: Dict[str, np.ndarray]) -> Dict[str, np.ndarray]:
+
+    def _unpack_network_edges(self, packed_edges: List[Dict[str, str]]) -> List[Tuple[str, str]]:
+        """
+        Unpack edge dictionaries into a list of directed edge tuples.
+
+        Takes a list of dictionaries where each dictionary represents outgoing edges
+        from source nodes, and converts them into a flat list of (source, target) tuples.
+
+        Args:
+            packed_edges (List[Dict[str, str]]): 
+                List of dictionaries where keys are source nodes and values are
+                comma-separated strings of target nodes. None values are safely handled.
+
+        Returns:
+            List[Tuple[str, str]]: 
+                Flat list of directed edge tuples (source, target).
+
+        Example:
+            >>> packed_edges = [{"A": "B,C"}, {"B": "C"}]
+            >>> _unpack_network_edges(packed_edges)
+            [("A", "B"), ("A", "C"), ("B", "C")]
+        """
+        return reduce(
+            lambda acc, itr: [
+                *acc,
+                *[
+                    (node_from, node_to) for node_from, edges in itr.items() if edges is not None
+                        for node_to in edges.split(",")
+                ]
+            ],
+            packed_edges,
+            []
+        )
+        
+    def _unpack_network_nodes(self, packed_edges: List[Dict[str, str]]) -> List[str]:
+        """
+        Extract unique source nodes from packed edge dictionaries.
+
+        Args:
+            packed_edges (List[Dict[str, str]]): 
+                List of dictionaries where keys represent source nodes.
+
+        Returns:
+            List[str]: 
+                Sorted list of unique source node identifiers.
+
+        Example:
+            >>> packed_edges = [{"A": "B,C"}, {"B": "C"}, {"A": "D"}]
+            >>> _unpack_network_nodes(packed_edges)
+            ["A", "B"]
+        """
+        return sorted([node for node_edges in packed_edges for node in node_edges.keys()])
+
+    def _handle_isolated_nodes(self, network: nx.DiGraph, loc: Dict[str, np.ndarray]) -> Dict[str, np.ndarray]:
         """
         Position isolated nodes at the periphery of the network layout.
 
@@ -853,7 +853,7 @@ class ABGridSna:
         except StopIteration:
             return loc
         
-    def compute_network_centralization(self, network: nx.Graph) -> float:
+    def _compute_network_centralization(self, network: nx.Graph) -> float:
         """
         Calculate the degree centralization of an undirected network.
 
