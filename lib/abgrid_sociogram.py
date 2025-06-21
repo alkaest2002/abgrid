@@ -249,7 +249,7 @@ class ABGridSociogram:
         sociogram_numeric_columns = (
             self.sociogram["micro_stats"]
                 .select_dtypes(np.number)
-                .filter(regex=r"^.*(?!.*_rank$)")
+                .filter(regex=r"^.*(?<!_rank)$")
         )
         
         return compute_descriptives(sociogram_numeric_columns)
