@@ -22,7 +22,6 @@ from lib.abgrid_yaml import ABGridYAML
 from lib.abgrid_data import ABGridData
 from lib.abgrid_utils import notify_decorator, to_json_serializable
 
-
 class ABGridMain:
     """
     Main class for managing project initialization, file generation, and report rendering 
@@ -187,7 +186,7 @@ class ABGridMain:
             print(f"Generating answersheet: {group_file.name}")
             
             # Persist answersheet to disk
-            self.render_pdf("answersheet", sheets_data, group_file.stem, language)
+            self._render_pdf("answersheet", sheets_data, group_file.stem, language)
 
     @notify_decorator("generate AB-Grid reports")
     def generate_reports(self, language: str, with_sociogram: bool = False) -> None:
@@ -223,7 +222,7 @@ class ABGridMain:
                 raise ValueError(report_errors)
             
             # Persist current group's report to disk
-            self.render_pdf("report", {**report_data, "with_sociogram": with_sociogram}, group_file.stem, language)
+            self._render_pdf("report", {**report_data, "with_sociogram": with_sociogram}, group_file.stem, language)
         
             # Add current group data to the collection, omitting graphics for JSON
             all_data[group_file.stem] = to_json_serializable(
@@ -256,7 +255,7 @@ class ABGridMain:
         with open(self.abgrid_data.project_folderpath / f"{self.abgrid_data.project}_data.json", "w") as fout:
             json.dump(all_data, fout, indent=4)
 
-    def render_pdf(
+    def _render_pdf(
         self, 
         doc_type: Literal["report", "answersheet"], 
         doc_data: Dict[str, Any], 
