@@ -11,14 +11,13 @@ The code is part of the AB-Grid project and is licensed under the MIT License.
 
 import re
 import datetime
+
 from pathlib import Path
 from copy import deepcopy
 from typing import Any, Dict, List, Optional, Protocol, Tuple, Union, TypedDict
 
-from lib.abgrid_sna import ABGridSna
-from lib.abgrid_sociogram import ABGridSociogram
-from lib.abgrid_sna import SNADict
-from lib.abgrid_sociogram import SociogramDict
+from lib.abgrid_sna import SNADict, ABGridSna
+from lib.abgrid_sociogram import SociogramDict, ABGridSociogram
 
 class ReportData(TypedDict, total=False):
     """
@@ -38,7 +37,6 @@ class ReportData(TypedDict, total=False):
     sociogram: SociogramDict  # Optional field, only present when with_sociogram=True
     relevant_nodes_ab: Dict[str, List[Dict[str, Any]]]
 
-
 class DataLoader(Protocol):
     """Protocol defining the interface for data loading utilities."""
     
@@ -56,7 +54,6 @@ class DataLoader(Protocol):
             a list of error dictionaries.
         """
         ...
-
 
 class ABGridData:
     """
@@ -115,31 +112,6 @@ class ABGridData:
             # Fallback to alphabetical sorting if numerical extraction fails
             self.groups_filepaths = sorted(groups_filepaths)
 
-    def pydantic_errors_messages(self, errors: List[Dict[str, Any]]) -> str:
-        """
-        Format Pydantic validation error messages into a readable string.
-
-        This method processes validation errors from Pydantic models and formats
-        them into a user-friendly string representation with consistent prefixing.
-
-        Args:
-            errors: A list of error dictionaries from Pydantic validation,
-                where each dictionary contains at least a 'msg' key with the
-                error message
-
-        Returns:
-            A formatted string with each error message prefixed by "-->" and
-            separated by newlines. Returns empty string if no errors provided.
-            
-        Example:
-            >>> errors = [{'msg': 'field required'}, {'msg': 'invalid value'}]
-            >>> formatter.pydantic_errors_messages(errors)
-            '--> field required\n--> invalid value'
-        """
-        if not errors:
-            return ""
-        return "\n".join([f"--> {error.get('msg', 'Unknown error')}" for error in errors])
-
     def get_project_data(self) -> Tuple[Optional[Dict[str, Any]], Optional[str]]:
         """
         Load and validate project configuration data.
@@ -166,7 +138,7 @@ class ABGridData:
         if project_data is not None:
             return project_data, None
         else:
-            error_message = self.pydantic_errors_messages(validation_errors or [])
+            error_message = self._get_pydantic_errors_messages(validation_errors or [])
             return None, error_message
 
     def get_group_data(self, group_filepath: Path) -> Tuple[Optional[Dict[str, Any]], Optional[str]]:
@@ -198,7 +170,7 @@ class ABGridData:
         if group_data is not None:
             return group_data, None
         else:
-            error_message = self.pydantic_errors_messages(validation_errors or [])
+            error_message = self._get_pydantic_errors_messages(validation_errors or [])
             return None, error_message
         
     def get_report_data(
@@ -248,7 +220,7 @@ class ABGridData:
 
         # Return error if project data loading failed
         if project_data is None:
-            error_message = self.pydantic_errors_messages(project_validation_errors or [])
+            error_message = self._get_pydantic_errors_messages(project_validation_errors or [])
             return None, error_message
         
         # Load and validate group data
@@ -258,7 +230,7 @@ class ABGridData:
 
         # Return error if group data loading failed
         if group_data is None:
-            error_message = self.pydantic_errors_messages(group_validation_errors or [])
+            error_message = self._get_pydantic_errors_messages(group_validation_errors or [])
             return None, error_message
         
         # Extract group number from group filename (assumes format ending with digits)
@@ -335,3 +307,28 @@ class ABGridData:
         } 
         
         return report_data, None
+
+    def _get_pydantic_errors_messages(self, errors: List[Dict[str, Any]]) -> str:
+        """
+        Format Pydantic validation error messages into a readable string.
+
+        This method processes validation errors from Pydantic models and formats
+        them into a user-friendly string representation with consistent prefixing.
+
+        Args:
+            errors: A list of error dictionaries from Pydantic validation,
+                where each dictionary contains at least a 'msg' key with the
+                error message
+
+        Returns:
+            A formatted string with each error message prefixed by "-->" and
+            separated by newlines. Returns empty string if no errors provided.
+            
+        Example:
+            >>> errors = [{'msg': 'field required'}, {'msg': 'invalid value'}]
+            >>> formatter._get_pydantic_errors_messages(errors)
+            '--> field required\n--> invalid value'
+        """
+        if not errors:
+            return ""
+        return "\n".join([f"--> {error.get('msg', 'Unknown error')}" for error in errors])
