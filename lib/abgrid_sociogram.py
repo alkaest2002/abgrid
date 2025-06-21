@@ -16,6 +16,7 @@ import matplotlib.pyplot as plt
 import networkx as nx
 
 from typing import Any, List, Literal, Dict, Optional, TypedDict, Tuple, Union
+
 from lib import CM_TO_INCHES
 from lib.abgrid_utils import compute_descriptives, figure_to_base64_svg
 

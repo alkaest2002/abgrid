@@ -17,6 +17,7 @@ import networkx as nx
 from typing import Literal, List, Dict, Optional, Tuple, TypedDict, Union
 from functools import reduce
 from scipy.spatial import ConvexHull
+
 from lib import A_COLOR, B_COLOR, CM_TO_INCHES
 from lib.abgrid_utils import compute_descriptives, figure_to_base64_svg
 
