@@ -449,18 +449,16 @@ class ABGridSna:
         if self.sna["rankings_a"] is None or self.sna["rankings_b"] is None or self.sna["micro_stats_a"] is None or self.sna["micro_stats_b"] is None:
             raise ValueError("SNA micro stats and rankings for both networks a and b are required.")
         
-        # Cache data
-        micro_stats_a = self.sna["micro_stats_a"]
-        micro_stats_b = self.sna["micro_stats_b"]
-        rankings_a = self.sna["rankings_a"]
-        rankings_b = self.sna["rankings_b"]
-        
-        # Init dict with empty sub-dicts for easier node consolidation
+        # Init dict with empty sub-dicts for storing relevant nodes
         relevant_nodes_ab = {"a": [], "b": []}
         
-        # Loop through A and B rankings
-        for valence_key, rankings in [("a", rankings_a), ("b", rankings_b)]:
-            
+        # Process both positive (a) and negative (b) relevance directions
+        for valence_key in relevant_nodes_ab.keys():
+
+            # Select micro_stats abd rankings to use
+            micro_stats =  self.sna["micro_stats_a"] if valence_key == "a" else self.sna["micro_stats_b"]
+            rankings = self.sna["rankings_a"] if valence_key == "a" else self.sna["rankings_b"]
+
             # Loop through metrics and associated ranks
             for metric_rank_name, ranks_series in rankings.items():
                 
@@ -471,35 +469,30 @@ class ABGridSna:
                 threshold_value = ranks_series.quantile(threshold)
                 
                 # Filter top nodes (assuming lower rank = better)
-                relevant_nodes = ranks_series[ranks_series <= threshold_value]
-                
-                # Calculate normalized ranks ONCE for all selected nodes
-                normalized_ranks = relevant_nodes.rank(method="dense", ascending=True)
-                
-                for node_id, original_rank in relevant_nodes.items():
-  
-                    # Get normalized rank
-                    normalized_rank = normalized_ranks[node_id]
-                    
-                    # Calculate weight for this metric
-                    weight = float(10.0 / (normalized_rank ** 0.8))
+                relevant_ranks = ranks_series[ranks_series.le(threshold_value)]
 
-                    # Get original value
-                    value = (
-                        micro_stats_a.loc[node_id, re.sub("_rank", "", metric_rank_name)] 
-                            if valence_key == "a" else micro_stats_b.loc[node_id, re.sub("_rank", "", metric_name)] 
-                    )
-                    
-                    # Add node entry to list
+                # Compute relevant nodes data
+                relevant_nodes = (
+                    relevant_ranks
+                        .to_frame()
+                        .assign(
+                            rank=relevant_ranks.rank(method="dense", ascending=True),
+                            value=micro_stats.loc[relevant_ranks.index, metric_name],
+                            weight=lambda x: x["rank"].pow(.8).rdiv(10),
+                        )
+                )
+
+                # Process each relevant node
+                for node_id, node_data in relevant_nodes.iterrows():
+                    # Add relevant node entry to list
                     relevant_nodes_ab[valence_key].append({
                         "id": node_id,
                         "metric": metric_name,
-                        "value": value,
-                        "rank": original_rank,
-                        "weight": weight
+                        "value": node_data["value"],
+                        "rank": node_data["rank"],
+                        "weight": node_data["weight"]
                     })
         
-        # Return list of relevant nodes
         return relevant_nodes_ab
 
     def compute_edges_types(self, network_type: Literal["a", "b"]) -> Dict[str, pd.Index]:

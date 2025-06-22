@@ -313,17 +313,15 @@ class ABGridSociogram:
         Raises:
             ValueError: If sociogram rankings have not been computed yet.
         """
-        # Validate that rankings data is available
+        # Make sure data is available
         if self.sociogram["rankings"] is None or self.sociogram["micro_stats"] is None:
             raise ValueError("Sociogram micro statistics and rankings are required.")
         
-        # Cahce micro_stats
+        # Select micro_stats and rankings to use
         micro_stats = self.sociogram["micro_stats"]
-        
-        # Cahce rankings
         rankings = self.sociogram["rankings"]
         
-        # Initialize nested dictionaries for node consolidation by valence
+        # Init dict with empty sub-dicts for storing relevant nodes
         relevant_nodes_ab = {"a": [], "b": []}
         
         # Process both positive (a) and negative (b) relevance directions
@@ -341,43 +339,37 @@ class ABGridSociogram:
                     threshold_value = ranks_series.quantile(threshold)
                     
                     # Filter nodes with ranks at or below threshold (best performers)
-                    relevant_nodes = ranks_series[ranks_series <= threshold_value]
-
-                    # Calculate normalized ranks for weight computation (dense ranking, ascending)
-                    normalized_ranks = relevant_nodes.rank(method="dense", ascending=True)
+                    relevant_ranks = ranks_series[ranks_series.le(threshold_value)]
 
                 else:
                     # Get threshold for bottom performers (higher quantile = worse ranks)
                     threshold_value = ranks_series.quantile(1 - threshold)
                     
                     # Filter nodes with ranks at or above threshold (worst performers)
-                    relevant_nodes = ranks_series[ranks_series >= threshold_value]
+                    relevant_ranks = ranks_series[ranks_series.ge(threshold_value)]
                 
-                    # Calculate normalized ranks for weight computation (dense ranking, ascending)
-                    normalized_ranks = relevant_nodes.rank(method="dense", ascending=False)
-                
-                # Process each selected node
-                for node_id, rank in relevant_nodes.items():
-                    
-                    # Get normalized rank for this node within selected group
-                    normalized_rank = normalized_ranks[node_id]
-                    
-                    # Calculate inverse exponential weight (better normalized rank = higher weight)
-                    weight = float(10.0 / (normalized_rank ** 0.8))
+                # Compute relevant nodes data
+                relevant_nodes = (
+                    relevant_ranks
+                        .to_frame()
+                        .assign(
+                            rank=relevant_ranks.rank(method="dense", ascending=valence_key == "a"),
+                            value=micro_stats.loc[relevant_ranks.index, metric_name],
+                            weight=lambda x: x["rank"].pow(.8).rdiv(10),
+                        )
+                )
 
-                    # Get node value
-                    value = micro_stats.loc[node_id, metric_name]
-                    
-                    # Add node entry to list
+                # Process each relevant node
+                for node_id, node_data in relevant_nodes.iterrows():
+                    # Add relevant node entry to list
                     relevant_nodes_ab[valence_key].append({
                         "id": node_id,
                         "metric": metric_name,
-                        "value": value,
-                        "rank": rank,
-                        "weight": weight
+                        "value": node_data["value"],
+                        "rank": node_data["rank"],
+                        "weight": node_data["weight"]
                     })
-        
-        # Return list of relevant nodes
+
         return relevant_nodes_ab
 
     def create_graph(self, coefficient: Literal["ai", "ii"]) -> str:
