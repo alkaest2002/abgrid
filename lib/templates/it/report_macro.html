@@ -201,10 +201,10 @@
     'sum': 'Somma'
 } %}
 <div class="data-legend">
-    <span class="text-italic">Definizioni in ordine alfabetico:</span>
+    <span class="text-italic text-bold">Definizioni in ordine alfabetico:</span>
     {% for metric in metrics_list %}
         {% if definitions[metric.lower()] %}
-            <b>{{ metric | upper }}</b> {{ definitions[metric.lower()] | safe }} 
+            <span class="text-italic"><b>{{ metric | upper }}</b> {{ definitions[metric.lower()] | safe }}</span> 
         {% endif %}
     {% endfor %}
 </div>
