@@ -50,7 +50,7 @@
 <div class="isolated-nodes-container mb-xl">
     <div class="isolated-nodes-main">
         {% if isolated_nodes["a"] | length > 0 %}
-            <span><b>ISO A</b> &rarr;
+            <span class="mr-xl"><b>ISO A</b> &rarr;
                 {% for node_id in isolated_nodes["a"] %}
                     <span class="isolated-node">{{ node_id }}</span>
                 {% endfor %}
