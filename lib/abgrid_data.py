@@ -11,7 +11,6 @@ The code is part of the AB-Grid project and is licensed under the MIT License.
 
 import re
 import datetime
-import numpy as np
 import pandas as pd
 
 from pathlib import Path
@@ -31,13 +30,15 @@ class ReportData(TypedDict, total=False):
     """
     project_title: str
     year: int
-    group: Union[int, str]
+    group: int
     members_per_group: int
     question_a: str
     question_b: str
     sna: SNADict
     sociogram: SociogramDict  # Optional field, only present when with_sociogram=True
-    relevant_nodes_ab: Dict[str, List[Dict[str, Any]]]
+    relevant_nodes_ab: Dict[str, pd.DataFrame]
+    isolated_nodes_ab: Dict[str, pd.Index]
+
 
 class DataLoader(Protocol):
     """Protocol defining the interface for data loading utilities."""
