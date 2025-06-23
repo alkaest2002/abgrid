@@ -91,7 +91,7 @@ def notify_decorator(operation_name: str) -> Callable:
 def to_json_serializable(
     data: Any,
     keep: Optional[List[str]] = None,
-    max_depth: int = 7
+    max_depth: int = 4
 ) -> Any:
     """
     Converts data into a JSON-serializable format by first filtering to keep only
@@ -240,7 +240,6 @@ def to_json_serializable(
     
     # Phase 2: Convert to JSON-serializable format
     serialized_data = _convert_to_serializable(pruned_data)
-    
     return serialized_data
 
 def figure_to_base64_svg(fig: plt.Figure) -> str:
