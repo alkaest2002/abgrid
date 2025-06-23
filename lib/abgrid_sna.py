@@ -748,7 +748,7 @@ class ABGridSna:
                 Sorted list of unique source node identifiers.
 
         Example:
-            >>> packed_edges = [{"A": "B,C"}, {"B": "C"}, {"A": "D"}]
+            >>> packed_edges = [{"A": "B,C"}, {"B": "C"}]
             >>> _unpack_network_nodes(packed_edges)
             ["A", "B"]
         """
