@@ -243,8 +243,6 @@ def to_json_serializable(
     
     return serialized_data
 
-
-
 def figure_to_base64_svg(fig: plt.Figure) -> str:
     """
     Convert a matplotlib figure to a base64-encoded SVG data URI.
