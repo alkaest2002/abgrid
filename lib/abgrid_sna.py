@@ -291,6 +291,10 @@ class ABGridSna:
         micro_level_stats["nd"] += (micro_level_stats["ic"] == 0).astype(int)
         micro_level_stats["nd"] += (micro_level_stats["lns"].str.len() == 0).astype(int) * 2
 
+        # Make sure that isolated nodes have no metric data
+        numeric_metrics_colums = [c for c in micro_level_stats.select_dtypes("number").columns if c != "nd"]
+        micro_level_stats.loc[micro_level_stats["nd"].eq(3), numeric_metrics_colums] = 0
+
         # Compute node ranks relative to each network centrality metric
         micro_level_stats_ranks = (
             micro_level_stats.iloc[:, 1:-1]  # omit first column (LNS) and last column (ND)
@@ -298,13 +302,17 @@ class ABGridSna:
                 .add_suffix("_rank")
         )
 
-        return (
-            pd.concat([
-                micro_level_stats,
-                micro_level_stats_ranks,
-            ], axis=1)
+        # Combine metrics and metrics ranks
+        micro_level_stats =  (
+            pd.concat(
+                [
+                    micro_level_stats,
+                    micro_level_stats_ranks,
+                ], axis=1)
                 .sort_index()
         )
+
+        return micro_level_stats
 
     def compute_descriptives(self, network_type: Literal["a", "b"]) -> pd.DataFrame:
         """
