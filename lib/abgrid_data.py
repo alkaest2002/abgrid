@@ -292,9 +292,9 @@ class ABGridData:
             )
             nodes = (
                 nodes
-                    # Keep nodes that has multiple evidences only
+                    # Keep nodes that with multiple metrics only
                     .loc[nodes["metric"].str.len() > 1, :]
-                    # add 10 point to nodes with metrics from both sna and sociogram
+                    # add 10 more points to weight of nodes with metrics from both sna and sociogram
                     .assign(weight=nodes["weight"] + nodes["evidence_type"].str.len().gt(1).mul(10))
                     # Sort nodes by weight
                     .sort_values(by="weight", ascending=False)

@@ -486,7 +486,8 @@ class ABGridSna:
                         )
                         .reset_index(drop=False, names="node_id")
                 )
-                # Add relevant nodes
+                
+                # Add relevant nodes to dataframe
                 relevant_nodes_ab[valence_type] = pd.concat([
                     relevant_nodes_ab[valence_type],
                     relevant_nodes

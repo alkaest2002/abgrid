@@ -337,7 +337,7 @@ class ABGridSociogram:
         # Process both positive (a) and negative (b) relevance directions
         for valence_type in relevant_nodes_ab.keys():
             
-            # Iterate through all metric rankings
+            # Loop through metrics and associated ranks
             for metric_rank_name, ranks_series in rankings.items():
 
                 # clean metric name
@@ -351,12 +351,18 @@ class ABGridSociogram:
                     # Filter nodes with ranks at or below threshold (best performers)
                     relevant_ranks = ranks_series[ranks_series.le(threshold_value)]
 
+                    # Set ascending so that smaller ranks are considered more important
+                    ascending = True
+
                 else:
                     # Get threshold for bottom performers (higher quantile = worse ranks)
                     threshold_value = ranks_series.quantile(1 - threshold)
                     
                     # Filter nodes with ranks at or above threshold (worst performers)
                     relevant_ranks = ranks_series[ranks_series.ge(threshold_value)]
+
+                    # Set ascending so that higher ranks are considered more important
+                    ascending = False
                 
                 # Compute relevant nodes data
                 relevant_nodes = (
@@ -364,14 +370,15 @@ class ABGridSociogram:
                         .to_frame()
                         .assign(
                             metric=metric_name,
-                            rank=relevant_ranks.rank(method="dense", ascending=valence_type == "a"),
+                            rank=relevant_ranks.rank(method="dense", ascending=ascending),
                             value=micro_stats.loc[relevant_ranks.index, metric_name],
                             weight=lambda x: x["rank"].pow(.8).rdiv(10),
                             evidence_type="sociogram"
                         )
                         .reset_index(drop=False, names="node_id")
                 )
-                # Add relevant nodes
+                
+                # Add relevant nodes to dataframe
                 relevant_nodes_ab[valence_type] = pd.concat([
                     relevant_nodes_ab[valence_type],
                     relevant_nodes
