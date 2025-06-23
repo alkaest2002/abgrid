@@ -287,7 +287,8 @@ class ABGridData:
                     .aggregate({
                         "metric": list,
                         "value": list,
-                        "rank": list,
+                        "original_rank": list,
+                        "recomputed_rank": list,
                         "weight": "sum",
                         "evidence_type": lambda x: list(set(x)),
                     })
