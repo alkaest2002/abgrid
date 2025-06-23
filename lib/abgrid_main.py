@@ -227,25 +227,17 @@ class ABGridMain:
             # Add current group data to the collection, omitting graphics for JSON
             all_data[group_file.stem] = to_json_serializable(
                 report_data, 
-                keys_to_omit=[
-                    "sna.graph_a", 
-                    "sna.graph_b",
-                    "sna.network_a", 
-                    "sna.network_b", 
-                    "sna.adjacency_a", 
-                    "sna.adjacency_b",
-                    "sna.descriptives_a",
-                    "sna.descriptives_b",
-                    "sna.rankings_ab",
-                    "sna.loc_a",
-                    "sna.loc_b",
-                    "sociogram.graph_ai",
-                    "sociogram.graph_ii",
+                keep=[
+                    "project_title",
+                    "members_per_group",
+                    "sna.macro_stats_a",
+                    "sna.macro_stats_b",
+                    "sna.micro_stats_a",
+                    "sna.micro_stats_b",
+                    "sociogram.macro_stats",
+                    "sociogram.micro_stats",
+                    "relevant_nodes_ab.*",
                 ],
-                keys_regex_to_omit=[
-                    r".*_rank",
-                    r"(sna|sociogram)\.relevant_nodes_ab"
-                ]
             )
 
             # Notify user
