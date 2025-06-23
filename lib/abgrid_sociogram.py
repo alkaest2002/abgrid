@@ -15,7 +15,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import networkx as nx
 
-from typing import Any, List, Literal, Dict, Optional, TypedDict, Tuple, Union
+from typing import Any, Literal, Dict, Optional, TypedDict, Tuple
 
 from lib import CM_TO_INCHES
 from lib.abgrid_utils import compute_descriptives, figure_to_base64_svg
@@ -28,7 +28,7 @@ class SociogramDict(TypedDict):
     rankings: Optional[Dict[str, pd.Series]]
     graph_ii: Optional[str]
     graph_ai: Optional[str]
-    relevant_nodes_ab: Optional[Dict[str, List[Dict[str, Union[str, List[str], List[int], float]]]]]
+    relevant_nodes_ab: Optional[Dict[str, pd.DataFrame]]
 
 class ABGridSociogram:
     """
