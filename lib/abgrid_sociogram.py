@@ -98,17 +98,17 @@ class ABGridSociogram:
         self.sna = sna
 
         # Compute all sociogram components in sequence
-        self.sociogram["macro_stats"] = self.compute_macro_stats()
-        self.sociogram["micro_stats"] = self.compute_micro_stats()
-        self.sociogram["descriptives"] = self.compute_descriptives()
-        self.sociogram["rankings"] = self.compute_rankings()
-        self.sociogram["relevant_nodes_ab"] = self.compute_relevant_nodes_ab()
-        self.sociogram["graph_ai"] = self.create_graph("ai")
-        self.sociogram["graph_ii"] = self.create_graph("ii")
+        self.sociogram["macro_stats"] = self._compute_macro_stats()
+        self.sociogram["micro_stats"] = self._compute_micro_stats()
+        self.sociogram["descriptives"] = self._compute_descriptives()
+        self.sociogram["rankings"] = self._compute_rankings()
+        self.sociogram["relevant_nodes_ab"] = self._compute_relevant_nodes_ab()
+        self.sociogram["graph_ai"] = self._create_graph("ai")
+        self.sociogram["graph_ii"] = self._create_graph("ii")
 
         return self.sociogram
 
-    def compute_macro_stats(self) -> pd.Series:
+    def _compute_macro_stats(self) -> pd.Series:
         """
         Compute macro-level sociogram statistics including cohesion and conflict indices.
         
@@ -152,7 +152,7 @@ class ABGridSociogram:
             "wi_ii": conflict_index_type_ii
         })
     
-    def compute_micro_stats(self) -> pd.DataFrame:
+    def _compute_micro_stats(self) -> pd.DataFrame:
         """
         Compute comprehensive micro-level sociogram statistics for individual nodes.
         
@@ -227,7 +227,7 @@ class ABGridSociogram:
 
         return sociogram_micro_stats.sort_index()
     
-    def compute_descriptives(self) -> pd.DataFrame:
+    def _compute_descriptives(self) -> pd.DataFrame:
         """
         Compute macro-level descriptive statistics by aggregating micro-level node statistics.
         
@@ -254,7 +254,7 @@ class ABGridSociogram:
         
         return compute_descriptives(sociogram_numeric_columns)
         
-    def compute_rankings(self) -> Dict[str, pd.Series]:
+    def _compute_rankings(self) -> Dict[str, pd.Series]:
         """
         Generate sorted node rankings based on centrality metrics and sociometric status.
         
@@ -289,7 +289,7 @@ class ABGridSociogram:
         
         return rankings
     
-    def compute_relevant_nodes_ab(self, threshold: float = 0.05) -> Dict[str, pd.DataFrame]:
+    def _compute_relevant_nodes_ab(self, threshold: float = 0.05) -> Dict[str, pd.DataFrame]:
         """
         Identify most and least relevant nodes for positive and negative outcomes.
         
@@ -389,7 +389,7 @@ class ABGridSociogram:
 
         return relevant_nodes_ab
 
-    def create_graph(self, coefficient: Literal["ai", "ii"]) -> str:
+    def _create_graph(self, coefficient: Literal["ai", "ii"]) -> str:
         """
         Generate a polar visualization of node distribution based on centrality coefficients.
         
