@@ -370,12 +370,15 @@ class ABGridSociogram:
                         .to_frame()
                         .assign(
                             metric=metric_name,
-                            rank=relevant_ranks.rank(method="dense", ascending=ascending),
+                            recomputed_rank=relevant_ranks.rank(method="dense", ascending=ascending),
                             value=micro_stats.loc[relevant_ranks.index, metric_name],
-                            weight=lambda x: x["rank"].pow(.8).rdiv(10),
+                            weight=lambda x: x["recomputed_rank"].pow(.8).rdiv(10),
                             evidence_type="sociogram"
                         )
                         .reset_index(drop=False, names="node_id")
+                        .rename(columns={
+                            metric_rank_name: "original_rank"
+                        })
                 )
                 
                 # Add relevant nodes to dataframe
