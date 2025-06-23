@@ -191,8 +191,8 @@
     'st': 'Sociometric Status',
     'sum': 'Sum'
 } %}
-<div class="table-data-legend">
-    <span class="text-italic text-bold">Definitions in alphabetical order:</span>
+<div class="data-legend">
+    <span class="text-italic text-bold">In alphabetical order:</span>
     {% for metric in metrics_list %}
         {% if definitions[metric.lower()] %}
             <span class="text-italic"><b>{{ metric | upper }}</b> {{ definitions[metric.lower()] | safe }}</span> 
