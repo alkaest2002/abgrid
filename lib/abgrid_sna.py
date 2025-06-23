@@ -764,58 +764,6 @@ class ABGridSna:
         
         return figure_to_base64_svg(fig)
 
-    def _unpack_network_edges(self, packed_edges: List[Dict[str, str]]) -> List[Tuple[str, str]]:
-        """
-        Unpack edge dictionaries into a list of directed edge tuples.
-
-        Takes a list of dictionaries where each dictionary represents outgoing edges
-        from source nodes, and converts them into a flat list of (source, target) tuples.
-
-        Args:
-            packed_edges (List[Dict[str, str]]): 
-                List of dictionaries where keys are source nodes and values are
-                comma-separated strings of target nodes. None values are safely handled.
-
-        Returns:
-            List[Tuple[str, str]]: 
-                Flat list of directed edge tuples (source, target).
-
-        Example:
-            >>> packed_edges = [{"A": "B,C"}, {"B": "C"}]
-            >>> _unpack_network_edges(packed_edges)
-            [("A", "B"), ("A", "C"), ("B", "C")]
-        """
-        return reduce(
-            lambda acc, itr: [
-                *acc,
-                *[
-                    (node_from, node_to) for node_from, edges in itr.items() if edges is not None
-                        for node_to in edges.split(",")
-                ]
-            ],
-            packed_edges,
-            []
-        )
-        
-    def _unpack_network_nodes(self, packed_edges: List[Dict[str, str]]) -> List[str]:
-        """
-        Extract unique source nodes from packed edge dictionaries.
-
-        Args:
-            packed_edges (List[Dict[str, str]]): 
-                List of dictionaries where keys represent source nodes.
-
-        Returns:
-            List[str]: 
-                Sorted list of unique source node identifiers.
-
-        Example:
-            >>> packed_edges = [{"A": "B,C"}, {"B": "C"}]
-            >>> _unpack_network_nodes(packed_edges)
-            ["A", "B"]
-        """
-        return sorted([node for node_edges in packed_edges for node in node_edges.keys()])
-
     def _handle_isolated_nodes(self, network: nx.DiGraph, loc: Dict[str, np.ndarray]) -> Dict[str, np.ndarray]:
         """
         Position isolated nodes at the periphery of the network layout.
@@ -908,4 +856,56 @@ class ABGridSna:
         # All isolated nodes have been placed
         except StopIteration:
             return loc
+
+    def _unpack_network_edges(self, packed_edges: List[Dict[str, str]]) -> List[Tuple[str, str]]:
+        """
+        Unpack edge dictionaries into a list of directed edge tuples.
+
+        Takes a list of dictionaries where each dictionary represents outgoing edges
+        from source nodes, and converts them into a flat list of (source, target) tuples.
+
+        Args:
+            packed_edges (List[Dict[str, str]]): 
+                List of dictionaries where keys are source nodes and values are
+                comma-separated strings of target nodes. None values are safely handled.
+
+        Returns:
+            List[Tuple[str, str]]: 
+                Flat list of directed edge tuples (source, target).
+
+        Example:
+            >>> packed_edges = [{"A": "B,C"}, {"B": "C"}]
+            >>> _unpack_network_edges(packed_edges)
+            [("A", "B"), ("A", "C"), ("B", "C")]
+        """
+        return reduce(
+            lambda acc, itr: [
+                *acc,
+                *[
+                    (node_from, node_to) for node_from, edges in itr.items() if edges is not None
+                        for node_to in edges.split(",")
+                ]
+            ],
+            packed_edges,
+            []
+        )
         
+    def _unpack_network_nodes(self, packed_edges: List[Dict[str, str]]) -> List[str]:
+        """
+        Extract unique source nodes from packed edge dictionaries.
+
+        Args:
+            packed_edges (List[Dict[str, str]]): 
+                List of dictionaries where keys represent source nodes.
+
+        Returns:
+            List[str]: 
+                Sorted list of unique source node identifiers.
+
+        Example:
+            >>> packed_edges = [{"A": "B,C"}, {"B": "C"}]
+            >>> _unpack_network_nodes(packed_edges)
+            ["A", "B"]
+        """
+        return sorted([node for node_edges in packed_edges for node in node_edges.keys()])
+     
