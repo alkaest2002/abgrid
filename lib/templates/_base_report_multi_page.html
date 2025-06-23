@@ -27,6 +27,7 @@
             {{ base_report_macro.render_relevant_nodes("b", relevant_nodes_ab["b"]) }}
         </div>
         <div>
+            {{ base_report_macro.render_isolated_nodes(isolated_nodes_ab) }}
             {{ report_macro.render_data_legend(['ai', 'app', 'bt', 'cl', 'dis', 'hu', 'ic', 'ii', 'iso', 'kz', 'pop', 'pr','rej']) }}
             {{ report_macro.render_footer(year) }}
         </div>

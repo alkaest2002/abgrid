@@ -46,6 +46,27 @@
 </div>
 {% endmacro %}
 
+{% macro render_isolated_nodes(isolated_nodes) %}
+<div class="isolated-nodes-container mb-xl">
+    <div class="isolated-nodes-main">
+        {% if isolated_nodes["a"] | length > 0 %}
+            <span><b>ISO A</b> &rarr;
+                {% for node_id in isolated_nodes["a"] %}
+                    <span class="isolated-node">{{ node_id }}</span>
+                {% endfor %}
+            </span>
+        {% endif %}
+        {% if isolated_nodes["b"] | length > 0 %}
+            <span><b>ISO B</b> &rarr;
+                {% for node_id in isolated_nodes["b"] %}
+                    <span class="isolated-node">{{ node_id }}</span>
+                {% endfor %}
+            </span>
+        {% endif %}
+    </div>
+</div>
+{% endmacro %}
+
 {% macro render_sociogram_graphs(graph, graph_label) %}
 <div class="sociogram-graphs-container">
     <div class="sociogram-graphs-main">
