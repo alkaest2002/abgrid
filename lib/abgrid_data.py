@@ -205,7 +205,8 @@ class ABGridData:
             - Group information (number, size)
             - SNA analysis results
             - Sociogram data (if requested)
-            - Consolidated relevant nodes from both SNA and sociogram analyses
+            - Relevant nodes from both SNA and sociogram analyses
+            - Isolated nodes from SNA
             - Current year for report dating
             
         Example:
@@ -308,7 +309,7 @@ class ABGridData:
         # Add relevant_nodes_ab to report data
         report_data["relevant_nodes_ab"] = relevant_nodes_ab
 
-        # Add isolated nodes
+        # Add isolated nodes to report data
         report_data["isolated_nodes_ab"] = {
             "a": sna_results["micro_stats_a"].loc[sna_results["micro_stats_a"]["nd"].eq(3), :].index,
             "b": sna_results["micro_stats_b"].loc[sna_results["micro_stats_b"]["nd"].eq(3), :].index
