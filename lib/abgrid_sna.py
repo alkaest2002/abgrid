@@ -415,16 +415,16 @@ class ABGridSna:
         # Get the rankings from network A and B
         rankings_a = self.sna["rankings_a"]
         rankings_b = self.sna["rankings_b"]
-
+        
         # Combine them into side-by-side DataFrames
         rankings_ab = {}
         for k in rankings_a.keys():
-            series_a = rankings_a[k]
-            series_a.name = series_a.name + "_a"  # Rename to include network identifier
-            series_b = rankings_b[k]
-            series_b.name = series_a.name + "_b"  # Rename to include network identifier
+            series_a = rankings_a[k].copy() # Make a copy
+            series_a.name = series_a.name + "_a" # Rename to include network identifier
+            series_b = rankings_b[k].copy()  # Make a copy
+            series_b.name = series_b.name + "_b" # Rename to include network identifier
             rankings_ab[k] = pd.concat([series_a, series_b], axis=1) 
-
+        
         return rankings_ab
     
     def compute_relevant_nodes_ab(self, threshold: float = 0.05) -> Dict[str, pd.DataFrame]:
@@ -468,7 +468,7 @@ class ABGridSna:
             # Select micro_stats abd rankings to use
             micro_stats =  self.sna["micro_stats_a"] if valence_type == "a" else self.sna["micro_stats_b"]
             rankings = self.sna["rankings_a"] if valence_type == "a" else self.sna["rankings_b"]
-
+            
             # Loop through metrics and associated ranks
             for metric_rank_name, ranks_series in rankings.items():
                 
@@ -480,19 +480,22 @@ class ABGridSna:
                 
                 # Filter top nodes (assuming lower rank = better)
                 relevant_ranks = ranks_series[ranks_series.le(threshold_value)]
-
+                
                 # Compute relevant nodes data
                 relevant_nodes = (
                     relevant_ranks
                         .to_frame()
                         .assign(
                             metric=metric_name,
-                            rank=relevant_ranks.rank(method="dense", ascending=True),
+                            recomputed_rank=relevant_ranks.rank(method="dense", ascending=True),
                             value=micro_stats.loc[relevant_ranks.index, metric_name],
-                            weight=lambda x: x["rank"].pow(.8).rdiv(10),
+                            weight=lambda x: x["recomputed_rank"].pow(.8).rdiv(10),
                             evidence_type="sna"
                         )
                         .reset_index(drop=False, names="node_id")
+                        .rename(columns={
+                            metric_rank_name: "original_rank"
+                        })
                 )
                 
                 # Add relevant nodes to dataframe
@@ -500,7 +503,6 @@ class ABGridSna:
                     relevant_nodes_ab[valence_type],
                     relevant_nodes
                 ], ignore_index=True)
-                
         return relevant_nodes_ab
 
     def compute_edges_types(self, network_type: Literal["a", "b"]) -> Dict[str, pd.Index]:
