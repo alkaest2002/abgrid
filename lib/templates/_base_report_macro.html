@@ -19,29 +19,27 @@
 <div class="relevant-nodes-container mt-xl">
     <div class="relevant-nodes-main">
         <div class="relevant-nodes-list list-{{valence_type}}">
-            {% for node in relevant_nodes %}
-                {% if node["metrics"] | length > 1 %}
-                    <div class="node">
-                        <div class="node-id">
-                            {{ node["id"] }}
-                        </div>
-                        <div class="node-metrics">
-                            {% for metric in node["metrics"] %}
-                                {% if metric == "st" %}
-                                    {{ node["values"][loop.index0][:3] | upper }}
-                                {% else %}
-                                    {{ metric | upper }}
-                                {% endif%}
-                                {% if not loop.last %}
-                                    &middot;
-                                {% endif %}
-                            {% endfor %}
-                        </div>
-                        <div class="node-weight">
-                            <b>{{ node["weight"] | int }}</b>
-                        </div>
+            {% for node_id, node in relevant_nodes.iterrows() %}
+                <div class="node">
+                    <div class="node-id">
+                        {{ node_id }}
                     </div>
-                {% endif %}
+                    <div class="node-metrics">
+                        {% for metric in node["metric"] %}
+                            {% if metric == "st" %}
+                                {{ node["value"][loop.index0][:3] | upper }}
+                            {% else %}
+                                {{ metric | upper }}
+                            {% endif%}
+                            {% if not loop.last %}
+                                &middot;
+                            {% endif %}
+                        {% endfor %}
+                    </div>
+                    <div class="node-weight">
+                        <b>{{ node["weight"] | int }}</b>
+                    </div>
+                </div>
             {% endfor %}
         </div>
     </div>

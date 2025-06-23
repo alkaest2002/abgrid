@@ -419,45 +419,47 @@ class ABGridSna:
 
         return rankings_ab
     
-    def compute_relevant_nodes_ab(self, threshold: float = 0.05) -> Dict[str, List[Dict[str, Union[str, int, float]]]]:
-        """
-        Identify relevant nodes with low rank values across both networks.
-        
-        Finds nodes that rank highly (low rank values) in various centrality measures.
+    def compute_relevant_nodes_ab(self, threshold: float = 0.05) -> Dict[str, pd.DataFrame]:
+        """   
+        Finds nodes that rank highly (low rank values) in various centrality measures
+        for both network A and network B.
         
         Args:
             threshold (float): Percentile threshold for selecting top nodes (default: 0.05 for top 5%)
             
         Returns:
-            Dict[str, List[Dict[str, Union[str, int, float]]]]: 
-                Dictionary with keys 'a' and 'b', each containing a list of relevant node entries.
-                Each entry is a dictionary with:
-                - 'id': node identifier (str)
-                - 'metric': metric nane (str)
-                - 'rank': re-computed rank position (int)
-                - 'weight': weight (float)
+            Dict[str, pd.DataFrame]: 
+                Dictionary with keys 'a' and 'b', each containing a DataFrame of relevant nodes.
+                Each DataFrame has columns:
+                - 'node_id': node identifier
+                - 'metric': metric name without '_rank' suffix
+                - 'rank': re-computed dense rank position
+                - 'value': original metric value from micro_stats
+                - 'weight': computed weight using formula 10 / (rank ** 0.8)
+                - 'evidence_type': always 'sna'
 
         Note:
             - Lower rank values indicate higher centrality (rank 1 = most central)
-            - Weight calculation uses formula: 10.0 / (normalized_rank ** 0.8)
+            - Weight calculation uses formula: 10.0 / (rank ** 0.8)
             - Only nodes ranking in the top threshold percentile are included
+            - Processes all ranking columns ending with '_rank' from rankings data
 
         Raises:
-            ValueError: If rankings for both networks are not available.
+            ValueError: If rankings or micro_stats for both networks are not available.
         """
         # Make sure data is available
         if self.sna["rankings_a"] is None or self.sna["rankings_b"] is None or self.sna["micro_stats_a"] is None or self.sna["micro_stats_b"] is None:
             raise ValueError("SNA micro stats and rankings for both networks a and b are required.")
         
         # Init dict with empty sub-dicts for storing relevant nodes
-        relevant_nodes_ab = {"a": [], "b": []}
+        relevant_nodes_ab = {"a": pd.DataFrame(), "b": pd.DataFrame()}
         
         # Process both positive (a) and negative (b) relevance directions
-        for valence_key in relevant_nodes_ab.keys():
+        for valence_type in relevant_nodes_ab.keys():
 
             # Select micro_stats abd rankings to use
-            micro_stats =  self.sna["micro_stats_a"] if valence_key == "a" else self.sna["micro_stats_b"]
-            rankings = self.sna["rankings_a"] if valence_key == "a" else self.sna["rankings_b"]
+            micro_stats =  self.sna["micro_stats_a"] if valence_type == "a" else self.sna["micro_stats_b"]
+            rankings = self.sna["rankings_a"] if valence_type == "a" else self.sna["rankings_b"]
 
             # Loop through metrics and associated ranks
             for metric_rank_name, ranks_series in rankings.items():
@@ -476,23 +478,20 @@ class ABGridSna:
                     relevant_ranks
                         .to_frame()
                         .assign(
+                            metric=metric_name,
                             rank=relevant_ranks.rank(method="dense", ascending=True),
                             value=micro_stats.loc[relevant_ranks.index, metric_name],
                             weight=lambda x: x["rank"].pow(.8).rdiv(10),
+                            evidence_type="sna"
                         )
+                        .reset_index(drop=False, names="node_id")
                 )
-
-                # Process each relevant node
-                for node_id, node_data in relevant_nodes.iterrows():
-                    # Add relevant node entry to list
-                    relevant_nodes_ab[valence_key].append({
-                        "id": node_id,
-                        "metric": metric_name,
-                        "value": node_data["value"],
-                        "rank": node_data["rank"],
-                        "weight": node_data["weight"]
-                    })
-        
+                # Add relevant nodes
+                relevant_nodes_ab[valence_type] = pd.concat([
+                    relevant_nodes_ab[valence_type],
+                    relevant_nodes
+                ], ignore_index=True)
+                
         return relevant_nodes_ab
 
     def compute_edges_types(self, network_type: Literal["a", "b"]) -> Dict[str, pd.Index]:

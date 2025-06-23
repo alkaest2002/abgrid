@@ -125,16 +125,21 @@ def to_json_serializable(
         # Limit conversion to max depth
         if depth > max_depth:
             return obj
-        
+       
         # Perform conversions
         if obj is None:
             return None
         elif isinstance(obj, (str, int, float, bool)):
             return obj
         elif isinstance(obj, pd.DataFrame):
-            return obj.to_dict("index")
+            if obj.index.has_duplicates:
+                return obj.reset_index(drop=False, names="index").to_dict("index")
+            else:
+                return obj.to_dict("index")
         elif isinstance(obj, pd.Series):
             return obj.to_dict()
+        elif isinstance(obj, np.ndarray):
+            return obj.tolist()
         elif hasattr(obj, 'tolist') and hasattr(obj, 'dtype'):
             return obj.tolist()
         elif isinstance(obj, (datetime.date, datetime.datetime)):

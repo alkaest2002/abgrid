@@ -11,6 +11,8 @@ The code is part of the AB-Grid project and is licensed under the MIT License.
 
 import re
 import datetime
+import numpy as np
+import pandas as pd
 
 from pathlib import Path
 from copy import deepcopy
@@ -269,42 +271,41 @@ class ABGridData:
         relevant_nodes_ab_sociogram = deepcopy(sociogram_results["relevant_nodes_ab"]) if with_sociogram else {"a": [], "b": []}
         relevant_nodes_ab = {"a": {}, "b": {}}
 
-        # Consolidate relevant nodes across both positive (a) and negative (b) valences
+        # Loop through relevant_nodes_ab keys
         for valence_type in relevant_nodes_ab.keys():
+            # Group nodes with same id and consolidate their values
+            nodes = (
+                pd.concat(
+                    [
+                        relevant_nodes_ab_sna[valence_type], 
+                        relevant_nodes_ab_sociogram[valence_type]
+                    ]
+                )
+                .groupby(by="node_id")
+                    .aggregate({
+                        "metric": list,
+                        "value": list,
+                        "rank": list,
+                        "weight": "sum",
+                        "evidence_type": lambda x: list(set(x)),
+                    })
+            )
+            nodes = (
+                nodes
+                    # Keep nodes that has multiple evidences only
+                    .loc[nodes["metric"].str.len() > 1, :]
+                    # add 10 point to nodes with metrics from both sna and sociogram
+                    .assign(weight=nodes["weight"] + nodes["evidence_type"].str.len().gt(1).mul(10))
+                    # Sort nodes by weight
+                    .sort_values(by="weight", ascending=False)
+            )
             
-            # Merge relevant nodes from SNA and sociogram analyses for current valence
-            for relevant_nodes in [
-                *relevant_nodes_ab_sna[valence_type], 
-                *relevant_nodes_ab_sociogram[valence_type]
-            ]:
-                # Cache relevant node properties for processing
-                node_id = relevant_nodes["id"]
-                metric = relevant_nodes["metric"]
-                value = relevant_nodes["value"]
-                rank = relevant_nodes["rank"]
-                weight = relevant_nodes["weight"]
+            # Add relevant nodes of specific valence type to relevant_nodes_ab
+            relevant_nodes_ab[valence_type] = nodes
+            
 
-                # Initialize new node entry
-                if node_id not in relevant_nodes_ab[valence_type]:
-                    relevant_nodes_ab[valence_type][node_id] = {
-                        "id": node_id,
-                        "metrics": [metric],
-                        "values": [value],
-                        "ranks": [rank],
-                        "weight": weight
-                    }
-                else:
-                    # Consolidate multiple node metrics
-                    relevant_nodes_ab[valence_type][node_id]["metrics"].append(metric)
-                    relevant_nodes_ab[valence_type][node_id]["values"].append(value)
-                    relevant_nodes_ab[valence_type][node_id]["ranks"].append(rank)
-                    relevant_nodes_ab[valence_type][node_id]["weight"] += weight
-
-        # Sort consolidated relevant nodes by inverse weight (higher weight = higher relevance)
-        report_data["relevant_nodes_ab"] = {
-            "a": sorted(relevant_nodes_ab["a"].values(), key=lambda x: 1 / x["weight"]),
-            "b": sorted(relevant_nodes_ab["b"].values(), key=lambda x: 1 / x["weight"]),
-        } 
+        # Add relevant_nodes_ab to report data
+        report_data["relevant_nodes_ab"] = relevant_nodes_ab
         
         return report_data, None
 

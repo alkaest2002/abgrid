@@ -289,29 +289,39 @@ class ABGridSociogram:
         
         return rankings
     
-    def compute_relevant_nodes_ab(self, threshold: float = 0.05) -> Dict[str, List[Dict[str, Union[str, List[str], List[int], float]]]]:
+    def compute_relevant_nodes_ab(self, threshold: float = 0.05) -> Dict[str, pd.DataFrame]:
         """
         Identify most and least relevant nodes for positive and negative outcomes.
         
-        Analyzes node rankings across all centrality metrics to identify nodes that
-        consistently perform well (positive relevance) or poorly (negative relevance),
-        with consolidated weighting based on multiple metric appearances.
+        Analyzes node rankings across all sociometric centrality metrics to identify nodes that
+        consistently perform well (positive relevance) or poorly (negative relevance).
+        Processes sociogram rankings to find top performers (valence 'a') and bottom 
+        performers (valence 'b') across different sociometric measures.
 
         Args:
-            threshold: Quantile threshold for selecting top/bottom performing nodes
-                      (default 0.05 = top/bottom 5% of nodes per metric).
+            threshold (float): Quantile threshold for selecting top/bottom performing nodes
+                            (default 0.05 = top/bottom 5% of nodes per metric).
 
         Returns:
-            A dictionary with keys "a" (positive relevance) and "b" (negative relevance),
-            where values are lists of node dictionaries sorted by relevance weight:
-                Each node dictionary contains:
-                - "id": Node identifier as string
-                - "metric": List of metric names where node appears in threshold
-                - "rank": List of corresponding ranks for each metric
-                - "weight": Cumulative relevance weight across all metrics
+            Dict[str, pd.DataFrame]: 
+                Dictionary with keys 'a' (positive relevance) and 'b' (negative relevance),
+                each containing a DataFrame of relevant nodes.
+                Each DataFrame has columns:
+                - 'node_id': node identifier
+                - 'metric': metric name without '_rank' suffix
+                - 'rank': re-computed dense rank position, ascending for 'a', descending for 'b'
+                - 'value': original metric value from micro_stats
+                - 'weight': computed weight using formula 10 / (rank ** 0.8)
+                - 'evidence_type': always 'sociogram'
                 
+            Note:
+                - For valence 'a': selects nodes with ranks <= threshold quantile (best performers)
+                - For valence 'b': selects nodes with ranks >= (1-threshold) quantile (worst performers)
+                - Weight calculation uses formula: 10.0 / (rank ** 0.8)
+                - Processes all ranking columns ending with '_rank' from sociogram rankings
+                    
         Raises:
-            ValueError: If sociogram rankings have not been computed yet.
+            ValueError: If sociogram rankings or micro_stats have not been computed yet.
         """
         # Make sure data is available
         if self.sociogram["rankings"] is None or self.sociogram["micro_stats"] is None:
@@ -322,10 +332,10 @@ class ABGridSociogram:
         rankings = self.sociogram["rankings"]
         
         # Init dict with empty sub-dicts for storing relevant nodes
-        relevant_nodes_ab = {"a": [], "b": []}
+        relevant_nodes_ab = {"a": pd.DataFrame(), "b": pd.DataFrame()}
         
         # Process both positive (a) and negative (b) relevance directions
-        for valence_key in relevant_nodes_ab.keys():
+        for valence_type in relevant_nodes_ab.keys():
             
             # Iterate through all metric rankings
             for metric_rank_name, ranks_series in rankings.items():
@@ -334,7 +344,7 @@ class ABGridSociogram:
                 metric_name = re.sub("_rank", "", metric_rank_name)
 
                 # Select strategy: a = best performers, b = worst performers
-                if valence_key == "a":
+                if valence_type == "a":
                     # Get threshold for top performers (lower quantile = better ranks)
                     threshold_value = ranks_series.quantile(threshold)
                     
@@ -353,22 +363,19 @@ class ABGridSociogram:
                     relevant_ranks
                         .to_frame()
                         .assign(
-                            rank=relevant_ranks.rank(method="dense", ascending=valence_key == "a"),
+                            metric=metric_name,
+                            rank=relevant_ranks.rank(method="dense", ascending=valence_type == "a"),
                             value=micro_stats.loc[relevant_ranks.index, metric_name],
                             weight=lambda x: x["rank"].pow(.8).rdiv(10),
+                            evidence_type="sociogram"
                         )
+                        .reset_index(drop=False, names="node_id")
                 )
-
-                # Process each relevant node
-                for node_id, node_data in relevant_nodes.iterrows():
-                    # Add relevant node entry to list
-                    relevant_nodes_ab[valence_key].append({
-                        "id": node_id,
-                        "metric": metric_name,
-                        "value": node_data["value"],
-                        "rank": node_data["rank"],
-                        "weight": node_data["weight"]
-                    })
+                # Add relevant nodes
+                relevant_nodes_ab[valence_type] = pd.concat([
+                    relevant_nodes_ab[valence_type],
+                    relevant_nodes
+                ], ignore_index=True)
 
         return relevant_nodes_ab
 
