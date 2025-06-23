@@ -310,21 +310,21 @@
     <div class="sociogram-macro-stats-container-main">
         <table class="mt-md mb-md">
             <tr>
-                <td class="text-italic pr-md">
+                <td class="pr-md">
                     {{- render_sociogram_measures_label("ui_i") -}}: 
                     {{ "%0.2f"| format(macro_stats["ui_i"] * 100 | round(0)) }}%
                 </td>
-                <td class="text-italic">
+                <td>
                     {{- render_sociogram_measures_label("ui_ii") -}}: 
                     {{ "%0.2f"| format(macro_stats["ui_ii"] | round(2)) }}
                 </td>
             </tr>
             <tr>
-                <td class="text-italic pr-md">
+                <td class="pr-md">
                     {{- render_sociogram_measures_label("wi_i") -}}: 
                     {{ "%0.2f"| format(macro_stats["wi_i"] * 100 | round(0)) }}%
                 </td>
-                <td class="text-italic">
+                <td>
                      {{- render_sociogram_measures_label("wi_ii") -}}: 
                     {{ "%0.2f"| format(macro_stats["wi_ii"] | round(2)) }}
                 </td>
