@@ -48,7 +48,7 @@ class SNADict(TypedDict):
     graph_a: Optional[str]
     graph_b: Optional[str]
     rankings_ab: Optional[Dict[str, pd.DataFrame]]
-    relevant_nodes_ab: Optional[Dict[str, List[Dict[str, Union[str, List[str], List[int], float]]]]]
+    relevant_nodes_ab: Optional[Dict[str, pd.DataFrame]]
 
 class ABGridSna:
     """
