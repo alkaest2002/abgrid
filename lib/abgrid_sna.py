@@ -14,7 +14,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import networkx as nx
 
-from typing import Literal, List, Dict, Optional, Tuple, TypedDict, Union
+from typing import Literal, List, Dict, Optional, Tuple, TypedDict
 from functools import reduce
 from scipy.spatial import ConvexHull
 

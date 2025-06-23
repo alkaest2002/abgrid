@@ -15,7 +15,7 @@ import pandas as pd
 
 from pathlib import Path
 from copy import deepcopy
-from typing import Any, Dict, List, Optional, Protocol, Tuple, Union, TypedDict
+from typing import Any, Dict, List, Optional, Protocol, Tuple, TypedDict
 
 from lib.abgrid_sna import SNADict, ABGridSna
 from lib.abgrid_sociogram import SociogramDict, ABGridSociogram

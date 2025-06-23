@@ -17,7 +17,7 @@ import json
 
 from base64 import b64encode
 from pathlib import Path
-from typing import Callable, Any, List, Optional, Sequence, Union, Pattern
+from typing import Callable, Any, List, Optional, Sequence, Union
 from functools import wraps
 
 from matplotlib import pyplot as plt
