@@ -162,23 +162,23 @@ class ABGridSna:
                     
         # Store edge types, components, macro stats, micro stats, descriptives, rankings and graphs
         for network_type in ("a", "b"):
-            self.sna[f"edges_types_{network_type}"] = self.compute_edges_types(network_type)
-            self.sna[f"components_{network_type}"] = self.compute_components(network_type)
-            self.sna[f"macro_stats_{network_type}"] = self.compute_macro_stats(network_type)
-            self.sna[f"micro_stats_{network_type}"] = self.compute_micro_stats(network_type)
-            self.sna[f"descriptives_{network_type}"] = self.compute_descriptives(network_type)
-            self.sna[f"rankings_{network_type}"] = self.compute_rankings(network_type)
-            self.sna[f"graph_{network_type}"] = self.create_graph(network_type)
+            self.sna[f"edges_types_{network_type}"] = self._compute_edges_types(network_type)
+            self.sna[f"components_{network_type}"] = self._compute_components(network_type)
+            self.sna[f"macro_stats_{network_type}"] = self._compute_macro_stats(network_type)
+            self.sna[f"micro_stats_{network_type}"] = self._compute_micro_stats(network_type)
+            self.sna[f"descriptives_{network_type}"] = self._compute_descriptives(network_type)
+            self.sna[f"rankings_{network_type}"] = self._compute_rankings(network_type)
+            self.sna[f"graph_{network_type}"] = self._create_graph(network_type)
 
         # Store rankings comparison between networks
-        self.sna["rankings_ab"] = self.compute_rankings_ab()
+        self.sna["rankings_ab"] = self._compute_rankings_ab()
 
         # Store relevant nodes analysis
-        self.sna["relevant_nodes_ab"] = self.compute_relevant_nodes_ab()
+        self.sna["relevant_nodes_ab"] = self._compute_relevant_nodes_ab()
 
         return self.sna
     
-    def compute_macro_stats(self, network_type: Literal["a", "b"]) -> pd.Series:
+    def _compute_macro_stats(self, network_type: Literal["a", "b"]) -> pd.Series:
         """
         Calculate macro-level network statistics.
 
@@ -235,7 +235,7 @@ class ABGridSna:
             "network_reciprocity": network_reciprocity,
         })
     
-    def compute_micro_stats(self, network_type: Literal["a", "b"]) -> pd.DataFrame:
+    def _compute_micro_stats(self, network_type: Literal["a", "b"]) -> pd.DataFrame:
         """
         Calculate node-level (micro) statistics for the specified network.
 
@@ -314,7 +314,7 @@ class ABGridSna:
 
         return micro_level_stats
 
-    def compute_descriptives(self, network_type: Literal["a", "b"]) -> pd.DataFrame:
+    def _compute_descriptives(self, network_type: Literal["a", "b"]) -> pd.DataFrame:
         """
         Compute descriptive statistics for centrality measures.
 
@@ -346,7 +346,7 @@ class ABGridSna:
         
         return compute_descriptives(sna_numeric_columns)
 
-    def compute_rankings(self, network_type: Literal["a", "b"]) -> Dict[str, pd.Series]:
+    def _compute_rankings(self, network_type: Literal["a", "b"]) -> Dict[str, pd.Series]:
         """
         Generate node rankings based on centrality measures.
         
@@ -364,7 +364,7 @@ class ABGridSna:
                 Each Series is indexed by node identifiers and contains rank values.
 
         Example:
-            >>> rankings = compute_rankings("a")
+            >>> rankings = _compute_rankings("a")
             >>> rankings["ic_rank"]  # Returns nodes ordered by in-degree centrality rank
             node_A    1.0
             node_C    2.0  
@@ -391,7 +391,7 @@ class ABGridSna:
         
         return rankings
 
-    def compute_rankings_ab(self) -> Dict[str, pd.DataFrame]:
+    def _compute_rankings_ab(self) -> Dict[str, pd.DataFrame]:
         """
         Compute combined rankings from both networks A and B.
 
@@ -427,7 +427,7 @@ class ABGridSna:
         
         return rankings_ab
     
-    def compute_relevant_nodes_ab(self, threshold: float = 0.05) -> Dict[str, pd.DataFrame]:
+    def _compute_relevant_nodes_ab(self, threshold: float = 0.05) -> Dict[str, pd.DataFrame]:
         """   
         Finds nodes that rank highly (low rank values) in various centrality measures
         for both network A and network B.
@@ -505,7 +505,7 @@ class ABGridSna:
                 ], ignore_index=True)
         return relevant_nodes_ab
 
-    def compute_edges_types(self, network_type: Literal["a", "b"]) -> Dict[str, pd.Index]:
+    def _compute_edges_types(self, network_type: Literal["a", "b"]) -> Dict[str, pd.Index]:
         """
         Classify edges into five types based on reciprocity and cross-network relationships.
 
@@ -584,7 +584,7 @@ class ABGridSna:
             "type_v": type_v
         }
     
-    def compute_components(self, network_type: Literal["a", "b"]) -> Dict[str, pd.Series]:
+    def _compute_components(self, network_type: Literal["a", "b"]) -> Dict[str, pd.Series]:
         """
         Identify and extract significant network components.
 
@@ -607,7 +607,7 @@ class ABGridSna:
                 Components are sorted by size (largest first).
 
         Example:
-            >>> components = compute_components("a")
+            >>> components = _compute_components("a")
             >>> components["cliques"]
             0    ABC
             1    BCD
@@ -632,8 +632,60 @@ class ABGridSna:
 
         # Return components
         return components
+    
+    def _compute_network_centralization(self, network: nx.Graph) -> float:
+        """
+        Calculate the degree centralization of an undirected network.
 
-    def create_graph(self, network_type: Literal["a","b"]) -> str:
+        Centralization measures how concentrated the network structure is around
+        its most central node, comparing the actual network to a perfect star network.
+        Values range from 0 (completely decentralized) to 1 (perfectly centralized).
+
+        Args:
+            network (nx.Graph):
+                Undirected graph for which to calculate centralization.
+                Should typically be the undirected version of a directed graph.
+
+        Returns:
+            float: 
+                Network centralization value between 0 and 1, where:
+                - 0 indicates a completely decentralized network (all nodes have equal degree)
+                - 1 indicates a perfectly centralized network (star topology)
+                - Higher values suggest more centralized structure
+
+        Formula:
+            Centralization = Σ(max_centrality - node_centrality) / ((n-1)(n-2))
+            where n is the number of nodes.
+
+        Note:
+            This implementation uses degree centrality as the basis for centralization.
+            The network should have at least 3 nodes for meaningful centralization values.
+
+        Raises:
+            ZeroDivisionError: If the network has fewer than 3 nodes.
+            nx.NetworkXError: If the network is empty or invalid.
+        """
+        
+        # Get number of nodes
+        number_of_nodes = network.number_of_nodes()
+        
+        # Compute node centralities (degree values)
+        node_centralities = pd.Series(dict(nx.degree(network)))
+
+        # Compute Max centrality
+        max_centrality = node_centralities.max()
+        
+        # Compute network centralization
+        network_centralization = (
+            node_centralities
+                .rsub(max_centrality)
+                .sum()
+                / ((number_of_nodes - 1) * (number_of_nodes - 2))
+        )
+        
+        return network_centralization
+
+    def _create_graph(self, network_type: Literal["a","b"]) -> str:
         """
         Generate an SVG visualization of the specified network.
 
@@ -857,54 +909,3 @@ class ABGridSna:
         except StopIteration:
             return loc
         
-    def _compute_network_centralization(self, network: nx.Graph) -> float:
-        """
-        Calculate the degree centralization of an undirected network.
-
-        Centralization measures how concentrated the network structure is around
-        its most central node, comparing the actual network to a perfect star network.
-        Values range from 0 (completely decentralized) to 1 (perfectly centralized).
-
-        Args:
-            network (nx.Graph):
-                Undirected graph for which to calculate centralization.
-                Should typically be the undirected version of a directed graph.
-
-        Returns:
-            float: 
-                Network centralization value between 0 and 1, where:
-                - 0 indicates a completely decentralized network (all nodes have equal degree)
-                - 1 indicates a perfectly centralized network (star topology)
-                - Higher values suggest more centralized structure
-
-        Formula:
-            Centralization = Σ(max_centrality - node_centrality) / ((n-1)(n-2))
-            where n is the number of nodes.
-
-        Note:
-            This implementation uses degree centrality as the basis for centralization.
-            The network should have at least 3 nodes for meaningful centralization values.
-
-        Raises:
-            ZeroDivisionError: If the network has fewer than 3 nodes.
-            nx.NetworkXError: If the network is empty or invalid.
-        """
-        
-        # Get number of nodes
-        number_of_nodes = network.number_of_nodes()
-        
-        # Compute node centralities (degree values)
-        node_centralities = pd.Series(dict(nx.degree(network)))
-
-        # Compute Max centrality
-        max_centrality = node_centralities.max()
-        
-        # Compute network centralization
-        network_centralization = (
-            node_centralities
-                .rsub(max_centrality)
-                .sum()
-                / ((number_of_nodes - 1) * (number_of_nodes - 2))
-        )
-        
-        return network_centralization
