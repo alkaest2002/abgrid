@@ -129,7 +129,7 @@ class ABGridSociogram:
         if self.sna is None:
             raise AttributeError("SNA data must be set before computing statistics")
             
-        # Calculate cohesion indices based on mutual positive relationships
+        # Compute cohesion indices based on mutual positive relationships
         cohesion_index_type_i = (
             len(self.sna["edges_types_a"]["type_ii"]) * 2) / len(self.sna["network_a"].edges()
         )
@@ -137,7 +137,7 @@ class ABGridSociogram:
             len(self.sna["edges_types_a"]["type_ii"]) / len(self.sna["network_a"])
         )
         
-        # Calculate conflict indices based on mutual negative relationships
+        # Compute conflict indices based on mutual negative relationships
         conflict_index_type_i = (
             len(self.sna["edges_types_b"]["type_ii"]) * 2) / len(self.sna["network_b"].edges()
         )
@@ -440,15 +440,15 @@ class ABGridSociogram:
             # Test each quantile pair for best theoretical proportion match
             for low_q, high_q in quantile_pairs:
                 
-                # Calculate actual quantile threshold values
+                # Compute actual quantile threshold values
                 low_val = series.quantile(low_q)
                 high_val = series.quantile(high_q)
                 
-                # Calculate actual proportions below/above thresholds
+                # Compute actual proportions below/above thresholds
                 actual_low_prop = (series < low_val).sum() / series.shape[0]
                 actual_high_prop = (series > high_val).sum() / series.shape[0]
                 
-                # Calculate deviations from expected theoretical proportions
+                # Compute deviations from expected theoretical proportions
                 low_deviation = abs(actual_low_prop - low_q)
                 high_deviation = abs(actual_high_prop - (1 - high_q))
 
@@ -570,7 +570,7 @@ class ABGridSociogram:
             # Define angular offset pattern for current group (alternating and progressive)
             offset = idx % 2 * -np.pi + idx * 0.25
             
-            # Calculate angular spacing to distribute points evenly within group
+            # Compute angular spacing to distribute points evenly within group
             slice_angle = (2 * np.pi) / group_plot_data[coefficient].shape[0]
 
             # Reset index to preserve node labels for annotation

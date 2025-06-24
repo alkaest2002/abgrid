@@ -843,7 +843,7 @@ class ABGridSna:
                     # Add some randomness to position
                     random_offset = np.random.uniform(-0.05, 0.05, size=2)
                     
-                    # Calculate final position
+                    # Compute final position
                     candidate_pos = vertex + direction * distance_multiplier + random_offset
                     
                     # Update isolated node position
