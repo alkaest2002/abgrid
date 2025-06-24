@@ -300,9 +300,9 @@ def compute_descriptives(data) -> pd.DataFrame:
 
     # Compute descriptive statistics with pandas descrive
     descriptives = data.describe().T
-    
-    return (
-        descriptives
+
+    # Add other statistics
+    descriptives = (descriptives
             .rename(columns={ "50%": "median" })
             .assign(
                 cv=descriptives["std"].div(descriptives["mean"]),
@@ -310,9 +310,11 @@ def compute_descriptives(data) -> pd.DataFrame:
                 kt=data.kurt(),
                 gn=data.apply(gini_coefficient)
             )
+            # Reorder statistics
             .loc[:, ["count", "min", "max", "median", "mean", "std", "cv", "gn", "sk", "kt", "25%", "75%" ]]
-            .apply(pd.to_numeric, downcast="integer")
     )
+    
+    return descriptives
 
 def gini_coefficient(values: Union[Sequence[float], np.ndarray]) -> float:
     """
