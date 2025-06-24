@@ -20,6 +20,21 @@ from typing import Any, Dict, List, Optional, Protocol, Tuple, TypedDict
 from lib.abgrid_sna import SNADict, ABGridSna
 from lib.abgrid_sociogram import SociogramDict, ABGridSociogram
 
+class ProjectData(TypedDict):
+    """Structure for project configuration data loaded from project files."""
+    project_title: str
+    explanation: str
+    question_a: str
+    question_a_choices: str
+    question_b: str
+    question_b_choices: str
+
+class GroupData(TypedDict):
+    """Structure for group data loaded from group files."""
+    group: int
+    choices_a: List[Dict[str, Optional[str]]]  # Values can be None (empty choices)
+    choices_b: List[Dict[str, Optional[str]]]  # Values can be None (empty choices)
+
 class ReportData(TypedDict, total=False):
     """
     Structure for comprehensive report data passed to Jinja templates.
@@ -35,15 +50,14 @@ class ReportData(TypedDict, total=False):
     question_a: str
     question_b: str
     sna: SNADict
-    sociogram: SociogramDict  # Optional field, only present when with_sociogram=True
+    sociogram: SociogramDict  # Optional present when with_sociogram=True
     relevant_nodes_ab: Dict[str, pd.DataFrame]
     isolated_nodes_ab: Dict[str, pd.Index]
-
 
 class DataLoader(Protocol):
     """Protocol defining the interface for data loading utilities."""
     
-    def load_data(self, data_type: str, filepath: Path) -> Tuple[Optional[Dict[str, Any]], Optional[List[Dict[str, Any]]]]:
+    def load_data(self, data_type: str, filepath: Path) -> Tuple[Optional[Dict[str, Any]], Optional[List[str]]]:
         """Load and validate data from a file.
         
         Args:
@@ -115,7 +129,7 @@ class ABGridData:
             # Fallback to alphabetical sorting if numerical extraction fails
             self.groups_filepaths = sorted(groups_filepaths)
 
-    def get_project_data(self) -> Tuple[Optional[Dict[str, Any]], Optional[str]]:
+    def get_project_data(self) -> Tuple[Optional[ProjectData], Optional[str]]:
         """
         Load and validate project configuration data.
 
@@ -144,7 +158,7 @@ class ABGridData:
             error_message = self._get_pydantic_errors_messages(validation_errors or [])
             return None, error_message
 
-    def get_group_data(self, group_filepath: Path) -> Tuple[Optional[Dict[str, Any]], Optional[str]]:
+    def get_group_data(self, group_filepath: Path) -> Tuple[Optional[GroupData], Optional[str]]:
         """
         Load and validate group data from the specified file path.
 
@@ -318,7 +332,7 @@ class ABGridData:
         
         return report_data, None
 
-    def _get_pydantic_errors_messages(self, errors: List[Dict[str, Any]]) -> str:
+    def _get_pydantic_errors_messages(self, errors: List[str]) -> str:
         """
         Format Pydantic validation error messages into a readable string.
 
