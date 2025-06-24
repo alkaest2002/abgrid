@@ -316,30 +316,42 @@ def compute_descriptives(data) -> pd.DataFrame:
 
 def gini_coefficient(values: Union[Sequence[float], np.ndarray]) -> float:
     """
-    Calculate the Gini coefficient of a 1-dimensional sequence of values.
-
-    The Gini coefficient is a measure of statistical dispersion intended to represent 
-    the income or wealth distribution of a nation's residents. It is the most 
-    commonly used measure of inequality.
+    The Gini coefficient is a measure of statistical dispersion originally developed 
+    to represent income or wealth distribution, but widely applicable to any measure 
+    of inequality. It quantifies how unequally distributed values are within a dataset.
+    
+    This implementation automatically shifts negative values to ensure non-negative 
+    input (by subtracting the minimum value), preserving relative differences and 
+    inequality structure while enabling proper Gini calculation.
 
     Parameters:
     values (Union[Sequence[float], np.ndarray]): A 1-dimensional sequence (such as a 
-    list, tuple, or numpy array) which contains the values for which the Gini 
-    coefficient is to be calculated.
+    list, tuple, or numpy array) containing the values for which the Gini 
+    coefficient is to be calculated. Values can be negative; they will be 
+    automatically shifted to non-negative while preserving relative inequality.
 
     Returns:
-    float: The Gini coefficient, a value between 0 and 1 where 0 indicates 
-    perfect equality and 1 indicates maximal inequality.
+    float: The Gini coefficient, a value between 0 and 1 where:
+        - 0 indicates perfect equality (all values identical)
+        - 1 indicates maximal inequality (one value holds everything, others have nothing)
+        - Values closer to 0 suggest more equal distribution
+        - Values closer to 1 suggest more concentrated/unequal distribution
 
     Raises:
     ValueError: If the input is not a 1-dimensional sequence.
 
     Example:
-    gini = gini_coefficient([40000, 50000, 60000, 75000, 80000, 180000])
-    print(gini)  # Output: Gini coefficient as a float
+    # Sociometric status scores (can include negative values)
+    status_scores = [-2.1, -0.5, 0.8, 1.2, 3.4]
+    gini = gini_coefficient(status_scores)
+    print(f"Status inequality: {gini:.3f}")  # Output: 0.382
+    
+    # Perfect equality
+    equal_values = [5, 5, 5, 5, 5]
+    print(f"Equal distribution: {gini_coefficient(equal_values)}")  # Output: 0.0
     """
     # Convert to numpu array (make sure values are positive)
-    values = np.abs(np.array(values, dtype=np.float64))
+    values = np.array(values, dtype=np.float64) - np.min(values)
     
     # Sort the values
     sorted_values = np.sort(values)
