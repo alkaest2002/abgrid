@@ -131,7 +131,7 @@ class ABGridSociogram:
             
         # Compute cohesion indices based on mutual positive relationships
         cohesion_index_type_i = (
-            len(self.sna["edges_types_a"]["type_ii"]) * 2 / len(self.sna["network_a"].edges())
+            (len(self.sna["edges_types_a"]["type_ii"]) * 2) / len(self.sna["network_a"].edges())
         )
         cohesion_index_type_ii = (
             len(self.sna["edges_types_a"]["type_ii"]) / len(self.sna["network_a"])
@@ -139,7 +139,7 @@ class ABGridSociogram:
         
         # Compute conflict indices based on mutual negative relationships
         conflict_index_type_i = (
-            len(self.sna["edges_types_b"]["type_ii"]) * 2 / len(self.sna["network_b"].edges())
+            (len(self.sna["edges_types_b"]["type_ii"]) * 2) / len(self.sna["network_b"].edges())
         )
         conflict_index_type_ii = (
             len(self.sna["edges_types_b"]["type_ii"]) / len(self.sna["network_b"])
