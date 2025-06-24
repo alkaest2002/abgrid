@@ -48,11 +48,11 @@ class GroupSchema(BaseModel):
     Attributes:
         group: Group identifier (1-20)
         choices_a: List of choice dictionaries for question A. Each dictionary
-                  contains a single letter key mapped to a comma-separated string
+                  contains a single-letter key mapped to a comma-separated string
                   of single letter values (or None)
         choices_b: List of choice dictionaries for question B. Each dictionary
-                  contains a single letter key mapped to a comma-separated string
-                  of single letter values (or None)
+                  contains a single-letter key mapped to a comma-separated string
+                  of single-letter values (or None)
     
     Note:
         - Keys in choices_a and choices_b must be identical
