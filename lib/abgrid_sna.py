@@ -138,7 +138,7 @@ class ABGridSna:
             self.sna[f"edges_{network_type}"] = self._unpack_network_edges(packed_edges)
             self.sna[f"network_{network_type}"] = nx.DiGraph(self.sna[f"edges_{network_type}"])
 
-        # Add isolated nodes to networks A and B and 
+        # Add isolated nodes to networks A and B, and 
         # store nodes layout locations
         for network_type, network, nodes in [
             ("a", self.sna["network_a"], self.sna["nodes_a"]), 
@@ -291,7 +291,7 @@ class ABGridSna:
         micro_level_stats["nd"] += (micro_level_stats["ic"] == 0).astype(int)
         micro_level_stats["nd"] += (micro_level_stats["lns"].str.len() == 0).astype(int) * 2
 
-        # Make sure that isolated nodes have no metric data
+        # Ensure that isolated nodes have no centrality metric data
         numeric_metrics_colums = [c for c in micro_level_stats.select_dtypes("number").columns if c != "nd"]
         micro_level_stats.loc[micro_level_stats["nd"].eq(3), numeric_metrics_colums] = 0
 
@@ -429,7 +429,7 @@ class ABGridSna:
     
     def _compute_relevant_nodes_ab(self, threshold: float = 0.05) -> Dict[str, pd.DataFrame]:
         """   
-        Finds nodes that rank highly (low rank values) in various centrality measures
+        Finds nodes that rank highly (indicated by low rank values)
         for both network A and network B.
         
         Args:
@@ -466,7 +466,7 @@ class ABGridSna:
         # Process both positive (a) and negative (b) relevance directions
         for valence_type in relevant_nodes_ab.keys():
 
-            # Select micro_stats abd rankings to use
+            # Select micro_stats and rankings to use
             micro_stats =  self.sna["micro_stats_a"] if valence_type == "a" else self.sna["micro_stats_b"]
             rankings = self.sna["rankings_a"] if valence_type == "a" else self.sna["rankings_b"]
             
@@ -604,7 +604,7 @@ class ABGridSna:
                 - strongly_connected: Strongly connected components in the directed graph
                 - weakly_connected: Weakly connected components in the directed graph
                 
-                Each Series contains components as concatenated, sorted node strings.
+                Each Series contains components as concatenated strings of sorted node identifiers.
                 Components are sorted by size (largest first).
 
         Example:
@@ -639,7 +639,7 @@ class ABGridSna:
 
         Centralization measures how concentrated the network structure is around
         its most central node, comparing the actual network to a perfect star network.
-        Values range from 0 (completely decentralized) to 1 (perfectly centralized).
+        Values range from 0 (evenly distributed) to 1 (perfectly centralized).
 
         Args:
             network (nx.Graph):
@@ -649,7 +649,7 @@ class ABGridSna:
         Returns:
             float: 
                 Network centralization value between 0 and 1, where:
-                - 0 indicates a completely decentralized network (all nodes have equal degree)
+                - 0 indicates an evenly distributed network (all nodes have equal degree)
                 - 1 indicates a perfectly centralized network (star topology)
                 - Higher values suggest more centralized structure
 
