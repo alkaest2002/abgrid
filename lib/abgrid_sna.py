@@ -157,7 +157,7 @@ class ABGridSna:
             # Store current network layout locations
             self.sna[f"loc_{network_type}"] = updated_loc
 
-            # Add current network adjacency matrix
+            # Store current network adjacency matrix
             self.sna[f"adjacency_{network_type}"] = nx.to_pandas_adjacency(network, nodelist=nodes)
                     
         # Store edge types, components, macro stats, micro stats, descriptives, rankings and graphs
