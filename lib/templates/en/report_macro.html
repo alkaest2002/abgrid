@@ -58,7 +58,7 @@
 {% endmacro %}
 
 {% macro render_sna_measures_label(measure) %}
-    {% if measure == "ic" %}In degree Centrality{% endif%}
+    {% if measure == "ic" %}In-Degree Centrality{% endif%}
     {% if measure == "pr" %}PageRank Centrality{% endif%}
     {% if measure == "kz" %}Katz Centrality{% endif%}
     {% if measure == "bt" %}Betweenness Centrality{% endif%}
@@ -67,21 +67,21 @@
 {% endmacro %}
 
 {% macro render_sociogram_measures_label(measure) %}
-    {% if measure == "rp" %}Received preferences{% endif%}
-    {% if measure == "rr" %}Received rejections{% endif%}
+    {% if measure == "rp" %}Received Preferences{% endif%}
+    {% if measure == "rr" %}Received Rejections{% endif%}
     {% if measure == "gp" %}Given Preferences{% endif%}
-    {% if measure == "gr" %}Given rejections{% endif%}
-    {% if measure == "mp" %}Mutual preferences{% endif%}
-    {% if measure == "mr" %}Mutual rejections{% endif%}
+    {% if measure == "gr" %}Given Rejections{% endif%}
+    {% if measure == "mp" %}Mutual Preferences{% endif%}
+    {% if measure == "mr" %}Mutual Rejections{% endif%}
     {% if measure == "or" %}Orientation{% endif%}
     {% if measure == "im" %}Impact{% endif%}
     {% if measure == "bl" %}Balance{% endif%}
-    {% if measure == "ai" %}Affiliation index{% endif%}
-    {% if measure == "ii" %}Influence index{% endif%}
-    {% if measure == "ui_i" %}Type I cohesion index{% endif%}
-    {% if measure == "ui_ii" %}Type II cohesion index{% endif%}
-    {% if measure == "wi_i" %}Type I conflitct index{% endif%}
-    {% if measure == "wi_ii" %}Type II conflitct index{% endif%}
+    {% if measure == "ai" %}Affiliation Index{% endif%}
+    {% if measure == "ii" %}Influence Index{% endif%}
+    {% if measure == "ui_i" %}Type I Cohesion Index{% endif%}
+    {% if measure == "ui_ii" %}Type II Cohesion Index{% endif%}
+    {% if measure == "wi_i" %}Type I Conflict Index{% endif%}
+    {% if measure == "wi_ii" %}Type II Conflict Index{% endif%}
 {% endmacro %}
 
 {% macro render_sociogram_graph_label(type) %}
