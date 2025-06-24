@@ -144,8 +144,8 @@ class ABGridMain:
             ) as file:
                 file.write(rendered_group_template)
             
-    @notify_decorator("generate answersheet file")
-    def generate_answer_sheets(self, language: str) -> None:
+    @notify_decorator("generate answersheets")
+    def generate_answersheets(self, language: str) -> None:
         """
         Generate and render PDF answer sheets for all project groups.
 
@@ -188,7 +188,7 @@ class ABGridMain:
             # Persist answersheet to disk
             self._render_pdf("answersheet", sheets_data, group_file.stem, language)
 
-    @notify_decorator("generate AB-Grid reports")
+    @notify_decorator("generate reports")
     def generate_reports(self, language: str, with_sociogram: bool = False) -> None:
         """
         Generate comprehensive reports for all project groups and export summarized data.

@@ -72,7 +72,7 @@ try:
 
             case "sheets":
                 # Generate answersheets
-                abgrid_main.generate_answer_sheets(args.language)
+                abgrid_main.generate_answersheets(args.language)
             
             case "reports":
                 # Generate reports
