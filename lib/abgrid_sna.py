@@ -456,7 +456,8 @@ class ABGridSna:
             ValueError: If rankings or micro_stats for both networks are not available.
         """
         # Make sure data is available
-        if self.sna["rankings_a"] is None or self.sna["rankings_b"] is None or self.sna["micro_stats_a"] is None or self.sna["micro_stats_b"] is None:
+        if self.sna["rankings_a"] is None or self.sna["rankings_b"] is None\
+                or self.sna["micro_stats_a"] is None or self.sna["micro_stats_b"] is None:
             raise ValueError("SNA micro stats and rankings for both networks a and b are required.")
         
         # Init dict with empty sub-dicts for storing relevant nodes
