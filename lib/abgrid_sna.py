@@ -631,7 +631,6 @@ class ABGridSna:
             "weakly_connected": pd.Series([ "".join(sorted(list(c))) for c in sorted(nx.weakly_connected_components(network), key=len, reverse=True) if len(c) > 2 ]),
         }
 
-        # Return components
         return components
     
     def _compute_network_centralization(self, network: nx.Graph) -> float:
