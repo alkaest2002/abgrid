@@ -21,7 +21,7 @@ from matplotlib import pyplot as plt
 from typing import Any, Callable, Dict, List, Optional, Sequence, Set, Union
 from lib import EVENT_ERROR
 
-def handle_errors_decorator(emitter) -> Callable:
+def handle_errors_decorator(dispatcher) -> Callable:
     def decorator(function: Callable) -> Callable:
         """
         Decorator that wraps a function with notification capabilities.
@@ -54,7 +54,7 @@ def handle_errors_decorator(emitter) -> Callable:
                 return result
             except Exception as error:
                 error_message = extract_traceback_info(error)
-                emitter.emit(dict(
+                dispatcher.dispatch(dict(
                     event_type=EVENT_ERROR, 
                     event_message=error_message,
                     exception_type=type(error).__name__,

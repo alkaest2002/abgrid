@@ -528,6 +528,7 @@ class ABGridMain:
         
         # Process each group file to generate individual reports
         for group_file in self.abgrid_data.groups_filepaths:
+            
             # Signal processing of individual group
             event_dispatcher.dispatch({
                 "event_type": EVENT_START, 
