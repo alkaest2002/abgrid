@@ -17,10 +17,20 @@ from pathlib import Path
 from typing import Literal, Dict, Any, List
 from weasyprint import HTML
 
-from lib import SYMBOLS, jinja_env
 from lib.abgrid_yaml import ABGridYAML
 from lib.abgrid_data import ABGridData
-from lib.abgrid_utils import notify_decorator, to_json_serializable
+from lib.abgrid_utils import to_json_serializable
+from lib.abgrid_emitter import EventEmitter
+from lib.abgrid_logger_print import PrintLogger
+from lib import EVENT_ERROR, EVENT_START, EVENT_END, SYMBOLS, jinja_env
+
+# Init emitter and logger
+event_emitter = EventEmitter()
+event_logger = PrintLogger()
+
+# Register events using module-level constants
+for event_type in [EVENT_START, EVENT_END, EVENT_ERROR]:
+    event_emitter.add_listener(event_type, event_logger)
 
 class ABGridMain:
     """
@@ -60,7 +70,6 @@ class ABGridMain:
         )
 
     @staticmethod
-    @notify_decorator("init project")
     def init_project(project: str, project_folderpath: Path, language: str) -> None:
         """
         Initialize a new project with the required folder structure and configuration files.
@@ -78,6 +87,9 @@ class ABGridMain:
             FileNotFoundError: If the language template file doesn't exist.
             yaml.YAMLError: If there's an error processing the YAML template.
         """
+        # Emit event
+        event_emitter.emit(dict(event_type=EVENT_START, event_message="init project"))
+
         # Create necessary directories for the project
         os.makedirs(project_folderpath)
         os.makedirs(project_folderpath / "reports")
@@ -94,7 +106,9 @@ class ABGridMain:
         with open(project_folderpath / f"{project}.yaml", 'w') as fout:
             yaml.dump(yaml_data, fout, sort_keys=False)
 
-    @notify_decorator("generate group inputs files")
+        # Emit event
+        event_emitter.emit(dict(event_type=EVENT_END, event_message="project correctly initialized"))
+
     def generate_group_inputs(
         self, 
         groups: range, 
@@ -120,6 +134,9 @@ class ABGridMain:
             Member identification uses the first N letters from the SYMBOLS constant,
             where N is the value of members_per_group.
         """
+        # Emit event
+        event_emitter.emit(dict(event_type=EVENT_START, event_message="generate group data files"))
+
         # Get group template
         group_template = jinja_env.get_template(f"/{language}/group.html")
         
@@ -128,6 +145,7 @@ class ABGridMain:
         
         # Loop through each group and generate input files
         for group in groups:
+             
             # Prepare data for the current group
             template_data = dict(group=group, members=members_per_group_letters)
             
@@ -136,15 +154,18 @@ class ABGridMain:
             rendered_group_template = "\n".join([
                 line for line in rendered_group_template.split("\n") if line.strip()
             ])
-                
+
+            # Emit event
+            event_emitter.emit(dict(event_type=EVENT_START, event_message=f"generating group file for '{group_file.name}'"))
+    
             # Save the current group to disk
-            with open(
-                self.abgrid_data.project_folderpath / f"{self.abgrid_data.project}_g{group}.yaml", 
-                "w"
-            ) as file:
+            group_file = self.abgrid_data.project_folderpath / f"{self.abgrid_data.project}_g{group}.yaml"
+            with open(group_file, "w") as file:
                 file.write(rendered_group_template)
+          
+        # Emit event
+        event_emitter.emit(dict(event_type=EVENT_END, event_message="all group data files were generated"))
             
-    @notify_decorator("generate answersheets")
     def generate_answersheets(self, language: str) -> None:
         """
         Generate and render PDF answer sheets for all project groups.
@@ -165,6 +186,9 @@ class ABGridMain:
             generating answer sheets. All validation errors are collected and
             reported together.
         """
+        # Emit event
+        event_emitter.emit(dict(event_type=EVENT_START, event_message="generate answersheets"))
+
         # Load sheets data
         sheets_data, sheets_data_errors = self.abgrid_data.get_project_data()
 
@@ -182,13 +206,15 @@ class ABGridMain:
             sheets_data["group"] = int(re.search(r'(\d+)$', group_file.stem).group(0))
             sheets_data["likert"] = SYMBOLS[:len(group_data["choices_a"])]
 
-            # Notify user
-            print(f"Generating answersheet: {group_file.name}")
+            # Emit event
+            event_emitter.emit(dict(event_type=EVENT_START, event_message=f"generating answersheets for '{group_file.name}'"))
             
             # Persist answersheet to disk
             self._render_pdf("answersheet", sheets_data, group_file.stem, language)
 
-    @notify_decorator("generate reports")
+        # Emit event
+        event_emitter.emit(dict(event_type=EVENT_END, event_message="all answersheets were generated"))
+
     def generate_reports(self, language: str, with_sociogram: bool = False) -> None:
         """
         Generate comprehensive reports for all project groups and export summarized data.
@@ -212,6 +238,10 @@ class ABGridMain:
             to reduce file size and improve readability. All reports are saved in
             the project's reports folder.
         """
+        # Emit event
+        event_emitter.emit(dict(event_type=EVENT_START, event_message="generate reports"))
+
+        # Init dict for storing all reports data
         all_data = {}
         
         # Iterate over each group file to generate a report
@@ -221,6 +251,9 @@ class ABGridMain:
             if report_errors:
                 raise ValueError(report_errors)
             
+            # Emit event
+            event_emitter.emit(dict(event_type=EVENT_START, event_message=f"generating report for '{group_file.name}'"))
+           
             # Persist current group's report to disk
             self._render_pdf("report", {**report_data, "with_sociogram": with_sociogram}, group_file.stem, language)
         
@@ -239,13 +272,13 @@ class ABGridMain:
                     "relevant_nodes_ab.*",
                 ],
             )
-
-            # Notify user
-            print(f"Generating report: {group_file.name}")                   
         
         # Persist all collected data to disk as JSON
         with open(self.abgrid_data.project_folderpath / f"{self.abgrid_data.project}_data.json", "w") as fout:
             json.dump(all_data, fout, indent=4)
+
+        # Emit event
+        event_emitter.emit(dict(event_type=EVENT_END, event_message="all reports were generated"))
 
     def _render_pdf(
         self, 

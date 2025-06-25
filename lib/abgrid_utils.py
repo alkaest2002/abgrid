@@ -10,28 +10,18 @@ The code is part of the AB-Grid project and is licensed under the MIT License.
 
 import io
 import datetime
-import re
 import pandas as pd
 import numpy as np
 import json
 
-from base64 import b64encode
 from pathlib import Path
-from typing import Callable, Any, List, Optional, Sequence, Union
 from functools import wraps
-
+from base64 import b64encode
 from matplotlib import pyplot as plt
+from typing import Any, Callable, Dict, List, Optional, Sequence, Set, Union
+from lib import EVENT_ERROR
 
-def notify_decorator(operation_name: str) -> Callable:
-    """
-    Decorator factory that creates a decorator to add notification capabilities to functions.
-    
-    Args:
-        operation_name (str): Name of the operation to be displayed in notifications.
-        
-    Returns:
-        Callable: A decorator function that wraps the target function with notifications.
-    """
+def handle_errors_decorator(emitter) -> Callable:
     def decorator(function: Callable) -> Callable:
         """
         Decorator that wraps a function with notification capabilities.
@@ -46,7 +36,7 @@ def notify_decorator(operation_name: str) -> Callable:
         def wrapper(*args: Any, **kwargs: Any) -> Any:
             """
             Wrapper function executed in place of the original function.
-            It adds print notifications before and after function execution.
+            It adds error handling with event emission capabilities.
             
             Args:
                 *args (Any): Positional arguments to pass to the original function.
@@ -57,36 +47,54 @@ def notify_decorator(operation_name: str) -> Callable:
                 
             Raises:
                 Exception: Re-raises any exception that occurs during function execution
-                after printing error details and traceback information.
+                after emitting error details and traceback information.
             """
-            print(f"Operation '{operation_name}' is being currently executed.")
-            
             try:
                 result = function(*args, **kwargs)
-                print(f"Operation '{operation_name}' was successfully executed.")
                 return result
             except Exception as error:
-                print(f"Error while executing operation '{operation_name}'.\n{error}")
-                
-                # Retrieve the traceback object from the exception
-                traceback = error.__traceback__
-                while traceback is not None:
-                    if Path(traceback.tb_frame.f_code.co_filename).name != "abgrid_utils.py":
-                        print(
-                            "-->",
-                            Path(traceback.tb_frame.f_code.co_filename).name,
-                            traceback.tb_frame.f_code.co_name,
-                            "line code",
-                            traceback.tb_lineno,
-                            end="\n"
-                        )
-                    traceback = traceback.tb_next
-                
+                error_message = extract_traceback_info(error)
+                emitter.emit(dict(
+                    event_type=EVENT_ERROR, 
+                    event_message=error_message,
+                    exception_type=type(error).__name__,
+                    exception_str=str(error)
+                ))
                 raise
-        
         return wrapper
-    
     return decorator
+
+def extract_traceback_info(error: Exception, exclude_files: Optional[Set[str]] = None) -> List[Dict[str, Any]]:
+    """
+    Extract relevant traceback information from an exception.
+    
+    Args:
+        error: Exception object with traceback
+        exclude_files: Set of filenames to exclude from traceback
+        
+    Returns:
+        List of dictionaries containing filename, function name, and line number
+    """
+    if exclude_files is None:
+        exclude_files = {"abgrid_utils.py", "abgrid_logger.py"}
+    
+    traceback_info = []
+    current_traceback = error.__traceback__
+    
+    while current_traceback is not None:
+        frame = current_traceback.tb_frame
+        filename = Path(frame.f_code.co_filename).name
+        
+        if filename not in exclude_files:
+            traceback_info.append({
+                'filename': filename,
+                'function_name': frame.f_code.co_name,
+                'line_number': current_traceback.tb_lineno
+            })
+        
+        current_traceback = current_traceback.tb_next
+    
+    return traceback_info
 
 def to_json_serializable(
     data: Any,
@@ -263,25 +271,6 @@ def figure_to_base64_svg(fig: plt.Figure) -> str:
     base64_encoded_string = b64encode(buffer.getvalue()).decode()
     
     return f"data:image/svg+xml;base64,{base64_encoded_string}"
-
-
-def get_robust_threshold(n: float) -> float:
-    """
-    Calculate a robust threshold used for median/mad computations.
-
-    This threshold ensures a minimum level of robustness for statistical
-    calculations based on the number of data points provided.
-
-    Args:
-        n (float): The number of data points, typically representing the size of a dataset.
-
-    Returns:
-        float: A robust threshold value calculated based on the input size 'n'.
-               The result is set to a minimum of 0.6745 or adjusted according to
-               the formula (1.5 - (n / 50)), whichever is larger.
-    """
-    # Define robust threshold for median/mad computations
-    return max(0.6745, 1.5 - (n / 50))
 
 def compute_descriptives(data) -> pd.DataFrame:
     """
