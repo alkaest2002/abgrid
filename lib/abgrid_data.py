@@ -326,8 +326,8 @@ class ABGridData:
 
         # Add isolated nodes to report data
         report_data["isolated_nodes_ab"] = {
-            "a": sna_results["micro_stats_a"].loc[sna_results["micro_stats_a"]["nd"].eq(3), :].index,
-            "b": sna_results["micro_stats_b"].loc[sna_results["micro_stats_b"]["nd"].eq(3), :].index
+            "a": sna_results["micro_stats_a"].loc[sna_results["micro_stats_a"]["nd"].eq(3)].index,
+            "b": sna_results["micro_stats_b"].loc[sna_results["micro_stats_b"]["nd"].eq(3)].index
         }
         
         return report_data, None
