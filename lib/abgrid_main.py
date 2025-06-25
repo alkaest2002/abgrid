@@ -45,7 +45,6 @@ event_logger = PrintLogger()
 # The error decorator will automatically use this dispatcher for exception handling
 event_logger.subscribe_to(event_dispatcher, EVENT_START, EVENT_END, EVENT_ERROR)
 
-
 class ABGridMain:
     """
     Main orchestrator class for AB-Grid project management and operations.
