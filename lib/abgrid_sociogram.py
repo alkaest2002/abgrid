@@ -431,96 +431,108 @@ class ABGridSociogram:
             Returns:
                 A tuple containing (low_threshold, high_threshold) quantile values.
             """
-            # Set epsilon tolerance for quantile proportion matching
+            # Tolerance for matching actual vs theoretical quantile proportions
             epsilon = 0.05
 
-            # Define quantile pairs to test in order of preference (low_quantile, high_quantile)
+            # Quantile pairs ordered by preference: (low_quantile, high_quantile)
+            # Starting with moderate splits and moving to more extreme ones
             quantile_pairs = [(0.25, 0.75), (0.2, 0.8), (0.15, 0.85), (0.10, 0.90), (0.05, 0.95)]
 
-            # Test each quantile pair for best theoretical proportion match
+            # Test each quantile pair to find best match between actual and theoretical proportions
             for low_q, high_q in quantile_pairs:
                 
-                # Compute actual quantile threshold values
+                # Calculate threshold values at specified quantiles
                 low_val = series.quantile(low_q)
                 high_val = series.quantile(high_q)
                 
-                # Compute actual proportions below/above thresholds
+                # Calculate actual proportions of data below/above thresholds
                 actual_low_proportion = (series < low_val).sum() / series.shape[0]
                 actual_high_proportion = (series > high_val).sum() / series.shape[0]
                 
-                # Compute deviations from expected theoretical proportions
+                # Calculate deviations between actual and expected proportions
+                # Expected: low_q proportion below threshold, (1-high_q) proportion above threshold
                 low_deviation = abs(actual_low_proportion - low_q)
                 high_deviation = abs(actual_high_proportion - (1 - high_q))
 
-                # Return first quantile pair within epsilon tolerance
+                # Return first quantile pair where both deviations are within tolerance
                 if low_deviation <= epsilon and high_deviation <= epsilon:
                     return (low_val, high_val)
             
-            # If no quantiles meet epsilon criteria, return the last tested pair as fallback
+            # Fallback: return last tested pair if none meet tolerance criteria
             return (low_val, high_val)
-        
-        # Cache relevant columns for computational efficiency
-        impact = sociogram_micro_stats["im"]
-        balance = sociogram_micro_stats["bl"]
-        prefs_a = sociogram_micro_stats["rp"]
-        prefs_b = sociogram_micro_stats["rr"]
-        
-        # Determine adaptive impact thresholds using best quantile matching
+
+        # Extract key metrics from sociogram statistics for efficient repeated access
+        impact = sociogram_micro_stats["im"]  # Impact measure
+        balance = sociogram_micro_stats["bl"] # Balance between positive/negative preferences
+        prefs_a = sociogram_micro_stats["rp"] # Received preferences (positive)
+        prefs_b = sociogram_micro_stats["rr"] # Received rejections (negative)
+
+        # Calculate adaptive impact thresholds using quantile matching algorithm
         impact_quantile_low, impact_quantile_high = _select_best_quantiles(impact)
-        
-        # Create boolean masks for impact levels
-        impact_low = impact.lt(impact_quantile_low)
-        impact_high = impact.gt(impact_quantile_high)
-        impact_median = impact.between(impact_quantile_low, impact_quantile_high, inclusive="both")
-        
-        # Determine adaptive balance thresholds using absolute balance values
+
+        # Create impact level classification masks
+        impact_low = impact.lt(impact_quantile_low) # Low impact individuals
+        impact_high = impact.gt(impact_quantile_high) # High impact individuals  
+        impact_median = impact.between(impact_quantile_low, impact_quantile_high, inclusive="both") # Medium impact
+
+        # Calculate adaptive balance thresholds using absolute balance values
+        # Absolute balance removes direction, focusing on magnitude of imbalance
         abs_balance = balance.abs()
         abs_balance_quantile_low, abs_balance_quantile_high = _select_best_quantiles(abs_balance)
-        abs_balance_high = abs_balance.gt(abs_balance_quantile_high)
-        
-        # Create boolean masks for prevalent/dominant types
-        # prevalent is a less than dominant
-        a_prevalent = balance.gt(0) & ~abs_balance_high
-        b_prevalent = balance.lt(0) & ~abs_balance_high
-        a_dominant = balance.gt(0) & abs_balance_high
-        b_dominant = balance.lt(0) & abs_balance_high
-        
-        # Neutral are all those absolute balance values between 0 and low_quantile
-        # i.e., actual balance around 0 from both sides
+        abs_balance_high = abs_balance.gt(abs_balance_quantile_high)  # High absolute balance (strong imbalance)
+
+        # Create balance type classification masks
+        # Prevalent: moderate imbalance (positive or negative bias but not extreme)
+        a_prevalent = balance.gt(0) & ~abs_balance_high # Moderately positive balance
+        b_prevalent = balance.lt(0) & ~abs_balance_high # Moderately negative balance
+
+        # Dominant: extreme imbalance (strong positive or negative bias)
+        a_dominant = balance.gt(0) & abs_balance_high # Strongly positive balance
+        b_dominant = balance.lt(0) & abs_balance_high # Strongly negative balance
+
+        # Neutral: low absolute balance (minimal preference imbalance)
         neutral = abs_balance.lt(abs_balance_quantile_low)  
-        
-        # Initialize status series with default placeholder values
+
+        # Initialize status classification array
         status = pd.Series(["-"] * sociogram_micro_stats.shape[0], index=sociogram_micro_stats.index)
-        
-        # Assign status classifications based on combined impact and balance patterns
+
+        # Assign sociometric status classifications based on impact and balance patterns
+
+        # Isolated: individuals with no recorded preferences (sum of first 4 columns = 0)
         status.loc[sociogram_micro_stats.iloc[:, :4].sum(axis=1).eq(0)] = "isolated"
+
+        # Marginal: low impact regardless of balance pattern
         status.loc[impact_low] = "marginal"
-        
-        # Popular: positive dominant with high or medium impact
+
+        # Popular: positive dominant balance with significant impact (high or medium)
         status.loc[a_dominant & impact_high] = "popular"
         status.loc[a_dominant & impact_median] = "popular"
-        
-        # Appreciated: positive prevalent (but not dominant) with high or medium impact
+
+        # Appreciated: positive prevalent balance with significant impact
         status.loc[a_prevalent & impact_high] = "appreciated"
         status.loc[a_prevalent & impact_median] = "appreciated"
-        
-        # Rejected: negative dominant with high or medium impact
+
+        # Rejected: negative dominant balance with significant impact
         status.loc[b_dominant & impact_high] = "rejected"
         status.loc[b_dominant & impact_median] = "rejected"
-        
-        # Disliked: negative prevalent (but not dominant) with high or medium impact
+
+        # Disliked: negative prevalent balance with significant impact
         status.loc[b_prevalent & impact_high] = "disliked"
         status.loc[b_prevalent & impact_median] = "disliked"
-        
-        # Controversial/Ambitendent: balanced relationships, differentiated by impact level
-        status.loc[balance.eq(0) & impact_median] = "ambitendent"
-        status.loc[balance.eq(0) & impact_high] = "controversial"
 
-        # first conditiion ensures both prefs are greater than 0
+        # Handle perfectly balanced cases (balance exactly equals 0)
+        status.loc[balance.eq(0) & impact_median] = "ambitendent" # Medium impact, perfect balance
+        status.loc[balance.eq(0) & impact_high] = "controversial" # High impact, perfect balance
+
+        # Handle near-balanced cases (neutral category with both positive and negative preferences)
+        # Condition 1: prefs_a.mul(prefs_b).gt(0) ensures both preference types > 0
+        # Condition 2: neutral ensures low absolute balance (near-balanced)
+        # Condition 3: impact level determines ambitendent vs controversial classification
         status.loc[prefs_a.mul(prefs_b).gt(0) & neutral & impact_median] = "ambitendent"
         status.loc[prefs_a.mul(prefs_b).gt(0) & neutral & impact_high] = "controversial"
-        
+
         return status
+
 
     def _create_graph(self, coefficient: Literal["ai", "ii"]) -> str:
         """
