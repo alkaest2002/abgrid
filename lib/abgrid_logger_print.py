@@ -1,11 +1,11 @@
 """
 Event-driven logging system for AB-Grid project operations.
 
-This module provides a decorator-based notification system using event emitters
-and listeners to track function execution with structured logging capabilities.
+This module provides a logger that subscribes to event dispatchers to track 
+function execution with structured logging capabilities.
 
 Author: Pierpaolo Calanna
-Date Created: May 3, 2025
+Date Created: Wed Jun 25 2025
 License: MIT License
 """
 
@@ -15,22 +15,177 @@ from lib import EVENT_ERROR
 
 class PrintLogger:
     """
-    Console logger implementing EventListener protocol.
+    Console logger implementing EventSubscriber protocol.
     
-    This class handles operation lifecycle events by printing formatted messages
+    This class subscribes to operation lifecycle events and prints formatted messages
     to the console, including detailed error information with traceback data
     when errors occur.
     
     The logger distinguishes between regular operation events and error events,
-    providing appropriate formatting for each type.
+    providing appropriate formatting for each type. It can subscribe to multiple
+    event types across multiple dispatchers and manage its own subscriptions.
+    
+    Attributes:
+        _subscriptions (Dict): Internal tracking of active subscriptions for cleanup purposes.
+    
+    Examples:
+        >>> logger = PrintLogger()
+        >>> logger.subscribe_to(dispatcher, 'start', 'end', 'error')
+        >>> # Logger will now receive and display events when dispatcher dispatches them
+        >>> logger.unsubscribe_from(dispatcher, 'start')  # Stop receiving start events
+        >>> logger.unsubscribe_all()  # Clean up all subscriptions
     """
     
-    def handle_event(self, data: Dict[str, Any]) -> None:
+    def __init__(self) -> None:
+        """
+        Initialize the print logger with empty subscription tracking.
+        
+        Sets up internal structures for managing subscriptions across
+        multiple dispatchers and event types.
+        """
+        # Track active subscriptions for cleanup: {dispatcher: set of event_types}
+        self._subscriptions: Dict[Any, set] = {}
+    
+    def subscribe_to(self, dispatcher, *event_types: str) -> None:
+        """
+        Subscribe this logger to specific event types on a dispatcher.
+        
+        This method registers the logger with the dispatcher to receive notifications
+        when events of the specified types are dispatched. The logger will start
+        receiving and displaying these events immediately.
+        
+        Args:
+            dispatcher: EventDispatcher instance to subscribe to. Must have a
+                       subscribe() method that accepts event_type and subscriber.
+            *event_types (str): Variable number of event type names to subscribe to.
+                               Common types include 'start', 'end', 'error'.
+                
+        Returns:
+            None
+            
+        Raises:
+            AttributeError: If the dispatcher doesn't have a subscribe() method.
+            TypeError: If the dispatcher rejects this logger (not implementing EventSubscriber).
+            
+        Examples:
+            >>> logger = PrintLogger()
+            >>> logger.subscribe_to(dispatcher, 'start', 'end')
+            >>> logger.subscribe_to(another_dispatcher, 'error')
+            >>> # Logger now receives events from both dispatchers
+        """
+        # Track subscriptions for this dispatcher
+        if dispatcher not in self._subscriptions:
+            self._subscriptions[dispatcher] = set()
+        
+        for event_type in event_types:
+            # Register with the dispatcher
+            dispatcher.subscribe(event_type, self)
+            
+            # Track the subscription internally
+            self._subscriptions[dispatcher].add(event_type)
+    
+    def unsubscribe_from(self, dispatcher, *event_types: str) -> None:
+        """
+        Unsubscribe this logger from specific event types on a dispatcher.
+        
+        Removes the logger's registration for the specified event types.
+        The logger will stop receiving these events immediately.
+        
+        Args:
+            dispatcher: EventDispatcher instance to unsubscribe from
+            *event_types (str): Variable number of event type names to unsubscribe from
+                
+        Returns:
+            None
+            
+        Note:
+            This operation is idempotent - it won't fail if the logger wasn't
+            subscribed to the specified event types.
+            
+        Examples:
+            >>> logger.unsubscribe_from(dispatcher, 'start')
+            >>> logger.unsubscribe_from(dispatcher, 'end', 'error')
+        """
+        if dispatcher not in self._subscriptions:
+            return
+        
+        for event_type in event_types:
+            # Unregister from the dispatcher
+            dispatcher.unsubscribe(event_type, self)
+            
+            # Remove from internal tracking
+            self._subscriptions[dispatcher].discard(event_type)
+        
+        # Clean up empty dispatcher entries
+        if not self._subscriptions[dispatcher]:
+            del self._subscriptions[dispatcher]
+    
+    def unsubscribe_all(self) -> None:
+        """
+        Unsubscribe this logger from all event types on all dispatchers.
+        
+        This method provides a convenient way to clean up all subscriptions,
+        useful for shutdown procedures or when the logger is no longer needed.
+        
+        Returns:
+            None
+            
+        Examples:
+            >>> logger.unsubscribe_all()
+            >>> # Logger is now disconnected from all dispatchers
+        """
+        # Create a copy of the subscriptions to avoid modification during iteration
+        subscriptions_copy = dict(self._subscriptions)
+        
+        for dispatcher, event_types in subscriptions_copy.items():
+            # Unsubscribe from all event types for this dispatcher
+            event_types_list = list(event_types)
+            self.unsubscribe_from(dispatcher, *event_types_list)
+    
+    def get_active_subscriptions(self) -> Dict[Any, List[str]]:
+        """
+        Get a summary of all active subscriptions.
+        
+        Returns a dictionary showing which dispatchers this logger is
+        subscribed to and what event types it's listening for.
+        
+        Returns:
+            Dict[Any, List[str]]: Dictionary mapping dispatchers to lists of
+                                 subscribed event types.
+                                 
+        Examples:
+            >>> subscriptions = logger.get_active_subscriptions()
+            >>> for dispatcher, events in subscriptions.items():
+            ...     print(f"Dispatcher {id(dispatcher)}: {events}")
+        """
+        return {dispatcher: list(event_types) for dispatcher, event_types in self._subscriptions.items()}
+    
+    def is_subscribed_to(self, dispatcher, event_type: str) -> bool:
+        """
+        Check if this logger is subscribed to a specific event type on a dispatcher.
+        
+        Args:
+            dispatcher: EventDispatcher to check
+            event_type (str): Event type to check for subscription
+            
+        Returns:
+            bool: True if subscribed to the event type on the dispatcher, False otherwise.
+            
+        Examples:
+            >>> if logger.is_subscribed_to(dispatcher, 'error'):
+            ...     print("Logger will handle error events")
+        """
+        return (dispatcher in self._subscriptions and 
+                event_type in self._subscriptions[dispatcher])
+    
+    def on_event(self, data: Dict[str, Any]) -> None:
         """
         Process and display operation events based on their type.
         
         This method serves as the main entry point for event processing,
         routing events to appropriate handlers based on the event type.
+        This method is called automatically by dispatchers when subscribed
+        events are dispatched.
         
         Args:
             data (Dict[str, Any]): Event data dictionary containing:
@@ -43,16 +198,44 @@ class PrintLogger:
             
         Note:
             Error events are handled separately with enhanced formatting,
-            while regular events receive standard formatting.
+            while regular events receive standard formatting. This method
+            should not raise exceptions to avoid disrupting other subscribers.
+        """
+        try:
+            event_type: str = data.get("event_type", "Unknown event type")
+            
+            if event_type == EVENT_ERROR:
+                self._handle_error_event(data)
+            else:
+                # Handle regular (non-error) events
+                self._handle_regular_event(data)
+                
+        except Exception as e:
+            # Catch any exceptions to prevent disrupting other subscribers
+            print(f"PrintLogger internal error: {e}")
+
+    def _handle_regular_event(self, data: Dict[str, Any]) -> None:
+        """
+        Handle regular (non-error) operation events.
+        
+        Formats and displays standard operation events with consistent styling.
+        
+        Args:
+            data (Dict[str, Any]): Event data containing event_type and event_message
+            
+        Returns:
+            None
         """
         event_type: str = data.get("event_type", "Unknown event type")
+        event_message: str = data.get("event_message", "Unknown event message")
         
-        if event_type == EVENT_ERROR:
-            self._handle_error_event(data)
+        # Format based on event type for better readability
+        if event_type.endswith('_start') or event_type == 'start':
+            print(f"▶ START: {event_message}")
+        elif event_type.endswith('_end') or event_type == 'end':
+            print(f"✓ END: {event_message}")
         else:
-            # Handle regular (non-error) events
-            event_message: str = data.get("event_message", "Unknown event message")
-            print(f"▶ '{event_type}' - {event_message}")
+            print(f"● {event_type.upper()}: {event_message}")
 
     def _handle_error_event(self, data: Dict[str, Any]) -> None:
         """
@@ -81,11 +264,15 @@ class PrintLogger:
         exception_str: str = data.get('exception_str', 'Unknown error')
         traceback_info: Union[List[Dict[str, Any]], Any] = data.get('event_message', [])
         
-        # Display the primary error message
-        print(f"✗ Error: {exception_type} - {exception_str}")
+        # Display the primary error message with prominent styling
+        print(f"\n{'='*60}")
+        print(f"✗ ERROR: {exception_type}")
+        print(f"Message: {exception_str}")
+        print(f"{'='*60}")
         
         # Process and display traceback information if available
         self._print_traceback(traceback_info)
+        print(f"{'='*60}\n")
 
     def _print_traceback(self, traceback_info: Union[List[Dict[str, Any]], Any]) -> None:
         """
@@ -101,14 +288,40 @@ class PrintLogger:
         if isinstance(traceback_info, list) and traceback_info:
             print("Traceback (most recent call last):")
             
-            for trace_item in traceback_info:
+            for i, trace_item in enumerate(traceback_info):
                 if isinstance(trace_item, dict):
                     # Extract frame information with safe defaults
                     filename: str = trace_item.get('filename', 'unknown')
                     line_number: Union[int, str] = trace_item.get('line_number', '?')
                     function_name: str = trace_item.get('function_name', 'unknown')
                     
-                    # Format and display the traceback frame
-                    print(f"    → {filename}:{line_number} in {function_name}")
+                    # Format filename for better readability (show only filename, not full path)
+                    display_filename = filename.split('/')[-1] if '/' in filename else filename
+                    
+                    # Format and display the traceback frame with indentation
+                    indent = "  " + ("  " * i)  # Increase indentation for nested calls
+                    print(f"{indent}→ {display_filename}:{line_number} in {function_name}()")
         else:
             print("  (No traceback information available)")
+    
+    def __str__(self) -> str:
+        """
+        String representation of the logger showing active subscriptions.
+        
+        Returns:
+            str: Human-readable description of the logger's state
+        """
+        subscription_count = sum(len(events) for events in self._subscriptions.values())
+        dispatcher_count = len(self._subscriptions)
+        
+        return (f"PrintLogger(dispatchers={dispatcher_count}, "
+                f"total_subscriptions={subscription_count})")
+    
+    def __repr__(self) -> str:
+        """
+        Developer representation of the logger.
+        
+        Returns:
+            str: Detailed representation for debugging
+        """
+        return f"PrintLogger(subscriptions={dict(self._subscriptions)})"

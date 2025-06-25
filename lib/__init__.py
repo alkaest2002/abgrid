@@ -11,9 +11,9 @@ B_COLOR = "#FF0000"
 CM_TO_INCHES = 1 / 2.54
 
 # Event type constants
-EVENT_START = "Event started"
-EVENT_END = "Event ended" 
-EVENT_ERROR = "Event ended with error"
+EVENT_START = "event_start"
+EVENT_END = "event_end" 
+EVENT_ERROR = "event_error"
 
 # Initialize Jinja2 environment with a file system loader for templates
 jinja_env = jinja2.Environment(

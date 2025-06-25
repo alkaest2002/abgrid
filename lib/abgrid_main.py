@@ -7,11 +7,11 @@ comprehensive functionality for project lifecycle management including initializ
 group configuration, answer sheet generation, and report creation with optional sociograms.
 
 The module uses a decorator-based error handling system that automatically captures
-exceptions and emits error events through the event system for consistent logging
+exceptions and dispatches error events through the event system for consistent logging
 and error reporting across all operations.
 
 Author: Pierpaolo Calanna
-Date Created: May 3, 2025
+Date Created: Wed Jun 25 2025
 
 The code is part of the AB-Grid project and is licensed under the MIT License.
 """
@@ -27,7 +27,7 @@ from weasyprint import HTML
 from lib.abgrid_yaml import ABGridYAML
 from lib.abgrid_data import ABGridData
 from lib.abgrid_utils import to_json_serializable, handle_errors_decorator
-from lib.abgrid_emitter import EventEmitter
+from lib.abgrid_dispatcher import EventDispatcher
 from lib.abgrid_logger_print import PrintLogger
 from lib import EVENT_ERROR, EVENT_START, EVENT_END, SYMBOLS, jinja_env
 
@@ -38,13 +38,12 @@ ValidationErrors = List[str]
 DataWithErrors = Tuple[Dict[str, Any], ValidationErrors]
 
 # Initialize global event system for operation tracking and error handling
-event_emitter: EventEmitter = EventEmitter()
-event_logger: PrintLogger = PrintLogger()
+event_dispatcher = EventDispatcher()
+event_logger = PrintLogger()
 
-# Register the print logger for all event types (start, end, error)
-# The error decorator will automatically use this emitter for exception handling
-for event_type in [EVENT_START, EVENT_END, EVENT_ERROR]:
-    event_emitter.add_listener(event_type, event_logger)
+# Subscribe the print logger to all event types (start, end, error)
+# The error decorator will automatically use this dispatcher for exception handling
+event_logger.subscribe_to(event_dispatcher, EVENT_START, EVENT_END, EVENT_ERROR)
 
 
 class ABGridMain:
@@ -57,7 +56,7 @@ class ABGridMain:
     from setup to final report delivery.
     
     All public methods are decorated with error handling that automatically captures
-    exceptions and emits error events through the event system, providing consistent
+    exceptions and dispatches error events through the event system, providing consistent
     error reporting and logging across all operations.
     
     Attributes:
@@ -119,7 +118,7 @@ class ABGridMain:
         )
 
     @staticmethod
-    @handle_errors_decorator(event_emitter)
+    @handle_errors_decorator(event_dispatcher)
     def init_project(
         project: str, 
         project_folderpath: Path, 
@@ -133,7 +132,7 @@ class ABGridMain:
         This method sets up everything needed to begin working with a new AB-Grid project.
         
         The method is decorated with error handling that automatically captures any
-        exceptions and emits them as error events through the event system.
+        exceptions and dispatches them as error events through the event system.
         
         Args:
             project (str): The name of the project to initialize. This will be used as
@@ -161,7 +160,7 @@ class ABGridMain:
               - answersheets/      (for generated answer sheet PDFs)
               - {project}.yaml     (main project configuration file)
             
-            All exceptions are automatically handled by the decorator and emitted as
+            All exceptions are automatically handled by the decorator and dispatched as
             error events with detailed traceback information.
               
         Examples:
@@ -170,7 +169,7 @@ class ABGridMain:
             >>> # Any errors are automatically logged through the event system
         """
         # Signal the start of project initialization
-        event_emitter.emit({
+        event_dispatcher.dispatch({
             "event_type": EVENT_START, 
             "event_message": f"Initializing project '{project}' with language '{language}'"
         })
@@ -178,13 +177,25 @@ class ABGridMain:
         # Create the main project directory structure
         # os.makedirs will create intermediate directories if they don't exist
         os.makedirs(project_folderpath, exist_ok=False)  # Fail if project already exists
-        os.makedirs(project_folderpath / "reports")
-        os.makedirs(project_folderpath / "answersheets")
+        
+        # Create subdirectories for reports and answer sheets
+        reports_dir = project_folderpath / "reports"
+        answersheets_dir = project_folderpath / "answersheets"
+        os.makedirs(reports_dir)
+        os.makedirs(answersheets_dir)
         
         # Load the project configuration template for the specified language
         template_path = Path(f"./lib/templates/{language}/project.yaml")
+        
+        if not template_path.exists():
+            raise FileNotFoundError(f"Project template not found: {template_path}")
+        
         with open(template_path, 'r', encoding='utf-8') as fin:
             yaml_data: ProjectData = yaml.safe_load(fin)
+        
+        # Validate that template was loaded successfully
+        if not yaml_data:
+            raise ValueError(f"Empty or invalid project template: {template_path}")
         
         # Customize the template with the project name
         yaml_data["project_title"] = project
@@ -195,12 +206,12 @@ class ABGridMain:
             yaml.dump(yaml_data, fout, sort_keys=False, allow_unicode=True)
 
         # Signal successful completion
-        event_emitter.emit({
+        event_dispatcher.dispatch({
             "event_type": EVENT_END, 
-            "event_message": f"Project '{project}' successfully initialized"
+            "event_message": f"Project '{project}' successfully initialized at {project_folderpath}"
         })
 
-    @handle_errors_decorator(event_emitter)
+    @handle_errors_decorator(event_dispatcher)
     def generate_group_inputs(
         self, 
         groups: range, 
@@ -216,7 +227,7 @@ class ABGridMain:
         necessary configuration fields for AB-Grid analysis.
         
         This method is decorated with automatic error handling that captures exceptions
-        and emits them as error events through the event system.
+        and dispatches them as error events through the event system.
 
         Args:
             groups (range): A range object specifying the group numbers to generate files for.
@@ -241,7 +252,7 @@ class ABGridMain:
             - Generated files are named using the pattern: {project}_g{group_number}.yaml
             - Each file contains the complete structure needed for group data collection
             - Files are saved in the main project directory alongside the project config
-            - All exceptions are handled by the decorator and emitted as error events
+            - All exceptions are handled by the decorator and dispatched as error events
             
         Examples:
             >>> # Generate files for groups 1-5 with 4 members each
@@ -250,26 +261,47 @@ class ABGridMain:
             >>> # Each file will have members: A, B, C, D
         """
         # Signal the start of group file generation
-        event_emitter.emit({
+        event_dispatcher.dispatch({
             "event_type": EVENT_START, 
-            "event_message": f"Generating {len(groups)} group input files for {self.abgrid_data.project}"
+            "event_message": f"Generating {len(groups)} group input files for project '{self.abgrid_data.project}'"
         })
 
-        # Validate members_per_group parameter
+        # Validate input parameters
+        if not groups:
+            raise ValueError("Groups range cannot be empty")
+        
         if members_per_group <= 0:
             raise ValueError(f"members_per_group must be positive, got {members_per_group}")
+        
         if members_per_group > len(SYMBOLS):
-            raise ValueError(f"members_per_group ({members_per_group}) exceeds available symbols ({len(SYMBOLS)})")
+            raise ValueError(
+                f"members_per_group ({members_per_group}) exceeds available symbols ({len(SYMBOLS)}). "
+                f"Maximum supported group size is {len(SYMBOLS)} members."
+            )
 
         # Load the group template for the specified language
-        group_template = jinja_env.get_template(f"/{language}/group.html")
+        template_path = f"/{language}/group.html"
+        
+        try:
+            group_template = jinja_env.get_template(template_path)
+        except Exception as e:
+            raise FileNotFoundError(f"Group template not found: {template_path}") from e
         
         # Extract member letters based on the number of members per group
         # SYMBOLS contains the alphabet letters used for member identification
         members_per_group_letters: List[str] = SYMBOLS[:members_per_group]
         
+        # Track successfully generated files for reporting
+        generated_files = []
+        
         # Generate a configuration file for each group
         for group_number in groups:
+            # Signal the start of individual group file generation
+            event_dispatcher.dispatch({
+                "event_type": EVENT_START, 
+                "event_message": f"Generating configuration for group {group_number}"
+            })
+            
             # Prepare template data for the current group
             template_data: Dict[str, Any] = {
                 "group": group_number, 
@@ -291,23 +323,19 @@ class ABGridMain:
                 f"{self.abgrid_data.project}_g{group_number}.yaml"
             )
             
-            # Signal the start of individual group file generation
-            event_emitter.emit({
-                "event_type": EVENT_START, 
-                "event_message": f"Generating group file '{group_file_path.name}'"
-            })
-    
             # Write the rendered template to disk
             with open(group_file_path, "w", encoding='utf-8') as file:
                 file.write(rendered_group_template)
+            
+            generated_files.append(group_file_path.name)
           
         # Signal successful completion of all group file generation
-        event_emitter.emit({
+        event_dispatcher.dispatch({
             "event_type": EVENT_END, 
-            "event_message": f"Successfully generated {len(groups)} group input files for {self.abgrid_data.project}"
+            "event_message": f"Successfully generated {len(generated_files)} group input files: {', '.join(generated_files)}"
         })
 
-    @handle_errors_decorator(event_emitter)
+    @handle_errors_decorator(event_dispatcher)
     def generate_answersheets(self, language: str) -> None:
         """
         Generate and render PDF answer sheets for all project groups.
@@ -318,7 +346,7 @@ class ABGridMain:
         and response areas formatted according to the AB-Grid methodology.
         
         This method is decorated with automatic error handling that captures exceptions
-        and emits them as error events through the event system.
+        and dispatches them as error events through the event system.
 
         Args:
             language (str): The language code for template selection and rendering.
@@ -342,7 +370,7 @@ class ABGridMain:
             - Generated PDFs are saved in the project's answersheets/ subdirectory
             - Each answer sheet is customized with group-specific information and member lists
             - The method handles Likert scale configuration automatically based on group data
-            - All exceptions are handled by the decorator and emitted as error events
+            - All exceptions are handled by the decorator and dispatched as error events
             
         Examples:
             >>> main.generate_answersheets("en")
@@ -350,12 +378,21 @@ class ABGridMain:
             >>> # Files saved as: answersheets/{project}_answersheet_{group_stem}.pdf
         """
         # Signal the start of answer sheet generation
-        event_emitter.emit({
+        event_dispatcher.dispatch({
             "event_type": EVENT_START, 
-            "event_message": f"Generating PDF answer sheets for {self.abgrid_data.project}"
+            "event_message": f"Generating PDF answer sheets for project '{self.abgrid_data.project}'"
         })
 
+        # Validate that group files exist
+        if not self.abgrid_data.groups_filepaths:
+            raise ValueError("No group files found. Please generate group inputs first.")
+
         # Load and validate project-level data
+        event_dispatcher.dispatch({
+            "event_type": EVENT_START, 
+            "event_message": "Loading and validating project configuration"
+        })
+        
         sheets_data: ProjectData
         sheets_data_errors: ValidationErrors
         sheets_data, sheets_data_errors = self.abgrid_data.get_project_data()
@@ -365,8 +402,17 @@ class ABGridMain:
             error_message = f"Project data validation failed: {'; '.join(sheets_data_errors)}"
             raise ValueError(error_message)
 
+        # Track successfully generated answer sheets
+        generated_sheets = []
+
         # Process each group file to generate individual answer sheets
         for group_file in self.abgrid_data.groups_filepaths:
+            # Signal processing of individual group
+            event_dispatcher.dispatch({
+                "event_type": EVENT_START, 
+                "event_message": f"Processing group file '{group_file.name}'"
+            })
+            
             # Load and validate group-specific data
             group_data: GroupData
             group_data_errors: ValidationErrors
@@ -382,29 +428,36 @@ class ABGridMain:
             if not group_number_match:
                 raise ValueError(f"Could not extract group number from filename: {group_file.name}")
             
+            group_number = int(group_number_match.group(0))
+            
             # Enhance sheets data with group-specific information
-            sheets_data["group"] = int(group_number_match.group(0))
+            sheets_data_copy = sheets_data.copy()  # Don't modify original
+            sheets_data_copy["group"] = group_number
             
             # Configure Likert scale based on the number of choices in group data
             # SYMBOLS provides the letter labels for Likert scale options
-            sheets_data["likert"] = SYMBOLS[:len(group_data["choices_a"])]
+            if "choices_a" in group_data and group_data["choices_a"]:
+                sheets_data_copy["likert"] = SYMBOLS[:len(group_data["choices_a"])]
+            else:
+                raise ValueError(f"No choices_a found in group data for {group_file.name}")
 
             # Signal the start of individual answer sheet generation
-            event_emitter.emit({
+            event_dispatcher.dispatch({
                 "event_type": EVENT_START, 
-                "event_message": f"Generating answer sheet: '{group_file.name}'"
+                "event_message": f"Generating PDF answer sheet for group {group_number}"
             })
             
             # Generate and save the PDF answer sheet
-            self._render_pdf("answersheet", sheets_data, group_file.stem, language)
+            self._render_pdf("answersheet", sheets_data_copy, group_file.stem, language)
+            generated_sheets.append(f"group_{group_number}")
 
         # Signal successful completion of all answer sheet generation
-        event_emitter.emit({
+        event_dispatcher.dispatch({
             "event_type": EVENT_END, 
-            "event_message": f"Successfully generated answer sheets for {self.abgrid_data.project}"
+            "event_message": f"Successfully generated {len(generated_sheets)} answer sheets for groups: {', '.join(generated_sheets)}"
         })
 
-    @handle_errors_decorator(event_emitter)
+    @handle_errors_decorator(event_dispatcher)
     def generate_reports(
         self, 
         language: str, 
@@ -419,7 +472,7 @@ class ABGridMain:
         with other tools.
         
         This method is decorated with automatic error handling that captures exceptions
-        and emits them as error events through the event system.
+        and dispatches them as error events through the event system.
 
         Args:
             language (str): The language code for template selection and rendering.
@@ -448,7 +501,7 @@ class ABGridMain:
             - Reports are saved in the project's reports/ subdirectory
             - JSON data is saved as {project}_data.json in the main project directory
             - Sociogram generation significantly increases processing time but provides valuable insights
-            - All exceptions are handled by the decorator and emitted as error events
+            - All exceptions are handled by the decorator and dispatched as error events
             
         Examples:
             >>> # Generate basic reports without sociograms
@@ -459,16 +512,28 @@ class ABGridMain:
             >>> # Creates: reports/{project}_report_{group_stem}.pdf, {project}_data.json
         """
         # Signal the start of report generation
-        event_emitter.emit({
+        sociogram_status = "with sociograms" if with_sociogram else "without sociograms"
+        event_dispatcher.dispatch({
             "event_type": EVENT_START, 
-            "event_message": f"Generating reports for {self.abgrid_data.project} (sociogram: {with_sociogram})"
+            "event_message": f"Generating comprehensive reports for project '{self.abgrid_data.project}' ({sociogram_status})"
         })
+
+        # Validate that group files exist
+        if not self.abgrid_data.groups_filepaths:
+            raise ValueError("No group files found. Please ensure group data is available.")
 
         # Initialize storage for aggregated data from all groups
         all_groups_data: Dict[str, Any] = {}
+        generated_reports = []
         
         # Process each group file to generate individual reports
         for group_file in self.abgrid_data.groups_filepaths:
+            # Signal processing of individual group
+            event_dispatcher.dispatch({
+                "event_type": EVENT_START, 
+                "event_message": f"Processing report data for '{group_file.name}'"
+            })
+            
             # Load and validate report data for the current group
             report_data: ReportData
             report_errors: ValidationErrors
@@ -482,10 +547,14 @@ class ABGridMain:
                 error_message = f"Report data validation failed for {group_file.name}: {'; '.join(report_errors)}"
                 raise ValueError(error_message)
             
+            # Extract group identifier for reporting
+            group_number_match = re.search(r'(\d+)$', group_file.stem)
+            group_identifier = f"group_{group_number_match.group(0)}" if group_number_match else group_file.stem
+            
             # Signal the start of individual report generation
-            event_emitter.emit({
+            event_dispatcher.dispatch({
                 "event_type": EVENT_START, 
-                "event_message": f"Generating report: '{group_file.name}'"
+                "event_message": f"Generating PDF report for {group_identifier}"
             })
            
             # Generate the PDF report with sociogram configuration
@@ -494,9 +563,15 @@ class ABGridMain:
                 "with_sociogram": with_sociogram
             }
             self._render_pdf("report", enhanced_report_data, group_file.stem, language)
+            generated_reports.append(group_identifier)
         
             # Prepare data for JSON export by filtering out non-essential fields
             # This reduces file size and focuses on analytical results
+            event_dispatcher.dispatch({
+                "event_type": EVENT_START, 
+                "event_message": f"Preparing data export for {group_identifier}"
+            })
+            
             filtered_data = to_json_serializable(
                 report_data, 
                 keep=[
@@ -516,14 +591,23 @@ class ABGridMain:
             all_groups_data[group_file.stem] = filtered_data
         
         # Export all collected data to JSON file for external analysis
+        event_dispatcher.dispatch({
+            "event_type": EVENT_START, 
+            "event_message": "Exporting aggregated data to JSON file"
+        })
+        
         json_export_path = self.abgrid_data.project_folderpath / f"{self.abgrid_data.project}_data.json"
-        with open(json_export_path, "w", encoding='utf-8') as fout:
-            json.dump(all_groups_data, fout, indent=4, ensure_ascii=False)
+        
+        try:
+            with open(json_export_path, "w", encoding='utf-8') as fout:
+                json.dump(all_groups_data, fout, indent=4, ensure_ascii=False)
+        except Exception as e:
+            raise OSError(f"Failed to export data to JSON file {json_export_path}: {e}") from e
 
         # Signal successful completion of all report generation
-        event_emitter.emit({
+        event_dispatcher.dispatch({
             "event_type": EVENT_END, 
-            "event_message": f"Successfully generated reports for {self.abgrid_data.project}"
+            "event_message": f"Successfully generated {len(generated_reports)} reports for groups: {', '.join(generated_reports)}. Data exported to {json_export_path.name}"
         })
 
     def _render_pdf(
@@ -585,14 +669,25 @@ class ABGridMain:
             case "report":
                 template_path = f"./{language}/report_multi_page.html"
             case _:
-                raise ValueError(f"Unsupported document type: {doc_type}")
+                raise ValueError(f"Unsupported document type: {doc_type}. Supported types: 'report', 'answersheet'")
         
         # Load and render the template with provided data
-        template = jinja_env.get_template(template_path)
-        rendered_html: str = template.render(doc_data)
+        try:
+            template = jinja_env.get_template(template_path)
+        except Exception as e:
+            raise FileNotFoundError(f"Template not found: {template_path}") from e
+        
+        try:
+            rendered_html: str = template.render(doc_data)
+        except Exception as e:
+            raise ValueError(f"Template rendering failed for {template_path}: {e}") from e
         
         # Determine the output directory based on document type
         output_directory = self.abgrid_data.project_folderpath / f"{doc_type}s"
+        
+        # Ensure output directory exists
+        if not output_directory.exists():
+            raise OSError(f"Output directory does not exist: {output_directory}")
         
         # Construct and sanitize the filename
         # Remove leading/trailing underscores and ensure clean naming
@@ -601,7 +696,10 @@ class ABGridMain:
         output_path = output_directory / f"{sanitized_filename}.pdf"
         
         # Convert HTML to PDF and save to disk
-        HTML(string=rendered_html).write_pdf(output_path)
+        try:
+            HTML(string=rendered_html).write_pdf(output_path)
+        except Exception as e:
+            raise OSError(f"PDF generation failed for {output_path}: {e}") from e
         
         # -----------------------------------------------------------------------------------
         # DEBUGGING SECTION - Uncomment to save HTML files for template inspection
@@ -610,3 +708,43 @@ class ABGridMain:
         # with open(debug_html_path, "w", encoding='utf-8') as file:
         #     file.write(rendered_html)
         # -----------------------------------------------------------------------------------
+
+    def get_project_info(self) -> Dict[str, Any]:
+        """
+        Get comprehensive information about the current project.
+        
+        Returns:
+            Dict[str, Any]: Dictionary containing project metadata, file paths,
+                           and configuration information.
+        """
+        return {
+            "project_name": self.abgrid_data.project,
+            "project_path": str(self.abgrid_data.project_folderpath),
+            "project_file": str(self.abgrid_data.project_filepath),
+            "group_files": [str(path) for path in self.abgrid_data.groups_filepaths],
+            "group_count": len(self.abgrid_data.groups_filepaths),
+            "dispatcher_subscriptions": event_logger.get_active_subscriptions()
+        }
+
+    def cleanup(self) -> None:
+        """
+        Clean up resources and subscriptions.
+        
+        This method should be called when the ABGridMain instance is no longer needed
+        to ensure proper cleanup of event subscriptions and resources.
+        """
+        event_logger.unsubscribe_all()
+        event_dispatcher.dispatch({
+            "event_type": EVENT_END, 
+            "event_message": f"Cleaned up resources for project '{self.abgrid_data.project}'"
+        })
+
+    def __str__(self) -> str:
+        """String representation of the ABGridMain instance."""
+        return f"ABGridMain(project='{self.abgrid_data.project}', groups={len(self.abgrid_data.groups_filepaths)})"
+
+    def __repr__(self) -> str:
+        """Developer representation of the ABGridMain instance."""
+        return (f"ABGridMain(project='{self.abgrid_data.project}', "
+                f"project_path='{self.abgrid_data.project_folderpath}', "
+                f"groups={len(self.abgrid_data.groups_filepaths)})")
