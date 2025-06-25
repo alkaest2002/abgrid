@@ -252,7 +252,7 @@ class ABGridMain:
         # Signal the start of group file generation
         event_emitter.emit({
             "event_type": EVENT_START, 
-            "event_message": f"Generating group input files for {len(groups)} groups"
+            "event_message": f"Generating {len(groups)} group input files for {self.abgrid_data.project}"
         })
 
         # Validate members_per_group parameter
@@ -304,7 +304,7 @@ class ABGridMain:
         # Signal successful completion of all group file generation
         event_emitter.emit({
             "event_type": EVENT_END, 
-            "event_message": f"Successfully generated {len(groups)} group input files"
+            "event_message": f"Successfully generated {len(groups)} group input files for {self.abgrid_data.project}"
         })
 
     @handle_errors_decorator(event_emitter)
@@ -352,7 +352,7 @@ class ABGridMain:
         # Signal the start of answer sheet generation
         event_emitter.emit({
             "event_type": EVENT_START, 
-            "event_message": "Generating PDF answer sheets for all groups"
+            "event_message": f"Generating PDF answer sheets for {self.abgrid_data.project}"
         })
 
         # Load and validate project-level data
@@ -392,7 +392,7 @@ class ABGridMain:
             # Signal the start of individual answer sheet generation
             event_emitter.emit({
                 "event_type": EVENT_START, 
-                "event_message": f"Generating answer sheet for '{group_file.name}'"
+                "event_message": f"Generating answer sheet: '{group_file.name}'"
             })
             
             # Generate and save the PDF answer sheet
@@ -401,7 +401,7 @@ class ABGridMain:
         # Signal successful completion of all answer sheet generation
         event_emitter.emit({
             "event_type": EVENT_END, 
-            "event_message": f"Successfully generated answer sheets for {len(self.abgrid_data.groups_filepaths)} groups"
+            "event_message": f"Successfully generated answer sheets for {self.abgrid_data.project}"
         })
 
     @handle_errors_decorator(event_emitter)
@@ -461,7 +461,7 @@ class ABGridMain:
         # Signal the start of report generation
         event_emitter.emit({
             "event_type": EVENT_START, 
-            "event_message": f"Generating reports for all groups (sociogram: {with_sociogram})"
+            "event_message": f"Generating reports for {self.abgrid_data.project} (sociogram: {with_sociogram})"
         })
 
         # Initialize storage for aggregated data from all groups
@@ -485,7 +485,7 @@ class ABGridMain:
             # Signal the start of individual report generation
             event_emitter.emit({
                 "event_type": EVENT_START, 
-                "event_message": f"Generating report for '{group_file.name}'"
+                "event_message": f"Generating report: '{group_file.name}'"
             })
            
             # Generate the PDF report with sociogram configuration
@@ -523,7 +523,7 @@ class ABGridMain:
         # Signal successful completion of all report generation
         event_emitter.emit({
             "event_type": EVENT_END, 
-            "event_message": f"Successfully generated reports for {len(self.abgrid_data.groups_filepaths)} groups and exported data to JSON"
+            "event_message": f"Successfully generated reports for {self.abgrid_data.project}"
         })
 
     def _render_pdf(
