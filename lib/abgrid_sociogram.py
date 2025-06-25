@@ -445,12 +445,12 @@ class ABGridSociogram:
                 high_val = series.quantile(high_q)
                 
                 # Compute actual proportions below/above thresholds
-                actual_low_prop = (series < low_val).sum() / series.shape[0]
-                actual_high_prop = (series > high_val).sum() / series.shape[0]
+                actual_low_proportion = (series < low_val).sum() / series.shape[0]
+                actual_high_proportion = (series > high_val).sum() / series.shape[0]
                 
                 # Compute deviations from expected theoretical proportions
-                low_deviation = abs(actual_low_prop - low_q)
-                high_deviation = abs(actual_high_prop - (1 - high_q))
+                low_deviation = abs(actual_low_proportion - low_q)
+                high_deviation = abs(actual_high_proportion - (1 - high_q))
 
                 # Return first quantile pair within epsilon tolerance
                 if low_deviation <= epsilon and high_deviation <= epsilon:
@@ -478,12 +478,16 @@ class ABGridSociogram:
         abs_balance_quantile_low, abs_balance_quantile_high = _select_best_quantiles(abs_balance)
         abs_balance_high = abs_balance.gt(abs_balance_quantile_high)
         
-        # Create boolean masks for balance/relationship types
-        a_prevalent = balance.gt(0) & ~abs_balance_high  # Positive but not dominant
-        b_prevalent = balance.lt(0) & ~abs_balance_high  # Negative but not dominant
-        a_dominant = balance.gt(0) & abs_balance_high    # Strongly positive
-        b_dominant = balance.lt(0) & abs_balance_high    # Strongly negative
-        neutral = abs_balance.lt(abs_balance_quantile_low)  # Very balanced
+        # Create boolean masks for prevalent/dominant types
+        # prevalent is a less than dominant
+        a_prevalent = balance.gt(0) & ~abs_balance_high
+        b_prevalent = balance.lt(0) & ~abs_balance_high
+        a_dominant = balance.gt(0) & abs_balance_high
+        b_dominant = balance.lt(0) & abs_balance_high
+        
+        # Neutral are all those absolute balance values between 0 and low_quantile
+        # i.e., actual balance around 0 from both sides
+        neutral = abs_balance.lt(abs_balance_quantile_low)  
         
         # Initialize status series with default placeholder values
         status = pd.Series(["-"] * sociogram_micro_stats.shape[0], index=sociogram_micro_stats.index)
@@ -511,6 +515,8 @@ class ABGridSociogram:
         # Controversial/Ambitendent: balanced relationships, differentiated by impact level
         status.loc[balance.eq(0) & impact_median] = "ambitendent"
         status.loc[balance.eq(0) & impact_high] = "controversial"
+
+        # first conditiion ensures both prefs are greater than 0
         status.loc[prefs_a.mul(prefs_b).gt(0) & neutral & impact_median] = "ambitendent"
         status.loc[prefs_a.mul(prefs_b).gt(0) & neutral & impact_high] = "controversial"
         
