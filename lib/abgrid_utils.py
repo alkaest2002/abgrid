@@ -10,6 +10,7 @@ The code is part of the AB-Grid project and is licensed under the MIT License.
 
 import io
 import datetime
+import sys
 import pandas as pd
 import numpy as np
 import json
@@ -20,6 +21,25 @@ from base64 import b64encode
 from matplotlib import pyplot as plt
 from typing import Any, Callable, Dict, List, Optional, Sequence, Set, Union
 from lib import EVENT_ERROR
+
+def check_python_version():
+    """Check if Python version meets minimum requirements."""
+    required_version = (3, 10)
+    current_version = sys.version_info[:2]
+    
+    if current_version < required_version:
+        print("=" * 60)
+        print("PYTHON VERSION ERROR")
+        print("=" * 60)
+        print(f"This application requires Python {required_version[0]}.{required_version[1]} or higher.")
+        print(f"You are currently using Python {current_version[0]}.{current_version[1]}")
+        print()
+        print("Please upgrade your Python installation:")
+        print("- Visit https://www.python.org/downloads/")
+        print("- Or use your system's package manager")
+        print("- Or use pyenv/conda to install a newer version")
+        print("=" * 60)
+        sys.exit(1)
 
 def handle_errors_decorator(dispatcher) -> Callable:
     def decorator(function: Callable) -> Callable:

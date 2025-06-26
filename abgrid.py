@@ -2,9 +2,13 @@ import re
 import argparse
 from pathlib import Path
 from lib.abgrid_main import ABGridMain
+from lib.abgrid_utils import check_python_version
 
 # Available languages
 LANGUAGES = ["en", "it"]
+
+# Check python versione (3.10 or higher is needed)
+check_python_version()
 
 # Set up the argument parser
 parser = argparse.ArgumentParser(prog="ABGrid")
