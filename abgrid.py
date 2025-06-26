@@ -34,20 +34,18 @@ args = parser.parse_args()
 
 # catch errors
 try:
-
     # Setup the path to the project folder
     project_folderpath = Path("./data") / args.user / args.project
-
+    
     # Handle init action
     if args.action == "init":
-
+        
         # Make sure project folder does not already exist
         if project_folderpath.exists():
             raise FileExistsError(f"{args.project} already exists.")
         
         # If project folder does not exists
         else:
-            
             # Create project folder
             ABGridMain.init_project(args.project, project_folderpath, args.language)
 
@@ -56,28 +54,22 @@ try:
         
         # Find the project file within the project folder
         project_filepath = next(project_folderpath.glob(f"{args.project}.*"))
-
         # Determine how many group files are already created
         groups_filepaths = [ path for path in project_folderpath.glob("*_g*.*") if re.search(r"_g\d+\.\w+$", path.name) ]
         groups_already_created = len(groups_filepaths)
-        
         # Determine how many group files to be created
         groups_to_create = range(groups_already_created +1, groups_already_created + args.groups +1)
-        
         # Create an instance of ABGridMain 
         abgrid_main = ABGridMain(args.project, project_folderpath, project_filepath, groups_filepaths)
         
         # handle actions
         match args.action:
-            
             case "groups":
                 # Generate group files
                 abgrid_main.generate_group_inputs(groups_to_create, args.members_per_group, args.language)
-
             case "sheets":
                 # Generate answersheets
                 abgrid_main.generate_answersheets(args.language)
-            
             case "reports":
                 # Generate reports
                 abgrid_main.generate_reports(args.language, args.with_sociogram)
