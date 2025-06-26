@@ -514,7 +514,7 @@ class ABGridMain:
         sociogram_status = "with sociograms" if with_sociogram else "without sociograms"
         event_dispatcher.dispatch({
             "event_type": EVENT_START, 
-            "event_message": f"Generating comprehensive reports for project '{self.abgrid_data.project}' ({sociogram_status})"
+            "event_message": f"Generating reports for project '{self.abgrid_data.project}' ({sociogram_status})"
         })
 
         # Validate that group files exist
@@ -599,7 +599,7 @@ class ABGridMain:
         # Signal successful completion of all report generation
         event_dispatcher.dispatch({
             "event_type": EVENT_END, 
-            "event_message": f"Successfully generated {len(generated_reports)} reports for groups: {', '.join(generated_reports)}. Data exported to {json_export_path.name}"
+            "event_message": f"Generated {len(generated_reports)} reports and exported json data"
         })
 
     def _render_pdf(
