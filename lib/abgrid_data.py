@@ -281,16 +281,18 @@ class ABGridData:
             # Add sociogram data to report data
             report_data["sociogram"] = sociogram_results
 
-        # Initialize relevant nodes consolidation from both SNA and sociogram analyses
+        # Get relevant nodes from both SNA and sociogram analyses
         relevant_nodes_ab_sna = sna_results["relevant_nodes_ab"].copy()
         relevant_nodes_ab_sociogram = (
             sociogram_results["relevant_nodes_ab"].copy() if with_sociogram else 
             {"a": pd.DataFrame(), "b": pd.DataFrame()}
         )
-        relevant_nodes_ab = {"a": {}, "b": {}}
+        
+        # Init dict
+        relevant_nodes_ab = {}
 
         # Loop through relevant_nodes_ab keys
-        for valence_type in relevant_nodes_ab.keys():
+        for valence_type in ("a", "b"):
             # Group nodes with same id and consolidate their values
             nodes = (
                 pd.concat(
