@@ -14,7 +14,6 @@ import datetime
 import pandas as pd
 
 from pathlib import Path
-from copy import deepcopy
 from typing import Any, Dict, List, Optional, Protocol, Tuple, TypedDict
 
 from lib.abgrid_sna import SNADict, ABGridSna
@@ -283,8 +282,11 @@ class ABGridData:
             report_data["sociogram"] = sociogram_results
 
         # Initialize relevant nodes consolidation from both SNA and sociogram analyses
-        relevant_nodes_ab_sna = deepcopy(sna_results["relevant_nodes_ab"])
-        relevant_nodes_ab_sociogram = deepcopy(sociogram_results["relevant_nodes_ab"]) if with_sociogram else {"a": [], "b": []}
+        relevant_nodes_ab_sna = sna_results["relevant_nodes_ab"].copy()
+        relevant_nodes_ab_sociogram = (
+            sociogram_results["relevant_nodes_ab"].copy() if with_sociogram else 
+            {"a": pd.DataFrame(), "b": pd.DataFrame()}
+        )
         relevant_nodes_ab = {"a": {}, "b": {}}
 
         # Loop through relevant_nodes_ab keys
