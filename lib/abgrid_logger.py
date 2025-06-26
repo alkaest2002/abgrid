@@ -143,10 +143,6 @@ class Logger:
         Note:
             This operation is idempotent - it won't fail if the logger wasn't
             subscribed to the specified event types.
-            
-        Examples:
-            >>> logger.unsubscribe_from(dispatcher, 'start')
-            >>> logger.unsubscribe_from(dispatcher, 'end', 'error')
         """
         if dispatcher not in self._subscriptions:
             return
@@ -171,10 +167,6 @@ class Logger:
         
         Returns:
             None
-            
-        Examples:
-            >>> logger.unsubscribe_all()
-            >>> # Logger is now disconnected from all dispatchers
         """
         # Create a copy of the subscriptions to avoid modification during iteration
         subscriptions_copy = dict(self._subscriptions)
@@ -194,11 +186,6 @@ class Logger:
         Returns:
             Dict[Any, List[str]]: Dictionary mapping dispatchers to lists of
                                  subscribed event types.
-                                 
-        Examples:
-            >>> subscriptions = logger.get_active_subscriptions()
-            >>> for dispatcher, events in subscriptions.items():
-            ...     print(f"Dispatcher {id(dispatcher)}: {events}")
         """
         return {dispatcher: list(event_types) for dispatcher, event_types in self._subscriptions.items()}
     
