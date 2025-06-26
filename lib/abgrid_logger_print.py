@@ -102,10 +102,6 @@ class PrintLogger:
             break_on_hyphens=True
         )
         
-        if not wrapped_lines:
-            print(prefix)
-            return
-        
         # Print first line with prefix
         print(f"{prefix}{wrapped_lines[0]}")
         
