@@ -47,29 +47,23 @@ event_logger.subscribe_to(event_dispatcher, EVENT_START, EVENT_END, EVENT_ERROR)
 
 class ABGridMain:
     """
-    Main orchestrator class for AB-Grid project management and operations.
+    Main orchestrator for AB-Grid project lifecycle management and document generation.
     
-    This class provides a comprehensive interface for creating and managing AB-Grid projects,
-    including project initialization, group file generation, answer sheet creation, and 
-    report generation with optional sociograms. It handles the complete project lifecycle
-    from setup to final report delivery.
+    Provides comprehensive functionality for creating, configuring, and processing AB-Grid
+    projects from initialization through final report generation. Manages project directory
+    structure, configuration files, group data processing, answer sheet creation, and
+    analytical report generation with optional network visualizations.
     
-    All public methods are decorated with error handling that automatically captures
-    exceptions and dispatches error events through the event system, providing consistent
-    error reporting and logging across all operations.
+    All public methods implement automatic error handling through decorators that capture
+    exceptions and dispatch error events for consistent logging and error reporting.
+    
+    Integrates with the AB-Grid event system for operation tracking and provides a unified
+    interface for all project-related operations through the ABGridData management system.
     
     Attributes:
-        abgrid_data (ABGridData): Core data management instance containing all project-related
-                                 data, file paths, and operations for the current project.
-    
-    Examples:
-        >>> # Initialize a new project (static method with error handling)
-        >>> ABGridMain.init_project("MyProject", Path("./projects"), "en")
-        
-        >>> # Create main instance for existing project
-        >>> main = ABGridMain("MyProject", project_folder, project_file, group_files)
-        >>> main.generate_answersheets("en")  # Automatically handles errors
-        >>> main.generate_reports("en", with_sociogram=True)  # Automatically handles errors
+        abgrid_data (ABGridData): Core data management instance containing project paths,
+                                 configuration data, and file operations for the current
+                                 project workspace.
     """
     
     def __init__(
@@ -80,32 +74,27 @@ class ABGridMain:
         groups_filepaths: List[Path]
     ) -> None:
         """
-        Initialize the ABGridMain instance with project configuration and file paths.
+        Initialize ABGridMain instance with project configuration and file system paths.
 
-        Sets up the core data management system and prepares the instance for project
-        operations. This constructor does not use the error decorator as it should
-        fail fast if initialization parameters are invalid.
+        Creates the core data management system and prepares the instance for project
+        operations. Validates path accessibility and initializes the internal ABGridData
+        system that serves as the central hub for all project data operations.
 
         Args:
-            project (str): The unique name identifier for the project. Used for file
-                          naming and project identification throughout the system.
-            project_folderpath (Path): The root directory path where all project files
-                                     and subdirectories are located or will be created.
-            project_filepath (Path): The full path to the main project configuration file
-                                   (typically a YAML file containing project metadata).
-            groups_filepaths (List[Path]): List of file paths to group configuration files
-                                         that contain individual group data and settings.
+            project: Unique project identifier used for file naming and project reference.
+            project_folderpath: Root directory containing all project files and subdirectories.
+            project_filepath: Path to main project configuration file (YAML format).
+            groups_filepaths: List of paths to individual group configuration files.
 
         Raises:
-            FileNotFoundError: If any of the provided file paths don't exist.
-            PermissionError: If the system lacks read/write permissions for the paths.
-            TypeError: If any path arguments are not Path objects or strings.
+            FileNotFoundError: If specified file paths do not exist.
+            PermissionError: If insufficient read/write permissions for specified paths.
+            TypeError: If path arguments are not Path objects or convertible strings.
             
         Note:
-            This constructor creates an ABGridData instance that serves as the central
-            data management hub for all project operations. Unlike other methods in this
-            class, __init__ does not use error decoration to allow immediate failure
-            detection during object creation.
+            This constructor does not use error decoration to allow immediate failure
+            detection during object creation. Path validation occurs during ABGridData
+            initialization.
         """
         # Initialize the core data management system with project configuration
         self.abgrid_data: ABGridData = ABGridData(
@@ -124,48 +113,34 @@ class ABGridMain:
         language: str
     ) -> None:
         """
-        Initialize a new AB-Grid project with required directory structure and configuration.
+        Initialize new AB-Grid project with complete directory structure and configuration.
         
-        Creates a complete project structure including all necessary directories and
-        generates the main project configuration file from a language-specific template.
-        This method sets up everything needed to begin working with a new AB-Grid project.
+        Creates project workspace including directory hierarchy, configuration files, and
+        language-specific templates. Sets up all necessary components for AB-Grid project
+        operations including reports and answersheets subdirectories.
         
-        The method is decorated with error handling that automatically captures any
-        exceptions and dispatches them as error events through the event system.
-        
+        Generates main project configuration file from language-specific template with
+        customized project metadata. Ensures project workspace is ready for group
+        configuration and data collection operations.
+
         Args:
-            project (str): The name of the project to initialize. This will be used as
-                          the project identifier and for naming the main configuration file.
-            project_folderpath (Path): The directory path where the project structure
-                                     will be created. Parent directories will be created
-                                     if they don't exist.
-            language (str): The language code for template selection (e.g., 'en', 'it', 'es').
-                           This determines which language-specific templates will be used
-                           for generating project files and reports.
-            
+            project: Name identifier for the new project, used for directory and file naming.
+            project_folderpath: Target directory where project structure will be created.
+                               Parent directories created automatically if needed.
+            language: Language code for template selection (e.g., 'en', 'it', 'es').
+                     Determines language-specific templates and localization.
+
         Raises:
-            OSError: If directory creation fails due to insufficient permissions,
-                    disk space issues, or invalid path specifications.
-            FileNotFoundError: If the specified language template file doesn't exist
-                             in the lib/templates/{language}/ directory.
-            yaml.YAMLError: If there's an error parsing or processing the YAML template
-                           file, typically due to malformed template content.
-            PermissionError: If the system lacks write permissions for the target directory.
+            OSError: If directory creation fails due to permissions, disk space, or path issues.
+            FileNotFoundError: If language-specific template files are not found.
+            yaml.YAMLError: If template parsing or YAML processing fails.
+            FileExistsError: If project directory already exists (via os.makedirs exist_ok=False).
+            PermissionError: If insufficient write permissions for target directory.
             
         Note:
-            This method creates the following directory structure:
-            - project_folderpath/
-              - reports/           (for generated PDF reports)
-              - answersheets/      (for generated answer sheet PDFs)
-              - {project}.yaml     (main project configuration file)
-            
-            All exceptions are automatically handled by the decorator and dispatched as
-            error events with detailed traceback information.
-              
-        Examples:
-            >>> ABGridMain.init_project("TeamStudy2025", Path("./projects"), "en")
-            >>> # Creates: ./projects/TeamStudy2025/ with subdirectories and config file
-            >>> # Any errors are automatically logged through the event system
+            Creates directory structure: project_folderpath/{reports/, answersheets/, project.yaml}.
+            Fails if project directory already exists to prevent accidental overwrites.
+            All errors automatically handled by decorator and dispatched as error events.
         """
         # Signal the start of project initialization
         event_dispatcher.dispatch({
@@ -218,46 +193,38 @@ class ABGridMain:
         language: str
     ) -> None:
         """
-        Generate individual input configuration files for each group in the project.
+        Generate standardized input configuration files for specified project groups.
 
-        Creates YAML configuration files for each group based on a standardized template.
-        Each group file contains the structure needed for data collection, including
-        member identification using letter-based naming (A, B, C, etc.) and all
-        necessary configuration fields for AB-Grid analysis.
+        Creates individual YAML configuration files for each group using language-specific
+        templates. Each file contains structured data collection fields, member identification
+        using alphabetic symbols, and all configuration parameters required for AB-Grid
+        analysis and data processing.
         
-        This method is decorated with automatic error handling that captures exceptions
-        and dispatches them as error events through the event system.
+        Files are generated with consistent naming conventions and member identification
+        schemes to ensure compatibility with downstream processing and analysis operations.
 
         Args:
-            groups (range): A range object specifying the group numbers to generate files for.
-                           For example, range(1, 6) creates groups 1, 2, 3, 4, 5.
-            members_per_group (int): The number of members in each group. This determines
-                                   how many member identifiers (letters) will be included
-                                   in each group configuration file. Must be positive.
-            language (str): The language code for template selection (e.g., 'en', 'it').
-                           This determines which language-specific template will be used.
-            
+            groups: Range object specifying group numbers for file generation.
+                   Iterates through range to create individual group files.
+            members_per_group: Number of members per group, determines alphabetic identifiers
+                              assigned to each member (A, B, C, etc.). Must be positive.
+            language: Language code for template selection determining localization and
+                     template content for generated group configuration files.
+
         Raises:
-            TemplateNotFound: If the group template for the specified language doesn't exist
-                            in the lib/templates/{language}/ directory structure.
-            OSError: If file writing operations fail due to permissions, disk space,
-                    or other system-level issues.
-            jinja2.TemplateError: If there are errors during template rendering,
-                                typically due to malformed template syntax or missing variables.
-            ValueError: If members_per_group is not positive or exceeds available SYMBOLS.
+            TemplateNotFound: If group template for specified language is not found.
+            OSError: If file writing operations fail due to system-level issues.
+            jinja2.TemplateError: If template rendering fails due to syntax or variable errors.
+            ValueError: If members_per_group is non-positive or exceeds available symbols.
+            
+        Output:
+            Creates files named: {project}_g{group_number}.yaml in project root directory.
+            Each file contains complete group configuration structure with member identifiers.
             
         Note:
-            - Member identification uses consecutive letters from the SYMBOLS constant
-            - Generated files are named using the pattern: {project}_g{group_number}.yaml
-            - Each file contains the complete structure needed for group data collection
-            - Files are saved in the main project directory alongside the project config
-            - All exceptions are handled by the decorator and dispatched as error events
-            
-        Examples:
-            >>> # Generate files for groups 1-5 with 4 members each
-            >>> main.generate_group_inputs(range(1, 6), 4, "en")
-            >>> # Creates: project_g1.yaml, project_g2.yaml, ..., project_g5.yaml
-            >>> # Each file will have members: A, B, C, D
+            Member identification uses consecutive letters from SYMBOLS constant.
+            Template rendering removes blank lines for cleaner output formatting.
+            All errors handled by decorator and dispatched through event system.
         """
         # Signal the start of group file generation
         event_dispatcher.dispatch({
@@ -337,44 +304,37 @@ class ABGridMain:
     @handle_errors_decorator(event_dispatcher)
     def generate_answersheets(self, language: str) -> None:
         """
-        Generate and render PDF answer sheets for all project groups.
+        Generate formatted PDF answer sheets for all configured project groups.
 
-        Creates professionally formatted PDF answer sheets for each group using project
-        configuration and group-specific data. The answer sheets contain all necessary
-        fields for data collection including member identification, question sections,
-        and response areas formatted according to the AB-Grid methodology.
+        Creates professionally formatted answer sheets combining project configuration
+        with group-specific data. Each sheet contains structured data collection areas,
+        member identification sections, question fields, and response areas formatted
+        according to AB-Grid methodology requirements.
         
-        This method is decorated with automatic error handling that captures exceptions
-        and dispatches them as error events through the event system.
+        Validates both project-level and group-level data integrity before generation
+        to ensure consistency and completeness of generated documents. Uses WeasyPrint
+        for high-quality PDF rendering with professional styling and layout.
 
         Args:
-            language (str): The language code for template selection and rendering.
-                           This determines the language of labels, instructions, and
-                           formatting used in the generated answer sheets.
+            language: Language code determining template selection, localization, and
+                     content language for generated answer sheet documents.
 
         Raises:
-            ValueError: If there are validation errors in project data or any group data.
-                       This includes missing required fields, invalid data types, or
-                       inconsistent configurations across project and group files.
-            TemplateNotFound: If the answersheet template doesn't exist for the specified
-                            language in the lib/templates/{language}/ directory.
-            OSError: If PDF generation fails due to system issues, or if file saving
-                    operations encounter permission or disk space problems.
-            weasyprint.HTML.Error: If HTML to PDF conversion fails due to rendering issues,
-                                 typically caused by malformed HTML or CSS problems.
+            ValueError: If validation fails for project data or any group configuration.
+                       Includes missing fields, invalid data types, or inconsistent settings.
+            TemplateNotFound: If answersheet template not found for specified language.
+            OSError: If PDF generation or file operations fail due to system issues.
+            weasyprint.HTML.Error: If HTML to PDF conversion fails during rendering.
+            
+        Output:
+            Creates PDF files in answersheets/ subdirectory with naming pattern:
+            {project}_answersheet_{group_stem}.pdf for each configured group.
             
         Note:
-            - This method validates both project-level and group-level data before generation
-            - All validation errors are collected and reported together for efficiency
-            - Generated PDFs are saved in the project's answersheets/ subdirectory
-            - Each answer sheet is customized with group-specific information and member lists
-            - The method handles Likert scale configuration automatically based on group data
-            - All exceptions are handled by the decorator and dispatched as error events
-            
-        Examples:
-            >>> main.generate_answersheets("en")
-            >>> # Generates PDF answer sheets for all groups in English
-            >>> # Files saved as: answersheets/{project}_answersheet_{group_stem}.pdf
+            Performs comprehensive data validation before generation starts.
+            Configures Likert scales automatically based on group choice configurations.
+            Each answer sheet customized with group-specific information and member lists.
+            All errors handled by decorator and dispatched through event system.
         """
         # Signal the start of answer sheet generation
         event_dispatcher.dispatch({
@@ -463,52 +423,43 @@ class ABGridMain:
         with_sociogram: bool = False
     ) -> None:
         """
-        Generate comprehensive analytical reports for all project groups with data export.
+        Generate comprehensive analytical reports with statistical analysis and data export.
 
         Creates detailed PDF reports for each group containing statistical analysis,
-        network metrics, and optional sociogram visualizations. Additionally exports
-        all analytical data to a structured JSON file for further analysis or integration
-        with other tools.
+        network metrics, relationship patterns, and optional sociogram visualizations.
+        Performs complete data analysis pipeline including social network analysis,
+        centrality measurements, and group dynamics assessment.
         
-        This method is decorated with automatic error handling that captures exceptions
-        and dispatches them as error events through the event system.
+        Additionally exports structured analytical data to JSON format for integration
+        with external tools, further analysis, or archival purposes. JSON export excludes
+        graphics and bulky statistical data while preserving essential analytical results.
 
         Args:
-            language (str): The language code for template selection and rendering.
-                           This determines the language of labels, headings, and
-                           explanatory text used in the generated reports.
-            with_sociogram (bool, optional): Whether to include sociogram visualizations
-                                           in the reports. Defaults to False. When True,
-                                           generates network diagrams showing relationship
-                                           patterns and group dynamics.
+            language: Language code determining template selection, localization, and
+                     content language for generated report documents.
+            with_sociogram: Flag controlling inclusion of network visualization diagrams.
+                           When True, generates sociogram graphics showing relationship
+                           patterns and network structures within each group.
 
         Raises:
-            ValueError: If there are validation errors in report data for any group.
-                       This includes missing required fields, invalid statistical data,
-                       or inconsistent network analysis results.
-            TemplateNotFound: If the report template doesn't exist for the specified
-                            language in the lib/templates/{language}/ directory.
-            OSError: If PDF generation, JSON export, or other file operations fail
-                    due to system issues, permissions, or disk space problems.
-            json.JSONEncodeError: If data serialization to JSON fails due to
-                                non-serializable data types or circular references.
-            weasyprint.HTML.Error: If HTML to PDF conversion fails during report rendering.
+            ValueError: If validation fails for report data or analytical computations.
+                       Includes incomplete analysis, missing statistical data, or
+                       inconsistent network analysis results.
+            TemplateNotFound: If report template not found for specified language.
+            OSError: If PDF generation, JSON export, or file operations fail.
+            json.JSONEncodeError: If data serialization fails due to non-serializable types.
+            weasyprint.HTML.Error: If HTML to PDF conversion fails during rendering.
+            
+        Output:
+            Creates PDF reports in reports/ subdirectory with naming pattern:
+            {project}_report_{group_stem}.pdf and exports aggregated data as
+            {project}_data.json in project root directory.
             
         Note:
-            - Generated reports include statistical analysis, network metrics, and rankings
-            - The exported JSON excludes graphics and certain bulky statistical data
-            - Reports are saved in the project's reports/ subdirectory
-            - JSON data is saved as {project}_data.json in the main project directory
-            - Sociogram generation significantly increases processing time but provides valuable insights
-            - All exceptions are handled by the decorator and dispatched as error events
-            
-        Examples:
-            >>> # Generate basic reports without sociograms
-            >>> main.generate_reports("en")
-            
-            >>> # Generate comprehensive reports with sociograms
-            >>> main.generate_reports("en", with_sociogram=True)
-            >>> # Creates: reports/{project}_report_{group_stem}.pdf, {project}_data.json
+            Sociogram generation significantly increases processing time but provides
+            valuable network visualization insights. JSON export includes filtered
+            data optimized for external analysis and integration workflows.
+            All errors handled by decorator and dispatched through event system.
         """
         # Signal the start of report generation
         sociogram_status = "with sociograms" if with_sociogram else "without sociograms"
@@ -610,48 +561,42 @@ class ABGridMain:
         language: str
     ) -> None:
         """
-        Render a document template to PDF format and save to the appropriate location.
+        Internal method for rendering document templates to PDF format with professional styling.
 
-        This internal method handles the complete PDF generation pipeline from template
-        loading through HTML rendering to final PDF creation. It manages template
-        selection, data injection, HTML generation, and PDF conversion using WeasyPrint.
+        Handles complete PDF generation pipeline from template loading through HTML rendering
+        to final PDF creation. Manages template selection based on document type and language,
+        data injection into templates, HTML generation, and PDF conversion using WeasyPrint
+        for high-quality output with CSS styling support.
         
-        This method is NOT decorated with error handling as it's an internal method
-        that should propagate exceptions to its callers (which are decorated).
+        This internal method propagates exceptions to decorated calling methods for proper
+        error handling and event dispatching through the established error handling system.
 
         Args:
-            doc_type (Literal["report", "answersheet"]): The type of document to render.
-                                                        Determines which template to use
-                                                        and which subdirectory to save to.
-            doc_data (Dict[str, Any]): Complete data dictionary containing all variables
-                                     needed for template rendering. This includes project
-                                     configuration, group data, and analytical results.
-            doc_suffix (str): Suffix to append to the generated filename, typically
-                            containing group identification (e.g., "g1_stem", "g2_stem").
-            language (str): The language code for template selection, determining
-                          which language-specific template will be used.
+            doc_type: Document type determining template selection and output directory.
+                     Controls which template to load and where to save generated PDF.
+            doc_data: Complete data dictionary containing all variables required for
+                     template rendering including project config and analytical results.
+            doc_suffix: Filename suffix for generated file, typically containing group
+                       identification for unique file naming across project groups.
+            language: Language code for template selection determining which localized
+                     template will be used for document generation.
 
         Raises:
-            TemplateNotFound: If the specified template doesn't exist for the given
-                            language and document type combination.
-            OSError: If PDF generation or file saving operations fail due to system
-                    issues, permissions, or disk space problems.
-            weasyprint.HTML.Error: If HTML to PDF conversion fails, typically due to
-                                 malformed HTML, CSS issues, or rendering problems.
-            jinja2.TemplateError: If template rendering fails due to syntax errors,
-                                missing variables, or other template-related issues.
+            TemplateNotFound: If specified template does not exist for given language and type.
+            OSError: If PDF generation or file operations fail due to system issues.
+            weasyprint.HTML.Error: If HTML to PDF conversion fails during rendering process.
+            jinja2.TemplateError: If template rendering fails due to syntax or variable errors.
+            ValueError: If unsupported document type is specified.
+            
+        Output:
+            Creates PDF file in appropriate subdirectory (reports/ or answersheets/) with
+            sanitized filename based on project name, document type, and suffix.
             
         Note:
-            - Generated PDF files are saved in type-specific subdirectories (reports/ or answersheets/)
-            - Filenames are automatically sanitized to remove problematic characters
-            - The method includes debugging support for HTML output (commented out by default)
-            - WeasyPrint handles CSS styling and professional PDF formatting automatically
-            - This method propagates exceptions to decorated calling methods for proper error handling
-            
-        Examples:
-            >>> # Internal usage - not called directly by users
-            >>> self._render_pdf("report", report_data, "project_g1", "en")
-            >>> # Generates: reports/project_report_project_g1.pdf
+            Includes commented debugging section for HTML output inspection.
+            Automatically sanitizes filenames to remove problematic characters.
+            Validates output directory existence before attempting file creation.
+            Propagates exceptions to decorated calling methods for error handling.
         """
         # Select the appropriate template based on document type
         template_path: str
@@ -700,43 +645,3 @@ class ABGridMain:
         # with open(debug_html_path, "w", encoding='utf-8') as file:
         #     file.write(rendered_html)
         # -----------------------------------------------------------------------------------
-
-    def get_project_info(self) -> Dict[str, Any]:
-        """
-        Get comprehensive information about the current project.
-        
-        Returns:
-            Dict[str, Any]: Dictionary containing project metadata, file paths,
-                           and configuration information.
-        """
-        return {
-            "project_name": self.abgrid_data.project,
-            "project_path": str(self.abgrid_data.project_folderpath),
-            "project_file": str(self.abgrid_data.project_filepath),
-            "group_files": [str(path) for path in self.abgrid_data.groups_filepaths],
-            "group_count": len(self.abgrid_data.groups_filepaths),
-            "dispatcher_subscriptions": event_logger.get_active_subscriptions()
-        }
-
-    def cleanup(self) -> None:
-        """
-        Clean up resources and subscriptions.
-        
-        This method should be called when the ABGridMain instance is no longer needed
-        to ensure proper cleanup of event subscriptions and resources.
-        """
-        event_logger.unsubscribe_all()
-        event_dispatcher.dispatch({
-            "event_type": EVENT_END, 
-            "event_message": f"Cleaned up resources for project '{self.abgrid_data.project}'"
-        })
-
-    def __str__(self) -> str:
-        """String representation of the ABGridMain instance."""
-        return f"ABGridMain(project='{self.abgrid_data.project}', groups={len(self.abgrid_data.groups_filepaths)})"
-
-    def __repr__(self) -> str:
-        """Developer representation of the ABGridMain instance."""
-        return (f"ABGridMain(project='{self.abgrid_data.project}', "
-                f"project_path='{self.abgrid_data.project_folderpath}', "
-                f"groups={len(self.abgrid_data.groups_filepaths)})")
