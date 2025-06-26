@@ -12,7 +12,6 @@ License: MIT License
 from typing import Any, Dict, List, Protocol, TypedDict, Union, runtime_checkable, Optional
 from collections import defaultdict
 
-
 class Base(TypedDict):
     """
     Base event data structure containing common fields for all events.
@@ -22,7 +21,6 @@ class Base(TypedDict):
     """
     event_type: str
 
-
 class RegularEventData(Base):
     """
     Event data structure for standard operation events.
@@ -31,7 +29,6 @@ class RegularEventData(Base):
     completion, etc. where the message is a simple string.
     """
     event_message: str
-
 
 class TracebackErrorEventData(Base):
     """
@@ -43,11 +40,6 @@ class TracebackErrorEventData(Base):
     event_message: List[Dict[str, Any]]  # List of traceback frame dictionaries
     exception_type: str                  # Exception class name (e.g., 'ValueError')
     exception_str: str                   # String representation of the exception
-
-
-# Union type encompassing all possible event data structures
-EventData = Union[RegularEventData, TracebackErrorEventData]
-
 
 @runtime_checkable
 class Subscriber(Protocol):
@@ -87,7 +79,6 @@ class Subscriber(Protocol):
         """
         ...
 
-
 class Dispatcher:
     """
     Central event broadcasting system managing subscribers and event distribution.
@@ -103,12 +94,6 @@ class Dispatcher:
     Attributes:
         _subscribers (Dict[str, List[Subscriber]]): Registry mapping event types
             to their corresponding subscriber lists.
-            
-    Examples:
-        >>> dispatcher = EventDispatcher()
-        >>> logger = PrintLogger()
-        >>> logger.subscribe_to(dispatcher, 'error', 'start', 'end')
-        >>> dispatcher.dispatch({'event_type': 'error', 'event_message': 'Something failed'})
     """
     
     def __init__(self) -> None:
@@ -141,11 +126,6 @@ class Dispatcher:
         Note:
             The same subscriber can be registered for multiple event types,
             and multiple subscribers can be registered for the same event type.
-            
-        Examples:
-            >>> dispatcher = EventDispatcher()
-            >>> logger = PrintLogger()
-            >>> dispatcher.subscribe('error', logger)
         """
         if not isinstance(subscriber, Subscriber):
             raise TypeError(
@@ -171,9 +151,6 @@ class Dispatcher:
             Silently ignores cases where:
             - The event type doesn't exist in the registry
             - The subscriber is not registered for the specified event type
-            
-        Examples:
-            >>> dispatcher.unsubscribe('error', logger)
         """
         try:
             self._subscribers[event_type].remove(subscriber)
@@ -182,7 +159,7 @@ class Dispatcher:
             # ValueError: subscriber not found in the list
             pass  # Fail silently to make operation idempotent
     
-    def dispatch(self, data: EventData) -> None:
+    def dispatch(self, data: Union[RegularEventData, TracebackErrorEventData]) -> None:
         """
         Broadcast an event to all registered subscribers of the appropriate type.
         
@@ -202,12 +179,6 @@ class Dispatcher:
             Subscriber exceptions are caught and logged to prevent one failing
             subscriber from preventing others from receiving events. This ensures
             system robustness when dealing with multiple event handlers.
-            
-        Examples:
-            >>> dispatcher.dispatch({
-            ...     'event_type': 'operation_start',
-            ...     'event_message': 'Beginning data processing'
-            ... })
         """
         event_type: str = data["event_type"]
         
@@ -245,15 +216,6 @@ class Dispatcher:
         Returns:
             Union[int, Dict[str, int]]: Either the count for a specific event type,
                 or a dictionary mapping event types to their subscriber counts.
-                
-        Examples:
-            >>> # Get count for specific event type
-            >>> count = dispatcher.get_subscriber_count('error')
-            >>> print(f"Error subscribers: {count}")
-            
-            >>> # Get counts for all event types
-            >>> all_counts = dispatcher.get_subscriber_count()
-            >>> print(f"All subscriber counts: {all_counts}")
         """
         if event_type is not None:
             return len(self._subscribers[event_type])
@@ -273,13 +235,6 @@ class Dispatcher:
                     
         Returns:
             None
-            
-        Examples:
-            >>> # Clear subscribers for specific event type
-            >>> dispatcher.clear_subscribers('error')
-            
-            >>> # Clear all subscribers
-            >>> dispatcher.clear_subscribers()
         """
         if event_type is not None:
             self._subscribers[event_type].clear()
@@ -292,10 +247,6 @@ class Dispatcher:
         
         Returns:
             List[str]: List of event type identifiers that have at least one subscriber.
-            
-        Examples:
-            >>> event_types = dispatcher.get_event_types()
-            >>> print(f"Active event types: {event_types}")
         """
         return list(self._subscribers.keys())
     
@@ -308,10 +259,6 @@ class Dispatcher:
             
         Returns:
             bool: True if the event type has at least one subscriber, False otherwise.
-            
-        Examples:
-            >>> if dispatcher.has_subscribers('error'):
-            ...     print("Error handling is active")
         """
         return len(self._subscribers[event_type]) > 0
     
@@ -327,9 +274,5 @@ class Dispatcher:
         Returns:
             List[Subscriber]: Copy of the subscriber list for the specified event type.
                 Returns an empty list if no subscribers are registered.
-                
-        Examples:
-            >>> error_subscribers = dispatcher.get_subscribers('error')
-            >>> print(f"Error subscribers: {[type(s).__name__ for s in error_subscribers]}")
         """
         return self._subscribers[event_type].copy()

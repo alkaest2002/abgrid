@@ -9,8 +9,45 @@ Date Created: Wed Jun 25 2025
 License: MIT License
 """
 import textwrap
-from typing import Any, Dict, List, Union
+from typing import Any, Dict, List, Protocol, Union, runtime_checkable
 from lib import EVENT_ERROR
+
+@runtime_checkable
+class DispatcherProtocol(Protocol):
+    """
+    Minimal protocol defining only the essential methods for event dispatching.
+    
+    This protocol includes only the absolute minimum methods required for basic
+    publish-subscribe functionality. Useful for lightweight implementations or
+    when enhanced features are not needed.
+    
+    REQUIRED METHODS (3 total):
+    - subscribe()   : Register subscribers for event types
+    - unsubscribe() : Remove subscriber registrations
+    
+    Use this protocol when you need only basic event dispatching without
+    monitoring, introspection, or advanced management capabilities.
+    """
+    
+    def subscribe(self, event_type: str, subscriber) -> None:
+        """
+        Register a subscriber to receive events of a specific type.
+        
+        Args:
+            event_type: Event type identifier to subscribe to.
+            subscriber: Object implementing subscriber protocol.
+        """
+        ...
+    
+    def unsubscribe(self, event_type: str, subscriber) -> None:
+        """
+        Remove a subscriber from receiving events of a specific type.
+        
+        Args:
+            event_type: Event type identifier to unsubscribe from.
+            subscriber: Subscriber object to remove from registration.
+        """
+        ...
 
 class Logger:
     """
@@ -107,6 +144,12 @@ class Logger:
             AttributeError: If the dispatcher doesn't have a subscribe() method.
             TypeError: If the dispatcher rejects this logger (not implementing EventSubscriber).
         """
+        if not isinstance(dispatcher, DispatcherProtocol):
+            raise TypeError(
+                f"Dispatcher must implement DispatcherProtocol, "
+                f"got {type(dispatcher).__name__}"
+            )
+
         # Track subscriptions for this dispatcher
         if dispatcher not in self._subscriptions:
             self._subscriptions[dispatcher] = set()
