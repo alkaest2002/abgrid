@@ -8,7 +8,7 @@ Author: Pierpaolo Calanna
 Date Created: Wed Jun 25 2025
 License: MIT License
 """
-
+import textwrap
 from typing import Any, Dict, List, Union
 from lib import EVENT_ERROR
 
@@ -36,15 +36,83 @@ class PrintLogger:
         >>> logger.unsubscribe_all()  # Clean up all subscriptions
     """
     
-    def __init__(self) -> None:
+    def __init__(self, max_width: int = 80) -> None:
         """
         Initialize the print logger with empty subscription tracking.
         
         Sets up internal structures for managing subscriptions across
         multiple dispatchers and event types.
+        
+        Args:
+            max_width (int): Maximum line width for text wrapping. Defaults to 80.
         """
         # Track active subscriptions for cleanup: {dispatcher: set of event_types}
         self._subscriptions: Dict[Any, set] = {}
+        self._max_width: int = max_width
+    
+    def _pretty_print(self, text: str, prefix: str = "", width: int = None) -> None:
+        """
+        Print text with proper wrapping and prefix handling.
+        
+        This private method handles text wrapping to ensure no line exceeds the
+        specified width while maintaining proper indentation for continuation lines.
+        
+        Args:
+            text (str): The text to print with wrapping
+            prefix (str): Optional prefix for the first line (e.g., "Message: ")
+            width (int): Maximum line width. If None, uses instance default.
+                        
+        Returns:
+            None
+            
+        Note:
+            Continuation lines are automatically indented to align with the text
+            portion of the first line, creating a clean, readable format.
+            
+        Examples:
+            >>> logger._pretty_print("Short message", "Info: ")
+            Info: Short message
+            
+            >>> logger._pretty_print("Very long message that needs wrapping", "Error: ")
+            Error: Very long message that needs
+                   wrapping
+        """
+        if width is None:
+            width = self._max_width
+            
+        # Handle empty text
+        if not text:
+            print(prefix)
+            return
+        
+        # Calculate available width for text (accounting for prefix)
+        available_width = width - len(prefix)
+        
+        # If text fits on one line with prefix
+        full_line = f"{prefix}{text}"
+        if len(full_line) <= width:
+            print(full_line)
+            return
+        
+        # Text needs wrapping
+        wrapped_lines = textwrap.wrap(
+            text,
+            width=available_width,
+            break_long_words=True,
+            break_on_hyphens=True
+        )
+        
+        if not wrapped_lines:
+            print(prefix)
+            return
+        
+        # Print first line with prefix
+        print(f"{prefix}{wrapped_lines[0]}")
+        
+        # Print continuation lines with proper indentation
+        indent = " " * len(prefix)
+        for line in wrapped_lines[1:]:
+            print(f"{indent}{line}")
     
     def subscribe_to(self, dispatcher, *event_types: str) -> None:
         """
@@ -212,13 +280,14 @@ class PrintLogger:
                 
         except Exception as e:
             # Catch any exceptions to prevent disrupting other subscribers
-            print(f"PrintLogger internal error: {e}")
+            self._pretty_print(str(e), "PrintLogger internal error: ")
 
     def _handle_regular_event(self, data: Dict[str, Any]) -> None:
         """
         Handle regular (non-error) operation events.
         
-        Formats and displays standard operation events with consistent styling.
+        Formats and displays standard operation events with consistent styling
+        and proper text wrapping.
         
         Args:
             data (Dict[str, Any]): Event data containing event_type and event_message
@@ -231,18 +300,19 @@ class PrintLogger:
         
         # Format based on event type for better readability
         if event_type.endswith('_start') or event_type == 'start':
-            print(f"▶ START: {event_message}")
+            self._pretty_print(event_message, "▶ START: ")
         elif event_type.endswith('_end') or event_type == 'end':
-            print(f"✓ END: {event_message}")
+            self._pretty_print(event_message, "✓ END: ")
         else:
-            print(f"● {event_type.upper()}: {event_message}")
+            self._pretty_print(event_message, f"● {event_type.upper()}: ")
 
     def _handle_error_event(self, data: Dict[str, Any]) -> None:
         """
         Handle error events with detailed traceback information.
         
         This method processes error events by extracting exception details
-        and formatting traceback information for clear console output.
+        and formatting traceback information for clear console output with
+        proper text wrapping.
         
         Args:
             data (Dict[str, Any]): Error event data containing:
@@ -264,19 +334,19 @@ class PrintLogger:
         exception_str: str = data.get('exception_str', 'Unknown error')
         traceback_info: Union[List[Dict[str, Any]], Any] = data.get('event_message', [])
         
-        # Display the primary error message with prominent styling
-        print(f"\n{'='*60}")
-        print(f"✗ ERROR: {exception_type}")
-        print(f"Message: {exception_str}")
-        print(f"{'='*60}")
+        # Display the primary error message with prominent styling and text wrapping
+        self._pretty_print(f"\n{'='*self._max_width}")
+        self._pretty_print(exception_type, "✗ ERROR: ")
+        self._pretty_print(exception_str, "Message: ")
+        self._pretty_print(f"{'='*self._max_width}")
         
         # Process and display traceback information if available
         self._print_traceback(traceback_info)
-        print(f"{'='*60}\n")
+        self._pretty_print(f"{'='*self._max_width}\n")
 
     def _print_traceback(self, traceback_info: Union[List[Dict[str, Any]], Any]) -> None:
         """
-        Format and print traceback information to the console.
+        Format and print traceback information to the console with proper wrapping.
         
         Args:
             traceback_info (Union[List[Dict[str, Any]], Any]): Traceback data,
@@ -286,9 +356,9 @@ class PrintLogger:
             None
         """
         if isinstance(traceback_info, list) and traceback_info:
-            print("Traceback (most recent call last):")
+            self._pretty_print("Traceback (most recent call last):")
             
-            for i, trace_item in enumerate(traceback_info):
+            for trace_item in traceback_info:
                 if isinstance(trace_item, dict):
                     # Extract frame information with safe defaults
                     filename: str = trace_item.get('filename', 'unknown')
@@ -298,11 +368,36 @@ class PrintLogger:
                     # Format filename for better readability (show only filename, not full path)
                     display_filename = filename.split('/')[-1] if '/' in filename else filename
                     
-                    # Format and display the traceback frame with indentation
-                    indent = "  " + ("  " * i)  # Increase indentation for nested calls
-                    print(f"{indent}→ {display_filename}:{line_number} in {function_name}()")
+                    # Create the traceback line
+                    trace_line = f"{display_filename}:{line_number} in {function_name}()"
+                    
+                    # Pretty print
+                    self._pretty_print(trace_line, "→ ")
         else:
-            print("  (No traceback information available)")
+            self._pretty_print(traceback_info)
+
+    def set_max_width(self, width: int) -> None:
+        """
+        Set the maximum line width for text wrapping.
+        
+        Args:
+            width (int): New maximum line width. Must be at least 20 characters.
+            
+        Raises:
+            ValueError: If width is less than 20 characters.
+        """
+        if width < 20:
+            raise ValueError("Maximum width must be at least 20 characters")
+        self._max_width = width
+
+    def get_max_width(self) -> int:
+        """
+        Get the current maximum line width setting.
+        
+        Returns:
+            int: Current maximum line width for text wrapping.
+        """
+        return self._max_width
     
     def __str__(self) -> str:
         """
@@ -315,7 +410,8 @@ class PrintLogger:
         dispatcher_count = len(self._subscriptions)
         
         return (f"PrintLogger(dispatchers={dispatcher_count}, "
-                f"total_subscriptions={subscription_count})")
+                f"total_subscriptions={subscription_count}, "
+                f"max_width={self._max_width})")
     
     def __repr__(self) -> str:
         """
@@ -324,4 +420,5 @@ class PrintLogger:
         Returns:
             str: Detailed representation for debugging
         """
-        return f"PrintLogger(subscriptions={dict(self._subscriptions)})"
+        return (f"PrintLogger(subscriptions={dict(self._subscriptions)}, "
+                f"max_width={self._max_width})")

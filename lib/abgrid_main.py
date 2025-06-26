@@ -544,8 +544,7 @@ class ABGridMain:
             
             # Check for report-level validation errors
             if report_errors:
-                error_message = f"Report data validation failed for {group_file.name}: {'; '.join(report_errors)}"
-                raise ValueError(error_message)
+                raise ValueError(f"Report data validation failed for {group_file.name}: {'; '.join(report_errors)}")
             
             # Extract group identifier for reporting
             group_number_match = re.search(r'(\d+)$', group_file.stem)

@@ -74,14 +74,6 @@ try:
                 # Generate reports
                 abgrid_main.generate_reports(args.language, args.with_sociogram)
 
-# File already exists error
-except FileExistsError as error:
-    print(error)
-
-# No project file is found
-except StopIteration as error:
-    print(error)
-
-# Residual cases
+# Do not handle errrors
 except Exception as error:
-    print(error)
+    pass

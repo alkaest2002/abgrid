@@ -43,7 +43,7 @@ class ABGridYAML:
         except yaml.YAMLError:
             return None, f"YAML file {yaml_file_path.name} could not be parsed."
     
-    def validate(self, yaml_type: Literal["project", "group"], yaml_data: Dict[str, Any]) -> Tuple[Optional[Dict[str, Any]], Optional[str]]:
+    def validate(self, yaml_type: Literal["project", "group"], yaml_data: Dict[str, Any]) -> Tuple[Optional[Dict[str, Any]], Optional[ValidationError]]:
         """
         Validate the YAML data against the specified schema type.
 
@@ -65,5 +65,5 @@ class ABGridYAML:
                 return None, "Invalid YAML type specified."
             return validated_data, None
         
-        except ValidationError as e:
-            return None, e.errors()
+        except ValidationError as error:
+            return None, error

@@ -16,6 +16,8 @@ import pandas as pd
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Protocol, Tuple, TypedDict
 
+from pydantic import ValidationError
+
 from lib.abgrid_sna import SNADict, ABGridSna
 from lib.abgrid_sociogram import SociogramDict, ABGridSociogram
 
@@ -154,8 +156,7 @@ class ABGridData:
         if project_data is not None:
             return project_data, None
         else:
-            error_message = self._get_pydantic_errors_messages(validation_errors or [])
-            return None, error_message
+            return None, self._get_pydantic_errors_messages(validation_errors)
 
     def get_group_data(self, group_filepath: Path) -> Tuple[Optional[GroupData], Optional[str]]:
         """
@@ -186,8 +187,7 @@ class ABGridData:
         if group_data is not None:
             return group_data, None
         else:
-            error_message = self._get_pydantic_errors_messages(validation_errors or [])
-            return None, error_message
+            return None, self._get_pydantic_errors_messages(validation_errors)
         
     def get_report_data(
         self, 
@@ -237,8 +237,7 @@ class ABGridData:
 
         # Return error if project data loading failed
         if project_data is None:
-            error_message = self._get_pydantic_errors_messages(project_validation_errors or [])
-            return None, error_message
+            return None, self._get_pydantic_errors_messages(project_validation_errors)
         
         # Load and validate group data
         group_data, group_validation_errors = self.data_loader.load_data(
@@ -247,8 +246,7 @@ class ABGridData:
 
         # Return error if group data loading failed
         if group_data is None:
-            error_message = self._get_pydantic_errors_messages(group_validation_errors or [])
-            return None, error_message
+            return None, self._get_pydantic_errors_messages(group_validation_errors)
         
         # Extract group number from group filename (assumes format ending with digits)
         group_number = int(re.search(r'(\d+)$', group_filepath.stem).group(0))
@@ -336,27 +334,37 @@ class ABGridData:
         
         return report_data, None
 
-    def _get_pydantic_errors_messages(self, errors: List[str]) -> str:
+    def _get_pydantic_errors_messages(self, validation_error: ValidationError, context: str = "") -> List[str]:
         """
-        Format Pydantic validation error messages into a readable string.
-
-        This method processes validation errors from Pydantic models and formats
-        them into a user-friendly string representation with consistent prefixing.
-
+        Convert Pydantic ValidationError to list of formatted error messages.
+        
+        Perfect for integration with your existing validation error handling.
+        
         Args:
-            errors: A list of error dictionaries from Pydantic validation,
-                where each dictionary contains at least a 'msg' key with the
-                error message
-
-        Returns:
-            A formatted string with each error message prefixed by "-->" and
-            separated by newlines. Returns empty string if no errors provided.
+            validation_error: The ValidationError from Pydantic
+            context: Optional context description (e.g., "project data", "group configuration")
             
-        Example:
-            >>> errors = [{'msg': 'field required'}, {'msg': 'invalid value'}]
-            >>> formatter._get_pydantic_errors_messages(errors)
-            '--> field required\n--> invalid value'
+        Returns:
+            List of formatted error messages compatible with your existing error handling
         """
-        if not errors:
-            return ""
-        return "\n".join([f"--> {error.get('msg', 'Unknown error')}" for error in errors])
+        errors = validation_error.errors()
+        formatted_errors = []
+        
+        for error in errors:
+            loc = error.get('loc', ())
+            msg = error.get('msg', 'Unknown error')
+            
+            # Build location string
+            if loc:
+                location = '.'.join(str(part) for part in loc)
+                error_msg = f"{location}: {msg}"
+            else:
+                error_msg = msg
+            
+            # Add context if provided
+            if context:
+                error_msg = f"[{context}] {error_msg}"
+                
+            formatted_errors.append(error_msg)
+        
+        return formatted_errors
