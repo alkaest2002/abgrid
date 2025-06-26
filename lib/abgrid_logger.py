@@ -52,63 +52,47 @@ class Logger:
     
     def _pretty_print(self, text: str, prefix: str = "", width: int = None) -> None:
         """
-        Print text with proper wrapping and prefix handling.
+         Print text with proper line wrapping and consistent prefix indentation.
         
-        This private method handles text wrapping to ensure no line exceeds the
-        specified width while maintaining proper indentation for continuation lines.
+        Handles text wrapping to ensure lines don't exceed specified width while
+        maintaining proper indentation alignment for continuation lines. Gracefully
+        handles edge cases including empty text, very long prefixes, and whitespace-only content.
         
         Args:
-            text (str): The text to print with wrapping
-            prefix (str): Optional prefix for the first line (e.g., "Message: ")
-            width (int): Maximum line width. If None, uses instance default.
-                        
-        Returns:
-            None
+            text: The text content to print with wrapping applied.
+            prefix: Optional prefix string for the first line (e.g., "Error: ", "Info: ").
+            width: Maximum line width constraint. Uses instance default if None.
             
         Note:
-            Continuation lines are automatically indented to align with the text
-            portion of the first line, creating a clean, readable format.
-            
-        Examples:
-            >>> logger._pretty_print("Short message", "Info: ")
-            Info: Short message
-            
-            >>> logger._pretty_print("Very long message that needs wrapping", "Error: ")
-            Error: Very long message that needs
-                   wrapping
+            Continuation lines are automatically indented to align with the text portion
+            of the first line. Ensures minimum width of 1 character even with long prefixes.
+            Handles whitespace-only text and empty content gracefully.
         """
-        if width is None:
-            width = self._max_width
+        width = width if width else self._max_width
             
         # Handle empty text
         if not text:
-            print(prefix)
             return
         
-        # Calculate available width for text (accounting for prefix)
-        available_width = width - len(prefix)
-        
-        # If text fits on one line with prefix
-        full_line = f"{prefix}{text}"
-        if len(full_line) <= width:
+        # Print text directly, if it fits on one line
+        if len(full_line := f"{prefix}{text}") <= width:
             print(full_line)
             return
         
         # Text needs wrapping
-        wrapped_lines = textwrap.wrap(
+        [first_line, *rest_of_lines] = textwrap.wrap(
             text,
-            width=available_width,
+            width=max(1, width - len(prefix)),
             break_long_words=True,
             break_on_hyphens=True
         )
         
         # Print first line with prefix
-        print(f"{prefix}{wrapped_lines[0]}")
+        print(f"{prefix}{first_line}")
         
-        # Print continuation lines with proper indentation
-        indent = " " * len(prefix)
-        for line in wrapped_lines[1:]:
-            print(f"{indent}{line}")
+        # Print rest of lines with indentation
+        for line in rest_of_lines:
+            print(f"{' ' * len(prefix)}{line}")
     
     def subscribe_to(self, dispatcher, *event_types: str) -> None:
         """
@@ -130,12 +114,6 @@ class Logger:
         Raises:
             AttributeError: If the dispatcher doesn't have a subscribe() method.
             TypeError: If the dispatcher rejects this logger (not implementing EventSubscriber).
-            
-        Examples:
-            >>> logger = PrintLogger()
-            >>> logger.subscribe_to(dispatcher, 'start', 'end')
-            >>> logger.subscribe_to(another_dispatcher, 'error')
-            >>> # Logger now receives events from both dispatchers
         """
         # Track subscriptions for this dispatcher
         if dispatcher not in self._subscriptions:
