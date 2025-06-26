@@ -27,8 +27,8 @@ from weasyprint import HTML
 from lib.abgrid_yaml import ABGridYAML
 from lib.abgrid_data import ABGridData
 from lib.abgrid_utils import to_json_serializable, handle_errors_decorator
-from lib.abgrid_dispatcher import EventDispatcher
-from lib.abgrid_logger_print import PrintLogger
+from lib.abgrid_dispatcher import Dispatcher
+from lib.abgrid_logger import Logger
 from lib import EVENT_ERROR, EVENT_START, EVENT_END, SYMBOLS, jinja_env
 
 ProjectData = Dict[str, Any]
@@ -38,8 +38,8 @@ ValidationErrors = List[str]
 DataWithErrors = Tuple[Dict[str, Any], ValidationErrors]
 
 # Initialize global event system for operation tracking and error handling
-event_dispatcher = EventDispatcher()
-event_logger = PrintLogger()
+event_dispatcher = Dispatcher()
+event_logger = Logger()
 
 # Subscribe the print logger to all event types (start, end, error)
 # The error decorator will automatically use this dispatcher for exception handling

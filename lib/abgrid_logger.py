@@ -13,7 +13,7 @@ from typing import Any, Dict, List, Union
 from lib import EVENT_ERROR
 
 
-class PrintLogger:
+class Logger:
     """
     Console logger implementing EventSubscriber protocol.
     

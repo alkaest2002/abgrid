@@ -50,7 +50,7 @@ EventData = Union[RegularEventData, TracebackErrorEventData]
 
 
 @runtime_checkable
-class EventSubscriber(Protocol):
+class Subscriber(Protocol):
     """
     Protocol defining the interface for event subscribers.
     
@@ -88,7 +88,7 @@ class EventSubscriber(Protocol):
         ...
 
 
-class EventDispatcher:
+class Dispatcher:
     """
     Central event broadcasting system managing subscribers and event distribution.
     
@@ -101,7 +101,7 @@ class EventDispatcher:
     and then broadcasts events to all registered subscribers of the matching type.
     
     Attributes:
-        _subscribers (Dict[str, List[EventSubscriber]]): Registry mapping event types
+        _subscribers (Dict[str, List[Subscriber]]): Registry mapping event types
             to their corresponding subscriber lists.
             
     Examples:
@@ -120,9 +120,9 @@ class EventDispatcher:
         """
         # Registry of subscribers organized by event type
         # defaultdict ensures we don't need to check for key existence
-        self._subscribers: Dict[str, List[EventSubscriber]] = defaultdict(list)
+        self._subscribers: Dict[str, List[Subscriber]] = defaultdict(list)
     
-    def subscribe(self, event_type: str, subscriber: EventSubscriber) -> None:
+    def subscribe(self, event_type: str, subscriber: Subscriber) -> None:
         """
         Register a subscriber to receive events of a specific type.
         
@@ -133,10 +133,10 @@ class EventDispatcher:
         Args:
             event_type (str): Event type identifier to subscribe to
                 (e.g., 'operation_start', 'operation_error', 'operation_end')
-            subscriber (EventSubscriber): Object implementing the EventSubscriber protocol
+            subscriber (Subscriber): Object implementing the Subscriber protocol
                 
         Raises:
-            TypeError: If the provided subscriber doesn't implement the EventSubscriber protocol
+            TypeError: If the provided subscriber doesn't implement the Subscriber protocol
             
         Note:
             The same subscriber can be registered for multiple event types,
@@ -147,16 +147,16 @@ class EventDispatcher:
             >>> logger = PrintLogger()
             >>> dispatcher.subscribe('error', logger)
         """
-        if not isinstance(subscriber, EventSubscriber):
+        if not isinstance(subscriber, Subscriber):
             raise TypeError(
-                f"Subscriber must implement EventSubscriber protocol, "
+                f"Subscriber must implement Subscriber protocol, "
                 f"got {type(subscriber).__name__}"
             )
         
         # Add subscriber to the event type's subscriber list
         self._subscribers[event_type].append(subscriber)
     
-    def unsubscribe(self, event_type: str, subscriber: EventSubscriber) -> None:
+    def unsubscribe(self, event_type: str, subscriber: Subscriber) -> None:
         """
         Unregister a subscriber from receiving events of a specific type.
         
@@ -165,7 +165,7 @@ class EventDispatcher:
         
         Args:
             event_type (str): Event type to unsubscribe from
-            subscriber (EventSubscriber): Subscriber object to remove from registry
+            subscriber (Subscriber): Subscriber object to remove from registry
             
         Note:
             Silently ignores cases where:
@@ -315,7 +315,7 @@ class EventDispatcher:
         """
         return len(self._subscribers[event_type]) > 0
     
-    def get_subscribers(self, event_type: str) -> List[EventSubscriber]:
+    def get_subscribers(self, event_type: str) -> List[Subscriber]:
         """
         Get a copy of the subscriber list for a specific event type.
         
@@ -325,7 +325,7 @@ class EventDispatcher:
             event_type (str): Event type to get subscribers for
             
         Returns:
-            List[EventSubscriber]: Copy of the subscriber list for the specified event type.
+            List[Subscriber]: Copy of the subscriber list for the specified event type.
                 Returns an empty list if no subscribers are registered.
                 
         Examples:
