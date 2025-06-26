@@ -564,13 +564,6 @@ class ABGridMain:
             }
             self._render_pdf("report", enhanced_report_data, group_file.stem, language)
             generated_reports.append(group_identifier)
-        
-            # Prepare data for JSON export by filtering out non-essential fields
-            # This reduces file size and focuses on analytical results
-            event_dispatcher.dispatch({
-                "event_type": EVENT_START, 
-                "event_message": f"Preparing data export for {group_identifier}"
-            })
             
             filtered_data = to_json_serializable(
                 report_data, 
