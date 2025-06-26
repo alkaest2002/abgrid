@@ -26,13 +26,6 @@ class Logger:
     
     Attributes:
         _subscriptions (Dict): Internal tracking of active subscriptions for cleanup purposes.
-    
-    Examples:
-        >>> logger = PrintLogger()
-        >>> logger.subscribe_to(dispatcher, 'start', 'end', 'error')
-        >>> # Logger will now receive and display events when dispatcher dispatches them
-        >>> logger.unsubscribe_from(dispatcher, 'start')  # Stop receiving start events
-        >>> logger.unsubscribe_all()  # Clean up all subscriptions
     """
     
     def __init__(self, max_width: int = 80) -> None:
@@ -124,6 +117,87 @@ class Logger:
             
             # Track the subscription internally
             self._subscriptions[dispatcher].add(event_type)
+
+    def unsubscribe_from(self, dispatcher, *event_types: str) -> None:
+        """
+        Unsubscribe this logger from specific event types on a dispatcher.
+        
+        Removes the logger's registration for the specified event types.
+        The logger will stop receiving these events immediately.
+        
+        Args:
+            dispatcher: EventDispatcher instance to unsubscribe from
+            *event_types (str): Variable number of event type names to unsubscribe from
+                
+        Returns:
+            None
+            
+        Note:
+            This operation is idempotent - it won't fail if the logger wasn't
+            subscribed to the specified event types.
+        """
+        if dispatcher not in self._subscriptions:
+            return
+        
+        for event_type in event_types:
+            # Unregister from the dispatcher
+            dispatcher.unsubscribe(event_type, self)
+            
+            # Remove from internal tracking
+            self._subscriptions[dispatcher].discard(event_type)
+        
+        # Clean up empty dispatcher entries
+        if not self._subscriptions[dispatcher]:
+            del self._subscriptions[dispatcher]
+    
+    def unsubscribe_all(self) -> None:
+        """
+        Unsubscribe this logger from all event types on all dispatchers.
+        
+        This method provides a convenient way to clean up all subscriptions,
+        useful for shutdown procedures or when the logger is no longer needed.
+        
+        Returns:
+            None
+        """
+        # Create a copy of the subscriptions to avoid modification during iteration
+        subscriptions_copy = dict(self._subscriptions)
+        
+        for dispatcher, event_types in subscriptions_copy.items():
+            # Unsubscribe from all event types for this dispatcher
+            event_types_list = list(event_types)
+            self.unsubscribe_from(dispatcher, *event_types_list)
+    
+    def get_active_subscriptions(self) -> Dict[Any, List[str]]:
+        """
+        Get a summary of all active subscriptions.
+        
+        Returns a dictionary showing which dispatchers this logger is
+        subscribed to and what event types it's listening for.
+        
+        Returns:
+            Dict[Any, List[str]]: Dictionary mapping dispatchers to lists of
+                                 subscribed event types.
+        """
+        return {dispatcher: list(event_types) for dispatcher, event_types in self._subscriptions.items()}
+    
+    def is_subscribed_to(self, dispatcher, event_type: str) -> bool:
+        """
+        Check if this logger is subscribed to a specific event type on a dispatcher.
+        
+        Args:
+            dispatcher: EventDispatcher to check
+            event_type (str): Event type to check for subscription
+            
+        Returns:
+            bool: True if subscribed to the event type on the dispatcher, False otherwise.
+            
+        Examples:
+            >>> if logger.is_subscribed_to(dispatcher, 'error'):
+            ...     print("Logger will handle error events")
+        """
+        return (dispatcher in self._subscriptions and 
+                event_type in self._subscriptions[dispatcher])
      
     def on_event(self, data: Dict[str, Any]) -> None:
         """
