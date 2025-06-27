@@ -24,12 +24,12 @@ import json
 from pathlib import Path
 from typing import Literal, Dict, Any, List, Tuple
 from weasyprint import HTML
-from lib.abgrid_yaml import ABGridYAML
-from lib.abgrid_data import ABGridData
-from lib.abgrid_utils import to_json_serializable, handle_errors_decorator
-from lib.abgrid_dispatcher import Dispatcher
-from lib.abgrid_logger import Logger
-from lib import EVENT_ERROR, EVENT_START, EVENT_END, SYMBOLS, jinja_env
+from lib.terminal.terminal_yaml import ABGridYAML
+from lib.terminal.terminal_logger import logger_decorator
+from lib.core import SYMBOLS
+from lib.core.core_data import ABGridData
+from lib.abgrid_utils import to_json_serializable
+from lib import jinja_env
 
 ProjectData = Dict[str, Any]
 GroupData = Dict[str, Any]
@@ -37,15 +37,7 @@ ReportData = Dict[str, Any]
 ValidationErrors = List[str]
 DataWithErrors = Tuple[Dict[str, Any], ValidationErrors]
 
-# Initialize global event system for operation tracking and error handling
-event_dispatcher = Dispatcher()
-event_logger = Logger()
-
-# Subscribe the print logger to all event types (start, end, error)
-# The error decorator will automatically use this dispatcher for exception handling
-event_logger.subscribe_to(event_dispatcher, EVENT_START, EVENT_END, EVENT_ERROR)
-
-class ABGridMain:
+class TerminalMain:
     """
     Main orchestrator for AB-Grid project lifecycle management and document generation.
     
@@ -106,7 +98,7 @@ class ABGridMain:
         )
 
     @staticmethod
-    @handle_errors_decorator(event_dispatcher)
+    @logger_decorator("init project")
     def init_project(
         project: str, 
         project_folderpath: Path, 
@@ -142,12 +134,6 @@ class ABGridMain:
             Fails if project directory already exists to prevent accidental overwrites.
             All errors automatically handled by decorator and dispatched as error events.
         """
-        # Signal the start of project initialization
-        event_dispatcher.dispatch({
-            "event_type": EVENT_START, 
-            "event_message": f"Initializing project '{project}' with language '{language}'"
-        })
-
         # Create the main project directory structure
         # os.makedirs will create intermediate directories if they don't exist
         os.makedirs(project_folderpath, exist_ok=False)  # Fail if project already exists
@@ -179,13 +165,8 @@ class ABGridMain:
         with open(config_file_path, 'w', encoding='utf-8') as fout:
             yaml.dump(yaml_data, fout, sort_keys=False, allow_unicode=True)
 
-        # Signal successful completion
-        event_dispatcher.dispatch({
-            "event_type": EVENT_END, 
-            "event_message": f"Project '{project}' successfully initialized at {project_folderpath}"
-        })
 
-    @handle_errors_decorator(event_dispatcher)
+    @logger_decorator("generate group files")
     def generate_group_inputs(
         self, 
         groups: range, 
@@ -226,12 +207,6 @@ class ABGridMain:
             Template rendering removes blank lines for cleaner output formatting.
             All errors handled by decorator and dispatched through event system.
         """
-        # Signal the start of group file generation
-        event_dispatcher.dispatch({
-            "event_type": EVENT_START, 
-            "event_message": f"Generating {len(groups)} group input files for project '{self.abgrid_data.project}'"
-        })
-
         # Validate input parameters
         if not groups:
             raise ValueError("Groups range cannot be empty")
@@ -262,11 +237,6 @@ class ABGridMain:
         
         # Generate a configuration file for each group
         for group_number in groups:
-            # Signal the start of individual group file generation
-            event_dispatcher.dispatch({
-                "event_type": EVENT_START, 
-                "event_message": f"Generating configuration for group {group_number}"
-            })
             
             # Prepare template data for the current group
             template_data: Dict[str, Any] = {
@@ -295,13 +265,7 @@ class ABGridMain:
             
             generated_files.append(group_file_path.name)
           
-        # Signal successful completion of all group file generation
-        event_dispatcher.dispatch({
-            "event_type": EVENT_END, 
-            "event_message": f"Successfully generated {len(generated_files)} group input files: {', '.join(generated_files)}"
-        })
-
-    @handle_errors_decorator(event_dispatcher)
+    @logger_decorator("generate answersheets")
     def generate_answersheets(self, language: str) -> None:
         """
         Generate formatted PDF answer sheets for all configured project groups.
@@ -336,22 +300,10 @@ class ABGridMain:
             Each answer sheet customized with group-specific information and member lists.
             All errors handled by decorator and dispatched through event system.
         """
-        # Signal the start of answer sheet generation
-        event_dispatcher.dispatch({
-            "event_type": EVENT_START, 
-            "event_message": f"Generating PDF answer sheets for project '{self.abgrid_data.project}'"
-        })
-
         # Validate that group files exist
         if not self.abgrid_data.groups_filepaths:
             raise ValueError("No group files found. Please generate group inputs first.")
 
-        # Load and validate project-level data
-        event_dispatcher.dispatch({
-            "event_type": EVENT_START, 
-            "event_message": "Loading and validating project configuration"
-        })
-        
         sheets_data: ProjectData
         sheets_data_errors: ValidationErrors
         sheets_data, sheets_data_errors = self.abgrid_data.get_project_data()
@@ -366,12 +318,6 @@ class ABGridMain:
 
         # Process each group file to generate individual answer sheets
         for group_file in self.abgrid_data.groups_filepaths:
-            # Signal processing of individual group
-            event_dispatcher.dispatch({
-                "event_type": EVENT_START, 
-                "event_message": f"Processing group file '{group_file.name}'"
-            })
-            
             # Load and validate group-specific data
             group_data: GroupData
             group_data_errors: ValidationErrors
@@ -400,23 +346,12 @@ class ABGridMain:
             else:
                 raise ValueError(f"No choices_a found in group data for {group_file.name}")
 
-            # Signal the start of individual answer sheet generation
-            event_dispatcher.dispatch({
-                "event_type": EVENT_START, 
-                "event_message": f"Generating PDF answer sheet for group {group_number}"
-            })
-            
             # Generate and save the PDF answer sheet
             self._render_pdf("answersheet", sheets_data_copy, group_file.stem, language)
             generated_sheets.append(f"group_{group_number}")
 
-        # Signal successful completion of all answer sheet generation
-        event_dispatcher.dispatch({
-            "event_type": EVENT_END, 
-            "event_message": f"Successfully generated {len(generated_sheets)} answer sheets for groups: {', '.join(generated_sheets)}"
-        })
 
-    @handle_errors_decorator(event_dispatcher)
+    @logger_decorator("generate reports")
     def generate_reports(
         self, 
         language: str, 
@@ -463,10 +398,6 @@ class ABGridMain:
         """
         # Signal the start of report generation
         sociogram_status = "with sociograms" if with_sociogram else "without sociograms"
-        event_dispatcher.dispatch({
-            "event_type": EVENT_START, 
-            "event_message": f"Generating reports for project '{self.abgrid_data.project}' ({sociogram_status})"
-        })
 
         # Validate that group files exist
         if not self.abgrid_data.groups_filepaths:
@@ -478,12 +409,6 @@ class ABGridMain:
         
         # Process each group file to generate individual reports
         for group_file in self.abgrid_data.groups_filepaths:
-            
-            # Signal processing of individual group
-            event_dispatcher.dispatch({
-                "event_type": EVENT_START, 
-                "event_message": f"Processing report data for '{group_file.name}'"
-            })
             
             # Load and validate report data for the current group
             report_data: ReportData
@@ -501,12 +426,6 @@ class ABGridMain:
             group_number_match = re.search(r'(\d+)$', group_file.stem)
             group_identifier = f"group_{group_number_match.group(0)}" if group_number_match else group_file.stem
             
-            # Signal the start of individual report generation
-            event_dispatcher.dispatch({
-                "event_type": EVENT_START, 
-                "event_message": f"Generating PDF report for {group_identifier}"
-            })
-           
             # Generate the PDF report with sociogram configuration
             enhanced_report_data = {
                 **report_data, 
@@ -533,12 +452,6 @@ class ABGridMain:
             # Add the filtered data to the collection
             all_groups_data[group_file.stem] = filtered_data
         
-        # Export all collected data to JSON file for external analysis
-        event_dispatcher.dispatch({
-            "event_type": EVENT_START, 
-            "event_message": "Exporting aggregated data to JSON file"
-        })
-        
         json_export_path = self.abgrid_data.project_folderpath / f"{self.abgrid_data.project}_data.json"
         
         try:
@@ -547,12 +460,7 @@ class ABGridMain:
         except Exception as e:
             raise OSError(f"Failed to export data to JSON file {json_export_path}: {e}") from e
 
-        # Signal successful completion of all report generation
-        event_dispatcher.dispatch({
-            "event_type": EVENT_END, 
-            "event_message": f"Generated {len(generated_reports)} reports and exported json data"
-        })
-
+    @logger_decorator("rendering PDF document")
     def _render_pdf(
         self, 
         doc_type: Literal["report", "answersheet"], 

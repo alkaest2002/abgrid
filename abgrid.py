@@ -1,7 +1,7 @@
 import re
 import argparse
 from pathlib import Path
-from lib.abgrid_main import ABGridMain
+from lib.terminal.terminal_main import TerminalMain
 from lib.abgrid_utils import check_python_version
 
 # Available languages
@@ -47,7 +47,7 @@ try:
         # If project folder does not exists
         else:
             # Create project folder
-            ABGridMain.init_project(args.project, project_folderpath, args.language)
+            TerminalMain.init_project(args.project, project_folderpath, args.language)
 
     # Handle other actions (i.e., groups, sheets, reports)
     else:
@@ -59,8 +59,8 @@ try:
         groups_already_created = len(groups_filepaths)
         # Determine how many group files to be created
         groups_to_create = range(groups_already_created +1, groups_already_created + args.groups +1)
-        # Create an instance of ABGridMain 
-        abgrid_main = ABGridMain(args.project, project_folderpath, project_filepath, groups_filepaths)
+        # Create an instance of TerminalMain 
+        abgrid_main = TerminalMain(args.project, project_folderpath, project_filepath, groups_filepaths)
         
         # handle actions
         match args.action:

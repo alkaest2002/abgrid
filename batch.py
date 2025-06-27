@@ -1,7 +1,7 @@
 import argparse
 
 from pathlib import Path
-from lib.abgrid_main import ABGridMain
+from lib.terminal.terminal_main import ABGridMain
 
 # Set up the argument parser
 parser = argparse.ArgumentParser(prog="ABGrid")

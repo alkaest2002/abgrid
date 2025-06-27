@@ -9,10 +9,11 @@ The code is part of the AB-Grid project and is licensed under the MIT License.
 """
 
 import yaml
+
 from pathlib import Path
 from typing import Literal, Tuple, Optional, Dict, Any
 from pydantic import ValidationError
-from lib.abgrid_schemas import ProjectSchema, GroupSchema
+from lib.core.core_schemas import ProjectSchema, GroupSchema
 
 class ABGridYAML:
     """

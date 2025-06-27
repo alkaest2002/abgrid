@@ -17,8 +17,8 @@ import networkx as nx
 
 from typing import Any, Literal, Dict, Optional, TypedDict, Tuple
 
-from lib import CM_TO_INCHES
-from lib.abgrid_utils import compute_descriptives, figure_to_base64_svg
+from lib.core import CM_TO_INCHES
+from lib.core.core_utils import compute_descriptives, figure_to_base64_svg
 
 class SociogramDict(TypedDict):
     """Dictionary structure for storing sociogram analysis results."""

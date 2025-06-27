@@ -18,8 +18,8 @@ from typing import Any, Dict, List, Optional, Protocol, Tuple, TypedDict
 
 from pydantic import ValidationError
 
-from lib.abgrid_sna import SNADict, ABGridSna
-from lib.abgrid_sociogram import SociogramDict, ABGridSociogram
+from lib.core.core_sna import SNADict, ABGridSna
+from lib.core.core_sociogram import SociogramDict, ABGridSociogram
 
 class ProjectData(TypedDict):
     """Structure for project configuration data loaded from project files."""
