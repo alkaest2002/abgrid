@@ -27,7 +27,7 @@ from weasyprint import HTML
 from lib import jinja_env
 from lib.core import SYMBOLS
 from lib.core.core_data import CoreData
-from lib.terminal.terminal_logger import logger_decorator, pretty_print
+from terminal_app.terminal_logger import logger_decorator, pretty_print
 from lib.abgrid_utils import to_json_serializable
 
 ProjectData = Dict[str, Any]

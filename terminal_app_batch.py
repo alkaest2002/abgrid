@@ -1,7 +1,7 @@
 import argparse
 
 from pathlib import Path
-from lib.terminal.terminal_main import TerminalMain
+from terminal_app.terminal_main import TerminalMain
 
 # Set up the argument parser
 parser = argparse.ArgumentParser(prog="ABGrid")

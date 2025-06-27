@@ -1,7 +1,7 @@
 import re
 import argparse
 from pathlib import Path
-from lib.terminal.terminal_main import TerminalMain
+from terminal_app.terminal_main import TerminalMain
 from lib.abgrid_utils import check_python_version
 
 # Available languages
