@@ -9,12 +9,10 @@ Date Created: May 3, 2025
 The code is part of the AB-Grid project and is licensed under the MIT License.
 """
 
-import re
 import datetime
 import pandas as pd
 
-from pathlib import Path
-from typing import Any, Dict, List, Literal, Optional, Protocol, Tuple, TypedDict, runtime_checkable
+from typing import Any, Dict, List, Literal, Optional, Tuple, TypedDict
 
 from pydantic import ValidationError
 
@@ -56,216 +54,53 @@ class ReportData(TypedDict, total=False):
     relevant_nodes_ab: Dict[str, pd.DataFrame]
     isolated_nodes_ab: Dict[str, pd.Index]
 
-@runtime_checkable
-class DataLoader(Protocol):
-    """Protocol defining the interface for data loading utilities."""
-    
-    def load_data(self, data_type: str, filepath: Path) -> Tuple[Optional[Dict[str, Any]], Optional[List[str]]]:
-        """Load and validate data from a file.
-        
-        Args:
-            data_type: Type of data to load ('project' or 'group')
-            filepath: Path to the data file
-            
-        Returns:
-            Tuple of (loaded_data, validation_errors). If loading succeeds,
-            loaded_data contains the parsed data and validation_errors is None.
-            If loading fails, loaded_data is None and validation_errors contains
-            a list of error dictionaries.
-        """
-        ...
-
-class ABGridData:
+class CoreData:
     """
-    Manages and processes project data for AB-Grid network analysis.
-    
-    This class handles loading, validation, and preparation of project and group data
-    for AB-Grid network analysis, including Social Network Analysis (SNA) computations
-    and sociogram generation. It consolidates data from multiple sources and formats
-    it for report generation.
-    
-    Attributes:
-        project: The name of the project
-        project_folderpath: Path to the project folder
-        project_filepath: Path to the project's main configuration file
-        groups_filepaths: Sorted list of paths to group-specific data files
-        data_loader: Data loading utility for reading and validating YAML files
     """
     
-    def __init__(
-        self, 
-        project: str, 
-        project_folderpath: Path, 
-        project_filepath: Path, 
-        groups_filepaths: List[Path], 
-        data_loader: DataLoader
-    ) -> None:
+    def get_project_data(self, project_data: ProjectData) -> Tuple[Optional[ProjectData], Optional[str]]:
         """
-        Initialize the ABGridData object with project and group data paths.
-
-        Args:
-            project: The name of the project
-            project_folderpath: The path to the project folder
-            project_filepath: The path to the project's main configuration file
-            groups_filepaths: A list of paths to group-specific data files
-            data_loader: A data loading utility implementing the DataLoader protocol
-                for reading and validating YAML configuration files
-                
-        Note:
-            Group file paths are automatically sorted numerically based on trailing
-            digits in filenames. If numerical sorting fails, alphabetical sorting
-            is used as fallback.
         """
-        # Raise error if data_loader does not respect protocol
-        if not isinstance(data_loader, DataLoader):
-            raise TypeError(f"{type(data_loader).__name__} does not implement DataLoader protocol")
-
-        # Populate attributes
-        self.project = project
-        self.project_folderpath = project_folderpath
-        self.project_filepath = project_filepath
-        self.data_loader = data_loader
-        
-        try:
-            # Attempt to sort group file paths numerically based on trailing digits in filenames
-            self.groups_filepaths = sorted(
-                groups_filepaths, 
-                key=lambda x: int(re.search(r'\d+$', x.stem).group())
-            )
-        except (AttributeError, ValueError, TypeError):
-            # Fallback to alphabetical sorting if numerical extraction fails
-            self.groups_filepaths = sorted(groups_filepaths)
-
-        
-    def get_project_data(self) -> Tuple[Optional[ProjectData], Optional[str]]:
-        """
-        Load and validate project configuration data.
-
-        Attempts to load the project configuration file using the configured
-        data loader and handles any validation errors that occur.
-
-        Returns:
-            A tuple containing:
-            - First element: Project data dictionary if successful, None if failed
-            - Second element: None if successful, formatted error string if failed
-            
-        Example:
-            >>> data, error = abgrid_data.get_project_data()
-            >>> if error:
-            ...     print(f"Error loading project: {error}")
-            >>> else:
-            ...     print(f"Project title: {data['project_title']}")
-        """
-        # Get project data
-        project_data = self.data_loader.load_data(self.project_filepath)
-
         # Validate project data
         project_data, validation_errors = self._validate_data("project", project_data)
 
         # Return project data and errors
         if validation_errors:
-            return None, self._get_pydantic_errors_messages(validation_errors)
+            return None, self._get_pydantic_errors(validation_errors)
         else:
             return project_data, None
 
-    def get_group_data(self, group_filepath: Path) -> Tuple[Optional[GroupData], Optional[str]]:
+    def get_group_data(self, group_data: GroupData) -> Tuple[Optional[GroupData], Optional[str]]:
         """
-        Load and validate group data from the specified file path.
-
-        Args:
-            group_filepath: Path object representing the file path to the group
-                data file to be loaded and validated
-
-        Returns:
-            A tuple containing:
-            - First element: Group data dictionary if successful, None if failed
-            - Second element: None if successful, formatted error string if failed
-            
-        Raises:
-            FileNotFoundError: If the group file does not exist (propagated from data_loader)
-            
-        Example:
-            >>> group_path = Path("groups/group_1.yaml")
-            >>> data, error = abgrid_data.get_group_data(group_path)
-            >>> if error:
-            ...     print(f"Error loading group: {error}")
         """
-        # Load group data
-        group_data = self.data_loader.load_data(group_filepath)
-
         # Validate group data
         group_data, validation_errors = self._validate_data("group", group_data)
 
         # Return None as group data and validation errors
         if validation_errors:
-            return None, self._get_pydantic_errors_messages(validation_errors)
+            return None, self._get_pydantic_errors(validation_errors)
         
         # Return group data and None as validation errors
         return group_data, None
         
     def get_report_data(
-        self, 
-        group_filepath: Path, 
-        with_sociogram: bool = False
-    ) -> Tuple[Optional[ReportData], Optional[str]]:
+            self, project_data: ProjectData, group_data: GroupData, with_sociogram: bool = False
+        ) -> Tuple[Optional[ReportData], Optional[str]]:
         """
-        Load and prepare comprehensive data for generating a group's analysis report.
-
-        This method combines project and group data, performs Social Network Analysis
-        (SNA) computations, optionally generates sociogram data, and consolidates
-        relevant nodes from both analyses for complete report creation.
-
-        Args:
-            group_filepath: Path to the group-specific data file
-            with_sociogram: Whether to include sociogram data in the report.
-                Sociogram generation can be computationally expensive for large
-                networks. Defaults to False.
-
-        Returns:
-            A tuple containing:
-            - First element: Complete report data dictionary if successful, None if failed
-            - Second element: None if successful, formatted error string if failed
-            
-        Note:
-            The report data includes:
-            - Project metadata (title, questions)
-            - Group information (number, size)
-            - SNA analysis results
-            - Sociogram data (if requested)
-            - Relevant nodes from both SNA and sociogram analyses
-            - Isolated nodes from SNA
-            - Current year for report dating
-            
-        Example:
-            >>> report_data, error = abgrid_data.get_report_data(
-            ...     Path("groups/group_1.yaml"), 
-            ...     with_sociogram=True
-            ... )
-            >>> if not error:
-            ...     print(f"Group {report_data['group']} has {report_data['members_per_group']} members")
         """
-        # Load project data
-        project_data = self.data_loader.load_data(self.project_filepath)
-
         # Validate project data
         project_data, validation_errors = self._validate_data("project", project_data)
 
         # Return None as project data and validation errrors
         if validation_errors:
-            return None, self._get_pydantic_errors_messages(validation_errors)
+            return None, self._get_pydantic_errors(validation_errors)
         
-        # Load group data
-        group_data = self.data_loader.load_data(group_filepath)
-
         # Validate group data
         group_data, validation_errors = self._validate_data("group", group_data)
 
         # Return None as group data and validation errrors
         if validation_errors:
-            return None, self._get_pydantic_errors_messages(validation_errors)
-
-        # Extract group number from group filename (assumes format ending with digits)
-        group_number = int(re.search(r'(\d+)$', group_filepath.stem).group(0))
+            return None, self._get_pydantic_errors(validation_errors)
 
         # Initialize SNA analysis class
         abgrid_sna = ABGridSna()
@@ -283,7 +118,7 @@ class ABGridData:
         report_data: ReportData = {
             "project_title": project_data["project_title"],
             "year": datetime.datetime.now(datetime.UTC).year,
-            "group": group_number,
+            "group": group_data["group"],
             "members_per_group": len(group_data["choices_a"]),
             "question_a": project_data["question_a"],
             "question_b": project_data["question_b"],
@@ -352,12 +187,9 @@ class ABGridData:
 
     def _validate_data(self, data_type: Literal["project", "group"], yaml_data: Dict[str, Any]) -> Optional[ValidationError]:
         """
-        Validate the YAML data against the specified schema type.
-
-        Args:
-            data_type (Literal["project", "group"]): The type of YAML data being validated.
-            yaml_data (Dict[str, Any]): The YAML data to be validated.
         """
+        if not data_type in ["project", "group"]:
+            raise ValueError(f"{data_type} cannot be validated")
         try:
             if data_type == "project":
                 return ProjectSchema.model_validate(yaml_data).model_dump(), None
@@ -366,26 +198,8 @@ class ABGridData:
         except ValidationError as error:
             return None, error
 
-    def _get_pydantic_errors_message(self, validation_error: ValidationError, context: str = "") -> str:
+    def _get_pydantic_errors(self, validation_error: ValidationError, context: str = "") -> str:
         """
-        Convert Pydantic ValidationError to a single formatted error message string.
-        
-        Combines all validation errors into a readable string with proper formatting
-        and optional context information. Perfect for integration with existing
-        error handling that expects string messages.
-        
-        Args:
-            validation_error: The ValidationError from Pydantic containing all validation issues.
-            context: Optional context description (e.g., "project data", "group configuration")
-                    to provide additional context about where the validation failed.
-            
-        Returns:
-            Single formatted string containing all validation errors, separated by
-            semicolons for readability. Empty string if no errors found.
-            
-        Note:
-            Error format: "[context] field.path: error message" when context provided,
-            or "field.path: error message" without context. Multiple errors joined with "; ".
         """
         errors = validation_error.errors()
         if not errors:
@@ -412,5 +226,5 @@ class ABGridData:
             formatted_errors.append(error_msg)
         
         # Join all errors into a single string
-        return "; ".join(formatted_errors)
+        return  "; ".join(formatted_errors)
 

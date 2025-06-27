@@ -1,12 +1,10 @@
+import textwrap
+
 from functools import wraps
 from pathlib import Path
-import textwrap
-from typing import Any, Callable, Dict, List, Optional, Set
+from typing import Any, Callable, Optional, Set
 
-from pydantic_core import ValidationError
-
-def logger_decorator(messages) -> Callable:
-    start_message, end_message = messages
+def logger_decorator(start_message, end_message) -> Callable:
     def decorator(function: Callable) -> Callable:
         """
         Decorator that wraps a function with notification capabilities.

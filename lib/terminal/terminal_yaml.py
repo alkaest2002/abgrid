@@ -13,21 +13,15 @@ import yaml
 from pathlib import Path
 from typing import Optional, Dict, Any
 
-class ABGridYAML:
+class TerminalYAML:
     """
-    Class providing methods to load and validate YAML data using predefined schemas for AB-Grid projects.
     """
+
+    def __init__(self):
+        pass
 
     def load_data(self, yaml_file_path: Path) -> Optional[Dict[str, Any]]:
         """
-        Load and validate YAML data from a file.
-
-        Args:
-            yaml_type (Literal["project", "group"]): The type of YAML data being validated.
-            yaml_file_path (Path): The file path to the YAML file to be loaded.
-
-        Returns:
-            Loaded YAML data dictionary if successful
         """
         try:
             with open(yaml_file_path, 'r') as file:
