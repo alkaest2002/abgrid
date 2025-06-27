@@ -14,7 +14,7 @@ import datetime
 import pandas as pd
 
 from pathlib import Path
-from typing import Any, Dict, List, Literal, Optional, Protocol, Tuple, TypedDict
+from typing import Any, Dict, List, Literal, Optional, Protocol, Tuple, TypedDict, runtime_checkable
 
 from pydantic import ValidationError
 
@@ -56,6 +56,7 @@ class ReportData(TypedDict, total=False):
     relevant_nodes_ab: Dict[str, pd.DataFrame]
     isolated_nodes_ab: Dict[str, pd.Index]
 
+@runtime_checkable
 class DataLoader(Protocol):
     """Protocol defining the interface for data loading utilities."""
     
@@ -115,14 +116,18 @@ class ABGridData:
             digits in filenames. If numerical sorting fails, alphabetical sorting
             is used as fallback.
         """
+        # Raise error if data_loader does not respect protocol
+        if not isinstance(data_loader, DataLoader):
+            raise TypeError(f"{type(data_loader).__name__} does not implement DataLoader protocol")
+
+        # Populate attributes
         self.project = project
         self.project_folderpath = project_folderpath
         self.project_filepath = project_filepath
         self.data_loader = data_loader
         
-        # Attempt to sort group file paths numerically based on trailing digits in filenames
         try:
-            # Extract trailing digits from filename stems for numerical sorting
+            # Attempt to sort group file paths numerically based on trailing digits in filenames
             self.groups_filepaths = sorted(
                 groups_filepaths, 
                 key=lambda x: int(re.search(r'\d+$', x.stem).group())
@@ -131,6 +136,7 @@ class ABGridData:
             # Fallback to alphabetical sorting if numerical extraction fails
             self.groups_filepaths = sorted(groups_filepaths)
 
+        
     def get_project_data(self) -> Tuple[Optional[ProjectData], Optional[str]]:
         """
         Load and validate project configuration data.

@@ -43,6 +43,8 @@ def logger_decorator(messages) -> Callable:
                 pretty_print(str(error), "✗ ")
             except AttributeError as error:
                 pretty_print(str(error), "✗ ")
+            except TypeError as error:
+                pretty_print(str(error), "✗ ")
             except FileNotFoundError as error:
                 pretty_print(str(error), "✗ ")
             except OSError as error:
