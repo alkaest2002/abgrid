@@ -14,7 +14,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import networkx as nx
 
-from typing import Literal, List, Dict, Optional, Tuple, TypedDict
+from typing import Literal, List, Dict, Optional, Tuple, TypedDict, Any, Set
 from functools import reduce
 from scipy.spatial import ConvexHull
 
@@ -102,8 +102,8 @@ class CoreSna:
         }
 
     def get(self, 
-            packed_edges_a: List[Dict[str, str]], 
-            packed_edges_b: List[Dict[str, str]], 
+            packed_edges_a: List[Dict[str, Optional[str]]], 
+            packed_edges_b: List[Dict[str, Optional[str]]], 
     ) -> SNADict:
         """
         Compute and store comprehensive network analysis for two directed networks.
@@ -113,23 +113,14 @@ class CoreSna:
         component detection, and visualization generation.
 
         Args:
-            packed_edges_a (List[Dict[str, str]]): 
-                Edge data for network A. Each dictionary represents edges from a source node,
-                with keys as source nodes and values as comma-separated target nodes.
-            packed_edges_b (List[Dict[str, str]]): 
-                Edge data for network B. Structure mirrors `packed_edges_a`.
+            packed_edges_a: Edge data for network A. Each dictionary represents edges from a source node,
+                with keys as source nodes and values as comma-separated target nodes or None.
+            packed_edges_b: Edge data for network B. Structure mirrors `packed_edges_a`.
 
         Returns:
-            SNADict: A dictionary containing all network analysis results
-                     including nodes, edges, adjacency matrices, statistics, rankings,
-                     components, and visualization data for both networks.
-
-        Side Effects:
-            - Creates NetworkX DiGraph objects for both networks
-            - Computes and stores macro/micro statistics for each network
-            - Generates node layout information with isolated node handling
-            - Updates all fields in the internal `self.sna` dictionary
-            - Creates SVG visualizations of both networks
+            A dictionary containing all network analysis results including nodes, edges, 
+            adjacency matrices, statistics, rankings, components, and visualization data 
+            for both networks.
         """
         
         # Store network A and B nodes and edges
@@ -145,14 +136,14 @@ class CoreSna:
             ("b", self.sna["network_b"], self.sna["nodes_b"])
         ]:  
             # Add isolated nodes to current network
-            isolated_nodes = set(list(network)).symmetric_difference(set(nodes))
+            isolated_nodes: Set[str] = set(list(network)).symmetric_difference(set(nodes))
             network.add_nodes_from(isolated_nodes)
             
             # Generate layout locations (loc) for current network
-            loc = nx.kamada_kawai_layout(network)
+            loc: Dict[str, np.ndarray] = nx.kamada_kawai_layout(network)
             
             # Update loc to push isolated nodes away from other nodes
-            updated_loc = self._handle_isolated_nodes(network, loc)
+            updated_loc: Dict[str, np.ndarray] = self._handle_isolated_nodes(network, loc)
 
             # Store current network layout locations
             self.sna[f"loc_{network_type}"] = updated_loc
@@ -186,19 +177,17 @@ class CoreSna:
         and relationship patterns for the specified network.
 
         Args:
-            network_type (Literal["a", "b"]):
-                Network identifier ('a' or 'b') for selecting the target network.
+            network_type: Network identifier ('a' or 'b') for selecting the target network.
 
         Returns:
-            pd.Series:
-                Series containing macro-level statistics with the following metrics:
-                - network_nodes: Total number of nodes
-                - network_edges: Total number of edges  
-                - network_edges_reciprocal: Number of reciprocal edge pairs
-                - network_density: Edge density (0-1 scale)
-                - network_centralization: Degree centralization measure
-                - network_transitivity: Global clustering coefficient
-                - network_reciprocity: Overall reciprocity measure
+            Series containing macro-level statistics with the following metrics:
+            - network_nodes: Total number of nodes
+            - network_edges: Total number of edges  
+            - network_edges_reciprocal: Number of reciprocal edge pairs
+            - network_density: Edge density (0-1 scale)
+            - network_centralization: Degree centralization measure
+            - network_transitivity: Global clustering coefficient
+            - network_reciprocity: Overall reciprocity measure
 
         Raises:
             ValueError: If required data is not available.
@@ -211,19 +200,19 @@ class CoreSna:
             raise ValueError(f"Edge types data for network '{network_type}' is not available.")
     
         # Get network
-        network = self.sna[f"network_{network_type}"]
+        network: nx.DiGraph = self.sna[f"network_{network_type}"]
 
         # Get network edges types
-        edges_types = self.sna[f"edges_types_{network_type}"]
+        edges_types: Dict[str, pd.Index] = self.sna[f"edges_types_{network_type}"]
         
         # Compute macro-level statistics
-        network_nodes = network.number_of_nodes()
-        network_edges = network.number_of_edges()
-        network_edges_reciprocal = edges_types["type_ii"].shape[0]
-        network_density = nx.density(network)
-        network_centralization = self._compute_network_centralization(network.to_undirected())
-        network_transitivity = nx.transitivity(network)
-        network_reciprocity = nx.overall_reciprocity(network)
+        network_nodes: int = network.number_of_nodes()
+        network_edges: int = network.number_of_edges()
+        network_edges_reciprocal: int = edges_types["type_ii"].shape[0]
+        network_density: float = nx.density(network)
+        network_centralization: float = self._compute_network_centralization(network.to_undirected())
+        network_transitivity: float = nx.transitivity(network)
+        network_reciprocity: float = nx.overall_reciprocity(network)
         
         return pd.Series({
             "network_nodes": network_nodes,
@@ -243,21 +232,19 @@ class CoreSna:
         in the network, including degree-based and path-based centralities.
 
         Args:
-            network_type (Literal["a", "b"]):
-                Network identifier ('a' or 'b') for selecting the target network.
+            network_type: Network identifier ('a' or 'b') for selecting the target network.
 
         Returns:
-            pd.DataFrame: 
-                DataFrame indexed by node identifiers with the following columns:
-                - lns: Comma-separated list of neighbor nodes (out-neighbors)
-                - ic: In-degree centrality
-                - kz: Katz centrality
-                - pr: PageRank score
-                - bt: Betweenness centrality
-                - cl: Closeness centrality  
-                - hu: Hubs score (absolute value)
-                - nd: Node degree status (0=normal, 1=no in-degree, 2=no out-degree, 3=isolated)
-                - *_rank: Rank columns for each centrality measure (ic_rank, kz_rank, etc.)
+            DataFrame indexed by node identifiers with the following columns:
+            - lns: Comma-separated list of neighbor nodes (out-neighbors)
+            - ic: In-degree centrality
+            - kz: Katz centrality
+            - pr: PageRank score
+            - bt: Betweenness centrality
+            - cl: Closeness centrality  
+            - hu: Hubs score (absolute value)
+            - nd: Node degree status (0=normal, 1=no in-degree, 2=no out-degree, 3=isolated)
+            - *_rank: Rank columns for each centrality measure (ic_rank, kz_rank, etc.)
 
         Raises:
             ValueError: If required network data is not available.
@@ -271,11 +258,11 @@ class CoreSna:
             raise ValueError(f"Adjacency matrix for network '{network_type}' is not available.")
    
         # Get network and adjacency
-        network = self.sna[f"network_{network_type}"]
-        adjacency = self.sna[f"adjacency_{network_type}"]
+        network: nx.DiGraph = self.sna[f"network_{network_type}"]
+        adjacency: pd.DataFrame = self.sna[f"adjacency_{network_type}"]
 
         # Create a DataFrame with micro-level statistics
-        micro_level_stats = pd.concat([
+        micro_level_stats: pd.DataFrame = pd.concat([
             pd.Series(adjacency.apply(lambda x: ", ".join(x[x > 0].index.values), axis=1), name="lns"),
             pd.Series(nx.in_degree_centrality(network), name="ic"),
             pd.Series(nx.katz_centrality(network), name="kz"),
@@ -292,18 +279,18 @@ class CoreSna:
         micro_level_stats["nd"] += (micro_level_stats["lns"].str.len() == 0).astype(int) * 2
 
         # Ensure that isolated nodes have no centrality metric data
-        numeric_metrics_colums = [c for c in micro_level_stats.select_dtypes("number").columns if c != "nd"]
+        numeric_metrics_colums: List[str] = [c for c in micro_level_stats.select_dtypes("number").columns if c != "nd"]
         micro_level_stats.loc[micro_level_stats["nd"].eq(3), numeric_metrics_colums] = 0
 
         # Compute node ranks relative to each network centrality metric
-        micro_level_stats_ranks = (
+        micro_level_stats_ranks: pd.DataFrame = (
             micro_level_stats.iloc[:, 1:-1]  # omit first column (LNS) and last column (ND)
                 .rank(method="dense", ascending=False)
                 .add_suffix("_rank")
         )
 
         # Combine metrics and metrics ranks
-        micro_level_stats =  (
+        micro_level_stats = (
             pd.concat(
                 [
                     micro_level_stats,
@@ -322,14 +309,12 @@ class CoreSna:
         centrality measures of the specified network.
 
         Args:
-            network_type (Literal["a", "b"]):
-                Network identifier ('a' or 'b') for selecting the target network.
+            network_type: Network identifier ('a' or 'b') for selecting the target network.
 
         Returns:
-            pd.DataFrame: 
-                DataFrame with descriptive statistics for centrality measures.
-                Columns correspond to centrality measures (ic, pr, kz, bt, cl, hu).
-                Rows contain statistical summaries (count, mean, std, min, max, etc.).
+            DataFrame with descriptive statistics for centrality measures.
+            Columns correspond to centrality measures (ic, pr, kz, bt, cl, hu).
+            Rows contain statistical summaries (count, mean, std, min, max, etc.).
 
         Raises:
             ValueError: If required micro statistics data is not available.
@@ -339,10 +324,10 @@ class CoreSna:
             raise ValueError(f"Micro statistics for network '{network_type}' are not available.")
    
         # Select columns to retain for descriptive statistics
-        columns_to_retain = ["ic", "pr", "kz", "bt", "cl", "hu"]
+        columns_to_retain: List[str] = ["ic", "pr", "kz", "bt", "cl", "hu"]
 
         # Select numeric columns only
-        sna_numeric_columns = self.sna[f"micro_stats_{network_type}"].loc[:, columns_to_retain]
+        sna_numeric_columns: pd.DataFrame = self.sna[f"micro_stats_{network_type}"].loc[:, columns_to_retain]
         
         return compute_descriptives(sna_numeric_columns)
 
@@ -354,14 +339,12 @@ class CoreSna:
         nodes are sorted by their rank scores in ascending order.
         
         Args:
-            network_type (Literal["a", "b"]): 
-                Network identifier ('a' or 'b') for selecting the target network.
+            network_type: Network identifier ('a' or 'b') for selecting the target network.
         
         Returns:
-            Dict[str, pd.Series]: 
-                Dictionary mapping centrality metric names (with '_rank' suffix) to
-                pandas Series containing nodes ordered by their rank (best to worst).
-                Each Series is indexed by node identifiers and contains rank values.
+            Dictionary mapping centrality metric names (with '_rank' suffix) to
+            pandas Series containing nodes ordered by their rank (best to worst).
+            Each Series is indexed by node identifiers and contains rank values.
                 
         Raises:
             ValueError: If required micro statistics data is not available.
@@ -371,13 +354,13 @@ class CoreSna:
             raise ValueError(f"Micro statistics for network '{network_type}' are not available.")
     
         # Get the micro stats DataFrame for the specified network type
-        micro_stats_df = self.sna[f"micro_stats_{network_type}"]
+        micro_stats_df: pd.DataFrame = self.sna[f"micro_stats_{network_type}"]
         
         # Filter columns that end with '_rank' to get ranking data
-        rank_columns = micro_stats_df.filter(regex=r"_rank$").astype(int)
+        rank_columns: pd.DataFrame = micro_stats_df.filter(regex=r"_rank$").astype(int)
         
         # Convert to dictionary with metric names as keys and Series as values
-        rankings = {}
+        rankings: Dict[str, pd.Series] = {}
         for metric_name in rank_columns.columns:
             rankings[metric_name] = rank_columns[metric_name].sort_values()
         
@@ -391,8 +374,8 @@ class CoreSna:
         for easy comparison of node rankings across the two networks.
 
         Returns:
-            Dict[str, pd.DataFrame]: A dictionary where each key corresponds to a ranking metric
-            (e.g., 'ic_rank', 'pr_rank'), and the value is a DataFrame with two columns:
+            Dictionary where each key corresponds to a ranking metric (e.g., 'ic_rank', 'pr_rank'), 
+            and the value is a DataFrame with two columns:
             - Column ending with '_a': Rankings from network A
             - Column ending with '_b': Rankings from network B
 
@@ -405,15 +388,15 @@ class CoreSna:
             raise ValueError("Rankings for network a and b are not available.")
         
         # Get the rankings from network A and B
-        rankings_a = self.sna["rankings_a"]
-        rankings_b = self.sna["rankings_b"]
+        rankings_a: Dict[str, pd.Series] = self.sna["rankings_a"]
+        rankings_b: Dict[str, pd.Series] = self.sna["rankings_b"]
         
         # Combine them into side-by-side DataFrames
-        rankings_ab = {}
+        rankings_ab: Dict[str, pd.DataFrame] = {}
         for k in rankings_a.keys():
-            series_a = rankings_a[k].copy() # Make a copy
+            series_a: pd.Series = rankings_a[k].copy() # Make a copy
             series_a.name = series_a.name + "_a" # Rename to include network identifier
-            series_b = rankings_b[k].copy()  # Make a copy
+            series_b: pd.Series = rankings_b[k].copy()  # Make a copy
             series_b.name = series_b.name + "_b" # Rename to include network identifier
             rankings_ab[k] = pd.concat([series_a, series_b], axis=1) 
         
@@ -425,18 +408,17 @@ class CoreSna:
         for both network A and network B.
         
         Args:
-            threshold (float): Percentile threshold for selecting top nodes (default: 0.05 for top 5%)
+            threshold: Percentile threshold for selecting top nodes (default: 0.05 for top 5%)
             
         Returns:
-            Dict[str, pd.DataFrame]: 
-                Dictionary with keys 'a' and 'b', each containing a DataFrame of relevant nodes.
-                Each DataFrame has columns:
-                - 'node_id': node identifier
-                - 'metric': metric name without '_rank' suffix
-                - 'rank': re-computed dense rank position
-                - 'value': original metric value from micro_stats
-                - 'weight': computed weight using formula 10 / (rank ** 0.8)
-                - 'evidence_type': always 'sna'
+            Dictionary with keys 'a' and 'b', each containing a DataFrame of relevant nodes.
+            Each DataFrame has columns:
+            - 'node_id': node identifier
+            - 'metric': metric name without '_rank' suffix
+            - 'rank': re-computed dense rank position
+            - 'value': original metric value from micro_stats
+            - 'weight': computed weight using formula 10 / (rank ** 0.8)
+            - 'evidence_type': always 'sna'
 
         Note:
             - Lower rank values indicate higher centrality (rank 1 = most central)
@@ -453,29 +435,29 @@ class CoreSna:
             raise ValueError("SNA micro stats and rankings for both networks a and b are required.")
         
         # Init dict with empty sub-dicts for storing relevant nodes
-        relevant_nodes_ab = {"a": pd.DataFrame(), "b": pd.DataFrame()}
+        relevant_nodes_ab: Dict[str, pd.DataFrame] = {"a": pd.DataFrame(), "b": pd.DataFrame()}
         
         # Process both positive (a) and negative (b) relevance directions
         for valence_type in relevant_nodes_ab.keys():
 
             # Select micro_stats and rankings to use
-            micro_stats =  self.sna["micro_stats_a"] if valence_type == "a" else self.sna["micro_stats_b"]
-            rankings = self.sna["rankings_a"] if valence_type == "a" else self.sna["rankings_b"]
+            micro_stats: pd.DataFrame =  self.sna["micro_stats_a"] if valence_type == "a" else self.sna["micro_stats_b"]
+            rankings: Dict[str, pd.Series] = self.sna["rankings_a"] if valence_type == "a" else self.sna["rankings_b"]
             
             # Loop through metrics and associated ranks
             for metric_rank_name, ranks_series in rankings.items():
                 
                 # Clean metric name
-                metric_name = re.sub("_rank", "", metric_rank_name)
+                metric_name: str = re.sub("_rank", "", metric_rank_name)
                
                 # Get threshold value for this metric
-                threshold_value = ranks_series.quantile(threshold)
+                threshold_value: float = ranks_series.quantile(threshold)
                 
                 # Filter top nodes (assuming lower rank = better)
-                relevant_ranks = ranks_series[ranks_series.le(threshold_value)]
+                relevant_ranks: pd.Series = ranks_series[ranks_series.le(threshold_value)]
                 
                 # Compute relevant nodes data
-                relevant_nodes = (
+                relevant_nodes: pd.DataFrame = (
                     relevant_ranks
                         .to_frame()
                         .assign(
@@ -506,18 +488,16 @@ class CoreSna:
         the reference network to classify edges into five distinct types.
 
         Args:
-            network_type (Literal["a", "b"]):
-                Network identifier ('a' or 'b') for selecting the target network.
+            network_type: Network identifier ('a' or 'b') for selecting the target network.
                 The other network serves as the reference for comparison.
 
         Returns:
-            Dict[str, pd.Index]:
-                Dictionary containing five edge classifications:
-                - type_i: Non-reciprocal edges (A→B but not B→A in same network)
-                - type_ii: Reciprocal edges (A↔B in same network)  
-                - type_iii: Half symmetrical (A→B in both networks, but not B→A)
-                - type_iv: Half reversed symmetrical (A→B in one, B→A in other)
-                - type_v: Fully symmetrical (A↔B in both networks)
+            Dictionary containing five edge classifications:
+            - type_i: Non-reciprocal edges (A→B but not B→A in same network)
+            - type_ii: Reciprocal edges (A↔B in same network)  
+            - type_iii: Half symmetrical (A→B in both networks, but not B→A)
+            - type_iv: Half reversed symmetrical (A→B in one, B→A in other)
+            - type_v: Fully symmetrical (A↔B in both networks)
 
         Note:
             Edge classification uses upper triangular matrices to avoid double-counting
@@ -535,39 +515,39 @@ class CoreSna:
         
         # Get the adjacency DataFrames for the specified network type and reference
         if network_type == "a":
-            adj_df = self.sna["adjacency_a"]
-            adj_ref_df = self.sna["adjacency_b"]
+            adj_df: pd.DataFrame = self.sna["adjacency_a"]
+            adj_ref_df: pd.DataFrame = self.sna["adjacency_b"]
         else:
             adj_df = self.sna["adjacency_b"]
             adj_ref_df = self.sna["adjacency_a"]
 
         # Compute type I edges, non-reciprocal
         # i.e. same network: A -> B and not B -> A
-        type_i_df = adj_df - (adj_df * adj_df.T)
-        type_i = type_i_df.stack().loc[lambda x: x == 1].index
+        type_i_df: pd.DataFrame = adj_df - (adj_df * adj_df.T)
+        type_i: pd.Index = type_i_df.stack().loc[lambda x: x == 1].index
 
         # Compute type II edges, reciprocal
         # i.e. same network: A -> B and B -> A
-        type_ii_df = pd.DataFrame(np.triu(adj_df) * np.tril(adj_df).T, index=adj_df.index, columns=adj_df.columns)
-        type_ii = type_ii_df.stack().loc[lambda x: x == 1].index
+        type_ii_df: pd.DataFrame = pd.DataFrame(np.triu(adj_df) * np.tril(adj_df).T, index=adj_df.index, columns=adj_df.columns)
+        type_ii: pd.Index = type_ii_df.stack().loc[lambda x: x == 1].index
 
         # Compute type V edges, fully symmetrical
         # i.e. A -> B, B -> A in network and A -> B, B -> A in reference network
-        type_v_df = type_ii_df * pd.DataFrame(np.triu(adj_ref_df) * np.tril(adj_ref_df).T, index=adj_df.index, columns=adj_df.columns)
-        type_v = type_v_df.stack().loc[lambda x: x == 1].index
+        type_v_df: pd.DataFrame = type_ii_df * pd.DataFrame(np.triu(adj_ref_df) * np.tril(adj_ref_df).T, index=adj_df.index, columns=adj_df.columns)
+        type_v: pd.Index = type_v_df.stack().loc[lambda x: x == 1].index
         
         # Compute type III edges, half symmetrical
         # i.e. A -> B in network and A -> B in reference network
-        type_iii_df = pd.DataFrame(np.triu(adj_df) * np.triu(adj_ref_df), index=adj_df.index, columns=adj_df.columns)
-        type_iii = type_iii_df.sub(type_v_df).stack().loc[lambda x: x == 1].index
+        type_iii_df: pd.DataFrame = pd.DataFrame(np.triu(adj_df) * np.triu(adj_ref_df), index=adj_df.index, columns=adj_df.columns)
+        type_iii: pd.Index = type_iii_df.sub(type_v_df).stack().loc[lambda x: x == 1].index
         
         # Compute type IV edges, half reversed symmetrical
         # i.e. A -> B in network and B -> A in reference network
-        type_iv_df = (
+        type_iv_df: pd.DataFrame = (
             pd.DataFrame(np.triu(adj_df) * np.tril(adj_ref_df).T, index=adj_df.index, columns=adj_df.columns)
             + pd.DataFrame(np.tril(adj_df) * np.triu(adj_ref_df).T, index=adj_df.index, columns=adj_df.columns)
         )
-        type_iv = type_iv_df.sub(type_v_df).stack().loc[lambda x: x == 1].index
+        type_iv: pd.Index = type_iv_df.sub(type_v_df).stack().loc[lambda x: x == 1].index
         
         return {
             "type_i": type_i,
@@ -586,18 +566,16 @@ class CoreSna:
         Only components with more than 2 nodes are included.
 
         Args:
-            network_type (Literal["a", "b"]):
-                Network identifier ('a' or 'b') for selecting the target network.
+            network_type: Network identifier ('a' or 'b') for selecting the target network.
 
         Returns:
-            Dict[str, pd.Series]: 
-                Dictionary containing three types of components:
-                - cliques: Maximal cliques in the undirected version of the graph
-                - strongly_connected: Strongly connected components in the directed graph
-                - weakly_connected: Weakly connected components in the directed graph
+            Dictionary containing three types of components:
+            - cliques: Maximal cliques in the undirected version of the graph
+            - strongly_connected: Strongly connected components in the directed graph
+            - weakly_connected: Weakly connected components in the directed graph
                 
-                Each Series contains components as concatenated strings of sorted node identifiers.
-                Components are sorted by size (largest first).
+            Each Series contains components as concatenated strings of sorted node identifiers.
+            Components are sorted by size (largest first).
 
         Raises:
             ValueError: If required network data is not available.
@@ -607,10 +585,10 @@ class CoreSna:
             raise ValueError(f"Network data for type '{network_type}' is not available.")
     
         # Get network
-        network = self.sna[f"network_{network_type}"]
+        network: nx.DiGraph = self.sna[f"network_{network_type}"]
         
         # Compute network components
-        components = {
+        components: Dict[str, pd.Series] = {
             "cliques": pd.Series([ "".join(sorted(list(c))) for c in sorted(nx.find_cliques(network.to_undirected()), key=len, reverse=True) if len(c) > 2 ]),
             "strongly_connected": pd.Series([ "".join(sorted(list(c))) for c in sorted(nx.strongly_connected_components(network), key=len, reverse=True) if len(c) > 2 ]),
             "weakly_connected": pd.Series([ "".join(sorted(list(c))) for c in sorted(nx.weakly_connected_components(network), key=len, reverse=True) if len(c) > 2 ]),
@@ -627,16 +605,14 @@ class CoreSna:
         Values range from 0 (evenly distributed) to 1 (perfectly centralized).
 
         Args:
-            network (nx.Graph):
-                Undirected graph for which to calculate centralization.
+            network: Undirected graph for which to calculate centralization.
                 Should typically be the undirected version of a directed graph.
 
         Returns:
-            float: 
-                Network centralization value between 0 and 1, where:
-                - 0 indicates an evenly distributed network (all nodes have equal degree)
-                - 1 indicates a perfectly centralized network (star topology)
-                - Higher values suggest more centralized structure
+            Network centralization value between 0 and 1, where:
+            - 0 indicates an evenly distributed network (all nodes have equal degree)
+            - 1 indicates a perfectly centralized network (star topology)
+            - Higher values suggest more centralized structure
 
         Note:
             This implementation uses degree centrality as the basis for centralization.
@@ -648,16 +624,16 @@ class CoreSna:
         """
         
         # Get number of nodes
-        number_of_nodes = network.number_of_nodes()
+        number_of_nodes: int = network.number_of_nodes()
         
         # Compute node centralities (degree values)
-        node_centralities = pd.Series(dict(nx.degree(network)))
+        node_centralities: pd.Series = pd.Series(dict(nx.degree(network)))
 
         # Compute Max centrality
-        max_centrality = node_centralities.max()
+        max_centrality: int = node_centralities.max()
         
         # Compute network centralization
-        network_centralization = (
+        network_centralization: float = (
             node_centralities
                 .rsub(max_centrality)
                 .sum()
@@ -674,17 +650,16 @@ class CoreSna:
         then converts it to a base64-encoded SVG string for web display.
 
         Args:
-            network_type (Literal["a", "b"]):
-                Network identifier ('a' or 'b') for selecting which network to visualize.
+            network_type: Network identifier ('a' or 'b') for selecting which network to visualize.
 
         Returns:
-            str: Base64-encoded SVG data URI of the network visualization.
-                 The visualization includes:
-                 - Colored nodes (different colors for networks A and B)
-                 - Black nodes for isolated vertices
-                 - Reciprocal edges shown as undirected lines
-                 - Non-reciprocal edges shown as directed arrows
-                 - Node labels with white text
+            Base64-encoded SVG data URI of the network visualization.
+            The visualization includes:
+            - Colored nodes (different colors for networks A and B)
+            - Black nodes for isolated vertices
+            - Reciprocal edges shown as undirected lines
+            - Non-reciprocal edges shown as directed arrows
+            - Node labels with white text
 
         Note:
             - Uses Kamada-Kawai layout with special handling for isolated nodes
@@ -698,16 +673,16 @@ class CoreSna:
         """
 
         # Get network
-        network = self.sna[f"network_{network_type}"]
+        network: nx.DiGraph = self.sna[f"network_{network_type}"]
 
         # Get network layout locations
-        loc = self.sna[f"loc_{network_type}"]
+        loc: Dict[str, np.ndarray] = self.sna[f"loc_{network_type}"]
 
         # Set color based on graph type (a or b)
-        color = A_COLOR if network_type == "a" else B_COLOR
+        color: str = A_COLOR if network_type == "a" else B_COLOR
         
         # Set dimensions of matplotlib graph
-        fig_size = (17 * CM_TO_INCHES, 19 * CM_TO_INCHES)
+        fig_size: Tuple[float, float] = (17 * CM_TO_INCHES, 19 * CM_TO_INCHES)
         
         # Create a matplotlib figure
         fig, ax = plt.subplots(constrained_layout=True, figsize=fig_size)
@@ -728,7 +703,7 @@ class CoreSna:
         nx.draw_networkx_labels(network, loc, font_family="Times New Roman", font_color="#FFF", font_weight="normal", font_size=10, ax=ax)
         
         # Draw reciprocal edges with specific style (undirected lines)
-        reciprocal_edges = [e for e in network.edges if e[::-1] in network.edges]
+        reciprocal_edges: List[Tuple[str, str]] = [e for e in network.edges if e[::-1] in network.edges]
         nx.draw_networkx_edges(
             network, loc, edgelist=reciprocal_edges, 
             edge_color=color, arrowstyle='-', width=4, min_target_margin=0, 
@@ -736,7 +711,7 @@ class CoreSna:
         )
         
         # Draw non-reciprocal edges with specific style (directed arrows)
-        non_reciprocal_edges = [e for e in network.edges if e not in reciprocal_edges]
+        non_reciprocal_edges: List[Tuple[str, str]] = [e for e in network.edges if e not in reciprocal_edges]
         nx.draw_networkx_edges(
             network, loc, edgelist=non_reciprocal_edges, 
             edge_color=color, arrowstyle="->", width=.4, min_target_margin=10,
@@ -753,15 +728,12 @@ class CoreSna:
         of connected nodes, making them visually distinct and marginal in the layout.
 
         Args:
-            network (nx.DiGraph):
-                The directed graph containing both connected and isolated nodes.
-            loc (Dict[str, np.ndarray]):
-                Dictionary mapping node identifiers to their 2D coordinate positions.
+            network: The directed graph containing both connected and isolated nodes.
+            loc: Dictionary mapping node identifiers to their 2D coordinate positions.
 
         Returns:
-            Dict[str, np.ndarray]: 
-                Updated node layout dictionary with isolated nodes repositioned
-                at the periphery. Connected nodes retain their original positions.
+            Updated node layout dictionary with isolated nodes repositioned
+            at the periphery. Connected nodes retain their original positions.
 
         Algorithm:
             1. Identifies isolated nodes using NetworkX
@@ -780,29 +752,29 @@ class CoreSna:
             ValueError: If convex hull computation fails (e.g., with < 3 connected nodes).
         """
         # Get isolated nodes
-        isolates = list(nx.isolates(network))
+        isolates: List[str] = list(nx.isolates(network))
         
         # If there are no isolated nodes, just return original layout
         if not isolates:
             return loc
         
         # Convert current loc coordinates to dataframe
-        coordinates = pd.DataFrame(loc).T
+        coordinates: pd.DataFrame = pd.DataFrame(loc).T
         
         # Compute centroid of coordinates
-        coordinates_centroid = np.mean(coordinates, axis=0)
+        coordinates_centroid: np.ndarray = np.mean(coordinates, axis=0)
         
         # Compute convex hull around coordinates
-        hull = ConvexHull(coordinates)
+        hull: ConvexHull = ConvexHull(coordinates)
         
         # Get hull vertices
-        hull_vertices = coordinates.iloc[hull.vertices].values
+        hull_vertices: np.ndarray = coordinates.iloc[hull.vertices].values
         
         # Create an iterator from isolated nodes list
         isolate_iter = iter(isolates)
 
         # Keep track of loop rounds
-        round_num = 1
+        round_num: int = 1
         
         # Loop until all isolated nodes are placed
         try:
@@ -812,20 +784,20 @@ class CoreSna:
                 for vertex in hull_vertices:
                     
                     # Get next isolated node
-                    isolate = next(isolate_iter)
+                    isolate: str = next(isolate_iter)
                     
                     # Create direction vector from coordinates centroid to current hull vertex
-                    direction = vertex - coordinates_centroid
+                    direction: np.ndarray = vertex - coordinates_centroid
                     direction /= np.linalg.norm(direction)
                     
                     # Set distance multiplier (increases with each round)
-                    distance_multiplier = 0.15 * round_num
+                    distance_multiplier: float = 0.15 * round_num
                     
                     # Add some randomness to position
-                    random_offset = np.random.uniform(-0.05, 0.05, size=2)
+                    random_offset: np.ndarray = np.random.uniform(-0.05, 0.05, size=2)
                     
                     # Compute final position
-                    candidate_pos = vertex + direction * distance_multiplier + random_offset
+                    candidate_pos: np.ndarray = vertex + direction * distance_multiplier + random_offset
                     
                     # Update isolated node position
                     loc[isolate] = candidate_pos
@@ -838,7 +810,7 @@ class CoreSna:
         except StopIteration:
             return loc
 
-    def _unpack_network_edges(self, packed_edges: List[Dict[str, str]]) -> List[Tuple[str, str]]:
+    def _unpack_network_edges(self, packed_edges: List[Dict[str, Optional[str]]]) -> List[Tuple[str, str]]:
         """
         Unpack edge dictionaries into a list of directed edge tuples.
 
@@ -846,13 +818,11 @@ class CoreSna:
         from source nodes, and converts them into a flat list of (source, target) tuples.
 
         Args:
-            packed_edges (List[Dict[str, str]]): 
-                List of dictionaries where keys are source nodes and values are
+            packed_edges: List of dictionaries where keys are source nodes and values are
                 comma-separated strings of target nodes. None values are safely handled.
 
         Returns:
-            List[Tuple[str, str]]: 
-                Flat list of directed edge tuples (source, target).
+            Flat list of directed edge tuples (source, target).
         """
         return reduce(
             lambda acc, itr: [
@@ -866,17 +836,14 @@ class CoreSna:
             []
         )
         
-    def _unpack_network_nodes(self, packed_edges: List[Dict[str, str]]) -> List[str]:
+    def _unpack_network_nodes(self, packed_edges: List[Dict[str, Optional[str]]]) -> List[str]:
         """
         Extract unique source nodes from packed edge dictionaries.
 
         Args:
-            packed_edges (List[Dict[str, str]]): 
-                List of dictionaries where keys represent source nodes.
+            packed_edges: List of dictionaries where keys represent source nodes.
 
         Returns:
-            List[str]: 
-                Sorted list of unique source node identifiers.
+            Sorted list of unique source node identifiers.
         """
         return sorted([node for node_edges in packed_edges for node in node_edges.keys()])
-     
