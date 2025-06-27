@@ -22,7 +22,7 @@ import re
 import json
 
 from pathlib import Path
-from typing import Literal, Dict, Any, List, Optional, Tuple, Union
+from typing import Literal, Dict, Any, List, Tuple, Union
 from weasyprint import HTML
 from lib import jinja_env
 from lib.abgrid_utils import to_json_serializable
@@ -242,7 +242,6 @@ class TerminalMain:
         # Check for project-level validation errors
         if project_data_errors:
             raise ValueError(f"Data validation failed for project {self.project}:\n{project_data_errors}")
-
         # Process each group file to generate individual answer sheets
         for group_file in self.groups_filepaths:
             
@@ -252,22 +251,14 @@ class TerminalMain:
 
             # Check for group-level validation errors
             if group_data_errors:
-                error_message = f"Group data validation failed for {group_file.name}: {group_data_errors}"
-                raise ValueError(error_message)
+                raise ValueError(f"Group data validation failed for {group_file.name}: {group_data_errors}")
 
-            # Extract group number from filename using regex
-            group_number = re.search(r'(\d+)$', group_file.stem).group(0)
-            
             # Init sheets data
-            sheets_data = project_data.model_copy()
-            sheets_data["group"] = group_number
+            sheets_data = project_data.model_dump()
             
-            # Configure Likert scale based on the number of choices in group data
-            # SYMBOLS provides the letter labels for Likert scale options
-            if "choices_a" in group_data and group_data["choices_a"]:
-                sheets_data["likert"] = SYMBOLS[:len(group_data["choices_a"])]
-            else:
-                raise ValueError(f"No choices_a found in group data for {group_file.name}")
+            # Extend sheets data
+            sheets_data["group"] = group_data.group
+            sheets_data["likert"] = sum(map(lambda x: list(x.keys()), group_data.choices_a), [])
 
             # Generate and save the PDF answer sheet
             self._render_pdf("answersheet", sheets_data, group_file.stem, language)
