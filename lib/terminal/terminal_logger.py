@@ -98,7 +98,6 @@ def logger_decorator(func: Optional[F] = None) -> Callable[[F], F]:
         return decorator(func)
 
 
-
 def extract_traceback_info(error: Exception, exclude_files: Optional[Set[str]] = None) -> str:
     """
     Extract and format traceback information from an exception.
