@@ -189,3 +189,5 @@ class ReportSchema(BaseModel):
     """
     project_data: ProjectSchema
     group_data: GroupSchema
+
+    model_config = {"extra": "forbid"}
