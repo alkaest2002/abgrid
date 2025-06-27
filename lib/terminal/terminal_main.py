@@ -22,7 +22,7 @@ import re
 import json
 
 from pathlib import Path
-from typing import Literal, Dict, Any, List, Optional, Tuple
+from typing import Literal, Dict, Any, List, Optional, Tuple, Union
 from weasyprint import HTML
 from lib import jinja_env
 from lib.abgrid_utils import to_json_serializable
@@ -38,6 +38,11 @@ DataWithErrors = Tuple[Dict[str, Any], ValidationErrors]
 
 class TerminalMain:
     """
+    Main class for AB-Grid project management and document generation.
+    
+    This class provides comprehensive functionality for managing AB-Grid projects
+    including initialization, group file generation, answer sheet creation, and
+    report generation with optional sociogram support.
     """
     
     def __init__(
@@ -48,6 +53,16 @@ class TerminalMain:
         groups_filepaths: List[Path]
     ) -> None:
         """
+        Initialize TerminalMain instance with project configuration.
+        
+        Args:
+            project: Name of the project
+            project_folderpath: Path to the project directory
+            project_filepath: Path to the main project configuration file
+            groups_filepaths: List of paths to group configuration files
+        
+        Returns:
+            None
         """
         # Populate props
         self.project = project
@@ -66,6 +81,24 @@ class TerminalMain:
         language: str
     ) -> None:
         """
+        Initialize a new AB-Grid project with directory structure and configuration.
+        
+        Creates the project directory structure including subdirectories for reports
+        and answer sheets, then generates a project configuration file based on the
+        specified language template.
+        
+        Args:
+            project: Name of the project to initialize
+            project_folderpath: Path where the project directory will be created
+            language: Language code for template selection (e.g., 'en', 'it')
+        
+        Returns:
+            None
+        
+        Notes:
+            - Fails if project directory already exists
+            - Creates 'reports' and 'answersheets' subdirectories
+            - Uses language-specific templates from lib/templates/{language}/
         """
         # Create the main project directory structure
         # os.makedirs will create intermediate directories if they don't exist
@@ -109,6 +142,24 @@ class TerminalMain:
         language: str
     ) -> None:
         """
+        Generate group configuration files for specified groups.
+        
+        Creates individual YAML configuration files for each group using the
+        language-specific template. Each file contains group-specific data
+        including member assignments using alphabetical symbols.
+        
+        Args:
+            groups: Range object specifying which group numbers to generate
+            members_per_group: Number of members in each group
+            language: Language code for template selection
+        
+        Returns:
+            None
+        
+        Notes:
+            - Maximum supported group size is limited by available SYMBOLS
+            - Generated files follow naming pattern: {project}_g{group_number}.yaml
+            - Uses Jinja2 templates for HTML rendering within YAML structure
         """
         # Validate input parameters
         if not groups:
@@ -164,6 +215,22 @@ class TerminalMain:
     @logger_decorator("generate answersheets", "end of answersheets generation")
     def generate_answersheets(self, language: str) -> None:
         """
+        Generate PDF answer sheets for all configured groups.
+        
+        Creates individual PDF answer sheets for each group by combining project
+        configuration data with group-specific data. Each answer sheet includes
+        Likert scale configuration based on group choices.
+        
+        Args:
+            language: Language code for template selection
+        
+        Returns:
+            None
+        
+        Notes:
+            - Requires existing group files and valid project configuration
+            - Answer sheets are saved in the 'answersheets' subdirectory
+            - Likert scale symbols are automatically configured based on choices_a
         """
         # Validate that group files exist
         if not self.groups_filepaths:
@@ -209,6 +276,23 @@ class TerminalMain:
     @logger_decorator("generate reports", "end of reports generation")
     def generate_reports(self, language: str, with_sociogram: bool = False) -> None:
         """
+        Generate comprehensive PDF reports for all groups with optional sociograms.
+        
+        Creates detailed reports for each group including social network analysis,
+        statistics, and optional sociogram visualizations. Also exports aggregated
+        data in JSON format for further analysis.
+        
+        Args:
+            language: Language code for template selection
+            with_sociogram: Whether to include sociogram visualizations in reports
+        
+        Returns:
+            None
+        
+        Notes:
+            - Reports are saved in the 'reports' subdirectory
+            - JSON export includes filtered data for macro/micro statistics
+            - Sociogram generation requires additional computational resources
         """
         # Validate that group files exist
         if not self.groups_filepaths:
@@ -278,6 +362,25 @@ class TerminalMain:
         language: str
     ) -> None:
         """
+        Render HTML template to PDF document using WeasyPrint.
+        
+        Converts structured data into PDF documents by rendering Jinja2 templates
+        and converting the resulting HTML to PDF format. Handles both report and
+        answer sheet document types with appropriate template selection.
+        
+        Args:
+            doc_type: Type of document to generate ("report" or "answersheet")
+            doc_data: Data dictionary to populate the template
+            doc_suffix: Suffix to append to the filename (typically group identifier)
+            language: Language code for template selection
+        
+        Returns:
+            None
+        
+        Notes:
+            - Uses WeasyPrint for HTML to PDF conversion
+            - Filename sanitization removes leading/trailing underscores
+            - Debug HTML output can be enabled by uncommenting debug section
         """
         # Select the appropriate template based on document type
         template_path: str
@@ -327,8 +430,23 @@ class TerminalMain:
         #     file.write(rendered_html)
         # -----------------------------------------------------------------------------------
 
-    def _load_yaml_data(self, yaml_file_path: Path) -> Optional[Dict[str, Any]]:
+    def _load_yaml_data(self, yaml_file_path: Path) -> Union[Dict[str, Any], None]:
         """
+        Load and parse YAML data from file with error handling.
+        
+        Safely loads YAML configuration files and handles common errors such as
+        missing files and parsing issues. Returns structured data or None with
+        appropriate error information.
+        
+        Args:
+            yaml_file_path: Path to the YAML file to load
+        
+        Returns:
+            Dictionary containing parsed YAML data, or None if loading failed
+        
+        Notes:
+            - Handles FileNotFoundError and YAMLError exceptions gracefully
+            - Returns error messages for debugging purposes
         """
         try:
             with open(yaml_file_path, 'r') as file:
@@ -336,7 +454,7 @@ class TerminalMain:
             return yaml_data
         
         except FileNotFoundError:
-            return None, f"Cannot locate YAML file {yaml_file_path.name}."
+            raise FileNotFoundError(f"{yaml_file_path.name} could not be found.")
         
         except yaml.YAMLError:
-            return None, f"YAML file {yaml_file_path.name} could not be parsed."
+            raise ValueError(f"{yaml_file_path.name} could not be parsed.")
