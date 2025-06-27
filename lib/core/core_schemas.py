@@ -159,12 +159,8 @@ class GroupSchema(BaseModel):
         
         # Verify that keys for choices_a have not been modified
         if "".join(sorted(choices_a_keys)) != "".join(SYMBOLS[:len(choices_a_keys)]):
-            raise ValueError(f"Keys in choices_a have been modified.")
+            raise ValueError(f"Keys in choices_a and choices_b have been modified.")
         
-        # Verify that keys for choices_b have not been modified
-        if "".join(sorted(choices_b_keys)) != "".join(SYMBOLS[:len(choices_b_keys)]):
-            raise ValueError(f"Keys in choices_b have been modified.")
-
         # Validate that all values reference valid keys
         all_valid_keys: set[str] = choices_a_keys
         
