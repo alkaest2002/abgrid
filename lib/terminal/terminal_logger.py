@@ -3,7 +3,8 @@ from pathlib import Path
 import textwrap
 from typing import Any, Callable, Dict, List, Optional, Set
 
-def logger_decorator(message) -> Callable:
+def logger_decorator(messages) -> Callable:
+    start_message, end_message = messages
     def decorator(function: Callable) -> Callable:
         """
         Decorator that wraps a function with notification capabilities.
@@ -32,9 +33,9 @@ def logger_decorator(message) -> Callable:
                 after emitting error details and traceback information.
             """
             try:
-                pretty_print("▶ START EVENT: " + message)
+                pretty_print("▶ " + start_message)
                 result = function(*args, **kwargs)
-                pretty_print("▶ END EVENT: " + message)
+                pretty_print("▶ " + end_message)
                 return result
             except Exception as error:
                 error_message = extract_traceback_info(error)

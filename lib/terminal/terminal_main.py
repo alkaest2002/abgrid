@@ -98,7 +98,7 @@ class TerminalMain:
         )
 
     @staticmethod
-    @logger_decorator("init project")
+    @logger_decorator(("initialize project", "end of project initialization"))
     def init_project(
         project: str, 
         project_folderpath: Path, 
@@ -165,8 +165,7 @@ class TerminalMain:
         with open(config_file_path, 'w', encoding='utf-8') as fout:
             yaml.dump(yaml_data, fout, sort_keys=False, allow_unicode=True)
 
-
-    @logger_decorator("generate group files")
+    @logger_decorator(("generate group files", "end of group files generation"))
     def generate_group_inputs(
         self, 
         groups: range, 
@@ -265,7 +264,7 @@ class TerminalMain:
             
             generated_files.append(group_file_path.name)
           
-    @logger_decorator("generate answersheets")
+    @logger_decorator(("generate answersheets", "end of answersheets generation"))
     def generate_answersheets(self, language: str) -> None:
         """
         Generate formatted PDF answer sheets for all configured project groups.
@@ -350,8 +349,7 @@ class TerminalMain:
             self._render_pdf("answersheet", sheets_data_copy, group_file.stem, language)
             generated_sheets.append(f"group_{group_number}")
 
-
-    @logger_decorator("generate reports")
+    @logger_decorator(("generate reports", "end of reporst generation"))
     def generate_reports(
         self, 
         language: str, 
@@ -460,7 +458,7 @@ class TerminalMain:
         except Exception as e:
             raise OSError(f"Failed to export data to JSON file {json_export_path}: {e}") from e
 
-    @logger_decorator("rendering PDF document")
+    @logger_decorator(("generating PDF document", "end of PDF document generation"))
     def _render_pdf(
         self, 
         doc_type: Literal["report", "answersheet"], 
