@@ -15,7 +15,8 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import networkx as nx
 
-from typing import Any, Literal, Dict, Optional, TypedDict, Tuple
+from typing import Any, Literal, Dict, Optional, TypedDict, Tuple, List
+from matplotlib.figure import Figure
 
 from lib.core import CM_TO_INCHES
 from lib.core.core_utils import compute_descriptives, figure_to_base64_svg
@@ -76,8 +77,8 @@ class CoreSociogram:
             sna: A dictionary containing social network analysis data with the following structure:
                 - "network_a": NetworkX DiGraph for positive relationships
                 - "network_b": NetworkX DiGraph for negative relationships  
-                - "adjacency_a": NumPy adjacency matrix for positive relationships
-                - "adjacency_b": NumPy adjacency matrix for negative relationships
+                - "adjacency_a": Pandas DataFrame adjacency matrix for positive relationships
+                - "adjacency_b": Pandas DataFrame adjacency matrix for negative relationships
                 - "edges_types_a": Dictionary with edge type classifications for network A
                 - "edges_types_b": Dictionary with edge type classifications for network B
 
@@ -90,9 +91,6 @@ class CoreSociogram:
                 - "graph_ii": Base64-encoded SVG string of integration index polar visualization
                 - "graph_ai": Base64-encoded SVG string of activity index polar visualization
                 - "relevant_nodes_ab": Dictionary with most/least relevant nodes for positive/negative outcomes
-
-        Side Effects:
-            Updates the instance's `sna` and `sociogram` attributes with the computed data.
         """
         # Store social network analysis data
         self.sna = sna
@@ -129,20 +127,26 @@ class CoreSociogram:
         if self.sna is None:
             raise AttributeError("SNA data must be set before computing statistics")
             
+        # Get typed references to networks and edge types
+        network_a: nx.DiGraph = self.sna["network_a"]
+        network_b: nx.DiGraph = self.sna["network_b"]
+        edges_types_a: Dict[str, pd.Index] = self.sna["edges_types_a"]
+        edges_types_b: Dict[str, pd.Index] = self.sna["edges_types_b"]
+        
         # Compute cohesion indices based on mutual positive relationships
-        cohesion_index_type_i = (
-            (len(self.sna["edges_types_a"]["type_ii"]) * 2) / len(self.sna["network_a"].edges())
+        cohesion_index_type_i: float = (
+            (len(edges_types_a["type_ii"]) * 2) / len(network_a.edges())
         )
-        cohesion_index_type_ii = (
-            len(self.sna["edges_types_a"]["type_ii"]) / len(self.sna["network_a"])
+        cohesion_index_type_ii: float = (
+            len(edges_types_a["type_ii"]) / len(network_a)
         )
         
         # Compute conflict indices based on mutual negative relationships
-        conflict_index_type_i = (
-            (len(self.sna["edges_types_b"]["type_ii"]) * 2) / len(self.sna["network_b"].edges())
+        conflict_index_type_i: float = (
+            (len(edges_types_b["type_ii"]) * 2) / len(network_b.edges())
         )
-        conflict_index_type_ii = (
-            len(self.sna["edges_types_b"]["type_ii"]) / len(self.sna["network_b"])
+        conflict_index_type_ii: float = (
+            len(edges_types_b["type_ii"]) / len(network_b)
         )
 
         return pd.Series({
@@ -185,11 +189,11 @@ class CoreSociogram:
         # Retrieve network graphs and adjacency matrices
         network_a: nx.DiGraph = self.sna["network_a"]
         network_b: nx.DiGraph = self.sna["network_b"]
-        adjacency_a: np.ndarray = self.sna["adjacency_a"]
-        adjacency_b: np.ndarray = self.sna["adjacency_b"]
+        adjacency_a: pd.DataFrame = self.sna["adjacency_a"]
+        adjacency_b: pd.DataFrame = self.sna["adjacency_b"]
         
         # Initialize DataFrame with basic degree measures
-        sociogram_micro_stats = pd.concat([
+        sociogram_micro_stats: pd.DataFrame = pd.concat([
             pd.Series(dict(network_a.in_degree()), name="rp"), 
             pd.Series(dict(network_b.in_degree()), name="rr"),
             pd.Series(dict(network_a.out_degree()), name="gp"), 
@@ -211,18 +215,17 @@ class CoreSociogram:
         sociogram_micro_stats["st"] = self._compute_status(sociogram_micro_stats)
 
         # Compute dense rankings for all numeric columns (lower rank = better performance)
-        sociogram_micro_stats = pd.concat([
-            sociogram_micro_stats,
-            sociogram_micro_stats.rank(method="dense", ascending=False).add_suffix("_rank")
-        ], axis=1)
+        numeric_ranks: pd.DataFrame = sociogram_micro_stats.rank(method="dense", ascending=False).add_suffix("_rank")
+        sociogram_micro_stats = pd.concat([sociogram_micro_stats, numeric_ranks], axis=1)
 
         # Compute status ranking based on social desirability order
+        status_order: List[str] = [
+            "popular", "appreciated", "marginal", "isolated", "ambitendent",
+            "controversial", "disliked", "rejected"
+        ]
         sociogram_micro_stats["st_rank"] = (
             sociogram_micro_stats["st"]
-                .apply(lambda x: [
-                    "popular", "appreciated", "marginal", "isolated", "ambitendent",
-                    "controversial", "disliked", "rejected"
-                ].index(x) + 1)
+                .apply(lambda x: status_order.index(x) + 1)
         )
 
         return sociogram_micro_stats.sort_index()
@@ -246,7 +249,7 @@ class CoreSociogram:
             raise AttributeError("Micro stats must be computed before descriptives")
             
         # Select only non-rank numeric columns for statistical aggregation
-        sociogram_numeric_columns = (
+        sociogram_numeric_columns: pd.DataFrame = (
             self.sociogram["micro_stats"]
                 .select_dtypes(np.number)
                 .filter(regex=r"^.*(?<!_rank)$")
@@ -281,10 +284,11 @@ class CoreSociogram:
         rankings: Dict[str, pd.Series] = {}
         
         # Get micro statistics data
-        sociogram_micro_stats = self.sociogram["micro_stats"]
+        sociogram_micro_stats: pd.DataFrame = self.sociogram["micro_stats"]
         
         # Add sorted rankings for centrality metrics and status
-        for metric in [f"{m}_rank" for m in ["bl", "im", "ai", "ii", "st"]]:
+        rank_metrics: List[str] = [f"{m}_rank" for m in ["bl", "im", "ai", "ii", "st"]]
+        for metric in rank_metrics:
             rankings[metric] = sociogram_micro_stats[metric].sort_values()
         
         return rankings
@@ -299,40 +303,39 @@ class CoreSociogram:
         performers (valence 'b') across different sociometric measures.
 
         Args:
-            threshold (float): Quantile threshold for selecting top/bottom performing nodes
-                            (default 0.05 = top/bottom 5% of nodes per metric).
+            threshold: Quantile threshold for selecting top/bottom performing nodes
+                      (default 0.05 = top/bottom 5% of nodes per metric).
 
         Returns:
-            Dict[str, pd.DataFrame]: 
-                Dictionary with keys 'a' (positive relevance) and 'b' (negative relevance),
-                each containing a DataFrame of relevant nodes.
-                Each DataFrame has columns:
-                - 'node_id': node identifier
-                - 'metric': metric name without '_rank' suffix
-                - 'rank': re-computed dense rank position, ascending for 'a', descending for 'b'
-                - 'value': original metric value from micro_stats
-                - 'weight': computed weight using formula 10 / (rank ** 0.8)
-                - 'evidence_type': always 'sociogram'
+            Dictionary with keys 'a' (positive relevance) and 'b' (negative relevance),
+            each containing a DataFrame of relevant nodes.
+            Each DataFrame has columns:
+            - 'node_id': node identifier
+            - 'metric': metric name without '_rank' suffix
+            - 'rank': re-computed dense rank position, ascending for 'a', descending for 'b'
+            - 'value': original metric value from micro_stats
+            - 'weight': computed weight using formula 10 / (rank ** 0.8)
+            - 'evidence_type': always 'sociogram'
+            
+        Note:
+            - For valence 'a': selects nodes with ranks <= threshold quantile (best performers)
+            - For valence 'b': selects nodes with ranks >= (1-threshold) quantile (worst performers)
+            - Weight calculation uses formula: 10.0 / (rank ** 0.8)
+            - Processes all ranking columns ending with '_rank' from sociogram rankings
                 
-            Note:
-                - For valence 'a': selects nodes with ranks <= threshold quantile (best performers)
-                - For valence 'b': selects nodes with ranks >= (1-threshold) quantile (worst performers)
-                - Weight calculation uses formula: 10.0 / (rank ** 0.8)
-                - Processes all ranking columns ending with '_rank' from sociogram rankings
-                    
         Raises:
-            ValueError: If sociogram rankings or micro_stats have not been computed yet.
+            AttributeError: If sociogram rankings or micro_stats have not been computed yet.
         """
         # Make sure data is available
         if self.sociogram["rankings"] is None or self.sociogram["micro_stats"] is None:
             raise AttributeError("Sociogram micro statistics and rankings are required.")
         
         # Select micro_stats and rankings to use
-        micro_stats = self.sociogram["micro_stats"]
-        rankings = self.sociogram["rankings"]
+        micro_stats: pd.DataFrame = self.sociogram["micro_stats"]
+        rankings: Dict[str, pd.Series] = self.sociogram["rankings"]
         
         # Init dict with empty sub-dicts for storing relevant nodes
-        relevant_nodes_ab = {"a": pd.DataFrame(), "b": pd.DataFrame()}
+        relevant_nodes_ab: Dict[str, pd.DataFrame] = {"a": pd.DataFrame(), "b": pd.DataFrame()}
         
         # Process both positive (a) and negative (b) relevance directions
         for valence_type in relevant_nodes_ab.keys():
@@ -341,18 +344,18 @@ class CoreSociogram:
             for metric_rank_name, ranks_series in rankings.items():
 
                 # Clean metric name
-                metric_name = re.sub("_rank", "", metric_rank_name)
+                metric_name: str = re.sub("_rank", "", metric_rank_name)
 
                 # Select strategy: a = best performers, b = worst performers
                 if valence_type == "a":
                     # Get threshold for top performers (lower quantile = better ranks)
-                    threshold_value = ranks_series.quantile(threshold)
+                    threshold_value: float = ranks_series.quantile(threshold)
                     
                     # Filter nodes with ranks at or below threshold (best performers)
-                    relevant_ranks = ranks_series[ranks_series.le(threshold_value)]
+                    relevant_ranks: pd.Series = ranks_series[ranks_series.le(threshold_value)]
 
                     # Set ascending so that smaller ranks are considered more important
-                    ascending = True
+                    ascending: bool = True
 
                 else:
                     # Get threshold for bottom performers (higher quantile = worse ranks)
@@ -365,7 +368,7 @@ class CoreSociogram:
                     ascending = False
                 
                 # Compute relevant nodes data
-                relevant_nodes = (
+                relevant_nodes: pd.DataFrame = (
                     relevant_ranks
                         .to_frame()
                         .assign(
@@ -432,11 +435,15 @@ class CoreSociogram:
                 A tuple containing (low_threshold, high_threshold) quantile values.
             """
             # Tolerance for matching actual vs theoretical quantile proportions
-            epsilon = 0.05
+            epsilon: float = 0.05
 
             # Quantile pairs ordered by preference: (low_quantile, high_quantile)
             # Starting with moderate splits and moving to more extreme ones
-            quantile_pairs = [(0.25, 0.75), (0.2, 0.8), (0.15, 0.85), (0.10, 0.90), (0.05, 0.95)]
+            quantile_pairs: List[Tuple[float, float]] = [(0.25, 0.75), (0.2, 0.8), (0.15, 0.85), (0.10, 0.90), (0.05, 0.95)]
+
+            # Initialize variables for fallback
+            low_val: float = 0.0
+            high_val: float = 0.0
 
             # Test each quantile pair to find best match between actual and theoretical proportions
             for low_q, high_q in quantile_pairs:
@@ -446,13 +453,13 @@ class CoreSociogram:
                 high_val = series.quantile(high_q)
                 
                 # Calculate actual proportions of data below/above thresholds
-                actual_low_proportion = (series < low_val).sum() / series.shape[0]
-                actual_high_proportion = (series > high_val).sum() / series.shape[0]
+                actual_low_proportion: float = (series < low_val).sum() / series.shape[0]
+                actual_high_proportion: float = (series > high_val).sum() / series.shape[0]
                 
                 # Calculate deviations between actual and expected proportions
                 # Expected: low_q proportion below threshold, (1-high_q) proportion above threshold
-                low_deviation = abs(actual_low_proportion - low_q)
-                high_deviation = abs(actual_high_proportion - (1 - high_q))
+                low_deviation: float = abs(actual_low_proportion - low_q)
+                high_deviation: float = abs(actual_high_proportion - (1 - high_q))
 
                 # Return first quantile pair where both deviations are within tolerance
                 if low_deviation <= epsilon and high_deviation <= epsilon:
@@ -462,39 +469,43 @@ class CoreSociogram:
             return (low_val, high_val)
 
         # Extract key metrics from sociogram statistics for efficient repeated access
-        impact = sociogram_micro_stats["im"]  # Impact measure
-        balance = sociogram_micro_stats["bl"] # Balance between positive/negative preferences
-        prefs_a = sociogram_micro_stats["rp"] # Received preferences (positive)
-        prefs_b = sociogram_micro_stats["rr"] # Received rejections (negative)
+        impact: pd.Series = sociogram_micro_stats["im"]  # Impact measure
+        balance: pd.Series = sociogram_micro_stats["bl"] # Balance between positive/negative preferences
+        prefs_a: pd.Series = sociogram_micro_stats["rp"] # Received preferences (positive)
+        prefs_b: pd.Series = sociogram_micro_stats["rr"] # Received rejections (negative)
 
         # Calculate adaptive impact thresholds using quantile matching algorithm
+        impact_quantile_low: float
+        impact_quantile_high: float
         impact_quantile_low, impact_quantile_high = _select_best_quantiles(impact)
 
         # Create impact level classification masks
-        impact_low = impact.lt(impact_quantile_low) # Low impact individuals
-        impact_high = impact.gt(impact_quantile_high) # High impact individuals  
-        impact_median = impact.between(impact_quantile_low, impact_quantile_high, inclusive="both") # Medium impact
+        impact_low: pd.Series = impact.lt(impact_quantile_low) # Low impact individuals
+        impact_high: pd.Series = impact.gt(impact_quantile_high) # High impact individuals  
+        impact_median: pd.Series = impact.between(impact_quantile_low, impact_quantile_high, inclusive="both") # Medium impact
 
         # Calculate adaptive balance thresholds using absolute balance values
         # Absolute balance removes direction, focusing on magnitude of imbalance
-        abs_balance = balance.abs()
+        abs_balance: pd.Series = balance.abs()
+        abs_balance_quantile_low: float
+        abs_balance_quantile_high: float
         abs_balance_quantile_low, abs_balance_quantile_high = _select_best_quantiles(abs_balance)
-        abs_balance_high = abs_balance.gt(abs_balance_quantile_high)  # High absolute balance (strong imbalance)
+        abs_balance_high: pd.Series = abs_balance.gt(abs_balance_quantile_high)  # High absolute balance (strong imbalance)
 
         # Create balance type classification masks
         # Prevalent: moderate imbalance (positive or negative bias but not extreme)
-        a_prevalent = balance.gt(0) & ~abs_balance_high # Moderately positive balance
-        b_prevalent = balance.lt(0) & ~abs_balance_high # Moderately negative balance
+        a_prevalent: pd.Series = balance.gt(0) & ~abs_balance_high # Moderately positive balance
+        b_prevalent: pd.Series = balance.lt(0) & ~abs_balance_high # Moderately negative balance
 
         # Dominant: extreme imbalance (strong positive or negative bias)
-        a_dominant = balance.gt(0) & abs_balance_high # Strongly positive balance
-        b_dominant = balance.lt(0) & abs_balance_high # Strongly negative balance
+        a_dominant: pd.Series = balance.gt(0) & abs_balance_high # Strongly positive balance
+        b_dominant: pd.Series = balance.lt(0) & abs_balance_high # Strongly negative balance
 
         # Neutral: low absolute balance (minimal preference imbalance)
-        neutral = abs_balance.lt(abs_balance_quantile_low)  
+        neutral: pd.Series = abs_balance.lt(abs_balance_quantile_low)  
 
         # Initialize status classification array
-        status = pd.Series(["-"] * sociogram_micro_stats.shape[0], index=sociogram_micro_stats.index)
+        status: pd.Series = pd.Series(["-"] * sociogram_micro_stats.shape[0], index=sociogram_micro_stats.index)
 
         # Assign sociometric status classifications based on impact and balance patterns
 
@@ -533,7 +544,6 @@ class CoreSociogram:
 
         return status
 
-
     def _create_graph(self, coefficient: Literal["ai", "ii"]) -> str:
         """
         Generate a polar visualization of node distribution based on centrality coefficients.
@@ -559,13 +569,15 @@ class CoreSociogram:
             raise AttributeError("Micro stats must be computed before creating graphs")
             
         # Extract values for the specified centrality coefficient
-        data = self.sociogram["micro_stats"].loc[:, [coefficient]].copy()
+        data: pd.DataFrame = self.sociogram["micro_stats"].loc[:, [coefficient]].copy()
         
         # Normalize values to [0, 1] range and invert for radial display (center = high values)
-        plot_data = data.sub(data.min()).div(data.max() - data.min())
+        plot_data: pd.DataFrame = data.sub(data.min()).div(data.max() - data.min())
         plot_data = plot_data.max() - plot_data
         
         # Create polar coordinate subplot with specified figure size
+        fig: Figure
+        ax: plt.Axes
         fig, ax = plt.subplots(
             constrained_layout=True, 
             figsize=(19 * CM_TO_INCHES, 19 * CM_TO_INCHES),
@@ -580,32 +592,32 @@ class CoreSociogram:
         ax.grid(color="#bbb", linestyle="--", linewidth=.8)
         
         # Set jitter parameters to reduce visual overlap between nearby points
-        theta_jitter_scale = 0.03  # Angular jitter magnitude
-        r_jitter_scale = 0.01      # Radial jitter magnitude
+        theta_jitter_scale: float = 0.03  # Angular jitter magnitude
+        r_jitter_scale: float = 0.01      # Radial jitter magnitude
         
         # Plot data points grouped by unique coefficient values
         for idx, (_, group_plot_data) in enumerate(plot_data.groupby(by=coefficient)):
             # Define angular offset pattern for current group (alternating and progressive)
-            offset = idx % 2 * -np.pi + idx * 0.25
+            offset: float = idx % 2 * -np.pi + idx * 0.25
             
             # Compute angular spacing to distribute points evenly within group
-            slice_angle = (2 * np.pi) / group_plot_data[coefficient].shape[0]
+            slice_angle: float = (2 * np.pi) / group_plot_data[coefficient].shape[0]
 
             # Reset index to preserve node labels for annotation
             group_plot_data = group_plot_data.reset_index(names="node_labels")
 
             # Set base polar coordinates for this group
-            r = group_plot_data[coefficient]  # Radial distance (normalized and inverted)
-            theta = pd.Series(group_plot_data[coefficient].index.values).mul(slice_angle).add(offset)
+            r: pd.Series = group_plot_data[coefficient]  # Radial distance (normalized and inverted)
+            theta: pd.Series = pd.Series(group_plot_data[coefficient].index.values).mul(slice_angle).add(offset)
             
             # Apply reproducible random jitter to reduce overlap (seeded by group index)
             np.random.seed(42 + idx)
-            theta_jitter = np.random.normal(0, theta_jitter_scale, len(theta))
-            r_jitter = np.random.normal(0, r_jitter_scale, len(r))
+            theta_jitter: np.ndarray = np.random.normal(0, theta_jitter_scale, len(theta))
+            r_jitter: np.ndarray = np.random.normal(0, r_jitter_scale, len(r))
             
             # Apply jitter with bounds checking to keep points in valid range
-            theta_jittered = theta + theta_jitter
-            r_jittered = np.clip(r + r_jitter, 0, 1.1)
+            theta_jittered: pd.Series = theta + theta_jitter
+            r_jittered: np.ndarray = np.clip(r + r_jitter, 0, 1.1)
             
             # Plot data points as scatter plot with consistent styling
             ax.scatter(theta_jittered, r_jittered, c="#bbb", s=20)
