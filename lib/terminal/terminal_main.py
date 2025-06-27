@@ -25,10 +25,10 @@ from pathlib import Path
 from typing import Literal, Dict, Any, List, Tuple, Union
 from weasyprint import HTML
 from lib import jinja_env
-from lib.abgrid_utils import to_json_serializable
 from lib.core import SYMBOLS
 from lib.core.core_data import CoreData
 from lib.terminal.terminal_logger import logger_decorator
+from lib.abgrid_utils import to_json_serializable
 
 ProjectData = Dict[str, Any]
 GroupData = Dict[str, Any]
