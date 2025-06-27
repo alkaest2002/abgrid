@@ -16,7 +16,7 @@ from typing import Any, Dict, List, Optional, Tuple, Union
 
 from pydantic import ValidationError
 
-from lib.core.core_schemas import ProjectSchema, GroupSchema
+from lib.core.core_schemas import ProjectSchema, GroupSchema, ReportSchema
 from lib.core.core_sna import CoreSna, SNADict
 from lib.core.core_sociogram import SociogramDict, CoreSociogram
 
@@ -78,9 +78,7 @@ class CoreData:
         except ValidationError as error:
             return None, self._get_pydantic_errors(error)
         
-    def get_report_data(
-            self, project_data: Dict[str, Any], group_data: Dict[str, Any], with_sociogram: bool = False
-        ) -> Tuple[Optional[Dict[str, Any]], Optional[str]]:
+    def get_report_data(self, report_data: Dict[str, Any], with_sociogram: bool = False) -> Tuple[Optional[ReportSchema], Optional[str]]:
         """
         Generate comprehensive report data by combining project and group data with analysis results.
         
@@ -102,98 +100,96 @@ class CoreData:
             - Adds current year timestamp to report data
             - Returns dictionary for flexible template rendering
         """
-        # Validate project data
-        validated_project_data, error_msg = self.get_project_data(project_data)
-        if error_msg:
-            return None, error_msg
-        
-        # Validate group data
-        validated_group_data, error_msg = self.get_group_data(group_data)
-        if error_msg:
-            return None, error_msg
+        try:
+            
+            # Try to validate
+            validated_model = ReportSchema.model_validate(report_data)
+            
+            # Initialize SNA analysis class
+            abgrid_sna: CoreSna = CoreSna()
 
-        # Initialize SNA analysis class
-        abgrid_sna: CoreSna = CoreSna()
+            # Initialize sociogram analysis class
+            abgrid_sociogram: CoreSociogram = CoreSociogram()
+            
+            # Compute SNA results from group choice data
+            sna_results: SNADict = abgrid_sna.get(validated_model.group_data.choices_a, validated_model.group_data.choices_b)
 
-        # Initialize sociogram analysis class
-        abgrid_sociogram: CoreSociogram = CoreSociogram()
-        
-        # Compute SNA results from group choice data
-        sna_results: SNADict = abgrid_sna.get(validated_group_data.choices_a, validated_group_data.choices_b)
+            # Compute sociogram results from SNA data
+            sociogram_results: SociogramDict = abgrid_sociogram.get(sna_results)
+            
+            # Prepare the comprehensive report data structure
+            report_data: Dict[str, Any] = {
+                "year": datetime.datetime.now(datetime.UTC).year,
+                "project_title": validated_model.project_data.project_title,
+                "question_a": validated_model.project_data.question_a,
+                "question_b": validated_model.project_data.question_b,
+                "group": validated_model.group_data.group,
+                "members_per_group": len(validated_model.group_data.choices_a),
+                "sna": sna_results,
+            }
 
-        # Compute sociogram results from SNA data
-        sociogram_results: SociogramDict = abgrid_sociogram.get(sna_results)
-        
-        # Prepare the comprehensive report data structure
-        report_data: Dict[str, Any] = {
-            "project_title": validated_project_data.project_title,
-            "year": datetime.datetime.now(datetime.UTC).year,
-            "group": validated_group_data.group,
-            "members_per_group": len(validated_group_data.choices_a),
-            "question_a": validated_project_data.question_a,
-            "question_b": validated_project_data.question_b,
-            "sna": sna_results,
-        }
+            # Conditionally include sociogram data if requested
+            if with_sociogram:
+                # Add sociogram data to report data
+                report_data["sociogram"] = sociogram_results
 
-        # Conditionally include sociogram data if requested
-        if with_sociogram:
-            # Add sociogram data to report data
-            report_data["sociogram"] = sociogram_results
+            # Get relevant nodes from both SNA and sociogram analyses
+            relevant_nodes_ab_sna: Dict[str, pd.DataFrame] = sna_results["relevant_nodes_ab"].copy()
+            relevant_nodes_ab_sociogram: Dict[str, pd.DataFrame] = (
+                sociogram_results["relevant_nodes_ab"].copy() if with_sociogram else 
+                {"a": pd.DataFrame(), "b": pd.DataFrame()}
+            )
+            
+            # Init dict
+            relevant_nodes_ab: Dict[str, pd.DataFrame] = {}
 
-        # Get relevant nodes from both SNA and sociogram analyses
-        relevant_nodes_ab_sna: Dict[str, pd.DataFrame] = sna_results["relevant_nodes_ab"].copy()
-        relevant_nodes_ab_sociogram: Dict[str, pd.DataFrame] = (
-            sociogram_results["relevant_nodes_ab"].copy() if with_sociogram else 
-            {"a": pd.DataFrame(), "b": pd.DataFrame()}
-        )
-        
-        # Init dict
-        relevant_nodes_ab: Dict[str, pd.DataFrame] = {}
-
-        # Loop through relevant_nodes_ab keys
-        for valence_type in ("a", "b"):
-            # Group nodes with same id and consolidate their values
-            nodes: pd.DataFrame = (
-                pd.concat(
-                    [
-                        relevant_nodes_ab_sna[valence_type], 
-                        relevant_nodes_ab_sociogram[valence_type]
-                    ]
+            # Loop through relevant_nodes_ab keys
+            for valence_type in ("a", "b"):
+                # Group nodes with same id and consolidate their values
+                nodes: pd.DataFrame = (
+                    pd.concat(
+                        [
+                            relevant_nodes_ab_sna[valence_type], 
+                            relevant_nodes_ab_sociogram[valence_type]
+                        ]
+                    )
+                    .groupby(by="node_id")
+                        .aggregate({
+                            "metric": list,
+                            "value": list,
+                            "original_rank": list,
+                            "recomputed_rank": list,
+                            "weight": "sum",
+                            "evidence_type": lambda x: list(set(x)),
+                        })
                 )
-                .groupby(by="node_id")
-                    .aggregate({
-                        "metric": list,
-                        "value": list,
-                        "original_rank": list,
-                        "recomputed_rank": list,
-                        "weight": "sum",
-                        "evidence_type": lambda x: list(set(x)),
-                    })
-            )
-            nodes = (
-                nodes
-                    # Keep nodes with multiple metrics only
-                    .loc[nodes["metric"].str.len() > 1, :]
-                    # Add 10 more points to weight of nodes with metrics from both sna and sociogram
-                    .assign(weight=nodes["weight"] + nodes["evidence_type"].str.len().gt(1).mul(10))
-                    # Sort nodes by weight
-                    .sort_values(by="weight", ascending=False)
-            )
-            
-            # Add relevant nodes of specific valence type to relevant_nodes_ab
-            relevant_nodes_ab[valence_type] = nodes
-            
+                nodes = (
+                    nodes
+                        # Keep nodes with multiple metrics only
+                        .loc[nodes["metric"].str.len() > 1, :]
+                        # Add 10 more points to weight of nodes with metrics from both sna and sociogram
+                        .assign(weight=nodes["weight"] + nodes["evidence_type"].str.len().gt(1).mul(10))
+                        # Sort nodes by weight
+                        .sort_values(by="weight", ascending=False)
+                )
+                
+                # Add relevant nodes of specific valence type to relevant_nodes_ab
+                relevant_nodes_ab[valence_type] = nodes
+                
+            # Add relevant_nodes_ab to report data
+            report_data["relevant_nodes_ab"] = relevant_nodes_ab
 
-        # Add relevant_nodes_ab to report data
-        report_data["relevant_nodes_ab"] = relevant_nodes_ab
-
-        # Add isolated nodes to report data
-        report_data["isolated_nodes_ab"] = {
-            "a": sna_results["micro_stats_a"].loc[sna_results["micro_stats_a"]["nd"].eq(3)].index,
-            "b": sna_results["micro_stats_b"].loc[sna_results["micro_stats_b"]["nd"].eq(3)].index
-        }
+            # Add isolated nodes to report data
+            report_data["isolated_nodes_ab"] = {
+                "a": sna_results["micro_stats_a"].loc[sna_results["micro_stats_a"]["nd"].eq(3)].index,
+                "b": sna_results["micro_stats_b"].loc[sna_results["micro_stats_b"]["nd"].eq(3)].index
+            }
+            
+            return report_data, None
         
-        return report_data, None
+        except ValidationError as error:
+            return None, self._get_pydantic_errors(error)
+
 
     def _get_pydantic_errors(self, validation_error: ValidationError, context: str = "") -> str:
         """

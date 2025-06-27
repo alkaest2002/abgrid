@@ -55,7 +55,7 @@ class GroupSchema(BaseModel):
                   contains a single-letter key mapped to a comma-separated string
                   of single-letter values (or None)
     
-    Note:
+    Notes:
         - Keys in choices_a and choices_b must be identical
         - All values must reference valid keys from either choices_a or choices_b
         - Keys and values must be single alphabetic characters
@@ -76,7 +76,7 @@ class GroupSchema(BaseModel):
             value: List of choice dictionaries to validate
 
         Returns:
-            The validated list of choice dictionaries
+            List[Dict[str, Optional[str]]]: The validated list of choice dictionaries
 
         Raises:
             ValueError: If any validation rule fails:
@@ -128,18 +128,19 @@ class GroupSchema(BaseModel):
         """
         Validate logical constraints between choices_a and choices_b.
 
-        Ensures that:
-        - Keys in choices_a and choices_b are identical
-        - All values reference valid keys from the combined key set
-        - Cross-references between choices are consistent
-
         Returns:
-            The validated GroupSchema instance
+            GroupSchema: The validated GroupSchema instance
 
         Raises:
             ValueError: If coherence rules between choices_a and choices_b are violated:
                 - Key sets are not identical
                 - Values reference non-existent keys
+
+        Notes:
+            Ensures that:
+            - Keys in choices_a and choices_b are identical
+            - All values reference valid keys from the combined key set
+            - Cross-references between choices are consistent
         """
         # Extract all keys from both choice sets
         choices_a_keys: set[str] = {next(iter(choice.keys())) for choice in self.choices_a}
@@ -170,3 +171,21 @@ class GroupSchema(BaseModel):
                     )
 
         return self
+
+
+class ReportSchema(BaseModel):
+    """
+    Pydantic model representing a report's data schema.
+    
+    This model validates report information by combining project and group data
+    into a unified report structure for comprehensive data validation.
+
+    Args:
+        project_data: The project data containing project-level information
+        group_data: The group data containing group-level choices and constraints
+
+    Returns:
+        ReportSchema: A validated report instance containing both project and group data
+    """
+    project_data: ProjectSchema
+    group_data: GroupSchema

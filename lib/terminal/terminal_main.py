@@ -133,7 +133,6 @@ class TerminalMain:
         with open(config_file_path, 'w', encoding='utf-8') as fout:
             yaml.dump(yaml_data, fout, sort_keys=False, allow_unicode=True)
 
-
     @logger_decorator("generate group files", "end of group files generation")
     def generate_group_inputs(
         self, 
@@ -314,7 +313,10 @@ class TerminalMain:
             
             # Load and validate report data for the current group
             group_data = self._load_yaml_data(group_file)
-            report_data, report_data_errors = self.core_data.get_report_data(project_data, group_data, with_sociogram)
+            report_data, report_data_errors = (
+                self.core_data.get_report_data(
+                    dict(project_data=project_data, group_data=group_data), with_sociogram)
+            )
             
             # Check for report-level validation errors
             if report_data_errors:
