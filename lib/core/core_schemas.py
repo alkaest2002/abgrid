@@ -12,6 +12,7 @@ from pydantic import BaseModel, Field, field_validator, model_validator
 from pydantic.types import constr
 from typing import Dict, List, Optional
 
+from lib.core import SYMBOLS
 
 class ProjectSchema(BaseModel):
     """
@@ -145,31 +146,37 @@ class GroupSchema(BaseModel):
         # Extract all keys from both choice sets
         choices_a_keys: set[str] = {next(iter(choice.keys())) for choice in self.choices_a}
         choices_b_keys: set[str] = {next(iter(choice.keys())) for choice in self.choices_b}
-
-        # Verify key sets are identical
+        
+        # Verify key sets a and b are identical
         if choices_a_keys != choices_b_keys:
             raise ValueError("Keys in choices_a and choices_b must be identical")
+        
+        # Verigy that a and b keys are not more than SYMBOLS
+        if len(choices_a_keys) > len(SYMBOLS):
+            raise ValueError(f"Keys in choices_a and choices_b must be less than {len(SYMBOLS)+1}")
 
         # Validate that all values reference valid keys
-        all_valid_keys: set[str] = choices_a_keys  # Same as choices_b_keys due to above check
+        all_valid_keys: set[str] = choices_a_keys
         
         for choices_type, choices_list in [("a", self.choices_a), ("b", self.choices_b)]:
             for choice in choices_list:
+                # Get Key
                 key: str = next(iter(choice.keys()))
+                # Get value
                 value_str: Optional[str] = choice[key]
-                
+                # Value can be none   
                 if value_str is None:
                     continue
-                    
+                # Split value
                 value_parts: List[str] = value_str.split(',') if value_str else []
+                # Get invalid values
                 invalid_values: List[str] = [v for v in value_parts if v not in all_valid_keys]
-                
+                # If there are invalid values
                 if invalid_values:
                     raise ValueError(
                         f"Values for key '{key}' in choices_{choices_type} contain "
                         f"invalid references: {', '.join(invalid_values)}"
                     )
-
         return self
 
 
