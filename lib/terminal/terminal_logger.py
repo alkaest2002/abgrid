@@ -56,7 +56,7 @@ def extract_traceback_info(error: Exception, exclude_files: Optional[Set[str]] =
         List of dictionaries containing filename, function name, and line number
     """
     if exclude_files is None:
-        exclude_files = {"abgrid_utils.py", "abgrid_logger.py"}
+        exclude_files = {"abgrid_logger.py"}
     
     traceback_info = []
     current_traceback = error.__traceback__
@@ -64,7 +64,7 @@ def extract_traceback_info(error: Exception, exclude_files: Optional[Set[str]] =
     while current_traceback is not None:
         frame = current_traceback.tb_frame
         filename = Path(frame.f_code.co_filename).name
-        
+
         if filename not in exclude_files:
             traceback_info.append({
                 'filename': filename,
@@ -76,9 +76,9 @@ def extract_traceback_info(error: Exception, exclude_files: Optional[Set[str]] =
     
     return traceback_info
 
-def pretty_print(text: str, prefix: str = "", width: int = 80) -> None:
+def pretty_print(text: str, width: int = 80) -> None:
         """
-         Print text with proper line wrapping and consistent prefix indentation.
+        Print text with proper line wrapping and consistent prefix indentation.
         
         Handles text wrapping to ensure lines don't exceed specified width while
         maintaining proper indentation alignment for continuation lines. Gracefully
@@ -86,34 +86,24 @@ def pretty_print(text: str, prefix: str = "", width: int = 80) -> None:
         
         Args:
             text: The text content to print with wrapping applied.
-            prefix: Optional prefix string for the first line (e.g., "Error: ", "Info: ").
-            width: Maximum line width constraint. Uses instance default if None.
-            
-        Note:
-            Continuation lines are automatically indented to align with the text portion
-            of the first line. Ensures minimum width of 1 character even with long prefixes.
-            Handles whitespace-only text and empty content gracefully.
+            width: Maximum line width constraint. Default is 80 characters
         """
         # Handle empty text
         if not text:
             return
         
         # Print text directly, if it fits on one line
-        if len(full_line := f"{prefix}{text}") <= width:
-            print(full_line)
+        if len(text) <= width:
+            print(text)
             return
         
         # Text needs wrapping
-        [first_line, *rest_of_lines] = textwrap.wrap(
+        wrapped_text_lines = textwrap.wrap(
             text,
-            width=max(1, width - len(prefix)),
+            width=width,
             break_long_words=True,
             break_on_hyphens=True
         )
         
-        # Print first line with prefix
-        print(f"{prefix}{first_line}")
-        
-        # Print rest of lines with indentation
-        for line in rest_of_lines:
-            print(f"{' ' * len(prefix)}{line}")
+        # Print wrapped text lines
+        print(*wrapped_text_lines, sep='\n')
