@@ -50,7 +50,7 @@ class SNADict(TypedDict):
     rankings_ab: Optional[Dict[str, pd.DataFrame]]
     relevant_nodes_ab: Optional[Dict[str, pd.DataFrame]]
 
-class ABGridSna:
+class CoreSna:
     """
     A class for comprehensive social network analysis on directed graphs.
     
@@ -607,13 +607,6 @@ class ABGridSna:
                 Each Series contains components as concatenated strings of sorted node identifiers.
                 Components are sorted by size (largest first).
 
-        Example:
-            >>> components = _compute_components("a")
-            >>> components["cliques"]
-            0    ABC
-            1    BCD
-            dtype: object
-
         Raises:
             ValueError: If required network data is not available.
         """
@@ -652,10 +645,6 @@ class ABGridSna:
                 - 0 indicates an evenly distributed network (all nodes have equal degree)
                 - 1 indicates a perfectly centralized network (star topology)
                 - Higher values suggest more centralized structure
-
-        Formula:
-            Centralization = Σ(max_centrality - node_centrality) / ((n-1)(n-2))
-            where n is the number of nodes.
 
         Note:
             This implementation uses degree centrality as the basis for centralization.
@@ -872,11 +861,6 @@ class ABGridSna:
         Returns:
             List[Tuple[str, str]]: 
                 Flat list of directed edge tuples (source, target).
-
-        Example:
-            >>> packed_edges = [{"A": "B,C"}, {"B": "C"}]
-            >>> _unpack_network_edges(packed_edges)
-            [("A", "B"), ("A", "C"), ("B", "C")]
         """
         return reduce(
             lambda acc, itr: [
@@ -901,11 +885,6 @@ class ABGridSna:
         Returns:
             List[str]: 
                 Sorted list of unique source node identifiers.
-
-        Example:
-            >>> packed_edges = [{"A": "B,C"}, {"B": "C"}]
-            >>> _unpack_network_nodes(packed_edges)
-            ["A", "B"]
         """
         return sorted([node for node_edges in packed_edges for node in node_edges.keys()])
      

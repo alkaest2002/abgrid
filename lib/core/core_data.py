@@ -17,8 +17,8 @@ from typing import Any, Dict, List, Literal, Optional, Tuple, TypedDict
 from pydantic import ValidationError
 
 from lib.core.core_schemas import ProjectSchema, GroupSchema
-from lib.core.core_sna import SNADict, ABGridSna
-from lib.core.core_sociogram import SociogramDict, ABGridSociogram
+from lib.core.core_sna import CoreSna, SNADict
+from lib.core.core_sociogram import SociogramDict, CoreSociogram
 
 class ProjectData(TypedDict):
     """Structure for project configuration data loaded from project files."""
@@ -103,10 +103,10 @@ class CoreData:
             return None, self._get_pydantic_errors(validation_errors)
 
         # Initialize SNA analysis class
-        abgrid_sna = ABGridSna()
+        abgrid_sna = CoreSna()
 
         # Initialize sociogram analysis class
-        abgrid_sociogram = ABGridSociogram()
+        abgrid_sociogram = CoreSociogram()
         
         # Compute SNA results from group choice data
         sna_results = abgrid_sna.get(group_data["choices_a"], group_data["choices_b"])

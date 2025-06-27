@@ -30,7 +30,7 @@ class SociogramDict(TypedDict):
     graph_ai: Optional[str]
     relevant_nodes_ab: Optional[Dict[str, pd.DataFrame]]
 
-class ABGridSociogram:
+class CoreSociogram:
     """
     Analyzes and visualizes social networks by constructing sociometric components including 
     macro/micro statistics, node rankings, and polar graph visualizations.
@@ -49,7 +49,7 @@ class ABGridSociogram:
 
     def __init__(self) -> None:
         """
-        Initialize the ABGridSociogram instance.
+        Initialize the CoreSociogram instance.
         
         Sets up internal data structures for storing social network analysis data
         and computed sociogram results.

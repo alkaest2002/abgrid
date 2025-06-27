@@ -88,16 +88,6 @@ def gini_coefficient(values: Union[Sequence[float], np.ndarray]) -> float:
 
     Raises:
     ValueError: If the input is not a 1-dimensional sequence.
-
-    Example:
-    # Sociometric status scores (can include negative values)
-    status_scores = [-2.1, -0.5, 0.8, 1.2, 3.4]
-    gini = gini_coefficient(status_scores)
-    print(f"Status inequality: {gini:.3f}")  # Output: 0.382
-    
-    # Perfect equality
-    equal_values = [5, 5, 5, 5, 5]
-    print(f"Equal distribution: {gini_coefficient(equal_values)}")  # Output: 0.0
     """
     # Convert to numpu array (make sure values are positive)
     values = np.array(values, dtype=np.float64) - np.min(values)
