@@ -295,32 +295,31 @@ class TerminalMain:
         """
         # Validate that group files exist
         if not self.groups_filepaths:
-            raise ValueError("No group files found. Please generate group inputs first.")
+            raise ValueError("No group files found.")
         
-        # Load project data and validate it
-        project_data = self._load_yaml_data(self.project_filepath)
-        project_data, project_data_errors = self.core_data.get_project_data(project_data)
-
-        # Check for project-level validation errors
-        if project_data_errors:
-            raise ValueError(f"Data validation failed for project {self.project}:\n{project_data_errors}")
-
         # Initialize storage for aggregated data from all groups
         all_groups_data = {}
+
+        # Load project data
+        project_data = self._load_yaml_data(self.project_filepath)
         
         # Process each group file to generate individual reports
         for group_file in self.groups_filepaths:
             
-            # Load and validate report data for the current group
+            # Load group data for the current group
             group_data = self._load_yaml_data(group_file)
+            
+            # Validate report data, i.e. project data + report data
             report_data, report_data_errors = (
                 self.core_data.get_report_data(
-                    dict(project_data=project_data, group_data=group_data), with_sociogram)
+                    dict(project_data=project_data, group_data=group_data), 
+                    with_sociogram
+                )
             )
             
             # Check for report-level validation errors
             if report_data_errors:
-                raise ValueError(f"Report data validation failed for {group_file.name}:\n{report_data}")
+                raise ValueError(f"Report data validation failed for {group_file.name}: {report_data_errors}")
             
             # Generate the PDF report with sociogram configuration
             report_data.update({ "with_sociogram": with_sociogram })
