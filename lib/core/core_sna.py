@@ -362,15 +362,7 @@ class CoreSna:
                 Dictionary mapping centrality metric names (with '_rank' suffix) to
                 pandas Series containing nodes ordered by their rank (best to worst).
                 Each Series is indexed by node identifiers and contains rank values.
-
-        Example:
-            >>> rankings = _compute_rankings("a")
-            >>> rankings["ic_rank"]  # Returns nodes ordered by in-degree centrality rank
-            node_A    1.0
-            node_C    2.0  
-            node_B    3.0
-            dtype: float64
-
+                
         Raises:
             ValueError: If required micro statistics data is not available.
         """
