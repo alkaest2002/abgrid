@@ -1,7 +1,7 @@
 import argparse
 
 from pathlib import Path
-from lib.terminal.terminal_main import ABGridMain
+from lib.terminal.terminal_main import TerminalMain
 
 # Set up the argument parser
 parser = argparse.ArgumentParser(prog="ABGrid")
@@ -30,6 +30,6 @@ for path in folders_to_process:
         project = project_folder_path.name
         project_filepath = next(project_folder_path.glob(f"{project}.*"))
         groups_filepaths = list(project_folder_path.glob("*_g*.*"))
-        abgrid_main = ABGridMain(project, project_folder_path, project_filepath, groups_filepaths)
+        abgrid_main = TerminalMain(project, project_folder_path, project_filepath, groups_filepaths)
         abgrid_main.generate_reports(args.language, args.with_sociogram)
         # abgrid_main.generate_answersheets(args.language)
