@@ -458,7 +458,7 @@ class TerminalMain:
         except Exception as e:
             raise OSError(f"Failed to export data to JSON file {json_export_path}: {e}") from e
 
-    @logger_decorator(("generating PDF document", "end of PDF document generation"))
+    @logger_decorator(("generating PDF document; please, wait...", "end of PDF document generation"))
     def _render_pdf(
         self, 
         doc_type: Literal["report", "answersheet"], 
