@@ -325,7 +325,7 @@ class ABGridSociogram:
         """
         # Make sure data is available
         if self.sociogram["rankings"] is None or self.sociogram["micro_stats"] is None:
-            raise ValueError("Sociogram micro statistics and rankings are required.")
+            raise AttributeError("Sociogram micro statistics and rankings are required.")
         
         # Select micro_stats and rankings to use
         micro_stats = self.sociogram["micro_stats"]

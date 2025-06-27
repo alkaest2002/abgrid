@@ -3,6 +3,8 @@ from pathlib import Path
 import textwrap
 from typing import Any, Callable, Dict, List, Optional, Set
 
+from pydantic_core import ValidationError
+
 def logger_decorator(messages) -> Callable:
     start_message, end_message = messages
     def decorator(function: Callable) -> Callable:
@@ -33,32 +35,49 @@ def logger_decorator(messages) -> Callable:
                 after emitting error details and traceback information.
             """
             try:
-                pretty_print("▶ " + start_message)
+                pretty_print(start_message, "▶ ")
                 result = function(*args, **kwargs)
-                pretty_print("▶ " + end_message)
+                pretty_print(end_message, "▶ ")
                 return result
+            except ValueError as error:
+                pretty_print(str(error), "✗ ")
+            except AttributeError as error:
+                pretty_print(str(error), "✗ ")
+            except FileNotFoundError as error:
+                pretty_print(str(error), "✗ ")
+            except OSError as error:
+                pretty_print(str(error), "✗ ")
             except Exception as error:
-                error_message = extract_traceback_info(error)
-                pretty_print("✗ ERROR: " + error_message)
+                pretty_print(extract_traceback_info(error))
                 raise
         return wrapper
     return decorator
 
-def extract_traceback_info(error: Exception, exclude_files: Optional[Set[str]] = None) -> List[Dict[str, Any]]:
+def extract_traceback_info(error: Exception, exclude_files: Optional[Set[str]] = None) -> str:
     """
-    Extract relevant traceback information from an exception.
+    Extract and format traceback information from an exception into a readable string.
+    
+    Creates a formatted traceback message showing the call stack with file names,
+    function names, and line numbers. Excludes specified files (like logger files)
+    to focus on relevant application code in the traceback.
     
     Args:
-        error: Exception object with traceback
-        exclude_files: Set of filenames to exclude from traceback
+        error: Exception object containing traceback information to extract and format.
+        exclude_files: Set of filenames to exclude from the traceback output.
+                      Defaults to excluding "abgrid_logger.py" to avoid logger noise.
         
     Returns:
-        List of dictionaries containing filename, function name, and line number
+        Formatted string containing traceback information with each frame on a new line.
+        Returns "No traceback available" if no relevant frames are found.
+        
+    Note:
+        The traceback format follows: "filename:line_number in function_name()"
+        Each frame is separated by newlines with arrow prefixes for readability.
     """
     if exclude_files is None:
         exclude_files = {"abgrid_logger.py"}
     
-    traceback_info = []
+    traceback_lines = []
     current_traceback = error.__traceback__
     
     while current_traceback is not None:
@@ -66,17 +85,20 @@ def extract_traceback_info(error: Exception, exclude_files: Optional[Set[str]] =
         filename = Path(frame.f_code.co_filename).name
 
         if filename not in exclude_files:
-            traceback_info.append({
-                'filename': filename,
-                'function_name': frame.f_code.co_name,
-                'line_number': current_traceback.tb_lineno
-            })
+            # Format each traceback frame as a readable line
+            trace_line = f"{filename}:{current_traceback.tb_lineno} in {frame.f_code.co_name}()"
+            traceback_lines.append(f"→ {trace_line}")
         
         current_traceback = current_traceback.tb_next
     
-    return traceback_info
+    # Return formatted string or fallback message
+    if traceback_lines:
+        return "Traceback (most recent call last):\n" + "\n".join(traceback_lines)
+    else:
+        return "No traceback available"
 
-def pretty_print(text: str, width: int = 80) -> None:
+
+def pretty_print(text: str, prefix: str = "", width: int = 80) -> None:
         """
         Print text with proper line wrapping and consistent prefix indentation.
         
@@ -93,17 +115,21 @@ def pretty_print(text: str, width: int = 80) -> None:
             return
         
         # Print text directly, if it fits on one line
-        if len(text) <= width:
-            print(text)
+        if len(full_line := f"{prefix}{text}") <= width:
+            print(full_line)
             return
         
         # Text needs wrapping
-        wrapped_text_lines = textwrap.wrap(
+        [first_line, *rest_of_lines] = textwrap.wrap(
             text,
-            width=width,
+            width=max(1, width - len(prefix)),
             break_long_words=True,
             break_on_hyphens=True
         )
         
-        # Print wrapped text lines
-        print(*wrapped_text_lines, sep='\n')
+         # Print first line with prefix
+        print(f"{prefix}{first_line}")
+        
+        # Print rest of lines with indentation
+        for line in rest_of_lines:
+            print(f"{' ' * len(prefix)}{line}")

@@ -14,10 +14,11 @@ import datetime
 import pandas as pd
 
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Protocol, Tuple, TypedDict
+from typing import Any, Dict, List, Literal, Optional, Protocol, Tuple, TypedDict
 
 from pydantic import ValidationError
 
+from lib.core.core_schemas import ProjectSchema, GroupSchema
 from lib.core.core_sna import SNADict, ABGridSna
 from lib.core.core_sociogram import SociogramDict, ABGridSociogram
 
@@ -149,14 +150,17 @@ class ABGridData:
             >>> else:
             ...     print(f"Project title: {data['project_title']}")
         """
-        project_data, validation_errors = self.data_loader.load_data(
-            "project", self.project_filepath
-        )
+        # Get project data
+        project_data = self.data_loader.load_data(self.project_filepath)
 
-        if project_data is not None:
-            return project_data, None
-        else:
+        # Validate project data
+        project_data, validation_errors = self._validate_data("project", project_data)
+
+        # Return project data and errors
+        if validation_errors:
             return None, self._get_pydantic_errors_messages(validation_errors)
+        else:
+            return project_data, None
 
     def get_group_data(self, group_filepath: Path) -> Tuple[Optional[GroupData], Optional[str]]:
         """
@@ -180,14 +184,18 @@ class ABGridData:
             >>> if error:
             ...     print(f"Error loading group: {error}")
         """
-        group_data, validation_errors = self.data_loader.load_data(
-            "group", group_filepath
-        )
+        # Load group data
+        group_data = self.data_loader.load_data(group_filepath)
 
-        if group_data is not None:
-            return group_data, None
-        else:
+        # Validate group data
+        group_data, validation_errors = self._validate_data("group", group_data)
+
+        # Return None as group data and validation errors
+        if validation_errors:
             return None, self._get_pydantic_errors_messages(validation_errors)
+        
+        # Return group data and None as validation errors
+        return group_data, None
         
     def get_report_data(
         self, 
@@ -230,24 +238,26 @@ class ABGridData:
             >>> if not error:
             ...     print(f"Group {report_data['group']} has {report_data['members_per_group']} members")
         """
-        # Load and validate project data
-        project_data, project_validation_errors = self.data_loader.load_data(
-            "project", self.project_filepath
-        )
+        # Load project data
+        project_data = self.data_loader.load_data(self.project_filepath)
 
-        # Return error if project data loading failed
-        if project_data is None:
-            return None, self._get_pydantic_errors_messages(project_validation_errors)
-        
-        # Load and validate group data
-        group_data, group_validation_errors = self.data_loader.load_data(
-            "group", group_filepath
-        )
+        # Validate project data
+        project_data, validation_errors = self._validate_data("project", project_data)
 
-        # Return error if group data loading failed
-        if group_data is None:
-            return None, self._get_pydantic_errors_messages(group_validation_errors)
+        # Return None as project data and validation errrors
+        if validation_errors:
+            return None, self._get_pydantic_errors_messages(validation_errors)
         
+        # Load group data
+        group_data = self.data_loader.load_data(group_filepath)
+
+        # Validate group data
+        group_data, validation_errors = self._validate_data("group", group_data)
+
+        # Return None as group data and validation errrors
+        if validation_errors:
+            return None, self._get_pydantic_errors_messages(validation_errors)
+
         # Extract group number from group filename (assumes format ending with digits)
         group_number = int(re.search(r'(\d+)$', group_filepath.stem).group(0))
 
@@ -334,20 +344,47 @@ class ABGridData:
         
         return report_data, None
 
-    def _get_pydantic_errors_messages(self, validation_error: ValidationError, context: str = "") -> List[str]:
+    def _validate_data(self, data_type: Literal["project", "group"], yaml_data: Dict[str, Any]) -> Optional[ValidationError]:
         """
-        Convert Pydantic ValidationError to list of formatted error messages.
+        Validate the YAML data against the specified schema type.
+
+        Args:
+            data_type (Literal["project", "group"]): The type of YAML data being validated.
+            yaml_data (Dict[str, Any]): The YAML data to be validated.
+        """
+        try:
+            if data_type == "project":
+                return ProjectSchema.model_validate(yaml_data).model_dump(), None
+            if data_type == "group":
+                return GroupSchema.model_validate(yaml_data).model_dump(), None
+        except ValidationError as error:
+            return None, error
+
+    def _get_pydantic_errors_message(self, validation_error: ValidationError, context: str = "") -> str:
+        """
+        Convert Pydantic ValidationError to a single formatted error message string.
         
-        Perfect for integration with your existing validation error handling.
+        Combines all validation errors into a readable string with proper formatting
+        and optional context information. Perfect for integration with existing
+        error handling that expects string messages.
         
         Args:
-            validation_error: The ValidationError from Pydantic
+            validation_error: The ValidationError from Pydantic containing all validation issues.
             context: Optional context description (e.g., "project data", "group configuration")
+                    to provide additional context about where the validation failed.
             
         Returns:
-            List of formatted error messages compatible with your existing error handling
+            Single formatted string containing all validation errors, separated by
+            semicolons for readability. Empty string if no errors found.
+            
+        Note:
+            Error format: "[context] field.path: error message" when context provided,
+            or "field.path: error message" without context. Multiple errors joined with "; ".
         """
         errors = validation_error.errors()
+        if not errors:
+            return ""
+        
         formatted_errors = []
         
         for error in errors:
@@ -364,7 +401,10 @@ class ABGridData:
             # Add context if provided
             if context:
                 error_msg = f"[{context}] {error_msg}"
-                
+            
+            # Append error to list
             formatted_errors.append(error_msg)
         
-        return formatted_errors
+        # Join all errors into a single string
+        return "; ".join(formatted_errors)
+

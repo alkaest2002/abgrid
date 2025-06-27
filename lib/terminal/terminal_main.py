@@ -150,20 +150,25 @@ class TerminalMain:
         if not template_path.exists():
             raise FileNotFoundError(f"Project template not found: {template_path}")
         
-        with open(template_path, 'r', encoding='utf-8') as fin:
-            yaml_data: ProjectData = yaml.safe_load(fin)
+        try:
         
-        # Validate that template was loaded successfully
-        if not yaml_data:
-            raise ValueError(f"Empty or invalid project template: {template_path}")
+            with open(template_path, 'r', encoding='utf-8') as fin:
+                yaml_data: ProjectData = yaml.safe_load(fin)
+            
+            # Validate that template was loaded successfully
+            if not yaml_data:
+                raise ValueError(f"Empty or invalid project template: {template_path}")
+            
+            # Customize the template with the project name
+            yaml_data["project_title"] = project
+            
+            # Write the customized configuration to the project directory
+            config_file_path = project_folderpath / f"{project}.yaml"
+            with open(config_file_path, 'w', encoding='utf-8') as fout:
+                yaml.dump(yaml_data, fout, sort_keys=False, allow_unicode=True)
         
-        # Customize the template with the project name
-        yaml_data["project_title"] = project
-        
-        # Write the customized configuration to the project directory
-        config_file_path = project_folderpath / f"{project}.yaml"
-        with open(config_file_path, 'w', encoding='utf-8') as fout:
-            yaml.dump(yaml_data, fout, sort_keys=False, allow_unicode=True)
+        except yaml.YAMLError as error:
+            raise
 
     @logger_decorator(("generate group files", "end of group files generation"))
     def generate_group_inputs(
@@ -317,6 +322,7 @@ class TerminalMain:
 
         # Process each group file to generate individual answer sheets
         for group_file in self.abgrid_data.groups_filepaths:
+            
             # Load and validate group-specific data
             group_data: GroupData
             group_data_errors: ValidationErrors
@@ -411,10 +417,7 @@ class TerminalMain:
             # Load and validate report data for the current group
             report_data: ReportData
             report_errors: ValidationErrors
-            report_data, report_errors = self.abgrid_data.get_report_data(
-                group_file, 
-                with_sociogram
-            )
+            report_data, report_errors = self.abgrid_data.get_report_data(group_file, with_sociogram)
             
             # Check for report-level validation errors
             if report_errors:
