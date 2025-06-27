@@ -15,9 +15,12 @@ import textwrap
 
 from functools import wraps
 from pathlib import Path
-from typing import Any, Callable, Optional, Set
+from typing import Any, Callable, Optional, Set, TypeVar
 
-def logger_decorator(start_message: str, end_message: str) -> Callable:
+# Type variable for preserving function signatures
+F = TypeVar('F', bound=Callable[..., Any])
+
+def logger_decorator(start_message: str, end_message: str) -> Callable[[F], F]:
     """
     Create a logging decorator that wraps functions with start/end messages and error handling.
     
@@ -36,7 +39,7 @@ def logger_decorator(start_message: str, end_message: str) -> Callable:
         - Re-raises unexpected exceptions after logging traceback information
         - Uses pretty_print for consistent message formatting
     """
-    def decorator(function: Callable) -> Callable:
+    def decorator(function: F) -> F:
         """
         Decorator function that wraps the target function with logging and error handling.
         
@@ -56,12 +59,13 @@ def logger_decorator(start_message: str, end_message: str) -> Callable:
                 **kwargs: Keyword arguments to pass to the decorated function
             
             Returns:
-                Result of the decorated function execution
+                Result of the decorated function execution, or None if an exception is caught
             
             Notes:
                 - Logs start message before execution
                 - Logs end message on successful completion
                 - Handles exceptions with appropriate error formatting
+                - Returns None for handled exceptions (doesn't re-raise them)
             """
             try:
                 pretty_print(start_message, "▶ ")
@@ -70,18 +74,23 @@ def logger_decorator(start_message: str, end_message: str) -> Callable:
                 return result
             except ValueError as error:
                 pretty_print(str(error), "✗ ")
+                return None
             except AttributeError as error:
                 pretty_print(str(error), "✗ ")
+                return None
             except TypeError as error:
                 pretty_print(str(error), "✗ ")
+                return None
             except FileNotFoundError as error:
                 pretty_print(str(error), "✗ ")
+                return None
             except OSError as error:
                 pretty_print(str(error), "✗ ")
+                return None
             except Exception as error:
                 pretty_print(extract_traceback_info(error))
                 raise
-        return wrapper
+        return wrapper  # type: ignore
     return decorator
 
 def extract_traceback_info(error: Exception, exclude_files: Optional[Set[str]] = None) -> str:
