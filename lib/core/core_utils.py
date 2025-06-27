@@ -1,22 +1,44 @@
+"""
+Core utility functions for data processing, visualization, and statistical analysis.
+
+This module provides essential utility functions for the AB-Grid project including
+figure conversion to base64 format, descriptive statistics computation, and
+inequality measurement through Gini coefficient calculation.
+
+Author: Pierpaolo Calanna
+Date Created: Wed Jun 25 2025
+
+The code is part of the AB-Grid project and is licensed under the MIT License.
+"""
 
 import io
 import numpy as np
 import pandas as pd
 
-from typing import Sequence, Union
+from typing import Sequence, Union, Any
 from base64 import b64encode
 from matplotlib import pyplot as plt
 
 
 def figure_to_base64_svg(fig: plt.Figure) -> str:
     """
-    Convert a matplotlib figure to a base64-encoded SVG data URI.
-
+    Convert a matplotlib figure to a base64-encoded SVG string for web embedding.
+    
+    Takes a matplotlib figure object and converts it to a base64-encoded SVG format
+    suitable for embedding in HTML documents or web applications. The figure is
+    automatically closed after conversion to free memory.
+    
     Args:
-        fig (plt.Figure): The matplotlib figure to convert.
-
+        fig: Matplotlib figure object to convert
+    
     Returns:
-        str: The SVG data URI of the figure.
+        Base64-encoded SVG string with data URI prefix for direct HTML embedding
+    
+    Notes:
+        - Uses SVG format for scalable vector graphics
+        - Applies tight bounding box to minimize whitespace
+        - Sets transparent background for flexible styling
+        - Automatically closes the figure to prevent memory leaks
     """
     # Initialize an in-memory buffer
     buffer = io.BytesIO()
@@ -30,19 +52,26 @@ def figure_to_base64_svg(fig: plt.Figure) -> str:
     
     return f"data:image/svg+xml;base64,{base64_encoded_string}"
 
-def compute_descriptives(data) -> pd.DataFrame:
+def compute_descriptives(data: pd.DataFrame) -> pd.DataFrame:
     """
-    Compute descriptive statistics for a given DataFrame.
-
-    The function calculates standard descriptive statistics such as mean, std, min, max, quartiles,
-    along with additional metrics like the median, coefficient of variation (CV), skewness (sk), 
-    and kurtosis (kt) and GINI (gn).
-
+    Compute comprehensive descriptive statistics for numerical data.
+    
+    Calculates a wide range of descriptive statistics including central tendency,
+    dispersion, distribution shape, and inequality measures. Extends pandas'
+    basic describe() function with additional metrics useful for social network analysis.
+    
     Args:
-        data (pd.DataFrame): The input DataFrame for which descriptive statistics are to be computed.
-
+        data: DataFrame containing numerical data for statistical analysis
+    
     Returns:
-        pd.DataFrame: A DataFrame containing the computed descriptive statistics, with columns for each statistic.
+        DataFrame with comprehensive descriptive statistics for each column
+    
+    Notes:
+        - Includes standard statistics: count, min, max, mean, std, quartiles
+        - Adds coefficient of variation (cv) for relative variability
+        - Calculates skewness (sk) and kurtosis (kt) for distribution shape
+        - Computes Gini coefficient (gn) for inequality measurement
+        - Reorders columns for logical statistical interpretation
     """
 
     # Compute descriptive statistics with pandas descrive
@@ -63,33 +92,27 @@ def compute_descriptives(data) -> pd.DataFrame:
     
     return descriptives
 
-def gini_coefficient(values: Union[Sequence[float], np.ndarray]) -> float:
+def gini_coefficient(values: Union[Sequence[float], np.ndarray, pd.Series]) -> float:
     """
-    The Gini coefficient is a measure of statistical dispersion originally developed 
-    to represent income or wealth distribution, but widely applicable to any measure 
-    of inequality. It quantifies how unequally distributed values are within a dataset.
+    Calculate the Gini coefficient for measuring inequality in a distribution.
     
-    This implementation automatically shifts negative values to ensure non-negative 
-    input (by subtracting the minimum value), preserving relative differences and 
-    inequality structure while enabling proper Gini calculation.
-
-    Parameters:
-    values (Union[Sequence[float], np.ndarray]): A 1-dimensional sequence (such as a 
-    list, tuple, or numpy array) containing the values for which the Gini 
-    coefficient is to be calculated. Values can be negative; they will be 
-    automatically shifted to non-negative while preserving relative inequality.
-
+    Computes the Gini coefficient, a measure of inequality ranging from 0 (perfect equality)
+    to 1 (maximum inequality). The calculation uses the standard formula adjusted for
+    non-negative values by subtracting the minimum value from all observations.
+    
+    Args:
+        values: Sequence of numerical values to analyze for inequality
+    
     Returns:
-    float: The Gini coefficient, a value between 0 and 1 where:
-        - 0 indicates perfect equality (all values identical)
-        - 1 indicates maximal inequality (one value holds everything, others have nothing)
-        - Values closer to 0 suggest more equal distribution
-        - Values closer to 1 suggest more concentrated/unequal distribution
-
-    Raises:
-    ValueError: If the input is not a 1-dimensional sequence.
+        Gini coefficient as a float between 0 and 1
+    
+    Notes:
+        - Returns 0.0 for distributions with zero variance (perfect equality)
+        - Automatically handles negative values by shifting to non-negative range
+        - Uses the standard Gini formula: G = (2 * Σ(i * x_i)) / (n * Σ(x_i)) - (n + 1) / n
+        - Commonly used in social network analysis for measuring centralization
     """
-    # Convert to numpu array (make sure values are positive)
+    # Convert to numpy array (make sure values are positive)
     values = np.array(values, dtype=np.float64) - np.min(values)
     
     # Sort the values
