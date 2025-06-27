@@ -352,11 +352,14 @@ class TerminalMain:
             # Add the filtered data to the collection
             all_groups_data[group_file.stem] = filtered_data
         
-        json_export_path = self.project_folderpath / f"{self.project}_data.json"
-        
         try:
+            # Define json export file path
+            json_export_path = self.project_folderpath / f"{self.project}_data.json"
+
+            # Persist json file to disk
             with open(json_export_path, "w", encoding='utf-8') as fout:
                 json.dump(all_groups_data, fout, indent=4, ensure_ascii=False)
+       
         except Exception as e:
             raise OSError(f"Failed to export data to JSON file {json_export_path}:\n{e}") from e
 
