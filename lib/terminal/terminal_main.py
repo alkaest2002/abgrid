@@ -260,7 +260,7 @@ class TerminalMain:
             group_number = re.search(r'(\d+)$', group_file.stem).group(0)
             
             # Init sheets data
-            sheets_data = project_data.copy()
+            sheets_data = project_data.model_copy()
             sheets_data["group"] = group_number
             
             # Configure Likert scale based on the number of choices in group data
@@ -314,31 +314,28 @@ class TerminalMain:
             
             # Load and validate report data for the current group
             group_data = self._load_yaml_data(group_file)
-            group_data, group_data_errors = self.core_data.get_report_data(project_data, group_data, with_sociogram)
+            report_data, report_data_errors = self.core_data.get_report_data(project_data, group_data, with_sociogram)
             
             # Check for report-level validation errors
-            if group_data_errors:
-                raise ValueError(f"Report data validation failed for {group_file.name}:\n{group_data_errors}")
+            if report_data_errors:
+                raise ValueError(f"Report data validation failed for {group_file.name}:\n{report_data}")
             
             # Generate the PDF report with sociogram configuration
-            report_data = {
-                **group_data, 
-                "with_sociogram": with_sociogram
-            }
+            report_data.update({ "with_sociogram": with_sociogram })
             self._render_pdf("report", report_data, group_file.stem, language)
             
             filtered_data = to_json_serializable(
                 report_data, 
                 keep=[
-                    "project_title",              # Project identification
-                    "members_per_group",          # Group size information
-                    "sna.macro_stats_a",         # Social network analysis - macro level A
-                    "sna.macro_stats_b",         # Social network analysis - macro level B
-                    "sna.micro_stats_a",         # Social network analysis - micro level A
-                    "sna.micro_stats_b",         # Social network analysis - micro level B
-                    "sociogram.macro_stats",     # Sociogram macro statistics
-                    "sociogram.micro_stats",     # Sociogram micro statistics
-                    "relevant_nodes_ab.*",       # Key relationship nodes (pattern match)
+                    "project_title",         # Project identification
+                    "members_per_group",     # Group size information
+                    "sna.macro_stats_a",     # Social network analysis - macro level A
+                    "sna.macro_stats_b",     # Social network analysis - macro level B
+                    "sna.micro_stats_a",     # Social network analysis - micro level A
+                    "sna.micro_stats_b",     # Social network analysis - micro level B
+                    "sociogram.macro_stats", # Sociogram macro statistics
+                    "sociogram.micro_stats", # Sociogram micro statistics
+                    "relevant_nodes_ab.*",   # Key relationship nodes (pattern match)
                 ],
             )
             
