@@ -27,7 +27,7 @@ from weasyprint import HTML
 from lib import jinja_env
 from lib.core import SYMBOLS
 from lib.core.core_data import CoreData
-from lib.terminal.terminal_logger import logger_decorator
+from lib.terminal.terminal_logger import logger_decorator, pretty_print
 from lib.abgrid_utils import to_json_serializable
 
 ProjectData = Dict[str, Any]
@@ -74,7 +74,7 @@ class TerminalMain:
         self.core_data = CoreData()
 
     @staticmethod
-    @logger_decorator("initialize project", "end of project initialization")
+    @logger_decorator
     def init_project(
         project: str, 
         project_folderpath: Path, 
@@ -133,7 +133,10 @@ class TerminalMain:
         with open(config_file_path, 'w', encoding='utf-8') as fout:
             yaml.dump(yaml_data, fout, sort_keys=False, allow_unicode=True)
 
-    @logger_decorator("generate group files", "end of group files generation")
+        # Notify user
+        pretty_print(f"Project {project} correctly initialized.")
+
+    @logger_decorator
     def generate_group_inputs(
         self, 
         groups: range, 
@@ -210,8 +213,11 @@ class TerminalMain:
             # Write the rendered template to disk
             with open(group_file_path, "w", encoding='utf-8') as file:
                 file.write(rendered_group_template)
+
+        # Notify user
+        pretty_print(f"{group_number} group(s) succesfully generated.")
             
-    @logger_decorator("generate answersheets", "end of answersheets generation")
+    @logger_decorator
     def generate_answersheets(self, language: str) -> None:
         """
         Generate PDF answer sheets for all configured groups.
@@ -260,10 +266,16 @@ class TerminalMain:
             sheets_data["group"] = group_data.group
             sheets_data["likert"] = sum(map(lambda x: list(x.keys()), group_data.choices_a), [])
 
+            # Notify user
+            pretty_print(f"Generating answersheets for {group_file.stem}. Please, wait...")
+
             # Generate and save the PDF answer sheet
             self._render_pdf("answersheet", sheets_data, group_file.stem, language)
 
-    @logger_decorator("generate reports", "end of reports generation")
+            # Notify user
+            pretty_print(f"Answersheets for {group_file.stem} succesfully generated.")
+
+    @logger_decorator
     def generate_reports(self, language: str, with_sociogram: bool = False) -> None:
         """
         Generate comprehensive PDF reports for all groups with optional sociograms.
@@ -312,9 +324,15 @@ class TerminalMain:
             if report_data_errors:
                 raise ValueError(f"Report data validation failed for {group_file.name}: {report_data_errors}")
             
+            # Notify user
+            pretty_print(f"Generating report for {group_file.stem}. Please, wait...")
+            
             # Generate the PDF report with sociogram configuration
             report_data.update({ "with_sociogram": with_sociogram })
             self._render_pdf("report", report_data, group_file.stem, language)
+
+            # Notify user
+            pretty_print(f"Report for {group_file.stem} succesfully generated.")
             
             filtered_data = to_json_serializable(
                 report_data, 
@@ -342,7 +360,7 @@ class TerminalMain:
         except Exception as e:
             raise OSError(f"Failed to export data to JSON file {json_export_path}:\n{e}") from e
 
-    @logger_decorator("generating PDF document; please, wait...", "end of PDF document generation")
+    @logger_decorator
     def _render_pdf(
         self, 
         doc_type: Literal["report", "answersheet"], 
@@ -419,6 +437,7 @@ class TerminalMain:
         #     file.write(rendered_html)
         # -----------------------------------------------------------------------------------
 
+    @logger_decorator
     def _load_yaml_data(self, yaml_file_path: Path) -> Union[Dict[str, Any], None]:
         """
         Load and parse YAML data from file with error handling.

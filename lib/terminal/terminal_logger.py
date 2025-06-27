@@ -20,7 +20,7 @@ from typing import Any, Callable, Optional, Set, TypeVar
 # Type variable for preserving function signatures
 F = TypeVar('F', bound=Callable[..., Any])
 
-def logger_decorator(start_message: str, end_message: str) -> Callable[[F], F]:
+def logger_decorator(func: Optional[F] = None) -> Callable[[F], F]:
     """
     Create a logging decorator that wraps functions with start/end messages and error handling.
     
@@ -28,13 +28,13 @@ def logger_decorator(start_message: str, end_message: str) -> Callable[[F], F]:
     catching common exceptions and formatting them for user-friendly display.
     
     Args:
-        start_message: Message to display when function execution begins
-        end_message: Message to display when function execution completes successfully
+        func: Optional function to decorate (when used without parentheses)
     
     Returns:
-        Decorator function that can be applied to other functions
+        Decorator function that can be applied to other functions, or the decorated function itself
     
     Notes:
+        - Can be used with or without parentheses: @logger_decorator or @logger_decorator()
         - Catches and formats ValueError, AttributeError, TypeError, FileNotFoundError, OSError
         - Re-raises unexpected exceptions after logging traceback information
         - Uses pretty_print for consistent message formatting
@@ -68,10 +68,7 @@ def logger_decorator(start_message: str, end_message: str) -> Callable[[F], F]:
                 - Returns None for handled exceptions (doesn't re-raise them)
             """
             try:
-                pretty_print(start_message, "▶ ")
-                result = function(*args, **kwargs)
-                pretty_print(end_message, "▶ ")
-                return result
+                return function(*args, **kwargs)
             except ValueError as error:
                 pretty_print(str(error), "✗ ")
                 return None
@@ -90,8 +87,17 @@ def logger_decorator(start_message: str, end_message: str) -> Callable[[F], F]:
             except Exception as error:
                 pretty_print(extract_traceback_info(error))
                 raise
-        return wrapper  # type: ignore
-    return decorator
+        return wrapper
+    
+    # Handle both @logger_decorator and @logger_decorator() usage
+    if func is None:
+        # Called with parentheses: @logger_decorator()
+        return decorator
+    else:
+        # Called without parentheses: @logger_decorator
+        return decorator(func)
+
+
 
 def extract_traceback_info(error: Exception, exclude_files: Optional[Set[str]] = None) -> str:
     """
@@ -136,7 +142,7 @@ def extract_traceback_info(error: Exception, exclude_files: Optional[Set[str]] =
         return "No traceback available"
 
 
-def pretty_print(text: str, prefix: str = "", width: int = 80) -> None:
+def pretty_print(text: str, prefix: str = "▶ ", width: int = 80) -> None:
     """
     Print text with optional prefix and automatic line wrapping.
     
