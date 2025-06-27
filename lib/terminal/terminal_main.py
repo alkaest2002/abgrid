@@ -22,14 +22,13 @@ import re
 import json
 
 from pathlib import Path
-from typing import Literal, Dict, Any, List, Tuple
+from typing import Literal, Dict, Any, List, Optional, Tuple
 from weasyprint import HTML
-from lib.terminal.terminal_yaml import TerminalYAML
-from lib.terminal.terminal_logger import logger_decorator
+from lib import jinja_env
+from lib.abgrid_utils import to_json_serializable
 from lib.core import SYMBOLS
 from lib.core.core_data import CoreData
-from lib.abgrid_utils import to_json_serializable
-from lib import jinja_env
+from lib.terminal.terminal_logger import logger_decorator
 
 ProjectData = Dict[str, Any]
 GroupData = Dict[str, Any]
@@ -55,9 +54,6 @@ class TerminalMain:
         self.project_folderpath = project_folderpath
         self.project_filepath = project_filepath 
         self.groups_filepaths = groups_filepaths
-
-        # Initialize yaml loader
-        self.data_loader = TerminalYAML()
 
         # Initialize core data
         self.core_data = CoreData()
@@ -174,7 +170,7 @@ class TerminalMain:
             raise ValueError("No group files found. Please generate group inputs first.")
 
         # Load project data and validate it
-        project_data = self.data_loader.load_data(self.project_filepath)
+        project_data = self._load_yaml_data(self.project_filepath)
         project_data, project_data_errors = self.core_data.get_project_data(project_data)
 
         # Check for project-level validation errors
@@ -185,7 +181,7 @@ class TerminalMain:
         for group_file in self.groups_filepaths:
             
             # Load and validate group-specific data
-            group_data = self.data_loader.load_data(group_file)
+            group_data = self._load_yaml_data(group_file)
             group_data, group_data_errors = self.core_data.get_group_data(group_data)
 
             # Check for group-level validation errors
@@ -219,7 +215,7 @@ class TerminalMain:
             raise ValueError("No group files found. Please generate group inputs first.")
         
         # Load project data and validate it
-        project_data = self.data_loader.load_data(self.project_filepath)
+        project_data = self._load_yaml_data(self.project_filepath)
         project_data, project_data_errors = self.core_data.get_project_data(project_data)
 
         # Check for project-level validation errors
@@ -233,7 +229,7 @@ class TerminalMain:
         for group_file in self.groups_filepaths:
             
             # Load and validate report data for the current group
-            group_data = self.data_loader.load_data(group_file)
+            group_data = self._load_yaml_data(group_file)
             group_data, group_data_errors = self.core_data.get_report_data(project_data, group_data, with_sociogram)
             
             # Check for report-level validation errors
@@ -330,3 +326,17 @@ class TerminalMain:
         # with open(debug_html_path, "w", encoding='utf-8') as file:
         #     file.write(rendered_html)
         # -----------------------------------------------------------------------------------
+
+    def _load_yaml_data(self, yaml_file_path: Path) -> Optional[Dict[str, Any]]:
+        """
+        """
+        try:
+            with open(yaml_file_path, 'r') as file:
+                yaml_data = yaml.safe_load(file)
+            return yaml_data
+        
+        except FileNotFoundError:
+            return None, f"Cannot locate YAML file {yaml_file_path.name}."
+        
+        except yaml.YAMLError:
+            return None, f"YAML file {yaml_file_path.name} could not be parsed."
