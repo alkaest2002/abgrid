@@ -8,9 +8,11 @@ Date Created: May 3, 2025
 The code is part of the AB-Grid project and is licensed under the MIT License.
 """
 
-from pydantic import BaseModel, Field, field_validator, model_validator
+from pydantic import BaseModel, Field, ValidationError, field_validator, model_validator
 from pydantic.types import constr
-from typing import Dict, List, Optional
+from typing import Any, Dict, List, Optional
+
+from pydantic_core import ErrorDetails
 
 from lib.core import SYMBOLS
 
@@ -154,6 +156,14 @@ class GroupSchema(BaseModel):
         # Verigy that a and b keys are not more than SYMBOLS
         if len(choices_a_keys) > len(SYMBOLS):
             raise ValueError(f"Keys in choices_a and choices_b must be less than {len(SYMBOLS)+1}")
+        
+        # Verify that keys for choices_a have not been modified
+        if "".join(sorted(choices_a_keys)) != "".join(SYMBOLS[:len(choices_a_keys)]):
+            raise ValueError(f"Keys in choices_a have been modified.")
+        
+        # Verify that keys for choices_b have not been modified
+        if "".join(sorted(choices_b_keys)) != "".join(SYMBOLS[:len(choices_b_keys)]):
+            raise ValueError(f"Keys in choices_b have been modified.")
 
         # Validate that all values reference valid keys
         all_valid_keys: set[str] = choices_a_keys

@@ -233,6 +233,6 @@ class CoreData:
             
             # Append error to list
             formatted_errors.append(error_msg)
-            
+        
         # Join all errors into a single string
         return "; ".join(formatted_errors)

@@ -390,7 +390,6 @@ class TerminalMain:
             - Debug HTML output can be enabled by uncommenting debug section
         """
         # Select the appropriate template based on document type
-        template_path: str
         match doc_type:
             case "answersheet":
                 template_path = f"./{language}/answersheet.html"
@@ -406,7 +405,7 @@ class TerminalMain:
             raise FileNotFoundError(f"Template {template_path} not found.") from e
         
         try:
-            rendered_html: str = template.render(doc_data)
+            rendered_html = template.render(doc_data)
         except Exception as e:
             raise ValueError(f"Template rendering failed for {template_path}: {e}") from e
         
