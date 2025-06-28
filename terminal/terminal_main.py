@@ -217,7 +217,7 @@ class TerminalMain:
             }
             
             # Render the template with group-specific data
-            rendered_group_template: str = group_template.render(template_data)
+            rendered_group_template = group_template.render(template_data)
             
             # Remove blank lines from the rendered template for cleaner output
             rendered_group_template = "\n".join([
@@ -226,7 +226,7 @@ class TerminalMain:
             ])
 
             # Generate the group file path
-            group_file_path = (self.project_folderpath / f"{self.project}_g{group_number}.yaml")
+            group_file_path = self.project_folderpath / f"{self.project}_g{group_number}.yaml"
             
             # Write the rendered template to disk
             with open(group_file_path, "w", encoding='utf-8') as file:
@@ -266,6 +266,7 @@ class TerminalMain:
         # Check for project-level validation errors
         if project_data_errors:
             raise ValueError(f"Data validation failed for project {self.project}:\n{project_data_errors}")
+        
         # Process each group file to generate individual answer sheets
         for group_file in self.groups_filepaths:
             
@@ -288,10 +289,10 @@ class TerminalMain:
             pretty_print(f"Generating answersheets for {group_file.stem}. Please, wait...")
 
             # Generate and save the PDF answer sheet
-            rendered_answershhets = self.renderer.render_html(f"./{self.language}/answersheet.html", sheets_data)
+            rendered_answersheets = self.renderer.render_html(f"./{self.language}/answersheet.html", sheets_data)
             
-            # Generate PDF report
-            self._generate_pdf("answersheet", rendered_answershhets, group_file.stem, self.answersheets_path)
+            # Generate PDF answersheets
+            self._generate_pdf("answersheet", rendered_answersheets, group_file.stem, self.answersheets_path)
 
             # Notify user
             pretty_print(f"Answersheets for {group_file.stem} succesfully generated.")

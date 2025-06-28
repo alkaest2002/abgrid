@@ -34,11 +34,13 @@ class CoreRenderer:
             ValueError: If template rendering fails
         """
         try:
+            # Try to load template
             template = abgrid_jinja_env.get_template(template_path)
         except Exception as e:
             raise FileNotFoundError(f"Template {template_path} not found.") from e
         
         try:
+            # Try to render template with template data
             rendered_html = template.render(template_data)
         except Exception as e:
             raise ValueError(f"Template rendering failed for {template_path}: {e}") from e
