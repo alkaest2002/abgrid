@@ -16,6 +16,7 @@ import textwrap
 from functools import wraps
 from pathlib import Path
 from typing import Any, Callable, Optional, Set, TypeVar
+from lib.core.core_templates import TemplateRenderError
 
 # Type variable for preserving function signatures
 F = TypeVar('F', bound=Callable[..., Any])
@@ -82,6 +83,9 @@ def logger_decorator(func: Optional[F] = None) -> Callable[[F], F]:
                 pretty_print(str(error), "✗ ")
                 return None
             except OSError as error:
+                pretty_print(str(error), "✗ ")
+                return None
+            except TemplateRenderError as error:
                 pretty_print(str(error), "✗ ")
                 return None
             except Exception as error:

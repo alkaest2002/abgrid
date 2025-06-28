@@ -1,20 +1,32 @@
 """
 Filename: core_templates.py
 Description: Provides functionality to render SNA/Sociogra data via templates.
-
 Author: Pierpaolo Calanna
 Date Created: May 3, 2025
-
 The code is part of the AB-Grid project and is licensed under the MIT License.
 """
 import jinja2
+from jinja2.exceptions import TemplateNotFound, TemplateSyntaxError, TemplateRuntimeError, UndefinedError
 from pathlib import Path
 from typing import Any, Dict
 
 # Initialize Jinja2 environment with a file system loader for templates
-abgrid_jinja_env = jinja2.Environment(
-    loader=jinja2.FileSystemLoader(["./lib/core/templates"])
-)
+try:
+    abgrid_jinja_env = jinja2.Environment(
+        loader=jinja2.FileSystemLoader(["./lib/core/templates"]),
+        # Enable strict undefined handling to catch missing variables
+        undefined=jinja2.StrictUndefined,
+        # Auto-escape HTML for security
+        autoescape=jinja2.select_autoescape(['html', 'xml'])
+    )
+except Exception as e:
+    raise RuntimeError(f"Failed to initialize Jinja2 environment: {e}")
+
+
+class TemplateRenderError(Exception):
+    """Custom exception for template rendering errors."""
+    pass
+
 
 class CoreRenderer:
     """Renders templates to PDF documents using Jinja2 and WeasyPrint."""
@@ -31,18 +43,56 @@ class CoreRenderer:
             
         Raises:
             FileNotFoundError: If template file is not found
-            ValueError: If template rendering fails
+            TemplateRenderError: If template rendering fails due to syntax or runtime errors
+            ValueError: If input parameters are invalid
         """
+        # Input validation
+        if not template_path:
+            raise ValueError("Template path cannot be empty or None")
+        
+        if template_data is None:
+            template_data = {}
+        
+        if not isinstance(template_data, dict):
+            raise ValueError("Template data must be a dictionary")
+        
+        # Convert Path object to string for Jinja2
+        template_path_str = str(template_path)
+        
         try:
             # Try to load template
-            template = abgrid_jinja_env.get_template(template_path)
+            template = abgrid_jinja_env.get_template(template_path_str)
+            
+        except TemplateNotFound as e:
+            error_msg = f"Template file not found: {template_path_str}"
+            raise FileNotFoundError(error_msg) from e
+            
         except Exception as e:
-            raise FileNotFoundError(f"Template {template_path} not found.") from e
+            error_msg = f"Unexpected error loading template {template_path_str}: {e}"
+            raise TemplateRenderError(error_msg) from e
         
         try:
             # Try to render template with template data
             rendered_html = template.render(template_data)
+            
+            # Basic validation of rendered output
+            if not rendered_html or not isinstance(rendered_html, str):
+                raise TemplateRenderError(f"Template {template_path_str} produced invalid output")
+            
+            return rendered_html
+            
+        except TemplateSyntaxError as e:
+            error_msg = f"Template syntax error in {template_path_str}: {e.message} at line {e.lineno}"
+            raise TemplateRenderError(error_msg) from e
+            
+        except TemplateRuntimeError as e:
+            error_msg = f"Template runtime error in {template_path_str}: {e.message}"
+            raise TemplateRenderError(error_msg) from e
+            
+        except UndefinedError as e:
+            error_msg = f"Undefined variable in template {template_path_str}: {e.message}"
+            raise TemplateRenderError(error_msg) from e
+            
         except Exception as e:
-            raise ValueError(f"Template rendering failed for {template_path}: {e}.") from e
-        
-        return rendered_html
+            error_msg = f"Unexpected error rendering template {template_path_str}: {e}"
+            raise TemplateRenderError(error_msg) from e
