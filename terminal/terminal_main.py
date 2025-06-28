@@ -133,7 +133,7 @@ class TerminalMain:
         
         # If language-specific project configuration template does not exist
         if not template_path.exists():
-            raise FileNotFoundError(f"Project template not found: {template_path}")
+            raise FileNotFoundError(f"Project template not found: {template_path}.")
         
         # Open language-specific project configuration template
         with open(template_path, 'r', encoding='utf-8') as fin:
@@ -141,7 +141,7 @@ class TerminalMain:
         
         # Validate that template was loaded successfully
         if not yaml_data:
-            raise ValueError(f"Empty project template: {template_path}")
+            raise ValueError(f"Empty project template: {template_path}.")
         
         # Customize the template with the project name
         yaml_data["project_title"] = project
@@ -183,14 +183,14 @@ class TerminalMain:
         """
         # Validate input parameters
         if not groups:
-            raise ValueError("Groups range cannot be empty")
+            raise ValueError("Groups range cannot be empty.")
         
         if members_per_group <= 0:
-            raise ValueError(f"members_per_group must be positive, got {members_per_group}")
+            raise ValueError(f"members_per_group must be positive, got {members_per_group}.")
         
         if members_per_group > len(SYMBOLS):
             raise ValueError(
-                f"members_per_group ({members_per_group}) exceeds available symbols ({len(SYMBOLS)}). "
+                f"members_per_group ({members_per_group}) exceeds available symbols ({len(SYMBOLS)})."
                 f"Maximum supported group size is {len(SYMBOLS)} members."
             )
 
@@ -201,7 +201,7 @@ class TerminalMain:
             # Try to load template for the language-specific group template
             group_template = abgrid_jinja_env.get_template(template_path)
         except Exception as e:
-            raise FileNotFoundError(f"Group template not found: {template_path}") from e
+            raise FileNotFoundError(f"Group template not found: {template_path}.") from e
         
         # Extract member letters based on the number of members per group
         # SYMBOLS contains the alphabet letters used for member identification
@@ -265,7 +265,7 @@ class TerminalMain:
 
         # Check for project-level validation errors
         if project_data_errors:
-            raise ValueError(f"Data validation failed for project {self.project}:\n{project_data_errors}")
+            raise ValueError(f"Data validation failed for project {self.project}:\n{project_data_errors}.")
         
         # Process each group file to generate individual answer sheets
         for group_file in self.groups_filepaths:
@@ -276,7 +276,7 @@ class TerminalMain:
 
             # Check for group-level validation errors
             if group_data_errors:
-                raise ValueError(f"Group data validation failed for {group_file.name}: {group_data_errors}")
+                raise ValueError(f"Group data validation failed for {group_file.name}: {group_data_errors}.")
 
             # Init sheets data
             sheets_data = project_data.model_dump()
@@ -344,7 +344,7 @@ class TerminalMain:
             
             # Check for report-level validation errors
             if report_data_errors:
-                raise ValueError(f"Report data validation failed for {group_file.name}: {report_data_errors}")
+                raise ValueError(f"Report data validation failed for {group_file.name}: {report_data_errors}.")
             
             # Notify user
             pretty_print(f"Generating report for {group_file.stem}. Please, wait...")
@@ -386,7 +386,7 @@ class TerminalMain:
                 json.dump(all_groups_data, fout, indent=4, ensure_ascii=False)
        
         except Exception as e:
-            raise OSError(f"Failed to export data to JSON file {json_export_path}:\n{e}") from e
+            raise OSError(f"Failed to export data to JSON file {json_export_path}: {e}.") from e
     
     @logger_decorator
     def _load_yaml_data(self, yaml_file_path: Path) -> Union[Dict[str, Any], None]:
@@ -439,5 +439,5 @@ class TerminalMain:
         try:
             HTML(string=rendered_template).write_pdf(file_path)
         except Exception as e:
-            raise OSError(f"PDF generation failed for {file_path}: {e}") from e
+            raise OSError(f"PDF generation failed for {file_path}: {e}.") from e
 

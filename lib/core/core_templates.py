@@ -43,6 +43,6 @@ class CoreRenderer:
             # Try to render template with template data
             rendered_html = template.render(template_data)
         except Exception as e:
-            raise ValueError(f"Template rendering failed for {template_path}: {e}") from e
+            raise ValueError(f"Template rendering failed for {template_path}: {e}.") from e
         
         return rendered_html

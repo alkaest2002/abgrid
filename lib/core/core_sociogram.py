@@ -125,7 +125,7 @@ class CoreSociogram:
             AttributeError: If sna data has not been set via the get() method.
         """
         if self.sna is None:
-            raise AttributeError("SNA data must be set before computing statistics")
+            raise AttributeError("SNA data must be set before computing statistics.")
             
         # Get typed references to networks and edge types
         network_a: nx.DiGraph = self.sna["network_a"]
@@ -184,7 +184,7 @@ class CoreSociogram:
             AttributeError: If sna data has not been set via the get() method.
         """
         if self.sna is None:
-            raise AttributeError("SNA data must be set before computing statistics")
+            raise AttributeError("SNA data must be set before computing statistics.")
             
         # Retrieve network graphs and adjacency matrices
         network_a: nx.DiGraph = self.sna["network_a"]
@@ -246,7 +246,7 @@ class CoreSociogram:
             AttributeError: If micro_stats have not been computed yet.
         """
         if self.sociogram["micro_stats"] is None:
-            raise AttributeError("Micro stats must be computed before descriptives")
+            raise AttributeError("Micro stats must be computed before descriptives.")
             
         # Select only non-rank numeric columns for statistical aggregation
         sociogram_numeric_columns: pd.DataFrame = (
@@ -278,7 +278,7 @@ class CoreSociogram:
             AttributeError: If micro_stats have not been computed yet.
         """
         if self.sociogram["micro_stats"] is None:
-            raise AttributeError("Micro stats must be computed before rankings")
+            raise AttributeError("Micro stats must be computed before rankings.")
             
         # Initialize rankings dictionary
         rankings: Dict[str, pd.Series] = {}
@@ -566,7 +566,7 @@ class CoreSociogram:
             AttributeError: If micro_stats have not been computed yet.
         """
         if self.sociogram["micro_stats"] is None:
-            raise AttributeError("Micro stats must be computed before creating graphs")
+            raise AttributeError("Micro stats must be computed before creating graphs.")
             
         # Extract values for the specified centrality coefficient
         data: pd.DataFrame = self.sociogram["micro_stats"].loc[:, [coefficient]].copy()

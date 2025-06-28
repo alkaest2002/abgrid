@@ -92,10 +92,10 @@ class GroupSchema(BaseModel):
         """
         for choice_dict in value:
             if not isinstance(choice_dict, dict):
-                raise ValueError("Each choice must be a dictionary")
+                raise ValueError("Each choice must be a dictionary.")
             
             if len(choice_dict) != 1:
-                raise ValueError("Each choice must have exactly one key-value pair")
+                raise ValueError("Each choice must have exactly one key-value pair.")
             
             # Get the single key-value pair
             key: str = next(iter(choice_dict.keys()))
@@ -103,7 +103,7 @@ class GroupSchema(BaseModel):
             
             # Validate key
             if len(key) != 1 or not key.isalpha():
-                raise ValueError(f"Key '{key}' must be a single alphabetic character")
+                raise ValueError(f"Key '{key}' must be a single alphabetic character.")
             
             # Skip validation if value is None
             if value_str is None:
@@ -113,16 +113,16 @@ class GroupSchema(BaseModel):
             value_parts: List[str] = value_str.split(',') if value_str else []
             
             if any(not part for part in value_parts):
-                raise ValueError(f"Value '{value_str}' contains empty entries due to misplaced commas")
+                raise ValueError(f"Value '{value_str}' contains empty entries due to misplaced commas.")
             
             if any(len(part) != 1 or not part.isalpha() for part in value_parts):
-                raise ValueError(f"Value '{value_str}' must contain only single alphabetic characters")
+                raise ValueError(f"Value '{value_str}' must contain only single alphabetic characters.")
             
             if key in value_parts:
-                raise ValueError(f"Key '{key}' cannot be present in its own values")
+                raise ValueError(f"Key '{key}' cannot be present in its own values.")
             
             if len(value_parts) != len(set(value_parts)):
-                raise ValueError(f"Values for key '{key}' contain duplicates: {value_str}")
+                raise ValueError(f"Values for key '{key}' contain duplicates: {value_str}.")
         
         return value
 
@@ -151,11 +151,11 @@ class GroupSchema(BaseModel):
         
         # Verify key sets a and b are identical
         if choices_a_keys != choices_b_keys:
-            raise ValueError("Keys in choices_a and choices_b must be identical")
+            raise ValueError("Keys in choices_a and choices_b must be identical.")
         
         # Verigy that a and b keys are not more than SYMBOLS
         if len(choices_a_keys) > len(SYMBOLS):
-            raise ValueError(f"Keys in choices_a and choices_b must be less than {len(SYMBOLS)+1}")
+            raise ValueError(f"Keys in choices_a and choices_b must be less than {len(SYMBOLS)+1}.")
         
         # Verify that keys for choices_a have not been modified
         if "".join(sorted(choices_a_keys)) != "".join(SYMBOLS[:len(choices_a_keys)]):
@@ -181,7 +181,7 @@ class GroupSchema(BaseModel):
                 if invalid_values:
                     raise ValueError(
                         f"Values for key '{key}' in choices_{choices_type} contain "
-                        f"invalid references: {', '.join(invalid_values)}"
+                        f"invalid references: {', '.join(invalid_values)}."
                     )
         return self
 
