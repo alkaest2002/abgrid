@@ -60,7 +60,7 @@ try:
         # Determine how many group files to be created
         groups_to_create = range(groups_already_created +1, groups_already_created + args.groups +1)
         # Create an instance of TerminalMain 
-        abgrid_main = TerminalMain(args.project, project_folderpath, project_filepath, groups_filepaths)
+        abgrid_main = TerminalMain(args.project, project_folderpath, project_filepath, groups_filepaths, args.language)
         
         # handle actions
         match args.action:
@@ -69,10 +69,10 @@ try:
                 abgrid_main.generate_group_inputs(groups_to_create, args.members_per_group, args.language)
             case "sheets":
                 # Generate answersheets
-                abgrid_main.generate_answersheets(args.language)
+                abgrid_main.generate_answersheets()
             case "reports":
                 # Generate reports
-                abgrid_main.generate_reports(args.language, args.with_sociogram)
+                abgrid_main.generate_reports(args.with_sociogram)
 
 # Do not handle errrors
 except Exception as error:

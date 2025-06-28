@@ -18,15 +18,14 @@ The code is part of the AB-Grid project and is licensed under the MIT License.
 
 import os
 import yaml
-import re
 import json
 
 from pathlib import Path
-from typing import Literal, Dict, Any, List, Tuple, Union
-from weasyprint import HTML
+from typing import Dict, Any, List, Tuple, Union
 from lib import jinja_env
 from lib.core import SYMBOLS
 from lib.core.core_data import CoreData
+from lib.core.core_templates import CoreRenderer
 from terminal_app.terminal_logger import logger_decorator, pretty_print
 from lib.abgrid_utils import to_json_serializable
 
@@ -50,7 +49,8 @@ class TerminalMain:
         project: str,
         project_folderpath: Path, 
         project_filepath: Path, 
-        groups_filepaths: List[Path]
+        groups_filepaths: List[Path],
+        language: str,
     ) -> None:
         """
         Initialize TerminalMain instance with project configuration.
@@ -60,7 +60,10 @@ class TerminalMain:
             project_folderpath: Path to the project directory
             project_filepath: Path to the main project configuration file
             groups_filepaths: List of paths to group configuration files
-        
+            answersheets_path: Path to answersheets directory
+            reports_path: Path to reports directory
+            language: language used in templates
+
         Returns:
             None
         """
@@ -69,9 +72,15 @@ class TerminalMain:
         self.project_folderpath = project_folderpath
         self.project_filepath = project_filepath 
         self.groups_filepaths = groups_filepaths
-
+        self.answersheets_path = project_folderpath / "answersheets"
+        self.reports_path = project_folderpath / "reports"
+        self.language = language
+        
         # Initialize core data
         self.core_data = CoreData()
+
+        # Initialze core renderer
+        self.renderer = CoreRenderer()
 
     @staticmethod
     @logger_decorator
@@ -218,7 +227,7 @@ class TerminalMain:
         pretty_print(f"{group_number} group(s) succesfully generated.")
             
     @logger_decorator
-    def generate_answersheets(self, language: str) -> None:
+    def generate_answersheets(self) -> None:
         """
         Generate PDF answer sheets for all configured groups.
         
@@ -270,13 +279,18 @@ class TerminalMain:
             pretty_print(f"Generating answersheets for {group_file.stem}. Please, wait...")
 
             # Generate and save the PDF answer sheet
-            self._render_pdf("answersheet", sheets_data, group_file.stem, language)
-
+            self.renderer.generate_answersheets_pdf(
+                f"./{self.language}/answersheet.html", 
+                sheets_data, 
+                group_file.stem, 
+                self.answersheets_path
+            )
+            
             # Notify user
             pretty_print(f"Answersheets for {group_file.stem} succesfully generated.")
 
     @logger_decorator
-    def generate_reports(self, language: str, with_sociogram: bool = False) -> None:
+    def generate_reports(self, with_sociogram: bool = False) -> None:
         """
         Generate comprehensive PDF reports for all groups with optional sociograms.
         
@@ -329,7 +343,12 @@ class TerminalMain:
             
             # Generate the PDF report with sociogram configuration
             report_data.update({ "with_sociogram": with_sociogram })
-            self._render_pdf("report", report_data, group_file.stem, language)
+            self.renderer.generate_report_pdf(
+                f"./{self.language}/report.html", 
+                report_data, 
+                group_file.stem, 
+                self.reports_path
+            )
 
             # Notify user
             pretty_print(f"Report for {group_file.stem} succesfully generated.")
@@ -362,83 +381,7 @@ class TerminalMain:
        
         except Exception as e:
             raise OSError(f"Failed to export data to JSON file {json_export_path}:\n{e}") from e
-
-    @logger_decorator
-    def _render_pdf(
-        self, 
-        doc_type: Literal["report", "answersheet"], 
-        doc_data: Dict[str, Any], 
-        doc_suffix: str, 
-        language: str
-    ) -> None:
-        """
-        Render HTML template to PDF document using WeasyPrint.
-        
-        Converts structured data into PDF documents by rendering Jinja2 templates
-        and converting the resulting HTML to PDF format. Handles both report and
-        answer sheet document types with appropriate template selection.
-        
-        Args:
-            doc_type: Type of document to generate ("report" or "answersheet")
-            doc_data: Data dictionary to populate the template
-            doc_suffix: Suffix to append to the filename (typically group identifier)
-            language: Language code for template selection
-        
-        Returns:
-            None
-        
-        Notes:
-            - Uses WeasyPrint for HTML to PDF conversion
-            - Filename sanitization removes leading/trailing underscores
-            - Debug HTML output can be enabled by uncommenting debug section
-        """
-        # Select the appropriate template based on document type
-        match doc_type:
-            case "answersheet":
-                template_path = f"./{language}/answersheet.html"
-            case "report":
-                template_path = f"./{language}/report_multi_page.html"
-            case _:
-                raise ValueError(f"Unsupported document type: {doc_type}.")
-        
-        # Load and render the template with provided data
-        try:
-            template = jinja_env.get_template(template_path)
-        except Exception as e:
-            raise FileNotFoundError(f"Template {template_path} not found.") from e
-        
-        try:
-            rendered_html = template.render(doc_data)
-        except Exception as e:
-            raise ValueError(f"Template rendering failed for {template_path}: {e}") from e
-        
-        # Determine the output directory based on document type
-        output_directory = self.project_folderpath / f"{doc_type}s"
-        
-        # Ensure output directory exists
-        if not output_directory.exists():
-            raise OSError(f"Output directory {output_directory} does not exist.")
-        
-        # Construct and sanitize the filename
-        # Remove leading/trailing underscores and ensure clean naming
-        base_filename = f"{self.project}_{doc_type}_{doc_suffix}"
-        sanitized_filename = re.sub(r"^_+|_+$", "", base_filename)
-        output_path = output_directory / f"{sanitized_filename}.pdf"
-        
-        # Convert HTML to PDF and save to disk
-        try:
-            HTML(string=rendered_html).write_pdf(output_path)
-        except Exception as e:
-            raise OSError(f"PDF generation failed for {output_path}: {e}") from e
-        
-        # -----------------------------------------------------------------------------------
-        # DEBUGGING SECTION - Uncomment to save HTML files for template inspection
-        # -----------------------------------------------------------------------------------
-        # debug_html_path = output_directory / f"{sanitized_filename}.html"
-        # with open(debug_html_path, "w", encoding='utf-8') as file:
-        #     file.write(rendered_html)
-        # -----------------------------------------------------------------------------------
-
+    
     @logger_decorator
     def _load_yaml_data(self, yaml_file_path: Path) -> Union[Dict[str, Any], None]:
         """
