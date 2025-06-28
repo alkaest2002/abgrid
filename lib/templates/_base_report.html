@@ -8,6 +8,16 @@
         font-size: 10pt;
         line-height: 12pt;
     }
+
+    div:has(.graph-container) + div > .data-legend, 
+    div:has(.relevant-nodes-container) + div > .data-legend {
+        padding-top: 6pt;
+        border-top: .75pt solid var(--base-border-color);
+    }
+
+    .sna-micro-stats-main table td:nth-last-child(-n+6) {
+        width: 60pt;
+    }
     
     .question-container {
         margin-bottom: 6pt;
@@ -186,3 +196,188 @@
     }
 </style>
 {% endblock %}
+
+{% macro report_body() %}
+    <!-- RELEVANT NODES -->
+    <div class="page">
+        <div>
+            {{ base_macro.render_logo() }}
+            {{ report_macro.render_disclaimer() }}
+            {{ report_macro.render_report_header(project_title, group, "relevant_nodes") }}
+            {{ base_report_macro.render_question("a", question_a) }}
+            {{ base_report_macro.render_relevant_nodes("a", relevant_nodes_ab["a"]) }}
+            {{ base_report_macro.render_question("b", question_b) }}
+            {{ base_report_macro.render_relevant_nodes("b", relevant_nodes_ab["b"]) }}
+        </div>
+        <div>
+            {{ base_report_macro.render_isolated_nodes(isolated_nodes_ab) }}
+            {{ report_macro.render_data_legend(['ai', 'amb', 'app', 'bt', 'cl', 'con', 'dis', 'hu', 'ic', 'ii', 'im', 'iso', 'kz', 'mar', 'pop', 'pr', 'rej']) }}
+            {{ report_macro.render_footer(year) }}
+        </div>
+    </div>
+    <!-- NETWORK A AND B PAGES -->
+    {% for (network_type, question, graph, macro_stats, micro_stats, rankings, edges_types, components) in 
+        [
+            ("a", question_a, sna.graph_a, sna.macro_stats_a, sna.micro_stats_a, sna.rankings_a, sna.edges_types_a, sna.components_a), 
+            ("b", question_b, sna.graph_b, sna.macro_stats_b, sna.micro_stats_b, sna.rankings_b, sna.edges_types_b, sna.components_b)
+        ] 
+    %}
+        <!-- SNA GRAPH -->
+        <div class="page">
+            <div>
+                {{ base_macro.render_logo() }}
+                {{ report_macro.render_disclaimer() }}
+                {{ report_macro.render_report_header(project_title, group, "sna_graph") }}
+                {{ base_report_macro.render_question(network_type, question) }}
+                {{ base_report_macro.render_sna_macro_statistics(macro_stats) }}
+                {{ base_report_macro.render_graph(graph) }}
+            </div>
+            <div>
+                {{ report_macro.render_data_legend(['nc', 'ne', 'nn', 'nr', 'nt', 're']) }}
+                {{ report_macro.render_footer(year) }}
+            </div>
+        </div>
+        <!-- SNA MICRO STATISTICS RAW SCORES -->
+        <div class="page">
+            <div>
+                {{ base_macro.render_logo() }}
+                {{ report_macro.render_disclaimer() }}
+                {{ report_macro.render_report_header(project_title, group, "sna_raw_scores") }}
+                {{ base_report_macro.render_question(network_type, question) }}
+                {{ base_report_macro.render_sna_micro_statistics(network_type, "raw_scores", micro_stats, report_macro.render_choices_label) }}
+                {{ report_macro.render_data_legend(['bt', 'cl', 'hu', 'ic', 'kz', 'nd']) }}
+            </div>
+            {{ report_macro.render_footer(year) }}
+        </div>
+        <!-- SNA MICRO STATISTICS RANK SCORES -->
+        <div class="page">
+            <div>
+                {{ base_macro.render_logo() }}
+                {{ report_macro.render_disclaimer() }}
+                {{ report_macro.render_report_header(project_title, group, "sna_ranks") }}
+                {{ base_report_macro.render_question(network_type, question) }}
+                {{ base_report_macro.render_sna_micro_statistics(network_type, "ranks", micro_stats, report_macro.render_choices_label) }}
+                {{ report_macro.render_data_legend(['bt', 'cl', 'hu', 'ic', 'kz', 'nd']) }}
+            </div>
+            {{ report_macro.render_footer(year) }}
+        </div>
+        <!-- SNA RANKINGS -->
+        <div class="page">
+            <div>
+                {{ base_macro.render_logo() }}
+                {{ report_macro.render_disclaimer() }}
+                {{ report_macro.render_report_header(project_title, group, "sna_rankings") }}
+                {{ base_report_macro.render_question(network_type, question) }}
+                {{ base_report_macro.render_rankings(rankings, network_type, report_macro.render_rank_label, report_macro.render_sociogram_status_label) }}
+                {{ report_macro.render_data_legend(['bt', 'cl', 'hu', 'ic', 'kz', 'rk']) }}
+            </div>
+            {{ report_macro.render_footer(year) }}
+        </div>
+        <!-- SNA EDGES TYPES -->
+        <div class="page">
+            <div>
+                {{ base_macro.render_logo() }}
+                {{ report_macro.render_disclaimer() }}
+                {{ report_macro.render_report_header(project_title, group, "sna_edges_types") }}
+                {{ base_report_macro.render_question(network_type, question) }}
+                {{ base_report_macro.render_sna_edges_types(network_type, edges_types, report_macro.render_edges_types_label, report_macro.render_edges_type_empty_list ) }}
+            </div>
+            {{ report_macro.render_footer(year) }}
+        </div>
+        <!-- SNA COMPONENTS -->
+        <div class="page">
+            <div>
+                {{ base_macro.render_logo() }}
+                {{ report_macro.render_disclaimer() }}
+                {{ report_macro.render_report_header(project_title, group, "sna_components") }}
+                {{ base_report_macro.render_question(network_type, question) }}
+                {{ base_report_macro.render_sna_components(network_type, components, report_macro.render_components_label, report_macro.render_components_empty_list) }}
+            </div>
+            {{ report_macro.render_footer(year) }}
+        </div>
+    {% endfor %}
+    <!-- SNA COMPARISON OF RANKINGS -->
+    <div class="page">
+        <div>
+            {{ base_macro.render_logo() }}
+            {{ report_macro.render_disclaimer() }}
+            {{ report_macro.render_report_header(project_title, group, "sna_rankings_comparison") }}
+            {{ base_report_macro.render_rankings_comparison(sna.rankings_ab, report_macro.render_node_label) }}
+            {{ report_macro.render_data_legend(['bt', 'cl', 'hu', 'ic', 'kz', 'no']) }}
+        </div>
+        {{ report_macro.render_footer(year) }}
+    </div>
+    <!-- SNA DESCRIPTIVES -->
+    <div class="page">
+        <div>
+            {{ base_macro.render_logo() }}
+            {{ report_macro.render_disclaimer() }}
+            {{ report_macro.render_report_header(project_title, group, "sna_descriptives") }}
+            {{ base_report_macro.render_question("a", question_a) }}
+            {{ base_report_macro.render_sna_macro_statistics(sna.macro_stats_a) }}
+            {{ base_report_macro.render_descriptives(sna.descriptives_a, report_macro.render_sna_measures_label) }}
+            {{ report_macro.render_data_legend(['count', 'cv', 'gn', 'kt', 'max', 'mean', 'median', 'min', 'nc', 'ne', 'nn', 'nr', 'nt', 'p25', 'p75', 'sd', 'sk', 'sum']) }}
+            {{ base_report_macro.render_question("b", question_b) }}
+            {{ base_report_macro.render_sna_macro_statistics(sna.macro_stats_b) }}
+            {{ base_report_macro.render_descriptives(sna.descriptives_b, report_macro.render_sna_measures_label) }}
+            {{ report_macro.render_data_legend(['count', 'cv', 'gn', 'kt', 'max', 'mean', 'median', 'min', 'nc',  'ne', 'nn', 'nr', 'nt', 'p25', 'p75', 'sd', 'sk', 'sum']) }}
+        </div>
+        {{ report_macro.render_footer(year) }}
+    </div>
+    {% if with_sociogram %}
+        <!-- SOCIOGRAM MICRO STATISTICS -->
+        <div class="page">
+            <div>
+                {{ base_macro.render_logo() }}
+                {{ report_macro.render_disclaimer() }}
+                {{ report_macro.render_report_header(project_title, group, "sociogram_micro") }}
+                {{ base_report_macro.render_sociogram_micro_statistics(sociogram.micro_stats, report_macro.render_sociogram_status_label) }}
+                {{ report_macro.render_data_legend(['ai', 'bl', 'gp', 'gr', 'ii', 'im', 'mp', 'mr', 'or', 'rp', 'rr', 'st']) }}
+            </div>
+            {{ report_macro.render_footer(year) }}
+        </div>
+        <!-- SOCIOGRAM RANKINGS -->
+        <div class="page">
+            <div>
+                {{ base_macro.render_logo() }}
+                {{ report_macro.render_disclaimer() }}
+                {{ report_macro.render_report_header(project_title, group, "sociogram_rankings") }}
+                {{ base_report_macro.render_rankings(sociogram.rankings, network_type, report_macro.render_rank_label, report_macro.render_sociogram_status_label) }}
+                {{ report_macro.render_data_legend(['ai', 'bl', 'gp', 'gr', 'ii', 'im', 'rp', 'rr']) }}
+            </div>
+            {{ report_macro.render_footer(year) }}
+        </div>
+        <!-- SOCIOGRAM GRAPH AI -->
+        <div class="page">
+            <div>
+                {{ base_macro.render_logo() }}
+                {{ report_macro.render_disclaimer() }}
+                {{ report_macro.render_report_header(project_title, group, "sociogram_graph") }}
+                {{ base_report_macro.render_sociogram_graphs(sociogram.graph_ii, report_macro.render_sociogram_graph_label("ii")) }}
+            </div>
+            {{ report_macro.render_footer(year) }}
+        </div>
+        <!-- SOCIOGRAM GRAPH II -->
+        <div class="page">
+            <div>
+                {{ base_macro.render_logo() }}
+                {{ report_macro.render_disclaimer() }}
+                {{ report_macro.render_report_header(project_title, group, "sociogram_graph") }}
+                {{ base_report_macro.render_sociogram_graphs(sociogram.graph_ai, report_macro.render_sociogram_graph_label("ai")) }}
+            </div>
+            {{ report_macro.render_footer(year) }}
+        </div>
+        <!-- SOCIOGRAM DESCRIPTIVES -->
+        <div class="page">
+            <div>
+                {{ base_macro.render_logo() }}
+                {{ report_macro.render_disclaimer() }}
+                {{ report_macro.render_report_header(project_title, group, "sociogram_macro") }}
+                {{ base_report_macro.render_sociogram_macro_statistics(sociogram.macro_stats, report_macro.render_sociogram_measures_label) }}
+                {{ base_report_macro.render_descriptives(sociogram.descriptives, report_macro.render_sociogram_measures_label) }}
+                {{ report_macro.render_data_legend(['count', 'cv', 'gn', 'kt', 'max', 'mean', 'median', 'min', 'p25', 'p75', 'sd', 'sk', 'sum']) }}
+            </div>
+            {{ report_macro.render_footer(year) }}
+        </div>
+    {% endif %}
+{% endmacro %}
