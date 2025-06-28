@@ -48,13 +48,13 @@ class CoreRenderer:
         """
         # Input validation
         if not template_path:
-            raise ValueError("Template path cannot be empty or None")
+            raise ValueError("Template path cannot be empty or None.")
         
         if template_data is None:
             template_data = {}
         
         if not isinstance(template_data, dict):
-            raise ValueError("Template data must be a dictionary")
+            raise ValueError("Template data must be a dictionary.")
         
         # Convert Path object to string for Jinja2
         template_path_str = str(template_path)
@@ -68,7 +68,7 @@ class CoreRenderer:
             raise FileNotFoundError(error_msg) from e
             
         except Exception as e:
-            error_msg = f"Unexpected error loading template {template_path_str}: {e}"
+            error_msg = f"Unexpected error loading template {template_path_str}: {e}."
             raise TemplateRenderError(error_msg) from e
         
         try:
@@ -77,22 +77,22 @@ class CoreRenderer:
             
             # Basic validation of rendered output
             if not rendered_html or not isinstance(rendered_html, str):
-                raise TemplateRenderError(f"Template {template_path_str} produced invalid output")
+                raise TemplateRenderError(f"Template {template_path_str} produced invalid output.")
             
             return rendered_html
             
         except TemplateSyntaxError as e:
-            error_msg = f"Template syntax error in {template_path_str}: {e.message} at line {e.lineno}"
+            error_msg = f"Template syntax error in {template_path_str}: {e.message} at line {e.lineno}."
             raise TemplateRenderError(error_msg) from e
             
         except TemplateRuntimeError as e:
-            error_msg = f"Template runtime error in {template_path_str}: {e.message}"
+            error_msg = f"Template runtime error in {template_path_str}: {e.message}."
             raise TemplateRenderError(error_msg) from e
             
         except UndefinedError as e:
-            error_msg = f"Undefined variable in template {template_path_str}: {e.message}"
+            error_msg = f"Undefined variable in template {template_path_str}: {e.message}."
             raise TemplateRenderError(error_msg) from e
             
         except Exception as e:
-            error_msg = f"Unexpected error rendering template {template_path_str}: {e}"
+            error_msg = f"Unexpected error rendering template {template_path_str}: {e}."
             raise TemplateRenderError(error_msg) from e
