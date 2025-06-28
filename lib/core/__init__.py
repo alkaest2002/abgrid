@@ -1,3 +1,9 @@
+import matplotlib
+
+# Customize matplotlib settings
+matplotlib.rc("font", **{ "family": "Times New Roman", "size": 8 })
+matplotlib.use("Agg")
+
 SYMBOLS = list("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz")
 A_COLOR = "#0000FF"
 B_COLOR = "#FF0000"

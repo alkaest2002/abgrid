@@ -23,12 +23,12 @@ import json
 
 from pathlib import Path
 from typing import Dict, Any, List, Tuple, Union
-from lib import jinja_env
+from lib.core.core_templates import abgrid_jinja_env
 from lib.core import SYMBOLS
 from lib.core.core_data import CoreData
 from lib.core.core_templates import CoreRenderer
-from terminal.terminal_logger import logger_decorator, pretty_print
 from lib.utils import to_json_serializable
+from terminal.terminal_logger import logger_decorator, pretty_print
 
 ProjectData = Dict[str, Any]
 GroupData = Dict[str, Any]
@@ -199,7 +199,7 @@ class TerminalMain:
         
         try:
             # Try to load template for the language-specific group template
-            group_template = jinja_env.get_template(template_path)
+            group_template = abgrid_jinja_env.get_template(template_path)
         except Exception as e:
             raise FileNotFoundError(f"Group template not found: {template_path}") from e
         

@@ -7,10 +7,14 @@ Date Created: May 3, 2025
 
 The code is part of the AB-Grid project and is licensed under the MIT License.
 """
+import jinja2
 from pathlib import Path
 from typing import Any, Dict
-from lib import jinja_env
 
+# Initialize Jinja2 environment with a file system loader for templates
+abgrid_jinja_env = jinja2.Environment(
+    loader=jinja2.FileSystemLoader(["./lib/core/templates"])
+)
 
 class CoreRenderer:
     """Renders templates to PDF documents using Jinja2 and WeasyPrint."""
@@ -30,7 +34,7 @@ class CoreRenderer:
             ValueError: If template rendering fails
         """
         try:
-            template = jinja_env.get_template(template_path)
+            template = abgrid_jinja_env.get_template(template_path)
         except Exception as e:
             raise FileNotFoundError(f"Template {template_path} not found.") from e
         
