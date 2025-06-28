@@ -17,6 +17,7 @@ The code is part of the AB-Grid project and is licensed under the MIT License.
 """
 
 import os
+from weasyprint import HTML
 import yaml
 import json
 
@@ -75,6 +76,14 @@ class TerminalMain:
         self.answersheets_path = project_folderpath / "answersheets"
         self.reports_path = project_folderpath / "reports"
         self.language = language
+
+        # Ensure answersheets directory exists
+        if not self.answersheets_path.exists():
+            raise OSError(f"Output directory {self.answersheets_path} does not exist.")
+        
+        # Ensure rerport directory exists
+        if not self.reports_path.exists():
+            raise OSError(f"Output directory {self.reports_path} does not exist.")
         
         # Initialize core data
         self.core_data = CoreData()
@@ -279,13 +288,11 @@ class TerminalMain:
             pretty_print(f"Generating answersheets for {group_file.stem}. Please, wait...")
 
             # Generate and save the PDF answer sheet
-            self.renderer.generate_answersheets_pdf(
-                f"./{self.language}/answersheet.html", 
-                sheets_data, 
-                group_file.stem, 
-                self.answersheets_path
-            )
+            rendered_answershhets = self.renderer.render_html(f"./{self.language}/answersheet.html", sheets_data)
             
+            # Generate PDF report
+            self._generate_pdf("answersheet", rendered_answershhets, group_file.stem, self.answersheets_path)
+
             # Notify user
             pretty_print(f"Answersheets for {group_file.stem} succesfully generated.")
 
@@ -341,14 +348,12 @@ class TerminalMain:
             # Notify user
             pretty_print(f"Generating report for {group_file.stem}. Please, wait...")
             
-            # Generate the PDF report with sociogram configuration
+            # Render report html template
             report_data.update({ "with_sociogram": with_sociogram })
-            self.renderer.generate_report_pdf(
-                f"./{self.language}/report.html", 
-                report_data, 
-                group_file.stem, 
-                self.reports_path
-            )
+            rendered_report = self.renderer.render_html(f"./{self.language}/report.html", report_data)
+
+            # Generate PDF report
+            self._generate_pdf("report", rendered_report, group_file.stem, self.reports_path)
 
             # Notify user
             pretty_print(f"Report for {group_file.stem} succesfully generated.")
@@ -411,3 +416,27 @@ class TerminalMain:
         
         except yaml.YAMLError:
             raise ValueError(f"{yaml_file_path.name} could not be parsed.")
+        
+    def _generate_pdf(self, template_type: str, rendered_template: str, suffix: str, output_directory: Path) -> None:
+        """Convert HTML template to PDF and save to output directory.
+        
+        Args:
+            template_type: Type of document for filename prefix
+            rendered_template: HTML content as string
+            suffix: Suffix used in filename
+            output_directory: Directory to save the PDF file
+            
+        Notes:
+            Filename format: {template_type}_{suffix}.pdf
+            Leading/trailing underscores are automatically removed from filename
+        """
+        
+        # Build file path
+        file_path = output_directory / f"{template_type}_{suffix}.pdf"
+        
+        # Convert HTML to PDF and save to disk
+        try:
+            HTML(string=rendered_template).write_pdf(file_path)
+        except Exception as e:
+            raise OSError(f"PDF generation failed for {file_path}: {e}") from e
+
