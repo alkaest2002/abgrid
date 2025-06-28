@@ -7,5 +7,5 @@ matplotlib.use("Agg")
 
 # Initialize Jinja2 environment with a file system loader for templates
 jinja_env = jinja2.Environment(
-    loader=jinja2.FileSystemLoader(["./lib/templates"])
+    loader=jinja2.FileSystemLoader(["./lib/core/templates"])
 )

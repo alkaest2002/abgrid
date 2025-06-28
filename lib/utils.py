@@ -1,5 +1,5 @@
 """
-Filename: abgrid_utils.py
+Filename: utils.py
 Description: Implements a decorator to print notifications for function execution and utility functions for AB-Grid project.
 
 Author: Pierpaolo Calanna
