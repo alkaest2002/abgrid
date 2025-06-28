@@ -15,8 +15,8 @@ import io
 import numpy as np
 import pandas as pd
 
-from typing import Sequence, Union, Any
 from base64 import b64encode
+from typing import Sequence, Union
 from matplotlib import pyplot as plt
 
 
@@ -45,6 +45,8 @@ def figure_to_base64_svg(fig: plt.Figure) -> str:
     
     # Save figure to the buffer in SVG format then close it
     fig.savefig(buffer, format="svg", bbox_inches='tight', transparent=True, pad_inches=0.05)
+    
+    # Close figure
     plt.close(fig)
     
     # Encode the buffer contents to a base64 string
