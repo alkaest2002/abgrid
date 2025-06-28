@@ -12,7 +12,7 @@ import argparse
 from pathlib import Path
 from typing import List, Iterator
 from terminal.terminal_main import TerminalMain
-from lib.abgrid_utils import check_python_version
+from lib.utils import check_python_version
 
 # Available languages
 LANGUAGES = ["en", "it"]

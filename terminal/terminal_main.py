@@ -27,7 +27,7 @@ from lib.core import SYMBOLS
 from lib.core.core_data import CoreData
 from lib.core.core_templates import CoreRenderer
 from terminal.terminal_logger import logger_decorator, pretty_print
-from lib.abgrid_utils import to_json_serializable
+from lib.utils import to_json_serializable
 
 ProjectData = Dict[str, Any]
 GroupData = Dict[str, Any]

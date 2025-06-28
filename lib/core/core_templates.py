@@ -17,41 +17,7 @@ from lib import jinja_env
 class CoreRenderer:
     """Renders templates to PDF documents using Jinja2 and WeasyPrint."""
 
-    def generate_answersheets_pdf(self, template_path: Path, data: Dict[str, Any], suffix: str, output_directory: Path) -> None:
-        """Generate answersheet PDF from template.
-        
-        Args:
-            template_path: Path to the Jinja2 template file
-            data: Template context data
-            suffix: Suffix used in filename
-            output_directory: Directory to save the PDF file
-            
-        Raises:
-            FileNotFoundError: If template file is not found
-            ValueError: If template rendering fails
-            OSError: If output directory doesn't exist or PDF generation fails
-        """
-        rendered_template = self._render_html(template_path, data)
-        self._generate_pdf("answersheet", rendered_template, suffix, output_directory)
-
-    def generate_report_pdf(self, template_path: Path, data: Dict[str, Any], suffix: str, output_directory: Path) -> None:
-        """Generate report PDF from template.
-        
-        Args:
-            template_path: Path to the Jinja2 template file
-            data: Template context data
-            suffix: Suffix used in filename
-            output_directory: Directory to save the PDF file
-            
-        Raises:
-            FileNotFoundError: If template file is not found
-            ValueError: If template rendering fails
-            OSError: If output directory doesn't exist or PDF generation fails
-        """
-        rendered_template = self._render_html(template_path, data)
-        self._generate_pdf("report", rendered_template, suffix, output_directory)
-
-    def _render_html(self, template_path: Path, data: Dict[str, Any]) -> str:
+    def render_html(self, template_path: Path, data: Dict[str, Any]) -> str:
         """Render Jinja2 template with provided data.
         
         Args:
@@ -76,6 +42,40 @@ class CoreRenderer:
             raise ValueError(f"Template rendering failed for {template_path}: {e}") from e
         
         return rendered_html
+
+    def generate_answersheets_pdf(self, template_path: Path, data: Dict[str, Any], suffix: str, output_directory: Path) -> None:
+        """Generate answersheet PDF from template.
+        
+        Args:
+            template_path: Path to the Jinja2 template file
+            data: Template context data
+            suffix: Suffix used in filename
+            output_directory: Directory to save the PDF file
+            
+        Raises:
+            FileNotFoundError: If template file is not found
+            ValueError: If template rendering fails
+            OSError: If output directory doesn't exist or PDF generation fails
+        """
+        rendered_template = self.render_html(template_path, data)
+        self._generate_pdf("answersheet", rendered_template, suffix, output_directory)
+
+    def generate_report_pdf(self, template_path: Path, data: Dict[str, Any], suffix: str, output_directory: Path) -> None:
+        """Generate report PDF from template.
+        
+        Args:
+            template_path: Path to the Jinja2 template file
+            data: Template context data
+            suffix: Suffix used in filename
+            output_directory: Directory to save the PDF file
+            
+        Raises:
+            FileNotFoundError: If template file is not found
+            ValueError: If template rendering fails
+            OSError: If output directory doesn't exist or PDF generation fails
+        """
+        rendered_template = self.render_html(template_path, data)
+        self._generate_pdf("report", rendered_template, suffix, output_directory)
     
     def _generate_html(self, doc_type: str, rendered_template: str, suffix: str, output_directory: Path) -> None:
         """Save rendered HTML template to file.
