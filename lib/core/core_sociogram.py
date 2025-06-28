@@ -1,5 +1,5 @@
 """
-Filename: abgrid_sociogram.py
+Filename: core_sociogram.py
 Description: Provides functionality to analyze directed networks (graphs) for sociometric analysis,
 computing macro and micro-level statistics, node rankings, and generating polar visualizations.
 

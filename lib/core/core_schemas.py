@@ -1,5 +1,5 @@
 """
-Filename: abgrid_schemas.py
+Filename: core_schemas.py
 Description: Defines Pydantic models for project and group schemas, ensuring data integrity and validation.
 
 Author: Pierpaolo Calanna

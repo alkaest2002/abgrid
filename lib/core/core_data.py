@@ -1,5 +1,5 @@
 """
-Filename: abgrid_data.py
+Filename: core_data.py
 Description: Manages and processes data related to AB-Grid networks, including project and group data
 loading, validation, and preparation for social network analysis and report generation.
 
