@@ -8,6 +8,7 @@ Date Created: May 3, 2025
 The code is part of the AB-Grid project and is licensed under the MIT License.
 """
 
+import re
 from typing import Dict, List, Any, Set
 from pydantic import BaseModel, model_validator
 
@@ -103,7 +104,7 @@ class ABGridSchema(BaseModel):
     def _validate_basic_fields(cls, data: Dict[str, Any]) -> List[Dict[str, Any]]:
         """STEP 1: Validate basic fields (project_title, group, prompt, questions)."""
         errors: List[Dict[str, Any]] = []
-        
+
         # String fields validation
         string_fields = {
             "project_title": (1, 80),
@@ -114,6 +115,9 @@ class ABGridSchema(BaseModel):
             "question_b_choices": (1, 150),
         }
         
+        # Regex pattern allowing letters, accented characters, numbers, apostrophe, comma and full stop
+        valid_char_pattern = re.compile(r'^[\p{L}\d\s\'.,]+$')
+
         for field_name, (min_len, max_len) in string_fields.items():
             value = data.get(field_name)
             
@@ -145,6 +149,13 @@ class ABGridSchema(BaseModel):
                     "location": field_name,
                     "value_to_blame": value,
                     "error_message": f"Must be at most {max_len} characters long"
+                })
+
+            if not valid_char_pattern.match(value):
+                errors.append({
+                    "location": field_name,
+                    "value_to_blame": value,
+                    "error_message": "Contains invalid characters. Only letters, numbers, and punctuation are allowed."
                 })
         
         # Group field validation
