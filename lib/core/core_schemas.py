@@ -13,7 +13,7 @@ from pydantic import BaseModel, model_validator
 
 from lib.core import SYMBOLS
 
-class ValidationException(Exception):
+class PydanticValidationException(Exception):
     """Custom exception that carries structured error information."""
     
     def __init__(self, errors: List[Dict[str, Any]]):
@@ -343,4 +343,4 @@ class ABGridSchema(BaseModel):
     def _raise_errors_if_any(cls, errors: List[Dict[str, Any]]) -> None:
         """Raise custom exception with structured errors."""
         if errors:
-            raise ValidationException(errors)
+            raise PydanticValidationException(errors)

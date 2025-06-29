@@ -15,7 +15,8 @@ import textwrap
 
 from functools import wraps
 from pathlib import Path
-from typing import Any, Callable, Optional, Set, TypeVar
+from typing import Any, Callable, List, Optional, Set, TypeVar
+from lib.core.core_schemas import PydanticValidationException
 from lib.core.core_templates import TemplateRenderError
 
 # Type variable for preserving function signatures
@@ -88,6 +89,8 @@ def logger_decorator(func: Optional[F] = None) -> Callable[[F], F]:
             except TemplateRenderError as error:
                 print(str(error))
                 return None
+            except PydanticValidationException as error:
+                print(extract_pydantic_errors(error))
             except Exception as error:
                 print(extract_traceback_info(error))
                 raise
@@ -143,3 +146,42 @@ def extract_traceback_info(error: Exception, exclude_files: Optional[Set[str]] =
         return "Traceback (most recent call last):\n" + "\n".join(traceback_lines)
     else:
         return "No traceback available"
+    
+def extract_pydantic_errors(pydantic_validation_exception: PydanticValidationException) -> str:
+        """
+        Format Pydantic validation errors into human-readable error messages.
+        
+        Converts ValidationError objects into formatted strings that provide
+        clear information about field locations and error descriptions.
+        
+        Args:
+            validation_error: Pydantic ValidationError object containing error details
+        
+        Returns:
+            Formatted string containing all validation errors separated by semicolons
+        
+        Notes:
+            - Builds location paths using dot notation for nested fields
+            - Supports optional context prefixes for error categorization
+            - Returns empty string if no errors are present
+        """
+        # Init formatted errors
+        formatted_errors: List[str] = [
+            "Pydantic validation errors", 
+            "==========================",
+        ]
+        
+        # Loop through errors
+        for error in pydantic_validation_exception.errors:  
+            
+            # Get location of error
+            location = error.get('location', "Unkown location")
+            
+            # Get error message
+            error_message = error.get('error_message', 'Unknown error')
+            
+            # Append error to list
+            formatted_errors.append(f"{location}: {error_message}")
+        
+        # Join all errors into a single string
+        return "\n".join(formatted_errors)

@@ -1,74 +1,39 @@
 """
 Filename: core_data.py
-Description: Manages and processes data related to AB-Grid networks, including project and group data
-loading, validation, and preparation for social network analysis and report generation.
+Description: Manages and processes data related to AB-Grid networks.
 
 Author: Pierpaolo Calanna
 Date Created: May 3, 2025
 
 The code is part of the AB-Grid project and is licensed under the MIT License.
 """
-
 import datetime
 import pandas as pd
 
-from typing import Any, Dict, List, Optional, Tuple, Union
-
-from pydantic import ValidationError
+from typing import Any, Dict
 
 from lib.core.core_schemas import ABGridSchema
 from lib.core.core_sna import CoreSna, SNADict
 from lib.core.core_sociogram import CoreSociogram, SociogramDict
-from lib.core.core_schemas import ValidationException
 
 class CoreData:
     """
-    Core data processing class for AB-Grid project and group data management.
-    
-    Provides validation, processing, and analysis of project and group data,
-    integrating social network analysis and sociogram generation capabilities.
-    Handles data validation using Pydantic schemas and prepares comprehensive
-    report data structures.
     """
-    
-    def validate_input_data(self, data: Dict[str, Any]) -> Tuple[Optional[ABGridSchema], Optional[str]]:
+
+    def get_answersheet_data(self, validated_model: ABGridSchema) -> Dict[str, Any]:
         """
-        Validate input data using Pydantic schema.
-        
-        Args:
-            data: Raw data dictionary to validate
-            
-        Returns:
-            Tuple containing validated ABGridSchema model (or None) and error string (or None)
-            
-        Raises:
-            ValidationError: If data doesn't match schema requirements
         """
-        try:
-            validated_model = ABGridSchema.model_validate(data)
-            return validated_model, None
-        except ValidationException as error:
-            return None, self._get_pydantic_errors(error)
+
+        # Convert to dict
+        answersheet_data = validated_model.model_dump()
+
+        # Add list of participants
+        answersheet_data.update({ "participants": sum(map(lambda x: list(x.keys()), validated_model.choices_a), []) })
+
+        return answersheet_data
           
-    def get_data(self, validated_model: ABGridSchema, with_sociogram: bool = False) -> Dict[str, Any]:
+    def get_report_data(self, validated_model: ABGridSchema, with_sociogram: bool = False) -> Dict[str, Any]:
         """
-        Generate comprehensive report data by combining validated data with analysis results.
-        
-        Performs social network analysis, optionally generates sociograms,
-        and creates a complete report data structure with relevant and isolated node analysis.
-        
-        Args:
-            validated_model: Pre-validated ABGridSchema model
-            with_sociogram: Whether to include sociogram analysis in the report
-        
-        Returns:
-            Complete report data dictionary ready for template rendering
-        
-        Notes:
-            - Integrates SNA and optional sociogram analysis
-            - Identifies relevant nodes across both analysis types
-            - Calculates isolated nodes based on network degree
-            - Adds current year timestamp to report data
         """
         # Initialize SNA analysis class
         abgrid_sna: CoreSna = CoreSna()
@@ -149,48 +114,3 @@ class CoreData:
         }
         
         return report_data
-
-    def _get_pydantic_errors(self, validation_exception: ValidationException, context: str = "") -> str:
-        """
-        Format Pydantic validation errors into human-readable error messages.
-        
-        Converts ValidationError objects into formatted strings that provide
-        clear information about field locations and error descriptions.
-        
-        Args:
-            validation_error: Pydantic ValidationError object containing error details
-            context: Optional context string to prepend to error messages
-        
-        Returns:
-            Formatted string containing all validation errors separated by semicolons
-        
-        Notes:
-            - Builds location paths using dot notation for nested fields
-            - Supports optional context prefixes for error categorization
-            - Returns empty string if no errors are present
-        """
-        # Init formatted errors
-        formatted_errors: List[str] = []
-        
-        # Loop through errors
-        for error in validation_exception.errors:  
-            
-            # Get location of error
-            location = error.get('location', None)
-            
-            # Get error message
-            error_message = error.get('error_message', 'Unknown error')
-            
-            # Add error location if provided
-            if location:
-                error_msg: str = f"{location}: {error_message}"
-            
-            # Add error context if provided
-            if context:
-                error_msg = f"[{context}] {error_msg}"
-            
-            # Append error to list
-            formatted_errors.append(error_msg)
-        
-        # Join all errors into a single string
-        return "\n".join(formatted_errors)

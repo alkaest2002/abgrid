@@ -23,11 +23,11 @@ import json
 
 from pathlib import Path
 from typing import Dict, Any, List, Tuple, Union
-from lib.core.core_templates import abgrid_jinja_env
-from lib.core import SYMBOLS
-from lib.core.core_data import CoreData
-from lib.core.core_templates import CoreRenderer
 from lib.utils import to_json_serializable
+from lib.core import SYMBOLS
+from lib.core.core_schemas import ABGridSchema
+from lib.core.core_data import CoreData
+from lib.core.core_templates import abgrid_jinja_env, CoreRenderer
 from lib.interfaces.terminal.terminal_logger import logger_decorator
 
 ProjectData = Dict[str, Any]
@@ -212,24 +212,14 @@ class TerminalMain:
         # Process each group file to generate individual answer sheets
         for group_file in self.groups_filepaths:
             
-            # Load and validate group-specific data
+            # Load current group data
             group_data = self._load_yaml_data(group_file)
             
             # Validate current group data
-            validated_data, data_errors = self.core_data.validate_input_data(group_data)
-            
-            # Raise on validation errors
-            if data_errors:
-                error_label = f"Report data validation failed for {group_file.name}"
-                raise ValueError(
-                    f"{error_label}:\n{'-'*len(error_label)}\n{data_errors}"
-                )
+            validated_data = ABGridSchema.model_validate(group_data)
             
             # Init sheets_data
-            sheets_data = validated_data.model_dump()
-
-            # Add list of participants
-            sheets_data.update({ "participants": sum(map(lambda x: list(x.keys()), validated_data.choices_a), []) })
+            sheets_data = self.core_data.get_answersheet_data(validated_data)
 
             # Notify user
             print(f"Generating answersheets for {group_file.stem}. Please, wait...")
@@ -277,17 +267,10 @@ class TerminalMain:
             group_data = self._load_yaml_data(group_file)
             
             # Validate current group data
-            validated_data, data_errors = self.core_data.validate_input_data(group_data)
-            
-            # Raise on validation errors
-            if data_errors:
-                error_label = f"Report data validation failed for {group_file.name}"
-                raise ValueError(
-                    f"{error_label}:\n{'-'*len(error_label)}\n{data_errors}"
-                )
+            validated_data = ABGridSchema.model_validate(group_data)
             
             # Get report Data
-            report_data = self.core_data.get_data(validated_data, with_sociogram)
+            report_data = self.core_data.get_report_data(validated_data, with_sociogram)
             
             # Notify user
             print(f"Generating report for {group_file.stem}. Please, wait...")
