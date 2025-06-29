@@ -8,48 +8,24 @@ Date Created: May 3, 2025
 The code is part of the AB-Grid project and is licensed under the MIT License.
 """
 
-from pydantic import BaseModel, Field, ValidationError, field_validator, model_validator
+from pydantic import BaseModel, Field, field_validator, model_validator
 from pydantic.types import constr
-from typing import Any, Dict, List, Optional
+from typing import Dict, List, Optional
 
-from pydantic_core import ErrorDetails
 
 from lib.core import SYMBOLS
 
-class ProjectSchema(BaseModel):
+class ABGridSchema(BaseModel):
     """
-    Pydantic model representing a project's data schema.
+    Pydantic model representing an ABGrid data project.
     
-    This model validates project information including title, description, 
-    and two questions with their associated answer choices.
-
     Attributes:
         project_title: The project title (1-80 characters)
-        explanation: Project description/explanation (1-500 characters)
+        prompt: Project prompt (1-500 characters)
         question_a: First question text (1-300 characters)
         question_a_choices: Answer choices for question A (1-150 characters)
         question_b: Second question text (1-300 characters)
         question_b_choices: Answer choices for question B (1-150 characters)
-    """
-    project_title: constr(min_length=1, max_length=80) # type: ignore
-    explanation: constr(min_length=1, max_length=500) # type: ignore
-    question_a: constr(min_length=1, max_length=300) # type: ignore
-    question_a_choices: constr(min_length=1, max_length=150) # type: ignore
-    question_b: constr(min_length=1, max_length=300) # type: ignore
-    question_b_choices: constr(min_length=1, max_length=150) # type: ignore
-    
-    model_config = {"extra": "forbid"}
-
-
-class GroupSchema(BaseModel):
-    """
-    Pydantic model representing a group within a project.
-    
-    This model validates the structure of answer choices for both questions
-    within a group, ensuring consistency and logical relationships between
-    the choices.
-
-    Attributes:
         group: Group identifier (1-20)
         choices_a: List of choice dictionaries for question A. Each dictionary
                   contains a single-letter key mapped to a comma-separated string
@@ -63,7 +39,13 @@ class GroupSchema(BaseModel):
         - All values must reference valid keys from either choices_a or choices_b
         - Keys and values must be single alphabetic characters
     """
-    group: int = Field(ge=1, le=20)
+    project_title: constr(min_length=1, max_length=80) # type: ignore
+    group: int = Field(ge=1, le=50)
+    prompt: constr(min_length=1, max_length=500) # type: ignore
+    question_a: constr(min_length=1, max_length=300) # type: ignore
+    question_a_choices: constr(min_length=1, max_length=150) # type: ignore
+    question_b: constr(min_length=1, max_length=300) # type: ignore
+    question_b_choices: constr(min_length=1, max_length=150) # type: ignore
     choices_a: List[Dict[str, Optional[str]]]
     choices_b: List[Dict[str, Optional[str]]]
     
@@ -127,7 +109,7 @@ class GroupSchema(BaseModel):
         return value
 
     @model_validator(mode="after")
-    def validate_schema_constraints(self) -> "GroupSchema":
+    def validate_schema_constraints(self) -> "ABGridSchema":
         """
         Validate logical constraints between choices_a and choices_b.
 
@@ -184,23 +166,3 @@ class GroupSchema(BaseModel):
                         f"invalid references: {', '.join(invalid_values)}."
                     )
         return self
-
-
-class ReportSchema(BaseModel):
-    """
-    Pydantic model representing a report's data schema.
-    
-    This model validates report information by combining project and group data
-    into a unified report structure for comprehensive data validation.
-
-    Args:
-        project_data: The project data containing project-level information
-        group_data: The group data containing group-level choices and constraints
-
-    Returns:
-        ReportSchema: A validated report instance containing both project and group data
-    """
-    project_data: ProjectSchema
-    group_data: GroupSchema
-
-    model_config = {"extra": "forbid"}

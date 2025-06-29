@@ -17,6 +17,7 @@ The code is part of the AB-Grid project and is licensed under the MIT License.
 """
 
 import os
+from click import clear
 from weasyprint import HTML
 import yaml
 import json
@@ -49,7 +50,6 @@ class TerminalMain:
         self,
         project: str,
         project_folderpath: Path, 
-        project_filepath: Path, 
         groups_filepaths: List[Path],
         language: str,
     ) -> None:
@@ -59,7 +59,6 @@ class TerminalMain:
         Args:
             project: Name of the project
             project_folderpath: Path to the project directory
-            project_filepath: Path to the main project configuration file
             groups_filepaths: List of paths to group configuration files
             answersheets_path: Path to answersheets directory
             reports_path: Path to reports directory
@@ -71,12 +70,11 @@ class TerminalMain:
         # Populate props
         self.project = project
         self.project_folderpath = project_folderpath
-        self.project_filepath = project_filepath 
         self.groups_filepaths = groups_filepaths
         self.answersheets_path = project_folderpath / "answersheets"
         self.reports_path = project_folderpath / "reports"
         self.language = language
-
+        
         # Ensure answersheets directory exists
         if not self.answersheets_path.exists():
             raise OSError(f"Output directory {self.answersheets_path} does not exist.")
@@ -96,7 +94,6 @@ class TerminalMain:
     def init_project(
         project: str, 
         project_folderpath: Path, 
-        language: str
     ) -> None:
         """
         Initialize a new AB-Grid project with directory structure and configuration.
@@ -108,7 +105,6 @@ class TerminalMain:
         Args:
             project: Name of the project to initialize
             project_folderpath: Path where the project directory will be created
-            language: Language code for template selection (e.g., 'en', 'it')
         
         Returns:
             None
@@ -128,29 +124,6 @@ class TerminalMain:
         os.makedirs(reports_dir)
         os.makedirs(answersheets_dir)
         
-        # Get path for the language-specific project configuration template
-        template_path = Path(f"./lib/templates/{language}/project.yaml")
-        
-        # If language-specific project configuration template does not exist
-        if not template_path.exists():
-            raise FileNotFoundError(f"Project template not found: {template_path}.")
-        
-        # Open language-specific project configuration template
-        with open(template_path, 'r', encoding='utf-8') as fin:
-            yaml_data = yaml.safe_load(fin)
-        
-        # Validate that template was loaded successfully
-        if not yaml_data:
-            raise ValueError(f"Empty project template: {template_path}.")
-        
-        # Customize the template with the project name
-        yaml_data["project_title"] = project
-        
-        # Write the customized configuration to the project directory
-        config_file_path = project_folderpath / f"{project}.yaml"
-        with open(config_file_path, 'w', encoding='utf-8') as fout:
-            yaml.dump(yaml_data, fout, sort_keys=False, allow_unicode=True)
-
         # Notify user
         pretty_print(f"Project {project} correctly initialized.")
 
@@ -219,12 +192,6 @@ class TerminalMain:
             # Render the template with group-specific data
             rendered_group_template = group_template.render(template_data)
             
-            # Remove blank lines from the rendered template for cleaner output
-            rendered_group_template = "\n".join([
-                line for line in rendered_group_template.split("\n") 
-                if line.strip()
-            ])
-
             # Generate the group file path
             group_file_path = self.project_folderpath / f"{self.project}_g{group_number}.yaml"
             
@@ -259,37 +226,27 @@ class TerminalMain:
         if not self.groups_filepaths:
             raise ValueError("No group files found. Please generate group inputs first.")
 
-        # Load project data and validate it
-        project_data = self._load_yaml_data(self.project_filepath)
-        project_data, project_data_errors = self.core_data.get_project_data(project_data)
-
-        # Check for project-level validation errors
-        if project_data_errors:
-            raise ValueError(f"Data validation failed for project {self.project}:\n{project_data_errors}.")
-        
         # Process each group file to generate individual answer sheets
         for group_file in self.groups_filepaths:
             
             # Load and validate group-specific data
             group_data = self._load_yaml_data(group_file)
-            group_data, group_data_errors = self.core_data.get_group_data(group_data)
-
-            # Check for group-level validation errors
-            if group_data_errors:
-                raise ValueError(f"Group data validation failed for {group_file.name}: {group_data_errors}.")
-
-            # Init sheets data
-            sheets_data = project_data.model_dump()
             
-            # Extend sheets data
-            sheets_data["group"] = group_data.group
-            sheets_data["likert"] = sum(map(lambda x: list(x.keys()), group_data.choices_a), [])
+            # Validate current group data
+            validated_data, data_errors = self.core_data.validate_input_data(group_data)
+            
+            # Raise on validation errors
+            if data_errors:
+                raise ValueError(f"Report data validation failed for {group_file.name}: {data_errors}.")
 
             # Notify user
             pretty_print(f"Generating answersheets for {group_file.stem}. Please, wait...")
-
+            
             # Generate and save the PDF answer sheet
-            rendered_answersheets = self.renderer.render_html(f"./{self.language}/answersheet.html", sheets_data)
+            rendered_answersheets = self.renderer.render_html(
+                f"./{self.language}/answersheet.html", 
+                validated_data.model_dump()
+            )
             
             # Generate PDF answersheets
             self._generate_pdf("answersheet", rendered_answersheets, group_file.stem, self.answersheets_path)
@@ -307,7 +264,6 @@ class TerminalMain:
         data in JSON format for further analysis.
         
         Args:
-            language: Language code for template selection
             with_sociogram: Whether to include sociogram visualizations in reports
         
         Returns:
@@ -325,32 +281,26 @@ class TerminalMain:
         # Initialize storage for aggregated data from all groups
         all_groups_data = {}
 
-        # Load project data
-        project_data = self._load_yaml_data(self.project_filepath)
-        
         # Process each group file to generate individual reports
         for group_file in self.groups_filepaths:
             
-            # Load group data for the current group
+            # Load current group data
             group_data = self._load_yaml_data(group_file)
             
-            # Validate report data, i.e. project data + report data
-            report_data, report_data_errors = (
-                self.core_data.get_report_data(
-                    dict(project_data=project_data, group_data=group_data), 
-                    with_sociogram
-                )
-            )
+            # Validate current group data
+            validated_data, data_errors = self.core_data.validate_input_data(group_data)
             
-            # Check for report-level validation errors
-            if report_data_errors:
-                raise ValueError(f"Report data validation failed for {group_file.name}: {report_data_errors}.")
+            # Raise on validation errors
+            if data_errors:
+                raise ValueError(f"Report data validation failed for {group_file.name}: {data_errors}.")
+            
+            # Get report Data
+            report_data = self.core_data.get_data(validated_data, with_sociogram)
             
             # Notify user
             pretty_print(f"Generating report for {group_file.stem}. Please, wait...")
             
             # Render report html template
-            report_data.update({ "with_sociogram": with_sociogram })
             rendered_report = self.renderer.render_html(f"./{self.language}/report.html", report_data)
 
             # Generate PDF report

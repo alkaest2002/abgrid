@@ -3,7 +3,8 @@
 # NON MODIFICARE QUESTI DATI
 #
 ##################################################################################
-# identificativo gruppo
+
+# Identificativo numerico del gruppo
 group: {{ group }}
 
 ##################################################################################
@@ -11,18 +12,27 @@ group: {{ group }}
 # MODIFICA I DATI SEGUENTI SECONDO LE ESIGENZE
 #
 ##################################################################################
-# indica le scelte di ogni partecipante
-# rispetta gli spazi e i trattini
+
+# Informazioni a carattere generale
+project_title: "Titolo del progetto"
+prompt: "Rispondi alle seguenti domande."
+question_a: "Chi vorresti nel tuo gruppo di lavoro ideale?"
+question_a_choices: "Indica fino a un massimo di 5 persone"
+question_b: "Chi non vorresti nel tuo gruppo di lavoro ideale?"
+question_b_choices: "Indica fino a un massimo di 5 persone"
+
+# Indica le scelte di ogni partecipante del gruppo
+# rispettando gli spazi e i trattini
 # es. - A: B,C
 choices_a:
-{% for m in members %}
+{%- for m in members %}
   - {{ m }}: 
-{% endfor %}
+{%- endfor %}
 
-# indica i rifiuti di ogni partecipante
-# rispetta gli spazi e i trattini
+# Indica le scelte di ogni partecipante
+# rispettando gli spazi e i trattini
 # es. - A: B,C
 choices_b:
-{% for m in members %}
+{%- for m in members %}
   - {{ m }}: 
-{% endfor %}
+{%- endfor %}

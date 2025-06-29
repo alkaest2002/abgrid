@@ -66,7 +66,7 @@ def get_folders_to_process(data_folder: Path) -> Iterator[Path]:
     """
     return (path for path in data_folder.glob("*") if path.is_dir())
 
-def handle_init_action(project: str, project_folderpath: Path, language: str) -> None:
+def handle_init_action(project: str, project_folderpath: Path) -> None:
     """Handle project initialization.
     
     Args:
@@ -79,8 +79,7 @@ def handle_init_action(project: str, project_folderpath: Path, language: str) ->
     """
     if project_folderpath.exists():
         raise FileExistsError(f"{project} already exists.")
-    
-    TerminalMain.init_project(project, project_folderpath, language)
+    TerminalMain.init_project(project, project_folderpath)
 
 def handle_batch_processing(data_folder: Path, with_sociogram: bool, language: str) -> None:
     """Handle batch processing of projects.
@@ -106,14 +105,12 @@ def handle_project_actions(args: argparse.Namespace, project_folderpath: Path) -
         args: Parsed command line arguments
         project_folderpath: Path to the project folder
     """
-    project_filepath = next(project_folderpath.glob(f"{args.project}.*"))
     groups_filepaths = get_group_filepaths(project_folderpath)
     groups_already_created = len(groups_filepaths)
     groups_to_create = range(groups_already_created + 1, 
                            groups_already_created + args.groups + 1)
     
-    terminal_main = TerminalMain(args.project, project_folderpath, 
-                               project_filepath, groups_filepaths, args.language)
+    terminal_main = TerminalMain(args.project, project_folderpath, groups_filepaths, args.language)
     
     match args.action:
         case "groups":
@@ -138,7 +135,7 @@ def main() -> None:
         project_folderpath = Path("./data") / args.user / args.project
         
         if args.action == "init":
-            handle_init_action(args.project, project_folderpath, args.language)
+            handle_init_action(args.project, project_folderpath)
         elif args.action == "batch":
             data_folder = Path("./data") / args.user
             handle_batch_processing(data_folder, args.with_sociogram, args.language)
