@@ -11,7 +11,7 @@ import re
 import argparse
 from pathlib import Path
 from typing import List, Iterator
-from terminal.terminal_main import TerminalMain
+from lib.interfaces.terminal.terminal_main import TerminalMain
 from lib.utils import check_python_version
 
 # Available languages
