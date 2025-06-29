@@ -9,31 +9,47 @@ The code is part of the AB-Grid project and is licensed under the MIT License.
 """
 import datetime
 import pandas as pd
-
-from typing import Any, Dict
+from typing import Any, Dict, List
 
 from lib.core.core_schemas import ABGridSchema
 from lib.core.core_sna import CoreSna, SNADict
 from lib.core.core_sociogram import CoreSociogram, SociogramDict
 
+
 class CoreData:
-    """
-    """
+    """Processes AB-Grid data for answersheet and report generation."""
 
     def get_answersheet_data(self, validated_model: ABGridSchema) -> Dict[str, Any]:
+        """Generate answersheet data from validated model.
+        
+        Args:
+            validated_model: Validated ABGrid schema instance
+            
+        Returns:
+            Dictionary containing answersheet data with participants list
         """
-        """
-
         # Convert to dict
         answersheet_data = validated_model.model_dump()
 
         # Add list of participants
-        answersheet_data.update({ "participants": sum(map(lambda x: list(x.keys()), validated_model.choices_a), []) })
+        participants: List[str] = sum(map(lambda x: list(x.keys()), validated_model.choices_a), [])
+        answersheet_data.update({"participants": participants})
 
         return answersheet_data
           
     def get_report_data(self, validated_model: ABGridSchema, with_sociogram: bool = False) -> Dict[str, Any]:
-        """
+        """Generate comprehensive report data with SNA and optional sociogram analysis.
+        
+        Args:
+            validated_model: Validated ABGrid schema instance
+            with_sociogram: Whether to include sociogram analysis
+            
+        Returns:
+            Dictionary containing complete report data with analysis results
+            
+        Notes:
+            Combines SNA results with optional sociogram analysis and identifies
+            relevant nodes across both analysis types
         """
         # Initialize SNA analysis class
         abgrid_sna: CoreSna = CoreSna()
@@ -62,14 +78,14 @@ class CoreData:
         report_data["sociogram"] = sociogram_results if with_sociogram else None
 
         # Get relevant nodes from both SNA and sociogram analyses
-        relevant_nodes_ab_sna = sna_results["relevant_nodes_ab"].copy()
-        relevant_nodes_ab_sociogram = (
+        relevant_nodes_ab_sna: Dict[str, pd.DataFrame] = sna_results["relevant_nodes_ab"].copy()
+        relevant_nodes_ab_sociogram: Dict[str, pd.DataFrame] = (
             sociogram_results["relevant_nodes_ab"].copy() if with_sociogram else 
             {"a": pd.DataFrame(), "b": pd.DataFrame()}
         )
         
         # Init dict
-        relevant_nodes_ab = {}
+        relevant_nodes_ab: Dict[str, pd.DataFrame] = {}
 
         # Loop through relevant_nodes_ab keys
         for valence_type in ("a", "b"):
