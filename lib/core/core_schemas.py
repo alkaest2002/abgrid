@@ -14,6 +14,8 @@ from pydantic import BaseModel, model_validator
 
 from lib.core import SYMBOLS
 
+forbbiden_chars = re.compile(r'[^A-Za-zÀ-ÖØ-öø-ÿĀ-ſƀ-ɏḀ-ỿЀ-ӿͰ-Ͽ\d\s\'\.,\-\?\!]')
+
 class PydanticValidationException(Exception):
     """Custom exception that carries structured error information."""
     
@@ -149,8 +151,7 @@ class ABGridSchema(BaseModel):
                 })
 
             # Validate safe characters using the compiled pattern
-            forbidden_chars = re.findall(r'[^A-Za-zÀ-ÖØ-öø-ÿĀ-ſƀ-ɏḀ-ỿЀ-ӿͰ-Ͽ\d\s\'\.,\-\?\!]', value)
-            if forbidden_chars:
+            if forbidden_chars := forbbiden_chars.findall(value):
                 # Remove duplicates while preserving order
                 unique_forbidden = list(dict.fromkeys(forbidden_chars))
                 forbidden_str = ''.join(unique_forbidden)
