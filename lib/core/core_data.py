@@ -92,10 +92,8 @@ class CoreData:
             "sna": sna_results,
         }
 
-        # Conditionally include sociogram data if requested
-        if with_sociogram:
-            # Add sociogram data to report data
-            report_data["sociogram"] = sociogram_results
+        # Add sociogram data to report data
+        report_data["sociogram"] = sociogram_results if with_sociogram else None
 
         # Get relevant nodes from both SNA and sociogram analyses
         relevant_nodes_ab_sna: Dict[str, pd.DataFrame] = sna_results["relevant_nodes_ab"].copy()
