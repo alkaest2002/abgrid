@@ -25,7 +25,6 @@ class PydanticValidationException(Exception):
         ]
         super().__init__(f"{'\n'.join(error_messages)}")
 
-
 class ABGridSchema(BaseModel):
     """
     Pydantic model representing an ABGrid data project.
@@ -45,6 +44,7 @@ class ABGridSchema(BaseModel):
         - Keys in choices_a and choices_b must be identical
         - All values must reference valid keys from either choices_a or choices_b
         - Keys and values must be single alphabetic characters
+        - Text fields are validated for safe characters only (letters, numbers, safe punctuation)
     """
     
     # Fields - using Any to bypass Pydantic's built-in validation
@@ -114,9 +114,6 @@ class ABGridSchema(BaseModel):
             "question_b": (1, 300),
             "question_b_choices": (1, 150),
         }
-        
-        # Regex pattern allowing letters, accented characters, numbers, apostrophe, comma and full stop
-        valid_char_pattern = re.compile(r'^[\p{L}\d\s\'.,]+$')
 
         for field_name, (min_len, max_len) in string_fields.items():
             value = data.get(field_name)
@@ -151,11 +148,16 @@ class ABGridSchema(BaseModel):
                     "error_message": f"Must be at most {max_len} characters long"
                 })
 
-            if not valid_char_pattern.match(value):
+            # Validate safe characters using the compiled pattern
+            forbidden_chars = re.findall(r'[^A-Za-zÀ-ÖØ-öø-ÿĀ-ſƀ-ɏḀ-ỿЀ-ӿͰ-Ͽ\d\s\'\.,\-\?\!]', value)
+            if forbidden_chars:
+                # Remove duplicates while preserving order
+                unique_forbidden = list(dict.fromkeys(forbidden_chars))
+                forbidden_str = ''.join(unique_forbidden)
                 errors.append({
                     "location": field_name,
                     "value_to_blame": value,
-                    "error_message": "Contains invalid characters. Only letters, numbers, and punctuation are allowed."
+                    "error_message": f"Contains invalid characters: {forbidden_str}"
                 })
         
         # Group field validation
