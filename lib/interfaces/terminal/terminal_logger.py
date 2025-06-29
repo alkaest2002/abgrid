@@ -38,7 +38,7 @@ def logger_decorator(func: Optional[F] = None) -> Callable[[F], F]:
         - Can be used with or without parentheses: @logger_decorator or @logger_decorator()
         - Catches and formats ValueError, AttributeError, TypeError, FileNotFoundError, OSError
         - Re-raises unexpected exceptions after logging traceback information
-        - Uses pretty_print for consistent message formatting
+        - Uses print for consistent message formatting
     """
     def decorator(function: F) -> F:
         """
@@ -71,25 +71,25 @@ def logger_decorator(func: Optional[F] = None) -> Callable[[F], F]:
             try:
                 return function(*args, **kwargs)
             except ValueError as error:
-                pretty_print(str(error), "✗ ")
+                print(str(error))
                 return None
             except AttributeError as error:
-                pretty_print(str(error), "✗ ")
+                print(str(error))
                 return None
             except TypeError as error:
-                pretty_print(str(error), "✗ ")
+                print(str(error))
                 return None
             except FileNotFoundError as error:
-                pretty_print(str(error), "✗ ")
+                print(str(error))
                 return None
             except OSError as error:
-                pretty_print(str(error), "✗ ")
+                print(str(error))
                 return None
             except TemplateRenderError as error:
-                pretty_print(str(error), "✗ ")
+                print(str(error))
                 return None
             except Exception as error:
-                pretty_print(extract_traceback_info(error))
+                print(str(error))
                 raise
         return wrapper
     
@@ -143,49 +143,3 @@ def extract_traceback_info(error: Exception, exclude_files: Optional[Set[str]] =
         return "Traceback (most recent call last):\n" + "\n".join(traceback_lines)
     else:
         return "No traceback available"
-
-
-def pretty_print(text: str, prefix: str = "▶ ", width: int = 80) -> None:
-    """
-    Print text with optional prefix and automatic line wrapping.
-    
-    Formats and prints text with consistent styling, handling line wrapping
-    for long messages while maintaining proper indentation alignment.
-    
-    Args:
-        text: Text content to print
-        prefix: Optional prefix to prepend to the text (e.g., "▶ ", "✗ ")
-        width: Maximum line width for text wrapping
-    
-    Returns:
-        None
-    
-    Notes:
-        - Returns early for empty text input
-        - Prints single line if text fits within width limit
-        - Uses textwrap for automatic line breaking on long text
-        - Maintains consistent indentation for wrapped lines
-    """
-    # Handle empty text
-    if not text:
-        return
-    
-    # Print text directly, if it fits on one line
-    if len(full_line := f"{prefix}{text}") <= width:
-        print(full_line)
-        return
-    
-    # Text needs wrapping
-    [first_line, *rest_of_lines] = textwrap.wrap(
-        text,
-        width=max(1, width - len(prefix)),
-        break_long_words=True,
-        break_on_hyphens=True
-    )
-    
-     # Print first line with prefix
-    print(f"{prefix}{first_line}")
-    
-    # Print rest of lines with indentation
-    for line in rest_of_lines:
-        print(f"{' ' * len(prefix)}{line}")

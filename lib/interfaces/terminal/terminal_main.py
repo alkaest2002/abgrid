@@ -28,7 +28,7 @@ from lib.core import SYMBOLS
 from lib.core.core_data import CoreData
 from lib.core.core_templates import CoreRenderer
 from lib.utils import to_json_serializable
-from lib.interfaces.terminal.terminal_logger import logger_decorator, pretty_print
+from lib.interfaces.terminal.terminal_logger import logger_decorator
 
 ProjectData = Dict[str, Any]
 GroupData = Dict[str, Any]
@@ -116,7 +116,7 @@ class TerminalMain:
         os.makedirs(project_folderpath / "answersheets")
         
         # Notify user
-        pretty_print(f"Project {project} correctly initialized.")
+        print(f"Project {project} correctly initialized.")
 
     @logger_decorator
     def generate_group_inputs(
@@ -183,7 +183,7 @@ class TerminalMain:
                 file.write(rendered_group_template)
 
         # Notify user
-        pretty_print(f"{group_number} group(s) succesfully generated.")
+        print(f"{group_number} group(s) succesfully generated.")
             
     @logger_decorator
     def generate_answersheets(self) -> None:
@@ -220,7 +220,10 @@ class TerminalMain:
             
             # Raise on validation errors
             if data_errors:
-                raise ValueError(f"Report data validation failed for {group_file.name}: {data_errors}.")
+                error_label = f"Report data validation failed for {group_file.name}"
+                raise ValueError(
+                    f"{error_label}:\n{'-'*len(error_label)}\n{data_errors}."
+                )
             
             # Init sheets_data
             sheets_data = validated_data.model_dump()
@@ -229,7 +232,7 @@ class TerminalMain:
             sheets_data.update({ "participants": sum(map(lambda x: list(x.keys()), validated_data.choices_a), []) })
 
             # Notify user
-            pretty_print(f"Generating answersheets for {group_file.stem}. Please, wait...")
+            print(f"Generating answersheets for {group_file.stem}. Please, wait...")
             
             # Generate and save the PDF answer sheet
             rendered_answersheets = self.renderer.render_html(f"./{self.language}/answersheet.html", sheets_data)
@@ -238,7 +241,7 @@ class TerminalMain:
             self._generate_pdf("answersheet", rendered_answersheets, group_file.stem, self.answersheets_path)
 
             # Notify user
-            pretty_print(f"Answersheets for {group_file.stem} succesfully generated.")
+            print(f"Answersheets for {group_file.stem} succesfully generated.")
 
     @logger_decorator
     def generate_reports(self, with_sociogram: bool = False) -> None:
@@ -278,13 +281,16 @@ class TerminalMain:
             
             # Raise on validation errors
             if data_errors:
-                raise ValueError(f"Report data validation failed for {group_file.name}: {data_errors}.")
+                error_label = f"Report data validation failed for {group_file.name}"
+                raise ValueError(
+                    f"{error_label}:\n{'-'*len(error_label)}\n{data_errors}."
+                )
             
             # Get report Data
             report_data = self.core_data.get_data(validated_data, with_sociogram)
             
             # Notify user
-            pretty_print(f"Generating report for {group_file.stem}. Please, wait...")
+            print(f"Generating report for {group_file.stem}. Please, wait...")
             
             # Render report html template
             rendered_report = self.renderer.render_html(f"./{self.language}/report.html", report_data)
@@ -293,7 +299,7 @@ class TerminalMain:
             self._generate_pdf("report", rendered_report, group_file.stem, self.reports_path)
 
             # Notify user
-            pretty_print(f"Report for {group_file.stem} succesfully generated.")
+            print(f"Report for {group_file.stem} succesfully generated.")
             
             filtered_data = to_json_serializable(
                 report_data, 

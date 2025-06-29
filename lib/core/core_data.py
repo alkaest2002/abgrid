@@ -19,6 +19,7 @@ from pydantic import ValidationError
 from lib.core.core_schemas import ABGridSchema
 from lib.core.core_sna import CoreSna, SNADict
 from lib.core.core_sociogram import CoreSociogram, SociogramDict
+from lib.core.core_schemas import ValidationException
 
 class CoreData:
     """
@@ -46,7 +47,7 @@ class CoreData:
         try:
             validated_model = ABGridSchema.model_validate(data)
             return validated_model, None
-        except ValidationError as error:
+        except ValidationException as error:
             return None, self._get_pydantic_errors(error)
           
     def get_data(self, validated_model: ABGridSchema, with_sociogram: bool = False) -> Dict[str, Any]:
@@ -149,7 +150,7 @@ class CoreData:
         
         return report_data
 
-    def _get_pydantic_errors(self, validation_error: ValidationError, context: str = "") -> str:
+    def _get_pydantic_errors(self, validation_exception: ValidationException, context: str = "") -> str:
         """
         Format Pydantic validation errors into human-readable error messages.
         
@@ -168,24 +169,23 @@ class CoreData:
             - Supports optional context prefixes for error categorization
             - Returns empty string if no errors are present
         """
-        errors: List[Dict[str, Any]] = validation_error.errors()
-        if not errors:
-            return ""
-        
+        # Init formatted errors
         formatted_errors: List[str] = []
         
-        for error in errors:
-            loc: Tuple[Union[str, int], ...] = error.get('loc', ())
-            msg: str = error.get('msg', 'Unknown error')
+        # Loop through errors
+        for error in validation_exception.errors:  
             
-            # Build location string
-            if loc:
-                location: str = '.'.join(str(part) for part in loc)
-                error_msg: str = f"{location}: {msg}"
-            else:
-                error_msg = msg
+            # Get location of error
+            location = error.get('location', None)
             
-            # Add context if provided
+            # Get error message
+            error_message = error.get('error_message', 'Unknown error')
+            
+            # Add error location if provided
+            if location:
+                error_msg: str = f"{location}: {error_message}"
+            
+            # Add error context if provided
             if context:
                 error_msg = f"[{context}] {error_msg}"
             
@@ -193,4 +193,4 @@ class CoreData:
             formatted_errors.append(error_msg)
         
         # Join all errors into a single string
-        return "; ".join(formatted_errors)
+        return "\n".join(formatted_errors)
