@@ -1,15 +1,6 @@
 {% extends "_base.html" %}
 {% import "./_base_macro.html" as base_macro %}
 
-{% macro get_list_of_participants(choices) %}
-    {% set participants_list = [] %}
-    {% for choice in choices %}
-        {% set participants_list = participants_list + (choice.keys() | list) %}
-    {% endfor %}
-    {{ participants_list }}
-{% endmacro %}
-
-
 {% macro answersheet_likert(participants, participant) %}
     <div class="likert-container">
         {% for member in participants %}
@@ -28,7 +19,6 @@
 {% endmacro %}
 
 {% macro answersheet_body() %}
-    {% set participants = get_list_of_participants(choices_a) %}
     {% for participant in participants %}
         <div class="page">
             <div>

@@ -17,7 +17,6 @@ The code is part of the AB-Grid project and is licensed under the MIT License.
 """
 
 import os
-from click import clear
 from weasyprint import HTML
 import yaml
 import json
@@ -238,15 +237,16 @@ class TerminalMain:
             # Raise on validation errors
             if data_errors:
                 raise ValueError(f"Report data validation failed for {group_file.name}: {data_errors}.")
+            
+            # Init sheets_data
+            sheets_data = validated_data.model_dump()
+            sheets_data.update({ "participants": sum(map(lambda x: list(x.keys()), validated_data.choices_a), []) })
 
             # Notify user
             pretty_print(f"Generating answersheets for {group_file.stem}. Please, wait...")
             
             # Generate and save the PDF answer sheet
-            rendered_answersheets = self.renderer.render_html(
-                f"./{self.language}/answersheet.html", 
-                validated_data.model_dump()
-            )
+            rendered_answersheets = self.renderer.render_html(f"./{self.language}/answersheet.html", sheets_data)
             
             # Generate PDF answersheets
             self._generate_pdf("answersheet", rendered_answersheets, group_file.stem, self.answersheets_path)
