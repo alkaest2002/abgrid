@@ -18,7 +18,7 @@ from pydantic import ValidationError
 
 from lib.core.core_schemas import ABGridSchema
 from lib.core.core_sna import CoreSna, SNADict
-from lib.core.core_sociogram import SociogramDict, CoreSociogram
+from lib.core.core_sociogram import CoreSociogram, SociogramDict
 
 class CoreData:
     """
