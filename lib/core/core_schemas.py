@@ -1,6 +1,6 @@
 """
 Filename: core_schemas.py
-Description: Defines Pydantic models for project and group schemas, ensuring data integrity and validation.
+Description: Defines Pydantic models ensuring data integrity and validation.
 
 Author: Pierpaolo Calanna
 Date Created: May 3, 2025
@@ -8,12 +8,12 @@ Date Created: May 3, 2025
 The code is part of the AB-Grid project and is licensed under the MIT License.
 """
 
+from typing import Dict, List, Optional
 from pydantic import BaseModel, Field, field_validator, model_validator
 from pydantic.types import constr
-from typing import Dict, List, Optional
-
 
 from lib.core import SYMBOLS
+
 
 class ABGridSchema(BaseModel):
     """
@@ -39,6 +39,8 @@ class ABGridSchema(BaseModel):
         - All values must reference valid keys from either choices_a or choices_b
         - Keys and values must be single alphabetic characters
     """
+    
+    # Fields
     project_title: constr(min_length=1, max_length=80) # type: ignore
     group: int = Field(ge=1, le=50)
     prompt: constr(min_length=1, max_length=500) # type: ignore
@@ -49,8 +51,10 @@ class ABGridSchema(BaseModel):
     choices_a: List[Dict[str, Optional[str]]]
     choices_b: List[Dict[str, Optional[str]]]
     
+    # Config
     model_config = {"extra": "forbid"}
 
+    # Extra
     @field_validator("choices_a", "choices_b")
     @classmethod
     def validate_choices(cls, value: List[Dict[str, Optional[str]]]) -> List[Dict[str, Optional[str]]]:
@@ -148,17 +152,23 @@ class ABGridSchema(BaseModel):
         
         for choices_type, choices_list in [("a", self.choices_a), ("b", self.choices_b)]:
             for choice in choices_list:
+                
                 # Get Key
                 key: str = next(iter(choice.keys()))
+                
                 # Get value
                 value_str: Optional[str] = choice[key]
+                
                 # Value can be none   
                 if value_str is None:
                     continue
+                
                 # Split value
                 value_parts: List[str] = value_str.split(',') if value_str else []
+                
                 # Get invalid values
                 invalid_values: List[str] = [v for v in value_parts if v not in all_valid_keys]
+                
                 # If there are invalid values
                 if invalid_values:
                     raise ValueError(
