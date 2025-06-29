@@ -59,8 +59,6 @@ class TerminalMain:
             project: Name of the project
             project_folderpath: Path to the project directory
             groups_filepaths: List of paths to group configuration files
-            answersheets_path: Path to answersheets directory
-            reports_path: Path to reports directory
             language: language used in templates
 
         Returns:
@@ -95,11 +93,10 @@ class TerminalMain:
         project_folderpath: Path, 
     ) -> None:
         """
-        Initialize a new AB-Grid project with directory structure and configuration.
+        Initialize a new AB-Grid project with directory structure.
         
         Creates the project directory structure including subdirectories for reports
-        and answer sheets, then generates a project configuration file based on the
-        specified language template.
+        and answer sheets.
         
         Args:
             project: Name of the project to initialize
@@ -111,17 +108,12 @@ class TerminalMain:
         Notes:
             - Fails if project directory already exists
             - Creates 'reports' and 'answersheets' subdirectories
-            - Uses language-specific templates from lib/templates/{language}/
         """
         # Create the main project directory structure
         # os.makedirs will create intermediate directories if they don't exist
         os.makedirs(project_folderpath, exist_ok=False)  # Fail if project already exists
-        
-        # Create subdirectories for reports and answer sheets
-        reports_dir = project_folderpath / "reports"
-        answersheets_dir = project_folderpath / "answersheets"
-        os.makedirs(reports_dir)
-        os.makedirs(answersheets_dir)
+        os.makedirs(project_folderpath / "reports")
+        os.makedirs(project_folderpath / "answersheets")
         
         # Notify user
         pretty_print(f"Project {project} correctly initialized.")
@@ -137,8 +129,7 @@ class TerminalMain:
         Generate group configuration files for specified groups.
         
         Creates individual YAML configuration files for each group using the
-        language-specific template. Each file contains group-specific data
-        including member assignments using alphabetical symbols.
+        language-specific template.
         
         Args:
             groups: Range object specifying which group numbers to generate
@@ -175,18 +166,11 @@ class TerminalMain:
         except Exception as e:
             raise FileNotFoundError(f"Group template not found: {template_path}.") from e
         
-        # Extract member letters based on the number of members per group
-        # SYMBOLS contains the alphabet letters used for member identification
-        members_per_group_letters = SYMBOLS[:members_per_group]
-        
         # Generate a configuration file for each group
         for group_number in groups:
             
             # Prepare template data for the current group
-            template_data: Dict[str, Any] = {
-                "group": group_number, 
-                "members": members_per_group_letters
-            }
+            template_data = { "group": group_number, "members": SYMBOLS[:members_per_group] }
             
             # Render the template with group-specific data
             rendered_group_template = group_template.render(template_data)
@@ -240,6 +224,8 @@ class TerminalMain:
             
             # Init sheets_data
             sheets_data = validated_data.model_dump()
+
+            # Add list of participants
             sheets_data.update({ "participants": sum(map(lambda x: list(x.keys()), validated_data.choices_a), []) })
 
             # Notify user
@@ -337,7 +323,7 @@ class TerminalMain:
        
         except Exception as e:
             raise OSError(f"Failed to export data to JSON file {json_export_path}: {e}.") from e
-    
+        
     @logger_decorator
     def _load_yaml_data(self, yaml_file_path: Path) -> Union[Dict[str, Any], None]:
         """
