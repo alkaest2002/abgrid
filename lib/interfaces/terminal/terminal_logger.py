@@ -12,62 +12,59 @@ The code is part of the AB-Grid project and is licensed under the MIT License.
 """
 
 import textwrap
-
 from functools import wraps
 from pathlib import Path
-from typing import Any, Callable, List, Optional, Set, TypeVar
+from typing import Any, Callable, List, Optional, Set, TypeVar, Union
 from lib.core.core_schemas import PydanticValidationException
 from lib.core.core_templates import TemplateRenderError
 
 # Type variable for preserving function signatures
 F = TypeVar('F', bound=Callable[..., Any])
 
-def logger_decorator(func: Optional[F] = None) -> Callable[[F], F]:
+def logger_decorator(func: Optional[F] = None) -> Union[Callable[[F], F], F]:
     """
-    Create a logging decorator that wraps functions with start/end messages and error handling.
+    Create a logging decorator that wraps functions with error handling.
     
-    This decorator provides comprehensive error handling and logging for function execution,
+    This decorator provides comprehensive error handling for function execution,
     catching common exceptions and formatting them for user-friendly display.
     
     Args:
         func: Optional function to decorate (when used without parentheses)
     
     Returns:
-        Decorator function that can be applied to other functions, or the decorated function itself
+        Decorator function or the decorated function itself
+    
+    Usage:
+        @logger_decorator
+        def my_function(): pass
+        
+        # or
+        
+        @logger_decorator()
+        def my_function(): pass
     
     Notes:
-        - Can be used with or without parentheses: @logger_decorator or @logger_decorator()
-        - Catches and formats ValueError, AttributeError, TypeError, FileNotFoundError, OSError
-        - Re-raises unexpected exceptions after logging traceback information
+        - Returns None for handled exceptions (doesn't re-raise them)
         - Uses print for consistent message formatting
+        - Handles different exception types with appropriate formatting
     """
     def decorator(function: F) -> F:
         """
-        Decorator function that wraps the target function with logging and error handling.
+        Decorator function that wraps the target function with error handling.
         
         Args:
-            function: The function to be decorated with logging capabilities
+            function: The function to be decorated
         
         Returns:
-            Wrapper function with logging and error handling
+            Wrapper function with error handling
         """
         @wraps(function)
         def wrapper(*args: Any, **kwargs: Any) -> Any:
             """
-            Wrapper function that executes the decorated function with logging.
-            
-            Args:
-                *args: Positional arguments to pass to the decorated function
-                **kwargs: Keyword arguments to pass to the decorated function
+            Wrapper function that executes the decorated function with error handling.
             
             Returns:
-                Result of the decorated function execution, or None if an exception is caught
-            
-            Notes:
-                - Logs start message before execution
-                - Logs end message on successful completion
-                - Handles exceptions with appropriate error formatting
-                - Returns None for handled exceptions (doesn't re-raise them)
+                Result of the decorated function execution, or None if an exception occurs
             """
             try:
                 return function(*args, **kwargs)
@@ -99,10 +96,8 @@ def logger_decorator(func: Optional[F] = None) -> Callable[[F], F]:
     
     # Handle both @logger_decorator and @logger_decorator() usage
     if func is None:
-        # Called with parentheses: @logger_decorator()
         return decorator
     else:
-        # Called without parentheses: @logger_decorator
         return decorator(func)
 
 
@@ -121,12 +116,12 @@ def extract_traceback_info(error: Exception, exclude_files: Optional[Set[str]] =
         Formatted string containing traceback information
     
     Notes:
-        - Defaults to excluding "abgrid_logger.py" from traceback
+        - Defaults to excluding "terminal_logger.py" from traceback
         - Formats each frame as "filename:line_number in function_name()"
-        - Returns fallback message if no traceback frames are available
+        - Includes the original error message
     """
     if exclude_files is None:
-        exclude_files = {"abgrid_logger.py"}
+        exclude_files = {"terminal_logger.py"}
     
     traceback_lines = []
     current_traceback = error.__traceback__
@@ -136,53 +131,41 @@ def extract_traceback_info(error: Exception, exclude_files: Optional[Set[str]] =
         filename = Path(frame.f_code.co_filename).name
 
         if filename not in exclude_files:
-            # Format each traceback frame as a readable line
             trace_line = f"{filename}:{current_traceback.tb_lineno} in {frame.f_code.co_name}()"
             traceback_lines.append(f"→ {trace_line}")
         
         current_traceback = current_traceback.tb_next
     
-    # Return formatted string or fallback message
-    if traceback_lines:
-        return "Traceback (most recent call last):\n" + "\n".join(traceback_lines)
-    else:
-        return "No traceback available"
+    # Include the error type and message
+    error_header = f"{type(error).__name__}: {str(error)}"
     
+    if traceback_lines:
+        return f"Traceback (most recent call last):\n" + "\n".join(traceback_lines) + f"\n{error_header}"
+    else:
+        return f"Error: {error_header}"
+    
+
 def extract_pydantic_errors(pydantic_validation_exception: PydanticValidationException) -> str:
-        """
-        Format Pydantic validation errors into human-readable error messages.
-        
-        Converts ValidationError objects into formatted strings that provide
-        clear information about field locations and error descriptions.
-        
-        Args:
-            validation_error: Pydantic ValidationError object containing error details
-        
-        Returns:
-            Formatted string containing all validation errors separated by semicolons
-        
-        Notes:
-            - Builds location paths using dot notation for nested fields
-            - Supports optional context prefixes for error categorization
-            - Returns empty string if no errors are present
-        """
-        # Init formatted errors
-        formatted_errors: List[str] = [
-            "Pydantic validation errors", 
-            "==========================",
-        ]
-        
-        # Loop through errors
-        for error in pydantic_validation_exception.errors:  
-            
-            # Get location of error
-            location = error.get('location', "Unkown location")
-            
-            # Get error message
-            error_message = error.get('error_message', 'Unknown error')
-            
-            # Append error to list
-            formatted_errors.append(f"{location}: {error_message}")
-        
-        # Join all errors into a single string
-        return "\n".join(formatted_errors)
+    """
+    Format Pydantic validation errors into human-readable error messages.
+    
+    Converts PydanticValidationException objects into formatted strings that provide
+    clear information about field locations and error descriptions.
+    
+    Args:
+        pydantic_validation_exception: PydanticValidationException containing error details
+    
+    Returns:
+        Formatted string containing all validation errors
+    """
+    formatted_errors = [
+        "Pydantic validation errors:",
+        "=" * 28,
+    ]
+    
+    for error in pydantic_validation_exception.errors:
+        location = error.get('location', "Unknown location")
+        error_message = error.get('error_message', 'Unknown error')
+        formatted_errors.append(f"  {location}: {error_message}")
+    
+    return "\n".join(formatted_errors)
