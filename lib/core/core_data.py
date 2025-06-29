@@ -96,14 +96,14 @@ class CoreData:
         report_data["sociogram"] = sociogram_results if with_sociogram else None
 
         # Get relevant nodes from both SNA and sociogram analyses
-        relevant_nodes_ab_sna: Dict[str, pd.DataFrame] = sna_results["relevant_nodes_ab"].copy()
-        relevant_nodes_ab_sociogram: Dict[str, pd.DataFrame] = (
+        relevant_nodes_ab_sna = sna_results["relevant_nodes_ab"].copy()
+        relevant_nodes_ab_sociogram = (
             sociogram_results["relevant_nodes_ab"].copy() if with_sociogram else 
             {"a": pd.DataFrame(), "b": pd.DataFrame()}
         )
         
         # Init dict
-        relevant_nodes_ab: Dict[str, pd.DataFrame] = {}
+        relevant_nodes_ab = {}
 
         # Loop through relevant_nodes_ab keys
         for valence_type in ("a", "b"):
