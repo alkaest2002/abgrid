@@ -262,6 +262,9 @@ class TerminalMain:
 
         # Process each group file to generate individual reports
         for group_file in self.groups_filepaths:
+
+            # Notify user
+            print(f"Generating report for {group_file.stem}. Please, wait...")
             
             # Load current group data
             group_data = self._load_yaml_data(group_file)
@@ -271,9 +274,6 @@ class TerminalMain:
             
             # Get report Data
             report_data = self.core_data.get_report_data(validated_data, with_sociogram)
-            
-            # Notify user
-            print(f"Generating report for {group_file.stem}. Please, wait...")
             
             # Render report html template
             rendered_report = self.renderer.render_html(f"./{self.language}/report.html", report_data)
