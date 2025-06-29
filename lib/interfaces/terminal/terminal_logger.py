@@ -91,9 +91,10 @@ def logger_decorator(func: Optional[F] = None) -> Callable[[F], F]:
                 return None
             except PydanticValidationException as error:
                 print(extract_pydantic_errors(error))
+                return None
             except Exception as error:
                 print(extract_traceback_info(error))
-                raise
+                return None
         return wrapper
     
     # Handle both @logger_decorator and @logger_decorator() usage

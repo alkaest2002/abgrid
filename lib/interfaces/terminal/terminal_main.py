@@ -160,11 +160,8 @@ class TerminalMain:
         # template for the language-specific group template
         template_path = f"/{language}/group.html"
         
-        try:
-            # Try to load template for the language-specific group template
-            group_template = abgrid_jinja_env.get_template(template_path)
-        except Exception as e:
-            raise FileNotFoundError(f"Group template not found: {template_path}.") from e
+        # Load template for the language-specific group template
+        group_template = abgrid_jinja_env.get_template(template_path)
         
         # Generate a configuration file for each group
         for group_number in groups:
@@ -207,7 +204,7 @@ class TerminalMain:
         """
         # Validate that group files exist
         if not self.groups_filepaths:
-            raise ValueError("No group files found. Please generate group inputs first.")
+            raise ValueError("No group files found.")
 
         # Process each group file to generate individual answer sheets
         for group_file in self.groups_filepaths:
@@ -302,16 +299,12 @@ class TerminalMain:
             # Add the filtered data to the collection
             all_groups_data[group_file.stem] = filtered_data
         
-        try:
             # Define json export file path
             json_export_path = self.project_folderpath / f"{self.project}_data.json"
 
             # Persist json file to disk
             with open(json_export_path, "w", encoding='utf-8') as fout:
                 json.dump(all_groups_data, fout, indent=4, ensure_ascii=False)
-       
-        except Exception as e:
-            raise OSError(f"Failed to export data to JSON file {json_export_path}: {e}.") from e
         
     @logger_decorator
     def _load_yaml_data(self, yaml_file_path: Path) -> Union[Dict[str, Any], None]:
@@ -337,9 +330,6 @@ class TerminalMain:
                 yaml_data = yaml.safe_load(file)
             return yaml_data
         
-        except FileNotFoundError:
-            raise FileNotFoundError(f"{yaml_file_path.name} could not be found.")
-        
         except yaml.YAMLError:
             raise ValueError(f"{yaml_file_path.name} could not be parsed.")
         
@@ -363,6 +353,7 @@ class TerminalMain:
         # Convert HTML to PDF and save to disk
         try:
             HTML(string=rendered_template).write_pdf(file_path)
+        
         except Exception as e:
             raise OSError(f"PDF generation failed for {file_path}: {e}.") from e
 
