@@ -89,7 +89,7 @@ def logger_decorator(func: Optional[F] = None) -> Callable[[F], F]:
                 print(str(error))
                 return None
             except Exception as error:
-                print(str(error))
+                print(extract_traceback_info(error))
                 raise
         return wrapper
     

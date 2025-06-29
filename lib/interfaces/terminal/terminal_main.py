@@ -222,7 +222,7 @@ class TerminalMain:
             if data_errors:
                 error_label = f"Report data validation failed for {group_file.name}"
                 raise ValueError(
-                    f"{error_label}:\n{'-'*len(error_label)}\n{data_errors}."
+                    f"{error_label}:\n{'-'*len(error_label)}\n{data_errors}"
                 )
             
             # Init sheets_data
@@ -283,7 +283,7 @@ class TerminalMain:
             if data_errors:
                 error_label = f"Report data validation failed for {group_file.name}"
                 raise ValueError(
-                    f"{error_label}:\n{'-'*len(error_label)}\n{data_errors}."
+                    f"{error_label}:\n{'-'*len(error_label)}\n{data_errors}"
                 )
             
             # Get report Data

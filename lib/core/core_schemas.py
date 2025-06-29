@@ -22,7 +22,7 @@ class ValidationException(Exception):
             f"{error['location']}: {error['error_message']}"
             for error in errors
         ]
-        super().__init__(f"{chr(10).join(error_messages)}")
+        super().__init__(f"{'\n'.join(error_messages)}")
 
 
 class ABGridSchema(BaseModel):
@@ -275,7 +275,7 @@ class ABGridSchema(BaseModel):
                     errors.append({
                         "location": f"{choice_location}.{key}",
                         "value_to_blame": value_str,
-                        "error_message": "Value must be a string or None."
+                        "error_message": "Value must be a string or None"
                     })
                     continue
                 
@@ -287,7 +287,7 @@ class ABGridSchema(BaseModel):
                         errors.append({
                             "location": f"{choice_location}.{key}",
                             "value_to_blame": value_str,
-                            "error_message": "Value contains only empty entries or whitespace."
+                            "error_message": "Value contains only empty entries or whitespace"
                         })
                         continue
                     
@@ -297,7 +297,7 @@ class ABGridSchema(BaseModel):
                         errors.append({
                             "location": f"{choice_location}.{key}",
                             "value_to_blame": value_str,
-                            "error_message": f"Value must contain only single alphabetic characters."
+                            "error_message": f"Value must contain only single alphabetic characters"
                         })
                     
                     # Check key doesn't appear in its own values
@@ -305,7 +305,7 @@ class ABGridSchema(BaseModel):
                         errors.append({
                             "location": f"{choice_location}.{key}",
                             "value_to_blame": value_str,
-                            "error_message": "Key cannot be present in its own values."
+                            "error_message": "Key cannot be present in its own values"
                         })
                     
                     # Check for duplicates
@@ -314,7 +314,7 @@ class ABGridSchema(BaseModel):
                         errors.append({
                             "location": f"{choice_location}.{key}",
                             "value_to_blame": value_str,
-                            "error_message": f"Values contain duplicates."
+                            "error_message": f"Values contain duplicates"
                         })
                     
                     # Check that all values reference valid keys
@@ -323,7 +323,7 @@ class ABGridSchema(BaseModel):
                         errors.append({
                             "location": f"{choice_location}.{key}",
                             "value_to_blame": value_str,
-                            "error_message": "Values contain invalid references."
+                            "error_message": "Values contain invalid references"
                         })
     
     @classmethod
@@ -336,7 +336,7 @@ class ABGridSchema(BaseModel):
                     "choices_a_keys": sorted(choices_a_keys),
                     "choices_b_keys": sorted(choices_b_keys)
                 },
-                "error_message": "Keys in choices_a and choices_b must be identical."
+                "error_message": "Keys in choices_a and choices_b must be identical"
             })
     
     @classmethod
