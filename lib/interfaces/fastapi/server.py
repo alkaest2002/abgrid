@@ -89,11 +89,11 @@ def get_server() -> FastAPI:
             report_data = core_data.get_report_data(model, True)
 
             # User requested html report
-            if type_of_report == 'html':
+            if type_of_report == "html":
                 return _generate_html_report(language, report_data)
 
             # User requested report json data
-            elif type_of_report == 'json':
+            elif type_of_report == "json":
                 return _generate_json_report(report_data)
 
         except FileNotFoundError as e:
