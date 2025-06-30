@@ -1,6 +1,6 @@
-from typing import Optional, Any
 
 import jwt
+from typing import Optional, Any
 from fastapi import Depends, HTTPException, status
 from fastapi.security import SecurityScopes, HTTPAuthorizationCredentials, HTTPBearer
 

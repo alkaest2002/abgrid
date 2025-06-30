@@ -1,5 +1,6 @@
 from functools import lru_cache
 from pydantic_settings import BaseSettings
+from typing import Optional
 
 class Settings(BaseSettings):
     """
@@ -14,11 +15,12 @@ class Settings(BaseSettings):
     auth0_domain: str
     auth0_api_audience: str
     auth0_issuer: str
-    auth0_algorithms: str
+    auth0_algorithms: str = "RS256"
 
     class Config:
         """Configuration for the Settings class."""
-        env_file = ".env"
+        env_file = "./lib/interfaces/fastapi/.env"
+        case_sensitive = False
 
 
 @lru_cache()
@@ -28,5 +30,13 @@ def get_settings() -> Settings:
 
     Returns:
         Settings: The application settings instance.
+        
+    Raises:
+        ValidationError: If required environment variables are missing.
     """
-    return Settings()
+    try:
+        return Settings()
+    except Exception as e:
+        print(f"Error loading settings: {e}")
+        print("Please ensure you have a .env file with the required Auth0 configuration.")
+        raise
