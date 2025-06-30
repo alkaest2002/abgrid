@@ -9,7 +9,7 @@ The code is part of the AB-Grid project and is licensed under the MIT License.
 """
 import datetime
 import pandas as pd
-from typing import Any, Dict, List
+from typing import Any, Dict
 
 from lib.core.core_schemas import ABGridSchema
 from lib.core.core_sna import CoreSna, SNADict
