@@ -1,4 +1,5 @@
 from fastapi import Depends, FastAPI, HTTPException, Request, Query, Security
+import fastapi
 from fastapi.responses import HTMLResponse, JSONResponse
 from fastapi.security import HTTPBearer
 from typing import Literal
@@ -23,10 +24,10 @@ def get_server() -> FastAPI:
     # Init auth
     auth = VerifyToken()
     
-    # Instantiate CoreData
+    # Instantiate abgrid core data
     core_data = CoreData()
 
-    # Initialize core renderer
+    # Initialize abgrid core renderer
     renderer = CoreRenderer()
 
     @app.exception_handler(PydanticValidationException)
@@ -44,7 +45,7 @@ def get_server() -> FastAPI:
             JSONResponse: A JSON response with status code 422 and error details.
         """
         return JSONResponse(
-            status_code=422,
+            status_code=fastapi.status.HTTP_422_UNPROCESSABLE_ENTITY,
             content={"detail": exc.errors}
         )
 
