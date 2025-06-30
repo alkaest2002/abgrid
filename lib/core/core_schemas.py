@@ -75,7 +75,7 @@ class ABGridSchema(BaseModel):
             Dict[str, Any]: Validated data dictionary
             
         Raises:
-            ValueError: Contains all validation errors found across all fields and constraints
+            PydanticValidationException: Contains all validation errors found across all fields and constraints
         """
         errors: List[Dict[str, Any]] = []
         
