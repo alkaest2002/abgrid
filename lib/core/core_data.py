@@ -28,12 +28,13 @@ class CoreData:
         Returns:
             Dictionary containing answersheet data with participants list
         """
-        # Convert to dict
+        # Convert model to dict
         answersheet_data = validated_model.model_dump()
 
         # Add list of participants
-        participants: List[str] = sum(map(lambda x: list(x.keys()), validated_model.choices_a), [])
-        answersheet_data.update({"participants": participants})
+        answersheet_data.update({
+            "participants":  sum(map(lambda x: list(x.keys()), validated_model.choices_a), [])
+        })
 
         return answersheet_data
           
@@ -74,7 +75,7 @@ class CoreData:
             "sna": sna_results,
         }
 
-        # Add sociogram data to report data
+        # Add sociogram data to report data, if requested
         report_data["sociogram"] = sociogram_results if with_sociogram else None
 
         # Get relevant nodes from both SNA and sociogram analyses
