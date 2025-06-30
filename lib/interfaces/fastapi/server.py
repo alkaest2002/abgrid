@@ -4,10 +4,10 @@ from typing import Literal
 from fastapi import FastAPI, HTTPException, Request, Query, Security, status
 from fastapi.responses import HTMLResponse, JSONResponse
 
+from .utils import VerifyToken
 from lib.core.core_data import CoreData
 from lib.core.core_schemas import ABGridSchema, PydanticValidationException
 from lib.core.core_templates import CoreRenderer
-from .utils import VerifyToken
 from lib.utils import to_json
 
 def get_server() -> FastAPI:
@@ -88,12 +88,20 @@ def get_server() -> FastAPI:
             # Get Report data
             report_data = core_data.get_report_data(model, True)
 
+            # User requested html report
             if type_of_report == 'html':
                 return _generate_html_report(language, report_data)
 
+            # User requested report json data
             elif type_of_report == 'json':
                 return _generate_json_report(report_data)
 
+        except FileNotFoundError as e:
+             raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND, 
+                detail=f"Language {language} is not available"
+            )
+        
         except Exception as e:
             # General exceptions catch-all
             raise HTTPException(
