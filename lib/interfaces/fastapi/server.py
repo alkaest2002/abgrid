@@ -4,7 +4,7 @@ from fastapi.responses import HTMLResponse, JSONResponse
 from lib.core.core_data import CoreData
 from lib.core.core_schemas import ABGridSchema, PydanticValidationException
 from lib.core.core_templates import CoreRenderer
-
+from lib.utils import to_json
 
 def get_server():
 
@@ -33,8 +33,8 @@ def get_server():
             content={"detail": exc.errors}
         )
 
-    @app.post("/report_data")
-    def report_data(model: ABGridSchema) -> HTMLResponse:
+    @app.post("/report_as_html")
+    def get_report_as_html(model: ABGridSchema) -> HTMLResponse:
         """
         Endpoint to retrieve and render report data based on a validated ABGridSchema model.
 
@@ -55,11 +55,40 @@ def get_server():
             rendered_report = renderer.render_html("./it/report.html", report_data)
             
             # Return HTML fragment
-            print(rendered_report)
             return HTMLResponse(content=rendered_report)
             
         except Exception as e:
             # General exceptions catch-all
             raise HTTPException(status_code=500, detail=str(e))
+        
+    
+    @app.post("/report_as_json")
+    def get_report_as_json(model: ABGridSchema) -> JSONResponse:
+        """
+        Endpoint to retrieve report data as JSON based on a validated ABGridSchema model.
+
+        Args:
+            model (ABGridSchema): Parsed and validated instance of ABGridSchema from request body.
+        
+        Returns:
+            JSONResponse: A JSON response containing the complete report data in serializable format.
+            
+        Raises:
+            HTTPException: If a validation or unexpected error occurs during processing.
+        """
+        try:
+            # Get Report data with sociogram analysis
+            report_data = core_data.get_report_data(model, True)
+            
+            # Convert to JSON-serializable format
+            json_serializable_data = to_json(report_data)
+            
+            # Return JSON response
+            return JSONResponse(content=json_serializable_data)
+            
+        except Exception as e:
+            # General exceptions catch-all
+            raise HTTPException(status_code=500, detail=str(e))
+
 
     return app

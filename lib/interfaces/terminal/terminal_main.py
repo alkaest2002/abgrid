@@ -23,7 +23,7 @@ import json
 
 from pathlib import Path
 from typing import Dict, Any, List, Tuple, Union
-from lib.utils import to_json_serializable
+from lib.utils import to_json
 from lib.core import SYMBOLS
 from lib.core.core_schemas import ABGridSchema
 from lib.core.core_data import CoreData
@@ -281,20 +281,8 @@ class TerminalMain:
             # Notify user
             print(f"Report for {group_file.stem} succesfully generated.")
             
-            filtered_data = to_json_serializable(
-                report_data, 
-                keep=[
-                    "project_title",         # Project identification
-                    "members_per_group",     # Group size information
-                    "sna.macro_stats_a",     # Social network analysis - macro level A
-                    "sna.macro_stats_b",     # Social network analysis - macro level B
-                    "sna.micro_stats_a",     # Social network analysis - micro level A
-                    "sna.micro_stats_b",     # Social network analysis - micro level B
-                    "sociogram.macro_stats", # Sociogram macro statistics
-                    "sociogram.micro_stats", # Sociogram micro statistics
-                    "relevant_nodes_ab.*",   # Key relationship nodes (pattern match)
-                ],
-            )
+            # Convert report data to json
+            filtered_data = to_json(report_data)
             
             # Add the filtered data to the collection
             all_groups_data[group_file.stem] = filtered_data

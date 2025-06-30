@@ -8,13 +8,16 @@ Date Created: May 3, 2025
 The code is part of the AB-Grid project and is licensed under the MIT License.
 """
 
-import datetime
 import sys
+import datetime
 import pandas as pd
 import numpy as np
+import networkx as nx
 import json
 
-from typing import Any, List, Optional
+from typing import Any, Dict, List, Optional, Union
+
+from lib.core.core_data import ReportDataDict
 
 def check_python_version():
     """Check if Python version meets minimum requirements."""
@@ -35,156 +38,125 @@ def check_python_version():
         print("=" * 60)
         sys.exit(1)
 
-def to_json_serializable(
-    data: Any,
-    keep: Optional[List[str]] = None,
-    max_depth: int = 4
-) -> Any:
+def to_json(report_data: ReportDataDict) -> Dict[str, Any]:
     """
-    Converts data into a JSON-serializable format by first filtering to keep only
-    specified key paths and their ancestors, then transforming values to JSON-compatible types.
-
-    The function works in two phases:
-    1. First prunes the data to keep only specified paths and their ancestors
-    2. Then converts all remaining data to JSON-serializable format
+    Convert ReportDataDict to a JSON-serializable format.
+    
+    This function handles the specific data types commonly found in AB-Grid report data,
+    including pandas DataFrames/Series, NetworkX graphs, numpy arrays, and nested dictionaries.
     
     Args:
-        data (Any): The input data to be serialized, which can be of any type.
-        keep (Optional[List[str]]): List of key paths to keep during serialization.
-            Each path should be given as a string using dot notation (e.g., "sociogram.descriptives").
-            Use "ancestor.*" to keep all children of ancestor (e.g., "sna.*" keeps all children of sna).
-            All ancestor paths are automatically kept (e.g., keeping "a.b.c" also keeps "a" and "a.b").
-            If None or empty, all keys are kept (no filtering).
-        max_depth (int): The maximum depth to which the object hierarchy should be
-            serialized. This helps prevent issues with circular references.
-    
+        report_data: The report data dictionary to convert
+        
     Returns:
-        Any: A JSON-serializable version of the input data with only specified paths and their ancestors kept.
-    
+        A JSON-serializable dictionary with the same structure as the input
+        
     Note:
-        - Ancestor paths are automatically included (keeping "a.b.c" also keeps "a" and "a.b")
-        - Use "path.*" wildcard to keep all children of a path
-        - If keep is None/empty, all keys are preserved
-        - Key paths use dot notation for nested objects
-        - Array indices are not currently supported in path notation
-    
-    Example Usage:
-        to_json_serializable(data, keep=["sociogram.descriptives"])  # Exact path only
-        to_json_serializable(data, keep=["sna.*"])  # All children of sna
-        to_json_serializable(data, keep=["user.profile.name", "settings.*"])  # Mixed exact and wildcard
+        - DataFrames are converted to dict format with index preservation
+        - NetworkX graphs are converted to node/edge lists
+        - Numpy arrays become Python lists
+        - Datetime objects become ISO format strings
+        - Complex objects are converted to string representation as fallback
     """
-    keep = keep or []
     
-    def _get_all_ancestor_paths(paths: List[str]) -> tuple[set[str], set[str]]:
-        """Generate all ancestor paths and identify wildcard prefixes."""
-        exact_paths = set()
-        wildcard_prefixes = set()
+    def _convert_pandas_dataframe(df: pd.DataFrame) -> Dict[str, Any]:
+        """Convert pandas DataFrame to JSON-serializable format."""
+        if df.empty:
+            return {}
         
-        for path in paths:
-            if path.endswith('.*'):
-                # This is a wildcard path
-                prefix = path[:-2]  # Remove '.*'
-                wildcard_prefixes.add(prefix)
-                
-                # Add ancestors of the wildcard prefix
-                parts = prefix.split('.')
-                for i in range(1, len(parts) + 1):
-                    ancestor_path = '.'.join(parts[:i])
-                    exact_paths.add(ancestor_path)
-            else:
-                # This is an exact path
-                exact_paths.add(path)
-                
-                # Add all ancestor paths
-                parts = path.split('.')
-                for i in range(1, len(parts)):
-                    ancestor_path = '.'.join(parts[:i])
-                    exact_paths.add(ancestor_path)
-        
-        return exact_paths, wildcard_prefixes
-    
-    def _should_keep_key(path_str: str, exact_paths: set[str], wildcard_prefixes: set[str]) -> bool:
-        """Check if a key path should be kept based on exact paths and wildcard prefixes."""
-        # If no filters are specified, keep all keys
-        if not keep:
-            return True
-        
-        # Check if this exact path is in the allowed set
-        if path_str in exact_paths:
-            return True
-        
-        # Check if this path is a child of any wildcard prefix
-        for prefix in wildcard_prefixes:
-            if path_str.startswith(prefix + "."):
-                return True
-        
-        return False
-    
-    def _prune_keys(obj: Any, path: Optional[List[str]] = None, exact_paths: Optional[set[str]] = None, wildcard_prefixes: Optional[set[str]] = None) -> Any:
-        """First phase: Keep only specified paths and their ancestors."""
-        path = path or []
-        exact_paths = exact_paths or set()
-        wildcard_prefixes = wildcard_prefixes or set()
-        
-        if isinstance(obj, dict):
-            result = {}
-            for k, v in obj.items():
-                current_path = path + [str(k)]
-                path_str = ".".join(current_path)
-                
-                if _should_keep_key(path_str, exact_paths, wildcard_prefixes):
-                    result[k] = _prune_keys(v, current_path, exact_paths, wildcard_prefixes)
-            return result
-        elif isinstance(obj, list):
-            # For lists, we keep all items but continue pruning within each item
-            return [_prune_keys(item, path, exact_paths, wildcard_prefixes) for item in obj]
+        # Handle DataFrames with duplicate indices by resetting index
+        if df.index.has_duplicates:
+            return df.reset_index(drop=False, names="index").to_dict("records")
         else:
-            return obj
+            # Convert to dict with index as keys for better readability
+            return df.to_dict("index")
     
-    def _convert_to_serializable(obj: Any, depth: int = 0) -> Any:
-        """Second phase: Convert all data to JSON-serializable format."""
+    def _convert_pandas_series(series: pd.Series) -> Union[Dict[str, Any], List[Any]]:
+        """Convert pandas Series to JSON-serializable format."""
+        if series.empty:
+            return {}
         
-        # Limit conversion to max depth
-        if depth > max_depth:
-            return obj
-       
-        # Perform conversions
-        if obj is None:
+        # If series has a meaningful index, convert to dict
+        if not isinstance(series.index, pd.RangeIndex):
+            return series.to_dict()
+        else:
+            # For range index, convert to list
+            return series.tolist()
+    
+    def _convert_networkx_graph(graph: nx.DiGraph) -> Dict[str, Any]:
+        """Convert NetworkX DiGraph to JSON-serializable format."""
+        return {
+            "nodes": list(graph.nodes()),
+            "edges": list(graph.edges()),
+            "number_of_nodes": graph.number_of_nodes(),
+            "number_of_edges": graph.number_of_edges()
+        }
+    
+    def _convert_numpy_array(arr: np.ndarray) -> List[Any]:
+        """Convert numpy array to JSON-serializable list."""
+        return arr.tolist()
+    
+    def _convert_datetime(dt: datetime.datetime) -> str:
+        """Convert datetime to ISO format string."""
+        return dt.isoformat()
+    
+    def _convert_value(value: Any) -> Any:
+        """Convert individual values to JSON-serializable format."""
+        if value is None:
             return None
-        elif isinstance(obj, (str, int, float, bool)):
-            return obj
-        elif isinstance(obj, pd.DataFrame):
-            if obj.index.has_duplicates:
-                return obj.reset_index(drop=False, names="index").to_dict("index")
-            else:
-                return obj.to_dict("index")
-        elif isinstance(obj, pd.Series):
-            return obj.to_dict()
-        elif isinstance(obj, np.ndarray):
-            return obj.tolist()
-        elif hasattr(obj, 'tolist') and hasattr(obj, 'dtype'):
-            return obj.tolist()
-        elif isinstance(obj, (datetime.date, datetime.datetime)):
-            return obj.isoformat()
-        elif isinstance(obj, dict):
-            return {k: _convert_to_serializable(v, depth + 1) for k, v in obj.items()}
-        elif isinstance(obj, (list, tuple)):
-            return [_convert_to_serializable(item, depth + 1) for item in obj]
-        elif hasattr(obj, '__dict__') and not isinstance(obj, type):
-            return _convert_to_serializable(obj.__dict__, depth + 1)
+        elif isinstance(value, (str, int, float, bool)):
+            return value
+        elif isinstance(value, pd.DataFrame):
+            return _convert_pandas_dataframe(value)
+        elif isinstance(value, pd.Series):
+            return _convert_pandas_series(value)
+        elif isinstance(value, pd.Index):
+            return value.tolist()
+        elif isinstance(value, nx.DiGraph):
+            return _convert_networkx_graph(value)
+        elif isinstance(value, np.ndarray):
+            return _convert_numpy_array(value)
+        elif isinstance(value, (datetime.date, datetime.datetime)):
+            return _convert_datetime(value)
+        elif isinstance(value, dict):
+            return {k: _convert_value(v) for k, v in value.items()}
+        elif isinstance(value, (list, tuple)):
+            return [_convert_value(item) for item in value]
         else:
+            # Fallback: try to serialize directly, otherwise convert to string
             try:
-                json.dumps(obj)
-                return obj
+                json.dumps(value)
+                return value
             except (TypeError, ValueError):
-                return str(obj)
+                return str(value)
     
-    # Generate exact paths and wildcard prefixes
-    exact_paths, wildcard_prefixes = _get_all_ancestor_paths(keep)
+    # Convert the main report data structure
+    json_data: Dict[str, Any] = {}
     
-    # Phase 1: Prune to keep only specified paths and their ancestors
-    pruned_data = _prune_keys(data, exact_paths=exact_paths, wildcard_prefixes=wildcard_prefixes)
+    # Handle basic metadata fields
+    json_data["year"] = report_data["year"]
+    json_data["project_title"] = report_data["project_title"]
+    json_data["question_a"] = report_data["question_a"]
+    json_data["question_b"] = report_data["question_b"]
+    json_data["group"] = report_data["group"]
+    json_data["members_per_group"] = report_data["members_per_group"]
     
-    # Phase 2: Convert to JSON-serializable format
-    serialized_data = _convert_to_serializable(pruned_data)
-    return serialized_data
+    # Handle SNA data (complex nested structure)
+    json_data["sna"] = _convert_value(report_data["sna"])
+    
+    # Handle sociogram data (optional, can be None)
+    json_data["sociogram"] = _convert_value(report_data["sociogram"])
+    
+    # Handle relevant nodes data (nested DataFrames)
+    json_data["relevant_nodes_ab"] = {
+        "a": _convert_pandas_dataframe(report_data["relevant_nodes_ab"]["a"]),
+        "b": _convert_pandas_dataframe(report_data["relevant_nodes_ab"]["b"])
+    }
+    
+    # Handle isolated nodes data (pandas Index objects)
+    json_data["isolated_nodes_ab"] = {
+        "a": report_data["isolated_nodes_ab"]["a"].tolist(),
+        "b": report_data["isolated_nodes_ab"]["b"].tolist()
+    }
+    
+    return json_data

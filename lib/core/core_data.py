@@ -9,11 +9,41 @@ The code is part of the AB-Grid project and is licensed under the MIT License.
 """
 import datetime
 import pandas as pd
-from typing import Any, Dict
+from typing import Any, Dict, Optional, TypedDict
 
 from lib.core.core_schemas import ABGridSchema
 from lib.core.core_sna import CoreSna, SNADict
 from lib.core.core_sociogram import CoreSociogram, SociogramDict
+
+class RelevantNodesDict(TypedDict):
+    """Dictionary structure for relevant nodes analysis results."""
+    a: pd.DataFrame  # Positive relevance nodes DataFrame
+    b: pd.DataFrame  # Negative relevance nodes DataFrame
+
+
+class IsolatedNodesDict(TypedDict):
+    """Dictionary structure for isolated nodes by network type."""
+    a: pd.Index  # Isolated nodes from network A
+    b: pd.Index  # Isolated nodes from network B
+
+
+class ReportDataDict(TypedDict):
+    """
+    Complete type definition for report data structure returned by get_report_data().
+    
+    Contains comprehensive analysis results including project metadata, network analysis,
+    sociogram data (optional), relevant nodes identification, and isolated nodes detection.
+    """
+    year: int  # Current year when report was generated
+    project_title: str  # Title of the AB-Grid project
+    question_a: str  # Text of question A from the survey
+    question_b: str  # Text of question B from the survey
+    group: int  # Group identifier (1-50)
+    members_per_group: int  # Number of participants in the group
+    sna: SNADict  # Complete social network analysis results
+    sociogram: Optional[SociogramDict]  # Sociogram analysis results (None if not requested)
+    relevant_nodes_ab: RelevantNodesDict  # Most/least relevant nodes for positive/negative outcomes
+    isolated_nodes_ab: IsolatedNodesDict  # Nodes with no connections in each network
 
 
 class CoreData:
