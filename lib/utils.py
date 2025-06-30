@@ -66,7 +66,7 @@ def to_json(report_data: ReportDataDict) -> Dict[str, Any]:
         
         # Handle DataFrames with duplicate indices by resetting index
         if df.index.has_duplicates:
-            return df.reset_index(drop=False, names="index").to_dict("records")
+            return df.reset_index(drop=False, names="index").to_dict("index")
         else:
             # Convert to dict with index as keys for better readability
             return df.to_dict("index")
@@ -83,7 +83,7 @@ def to_json(report_data: ReportDataDict) -> Dict[str, Any]:
             # For range index, convert to list
             return series.tolist()
     
-    def _convert_networkx_graph(graph: nx.DiGraph) -> Dict[str, Any]:
+    def _convert_networkx(graph: nx.DiGraph) -> Dict[str, Any]:
         """Convert NetworkX DiGraph to JSON-serializable format."""
         return {
             "nodes": list(graph.nodes()),
@@ -113,7 +113,7 @@ def to_json(report_data: ReportDataDict) -> Dict[str, Any]:
         elif isinstance(value, pd.Index):
             return value.tolist()
         elif isinstance(value, nx.DiGraph):
-            return _convert_networkx_graph(value)
+            return _convert_networkx(value)
         elif isinstance(value, np.ndarray):
             return _convert_numpy_array(value)
         elif isinstance(value, (datetime.date, datetime.datetime)):
