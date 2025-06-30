@@ -1,4 +1,5 @@
-from fastapi import FastAPI, HTTPException, Request
+from fastapi.security import HTTPBearer
+from fastapi import Depends, FastAPI, HTTPException, Request
 from fastapi.responses import HTMLResponse, JSONResponse
 
 from lib.core.core_data import CoreData
@@ -6,7 +7,15 @@ from lib.core.core_schemas import ABGridSchema, PydanticValidationException
 from lib.core.core_templates import CoreRenderer
 from lib.utils import to_json
 
-def get_server():
+def get_server() -> FastAPI:
+    """
+    Create and configure a FastAPI server instance.
+
+    Returns:
+        FastAPI: Configured FastAPI application instance.
+    """
+    # Scheme for the Authorization header
+    token_auth_scheme = HTTPBearer()
 
     app = FastAPI()
 
@@ -17,7 +26,9 @@ def get_server():
     renderer = CoreRenderer()
 
     @app.exception_handler(PydanticValidationException)
-    async def custom_pydantic_validation_exception_handler(request: Request, exc: PydanticValidationException) -> JSONResponse:
+    async def custom_pydantic_validation_exception_handler(
+        request: Request, exc: PydanticValidationException
+    ) -> JSONResponse:
         """
         Custom exception handler for PydanticValidationException.
 
@@ -33,13 +44,31 @@ def get_server():
             content={"detail": exc.errors}
         )
 
-    @app.post("/report_html")
-    def get_report_as_html(model: ABGridSchema) -> HTMLResponse:
+    @app.get("/api/public")
+    def public() -> dict:
+        """
+        Public endpoint that can be accessed without authentication.
+
+        Returns:
+            dict: A message indicating the endpoint is publicly accessible.
+        """
+        result = {
+            "status": "success",
+            "msg": ("Hello from a public endpoint! You don't need to be "
+                    "authenticated to see this.")
+        }
+        return result
+
+    @app.post("/api/report_html")
+    def get_report_as_html(
+        model: ABGridSchema, token: str = Depends(token_auth_scheme)
+    ) -> HTMLResponse:
         """
         Endpoint to retrieve and render report data based on a validated ABGridSchema model.
 
         Args:
-            model (ABGridSchema): Parsed and validated instance of ABGridSchema from request body.
+            model (ABGridSchema): Parsed and validated instance of ABGridSchema from the request body.
+            token (str): Authorization token obtained via HTTPBearer.
         
         Returns:
             HTMLResponse: An HTML response containing the rendered report data.
@@ -60,15 +89,17 @@ def get_server():
         except Exception as e:
             # General exceptions catch-all
             raise HTTPException(status_code=500, detail=str(e))
-        
-    
-    @app.post("/report_json")
-    def get_report_as_json(model: ABGridSchema) -> JSONResponse:
+
+    @app.post("/api/report_json")
+    def get_report_as_json(
+        model: ABGridSchema, token: str = Depends(token_auth_scheme)
+    ) -> JSONResponse:
         """
         Endpoint to retrieve report data as JSON based on a validated ABGridSchema model.
 
         Args:
             model (ABGridSchema): Parsed and validated instance of ABGridSchema from request body.
+            token (str): Authorization token obtained via HTTPBearer.
         
         Returns:
             JSONResponse: A JSON response containing the complete report data in serializable format.
@@ -89,6 +120,5 @@ def get_server():
         except Exception as e:
             # General exceptions catch-all
             raise HTTPException(status_code=500, detail=str(e))
-
 
     return app
