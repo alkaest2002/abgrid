@@ -50,19 +50,17 @@ def get_server() -> FastAPI:
         )
 
     @app.get("/api/public")
-    def public() -> dict:
+    def public() -> JSONResponse:
         """
         Public endpoint that can be accessed without authentication.
 
         Returns:
             dict: A message indicating the endpoint is publicly accessible.
         """
-        result = {
-            "status": "success",
-            "msg": ("Hello from a public endpoint! You don't need to be "
-                    "authenticated to see this.")
-        }
-        return result
+        return JSONResponse(
+            status_code=status.HTTP_200_OK,
+            content={"msg": "AB-Grid server is up and running"}
+        )
 
     @app.post("/api/report")
     def get_report(
