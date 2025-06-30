@@ -96,7 +96,10 @@ def get_server() -> FastAPI:
 
         except Exception as e:
             # General exceptions catch-all
-            raise HTTPException(status_code=500, detail=str(e))
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, 
+                detail=str(e)
+            )
 
     def _generate_html_report(language: str, report_data: dict) -> HTMLResponse:
         """
@@ -111,7 +114,10 @@ def get_server() -> FastAPI:
         """
         report_template = f"./{language}/report.html"
         rendered_report = renderer.render_html(report_template, report_data)
-        return HTMLResponse(content=rendered_report)
+        return HTMLResponse(
+            status_code=status.HTTP_200_OK,
+            content=rendered_report
+        )
 
     def _generate_json_report(report_data: dict) -> JSONResponse:
         """
@@ -124,6 +130,9 @@ def get_server() -> FastAPI:
             JSONResponse: A JSON response containing the report data.
         """
         json_serializable_data = to_json(report_data)
-        return JSONResponse(content=json_serializable_data)
+        return JSONResponse(
+            status_code=status.HTTP_200_OK,
+            content=json_serializable_data
+        )
 
     return app
