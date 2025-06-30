@@ -33,7 +33,7 @@ def get_server():
             content={"detail": exc.errors}
         )
 
-    @app.post("/report_as_html")
+    @app.post("/report_html")
     def get_report_as_html(model: ABGridSchema) -> HTMLResponse:
         """
         Endpoint to retrieve and render report data based on a validated ABGridSchema model.
@@ -62,7 +62,7 @@ def get_server():
             raise HTTPException(status_code=500, detail=str(e))
         
     
-    @app.post("/report_as_json")
+    @app.post("/report_json")
     def get_report_as_json(model: ABGridSchema) -> JSONResponse:
         """
         Endpoint to retrieve report data as JSON based on a validated ABGridSchema model.
