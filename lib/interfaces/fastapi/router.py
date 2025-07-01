@@ -44,7 +44,7 @@ def get_router() -> APIRouter:
     abgrid_renderer = CoreRenderer()
 
     @router.post("/report")
-    @SimpleRateLimiter(limit=1, window_seconds=5)      # Apply burst protection first
+    @SimpleRateLimiter(limit=1, window_seconds=5)       # Apply burst protection first
     @SimpleRateLimiter(limit=100, window_seconds=3600)  # Then apply hourly limit
     async def get_report(
         request: Request,
