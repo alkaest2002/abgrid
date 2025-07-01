@@ -1,158 +1,101 @@
 import time
-from collections import OrderedDict
-from dataclasses import dataclass
-from functools import wraps
-from typing import Any
-import threading
 import hashlib
+import threading
+from collections import OrderedDict
+from functools import wraps
+
 
 class RateLimitException(Exception):
+    """Raised when rate limit is exceeded."""
+    pass
+
+
+class SimpleRateLimiter:
     """
-    This is a custom Exception that occurs when the API RateLimit is reached.
-    Occurs when a set limit is reached
+    Simple JWT-based rate limiter using sliding window approach.
+    Focuses on simplicity while preventing memory leaks.
     """
-
-    def __init__(self, message: str = None):
-        super(RateLimitException, self).__init__(message)
-
-
-@dataclass
-class LimitTypeKey:
-    RateLimit = 'default'
-
-
-class LRUCache:
-    """LRU Cache with size limit and automatic cleanup."""
     
-    def __init__(self, max_size: int = 10000, cleanup_interval: int = 300):
-        self.max_size = max_size
-        self.cleanup_interval = cleanup_interval
+    def __init__(
+        self, 
+        limit: int, 
+        window_seconds: int,
+        max_cache_size: int = 10000
+    ):
+        self.limit = limit
+        self.window_seconds = window_seconds
+        self.max_cache_size = max_cache_size
+        
+        # Cache stores: key -> (window_start_time, request_count)
         self._cache = OrderedDict()
         self._lock = threading.RLock()
-        self._last_cleanup = time.time()
-    
-    def get(self, key: str, default=None):
-        with self._lock:
-            if key in self._cache:
-                # Move to end (most recently used)
-                self._cache.move_to_end(key)
-                return self._cache[key]
-            return default
-    
-    def set(self, key: str, value):
-        with self._lock:
-            # Auto cleanup if needed
-            self._auto_cleanup()
-            
-            if key in self._cache:
-                self._cache.move_to_end(key)
-            else:
-                # Evict oldest if at capacity
-                if len(self._cache) >= self.max_size:
-                    self._cache.popitem(last=False)  # Remove oldest
-            
-            self._cache[key] = value
-    
-    def delete(self, key: str):
-        with self._lock:
-            self._cache.pop(key, None)
-    
-    def _auto_cleanup(self):
-        """Automatically cleanup expired entries."""
-        current_time = time.time()
-        if (current_time - self._last_cleanup) > self.cleanup_interval:
-            self._cleanup_expired()
-            self._last_cleanup = current_time
-    
-    def _cleanup_expired(self, expiry_seconds: int = 3600):
-        """Remove entries older than expiry_seconds."""
-        current_time = time.time()
-        expired_keys = []
-        
-        for key, (timestamp, _) in self._cache.items():
-            if (current_time - timestamp) > expiry_seconds:
-                expired_keys.append(key)
-        
-        for key in expired_keys:
-            del self._cache[key]
-
-
-class RateLimiter:
-    def __init__(
-        self,
-        limit: int,
-        seconds: int,
-        max_memory_entries: int = 10000,
-        cleanup_interval: int = 300,
-        exception_message: Any = "Rate Limit Exceed",
-    ):
-        self._limit = limit
-        self._seconds = seconds
-        self._local_session = LRUCache(max_memory_entries, cleanup_interval)
-        self._exception_cls = RateLimitException
-        self._exception_message = exception_message
 
     def __call__(self, func):
         @wraps(func)
         async def wrapper(*args, **kwargs):
-            request = kwargs.get("request", None)
-            key = self.__get_key(request, LimitTypeKey.RateLimit)
-            await self.__check_in_memory(key)
+            request = kwargs.get("request")
+            if not request:
+                raise RateLimitException("Request object required for rate limiting")
+            
+            key = self._get_cache_key(request)
+            self._check_rate_limit(key)
+            
             return await func(*args, **kwargs)
-
         return wrapper
-    
-    def raise_exception(self):
-        """An exception is raised when the rate limit reaches the limit."""
-        raise self._exception_cls(self._exception_message)
 
-    
-    def __get_key(self, request, key_name: str):
-        """Creates and returns a RateLimit Key based on JWT token.
+    def _get_cache_key(self, request) -> str:
+        """Extract JWT token and create cache key."""
+        auth_header = request.headers.get("Authorization", "")
         
-        Requires a JWT token in the Authorization header. Raises RateLimitException if not found.
-        Uses full SHA-256 hash to prevent collisions.
-
-        Args:
-            request: FastAPI.Request Object
-            key_name: Key prefix name
-
-        Returns:
-            str: The generated key
-
-        Raises:
-            RateLimitException: If JWT token is not found in request
-        """
-        if not request:
-            raise RateLimitException("Request object is required")
+        if not auth_header.startswith("Bearer "):
+            raise RateLimitException("JWT token required")
         
-        # Extract JWT token from Authorization header
-        auth_header = request.headers.get("Authorization")
-        if not auth_header or not auth_header.startswith("Bearer "):
-            raise RateLimitException("JWT token is required for rate limiting")
+        token = auth_header[7:]  # Remove "Bearer "
+        if not token:
+            raise RateLimitException("JWT token required")
         
-        jwt_token = auth_header.split(" ", 1)[1]
-        if not jwt_token:
-            raise RateLimitException("JWT token is required for rate limiting")
-        
-        # Use full SHA-256 hash to prevent collisions
-        token_hash = hashlib.sha256(jwt_token.encode()).hexdigest()
-        return f"{key_name}:jwt:{token_hash}:{request.url.path}"
+        # Use SHA-256 hash for privacy and collision prevention
+        token_hash = hashlib.sha256(token.encode()).hexdigest()
+        return f"rate_limit:{token_hash}:{request.url.path}"
 
-    async def __check_in_memory(self, key: str):
-        """This is a check function used when memory is used as rate limit storage.
-        
-        Use a dictionary in memory to check usage based on key.
-
-        Args:
-            key: RateLimit Key
-        """
+    def _check_rate_limit(self, key: str):
+        """Check and update rate limit for given key."""
         current_time = time.time()
-        existing_data = self._local_session.get(key, (0, 0))
-        last_request_time, request_count = existing_data
+        
+        with self._lock:
+            # Auto-cleanup: remove entries older than 2x window to prevent memory leaks
+            self._cleanup_expired(current_time)
+            
+            if key in self._cache:
+                window_start, count = self._cache[key]
+                
+                # If we're still in the same time window
+                if (current_time - window_start) < self.window_seconds:
+                    if count >= self.limit:
+                        raise RateLimitException("Rate limit exceeded")
+                    
+                    # Update count and move to end (LRU)
+                    self._cache[key] = (window_start, count + 1)
+                    self._cache.move_to_end(key)
+                else:
+                    # New time window - reset
+                    self._cache[key] = (current_time, 1)
+                    self._cache.move_to_end(key)
+            else:
+                # First request for this key
+                # Evict oldest if at capacity
+                if len(self._cache) >= self.max_cache_size:
+                    self._cache.popitem(last=False)
+                
+                self._cache[key] = (current_time, 1)
 
-        if (current_time - last_request_time) < self._seconds and request_count >= self._limit:
-            self.raise_exception()
-        else:
-            new_count = 1 if request_count >= self._limit else request_count + 1
-            self._local_session.set(key, (current_time, new_count))
+    def _cleanup_expired(self, current_time: float):
+        """Remove entries older than 2x window_seconds to prevent memory leaks."""
+        cutoff_time = current_time - (2 * self.window_seconds)
+        expired_keys = [
+            k for k, (window_start, _) in self._cache.items() 
+            if window_start < cutoff_time
+        ]
+        
+        for key in expired_keys:
+            del self._cache[key]

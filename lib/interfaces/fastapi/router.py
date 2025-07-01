@@ -17,7 +17,7 @@ from fastapi import APIRouter, HTTPException, Query, Security, status, Request
 from fastapi.responses import HTMLResponse, JSONResponse
 
 from .security import VerifyToken
-from .limiter import RateLimiter
+from .limiter import SimpleRateLimiter
 from lib.core.core_data import CoreData
 from lib.core.core_schemas import ABGridSchema
 from lib.core.core_templates import CoreRenderer
@@ -37,23 +37,6 @@ def get_router() -> APIRouter:
     # Init auth
     auth = VerifyToken()
     
-    # Init rate limiters
-    report_rate_limiter_hourly = RateLimiter(
-        limit=50,                     # 50 reports per hour
-        seconds=3600,                 # 1 hour window
-        max_memory_entries=5000,      # 5K entries for report endpoint
-        cleanup_interval=300,         # 5 minutes cleanup
-        exception_message="Hourly report generation rate limit exceeded. Please try again later."
-    )
-
-    report_rate_limiter_burst = RateLimiter(
-        limit=1,                      # 1 report per 5 seconds
-        seconds=5,                    # 5 second window
-        max_memory_entries=5000,      # 5K entries for report endpoint
-        cleanup_interval=60,          # 1 minute cleanup (shorter for quick windows)
-        exception_message="Please wait 5 seconds between report requests."
-    )
-    
     # Init abgrid data
     abgrid_data = CoreData()
 
@@ -61,8 +44,8 @@ def get_router() -> APIRouter:
     abgrid_renderer = CoreRenderer()
 
     @router.post("/report")
-    @report_rate_limiter_burst     # Apply burst protection first
-    @report_rate_limiter_hourly    # Then apply hourly limit
+    @SimpleRateLimiter(limit=1, window_seconds=5)      # Apply burst protection first
+    @SimpleRateLimiter(limit=100, window_seconds=3600)  # Then apply hourly limit
     async def get_report(
         request: Request,
         model: ABGridSchema, 
