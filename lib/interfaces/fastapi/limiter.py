@@ -4,6 +4,7 @@ from dataclasses import dataclass
 from functools import wraps
 from typing import Any, Type
 import threading
+import hashlib
 
 class RateLimitException(Exception):
     """
@@ -91,13 +92,12 @@ class DefaultLimiter:
             max_memory_entries: int = 10000,
             cleanup_interval: int = 300,
             exception: Type[Exception] | None = None,
-            exception_status: int = 429,  # This field is unused with RateLimitException
             exception_message: Any = "",
     ):
         self._limit = limit
         self._seconds = seconds
         self._local_session = LRUCache(max_memory_entries, cleanup_interval)
-        self._exception_cls = exception or RateLimitException  # Default to RateLimitException
+        self._exception_cls = RateLimitException
         self._exception_message = exception_message
 
     def raise_exception(self):
@@ -107,25 +107,6 @@ class DefaultLimiter:
         If the exception class passed by the user does not exist, a RateLimitException is thrown.
         """
         raise self._exception_cls(self._exception_message)
-
-    def get_memory_stats(self):
-        """Get current memory usage statistics.
-        
-        Returns:
-            dict: Dictionary containing memory usage statistics
-        """
-        return {
-            "entries_count": self._local_session.size(),
-            "max_entries": self._local_session.max_size
-        }
-
-    def cleanup_expired_entries(self):
-        """Clean up expired entries from memory to prevent memory leaks.
-        
-        This method is now mostly handled automatically by the LRU cache,
-        but can still be called manually if needed.
-        """
-        self._local_session._cleanup_expired(self._seconds)
 
 
 class RateLimiter(DefaultLimiter):
@@ -168,12 +149,11 @@ class RateLimiter(DefaultLimiter):
 
         return (current_time - last_request_time) < self._seconds and request_count >= self._limit
 
-
-    @staticmethod
-    def __get_key(request, key_name: str):
-        """Creates and returns a RateLimit Key.
+    def __get_key(self, request, key_name: str):
+        """Creates and returns a RateLimit Key based on JWT token.
         
-        Create a key and count the limit according to the Client IP Address and API URL Path.
+        Requires a JWT token in the Authorization header. Raises RateLimitException if not found.
+        Uses full SHA-256 hash to prevent collisions.
 
         Args:
             request: FastAPI.Request Object
@@ -181,10 +161,25 @@ class RateLimiter(DefaultLimiter):
 
         Returns:
             str: The generated key
+
+        Raises:
+            RateLimitException: If JWT token is not found in request
         """
-        if request:
-            return f"{key_name}:{request.client.host}:{request.url.path}"
-        return ""
+        if not request:
+            raise RateLimitException("Request object is required")
+        
+        # Extract JWT token from Authorization header
+        auth_header = request.headers.get("Authorization")
+        if not auth_header or not auth_header.startswith("Bearer "):
+            raise RateLimitException("JWT token is required for rate limiting")
+        
+        jwt_token = auth_header.split(" ", 1)[1]
+        if not jwt_token:
+            raise RateLimitException("JWT token is required for rate limiting")
+        
+        # Use full SHA-256 hash to prevent collisions
+        token_hash = hashlib.sha256(jwt_token.encode()).hexdigest()
+        return f"{key_name}:jwt:{token_hash}:{request.url.path}"
 
     async def __check_in_memory(self, key: str):
         """This is a check function used when memory is used as rate limit storage.
