@@ -1,8 +1,10 @@
 """
 Filename: core_schemas.py
+
 Description: Defines Pydantic models ensuring data integrity and validation.
 
 Author: Pierpaolo Calanna
+
 Date Created: May 3, 2025
 
 The code is part of the AB-Grid project and is licensed under the MIT License.

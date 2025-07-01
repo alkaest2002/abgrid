@@ -1,8 +1,12 @@
 """
 Filename: core_templates.py
-Description: Provides functionality to render SNA/Sociogra data via templates.
+
+Description: Provides functionality to render SNA/Sociogram data via templates.
+
 Author: Pierpaolo Calanna
+
 Date Created: May 3, 2025
+
 The code is part of the AB-Grid project and is licensed under the MIT License.
 """
 import os

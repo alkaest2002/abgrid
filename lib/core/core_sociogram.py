@@ -1,9 +1,11 @@
 """
 Filename: core_sociogram.py
+
 Description: Provides functionality to analyze directed networks (graphs) for sociometric analysis,
 computing macro and micro-level statistics, node rankings, and generating polar visualizations.
 
 Author: Pierpaolo Calanna
+
 Date Created: May 3, 2025
 
 The code is part of the AB-Grid project and is licensed under the MIT License.

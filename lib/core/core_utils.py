@@ -1,12 +1,11 @@
 """
-Core utility functions for data processing, visualization, and statistical analysis.
+Filename: core_utils.py
 
-This module provides essential utility functions for the AB-Grid project including
-figure conversion to base64 format, descriptive statistics computation, and
-inequality measurement through Gini coefficient calculation.
+Description: utility functions for data processing, visualization, and statistical analysis.
 
 Author: Pierpaolo Calanna
-Date Created: Wed Jun 25 2025
+
+Date Created: May 3, 2025
 
 The code is part of the AB-Grid project and is licensed under the MIT License.
 """

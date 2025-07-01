@@ -1,8 +1,10 @@
 """
 Filename: core_sna.py
+
 Description: Provides functionality to analyze directed networks (graphs) for a given set of edges.
 
 Author: Pierpaolo Calanna
+
 Date Created: May 3, 2025
 
 The code is part of the AB-Grid project and is licensed under the MIT License.
