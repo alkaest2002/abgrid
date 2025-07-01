@@ -83,6 +83,8 @@ def logger_decorator(func: Optional[F] = None) -> Union[Callable[[F], F], F]:
             except OSError as error:
                 print(str(error))
                 return None
+            except RuntimeError as error:
+                print(str(error))
             except TemplateRenderError as error:
                 print(str(error))
                 return None
