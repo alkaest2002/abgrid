@@ -13,10 +13,11 @@ The code is part of the AB-Grid project and is licensed under the MIT License.
 from typing import Literal
 from xmlrpc.client import Boolean
 
-from fastapi import APIRouter, HTTPException, Query, Security, status
+from fastapi import APIRouter, HTTPException, Query, Security, status, Request
 from fastapi.responses import HTMLResponse, JSONResponse
 
 from .security import VerifyToken
+from .limiter import RateLimiter, FailedLimiter  
 from lib.core.core_data import CoreData
 from lib.core.core_schemas import ABGridSchema
 from lib.core.core_templates import CoreRenderer
@@ -36,6 +37,23 @@ def get_router() -> APIRouter:
     # Init auth
     auth = VerifyToken()
     
+    # Init rate limiters
+    report_rate_limiter_hourly = RateLimiter(
+        limit=50,                     # 50 reports per hour
+        seconds=3600,                 # 1 hour window
+        max_memory_entries=5000,      # 5K entries for report endpoint
+        cleanup_interval=300,         # 5 minutes cleanup
+        exception_message="Hourly report generation rate limit exceeded. Please try again later."
+    )
+
+    report_rate_limiter_burst = RateLimiter(
+        limit=1,                      # 1 report per 5 seconds
+        seconds=5,                    # 5 second window
+        max_memory_entries=5000,      # 5K entries for report endpoint
+        cleanup_interval=60,          # 1 minute cleanup (shorter for quick windows)
+        exception_message="Please wait 5 seconds between report requests."
+    )
+    
     # Init abgrid data
     abgrid_data = CoreData()
 
@@ -43,7 +61,10 @@ def get_router() -> APIRouter:
     abgrid_renderer = CoreRenderer()
 
     @router.post("/report")
-    def get_report(
+    @report_rate_limiter_burst     # Apply burst protection first
+    @report_rate_limiter_hourly    # Then apply hourly limit
+    async def get_report(
+        request: Request,
         model: ABGridSchema, 
         language: str = Query(..., description="Language of the report"),
         type_of_report: Literal['html', 'json'] = Query(..., description="The type of report desired"),
@@ -54,6 +75,7 @@ def get_router() -> APIRouter:
         Endpoint to retrieve report based on a validated ABGridSchema model and specified type and language.
 
         Args:
+            request (Request): FastAPI request object (required for rate limiting).
             model (ABGridSchema): Parsed and validated instance of ABGridSchema from the request body.
             language (str): Language of the report.
             type_of_report (str): Type of the report, either 'html' or 'json'.

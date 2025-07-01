@@ -13,23 +13,11 @@ The code is part of the AB-Grid project and is licensed under the MIT License.
 from fastapi import FastAPI, Request, status
 from fastapi.responses import JSONResponse
 from lib.core.core_schemas import PydanticValidationException
+from lib.interfaces.fastapi.limiter import RateLimitException
 from lib.interfaces.fastapi.router import get_router
 
 app = FastAPI()
 app.include_router(get_router())
-
-@app.get("/health")
-def health_check() -> JSONResponse:
-    """
-    Public endpoint that can be accessed without authentication.
-
-    Returns:
-        dict: A message indicating the endpoint is publicly accessible.
-    """
-    return JSONResponse(
-        status_code=status.HTTP_200_OK,
-        content={"msg": "AB-Grid server is alive and kicking."}
-    )
 
 @app.exception_handler(PydanticValidationException)
 async def custom_pydantic_validation_exception_handler(
@@ -48,4 +36,37 @@ async def custom_pydantic_validation_exception_handler(
     return JSONResponse(
         status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
         content={"detail": exc.errors}
+    )
+
+@app.exception_handler(RateLimitException)
+async def rate_limit_exception_handler(
+    request: Request, exc: RateLimitException
+) -> JSONResponse:
+    """
+    Custom exception handler for RateLimitException.
+
+    Args:
+        request (Request): The request that triggered the exception.
+        exc (RateLimitException): The exception instance.
+    
+    Returns:
+        JSONResponse: A JSON response with status code 429 and error details.
+    """
+    return JSONResponse(
+        status_code=status.HTTP_429_TOO_MANY_REQUESTS,
+        content={"detail": exc.message}
+    )
+
+
+@app.get("/health")
+def health_check() -> JSONResponse:
+    """
+    Public endpoint that can be accessed without authentication.
+
+    Returns:
+        dict: A message indicating the endpoint is publicly accessible.
+    """
+    return JSONResponse(
+        status_code=status.HTTP_200_OK,
+        content={"msg": "AB-Grid server is alive and kicking."}
     )
