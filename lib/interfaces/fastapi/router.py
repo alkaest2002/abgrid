@@ -1,5 +1,6 @@
 
 from typing import Literal
+from xmlrpc.client import Boolean
 
 from fastapi import APIRouter, HTTPException, Query, Security, status
 from fastapi.responses import HTMLResponse, JSONResponse
@@ -35,6 +36,7 @@ def get_router() -> APIRouter:
         model: ABGridSchema, 
         language: str = Query(..., description="Language of the report"),
         type_of_report: Literal['html', 'json'] = Query(..., description="The type of report desired"),
+        with_sociogram: Boolean = Query(..., description="Include sociogram"),
         _: dict = Security(auth.verify)
     ):
         """
@@ -44,6 +46,7 @@ def get_router() -> APIRouter:
             model (ABGridSchema): Parsed and validated instance of ABGridSchema from the request body.
             language (str): Language of the report.
             type_of_report (str): Type of the report, either 'html' or 'json'.
+            with_sociogram: (bool) include sociogram
             token (str): Authorization token obtained via HTTPBearer.
         
         Returns:
@@ -55,7 +58,7 @@ def get_router() -> APIRouter:
         """
         try:
             # Get report data
-            report_data = abgrid_data.get_report_data(model, True)
+            report_data = abgrid_data.get_report_data(model, with_sociogram)
 
             # User requested html report
             if type_of_report == "html":
