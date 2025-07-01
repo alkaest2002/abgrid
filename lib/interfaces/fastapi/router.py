@@ -35,7 +35,7 @@ def get_router() -> APIRouter:
         model: ABGridSchema, 
         language: str = Query(..., description="Language of the report"),
         type_of_report: Literal['html', 'json'] = Query(..., description="The type of report desired"),
-        auth_result: str = Security(auth.verify)
+        _: dict = Security(auth.verify)
     ):
         """
         Endpoint to retrieve report based on a validated ABGridSchema model and specified type and language.
