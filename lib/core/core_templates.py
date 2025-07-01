@@ -5,19 +5,25 @@ Author: Pierpaolo Calanna
 Date Created: May 3, 2025
 The code is part of the AB-Grid project and is licensed under the MIT License.
 """
-import jinja2
-from jinja2.exceptions import TemplateNotFound, TemplateSyntaxError, TemplateRuntimeError, UndefinedError
+import os
 from pathlib import Path
 from typing import Any, Dict
+from jinja2 import Environment, FileSystemLoader, StrictUndefined, FileSystemBytecodeCache, select_autoescape
+from jinja2.exceptions import TemplateNotFound, TemplateSyntaxError, TemplateRuntimeError, UndefinedError
+
+# Define cache directory
+TEMPLATE_CACHE_DIR = Path("./lib/core/templates/.cache")
 
 # Initialize Jinja2 environment with a file system loader for templates
 try:
-    abgrid_jinja_env = jinja2.Environment(
-        loader=jinja2.FileSystemLoader(["./lib/core/templates"]),
+    abgrid_jinja_env = Environment(
+        loader=FileSystemLoader(["./lib/core/templates"]),
         # Enable strict undefined handling to catch missing variables
-        undefined=jinja2.StrictUndefined,
+        undefined=StrictUndefined,
         # Auto-escape HTML for security
-        autoescape=jinja2.select_autoescape(['html', 'xml'])
+        autoescape=select_autoescape(['html', 'xml']),
+        # Add bytecode cache for performance
+        bytecode_cache=FileSystemBytecodeCache(TEMPLATE_CACHE_DIR)
     )
 except Exception as e:
     raise RuntimeError(f"Failed to initialize Jinja2 environment: {e}")
