@@ -66,6 +66,9 @@ class SimpleRateLimiter:
             raise ValueError("window_seconds must be greater than 0")
         if max_cache_size <= 0:
             raise ValueError("max_cache_size must be greater than 0")
+        
+        # Create unique identifier for this limiter instance
+        self.limiter_id = f"{limit}req_{window_seconds}s"
             
         # Store values
         self.limit: int = limit
@@ -136,7 +139,7 @@ class SimpleRateLimiter:
         # Get request path, fallback to empty string if not available
         path: str = getattr(getattr(request, 'url', None), 'path', '') or ''
         
-        return f"rate_limit:{token_hash}:{path}"
+        return f"rate_limit:{self.limiter_id}:{token_hash}:{request.url.path}"
 
     def _check_rate_limit(self, key: str) -> None:
         """
