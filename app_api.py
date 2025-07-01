@@ -6,8 +6,8 @@ from lib.interfaces.fastapi.router import get_router
 app = FastAPI()
 app.include_router(get_router())
 
-@app.get("/public")
-def public() -> JSONResponse:
+@app.get("/health")
+def health_check() -> JSONResponse:
     """
     Public endpoint that can be accessed without authentication.
 
@@ -16,7 +16,7 @@ def public() -> JSONResponse:
     """
     return JSONResponse(
         status_code=status.HTTP_200_OK,
-        content={"msg": "AB-Grid server is up and running"}
+        content={"msg": "AB-Grid server is alive and kicking."}
     )
 
 @app.exception_handler(PydanticValidationException)
