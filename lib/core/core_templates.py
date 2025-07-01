@@ -25,6 +25,7 @@ try:
         # Add bytecode cache for performance
         bytecode_cache=FileSystemBytecodeCache(TEMPLATE_CACHE_DIR)
     )
+
 except Exception as e:
     raise RuntimeError(f"Failed to initialize Jinja2 environment: {e}")
 
@@ -52,13 +53,11 @@ class CoreRenderer:
             TemplateRenderError: If template rendering fails due to syntax or runtime errors
             ValueError: If input parameters are invalid
         """
-        # Input validation
+        # Ensure template_path
         if not template_path:
             raise ValueError("Template path cannot be empty or None.")
         
-        if template_data is None:
-            template_data = {}
-        
+        # Ensure template_data
         if not isinstance(template_data, dict):
             raise ValueError("Template data must be a dictionary.")
         
@@ -70,22 +69,15 @@ class CoreRenderer:
             template = abgrid_jinja_env.get_template(template_path_str)
             
         except TemplateNotFound as e:
-            error_msg = f"Template file not found: {template_path_str}"
-            raise FileNotFoundError(error_msg) from e
+            raise FileNotFoundError(f"Template file not found: {template_path_str}") from e
             
         except Exception as e:
-            error_msg = f"Unexpected error loading template {template_path_str}: {e}."
-            raise TemplateRenderError(error_msg) from e
+            raise TemplateRenderError( f"Unexpected error loading template {template_path_str}: {e}.") from e
         
         try:
+            
             # Try to render template with template data
-            rendered_html = template.render(template_data)
-            
-            # Basic validation of rendered output
-            if not rendered_html or not isinstance(rendered_html, str):
-                raise TemplateRenderError(f"Template {template_path_str} produced invalid output.")
-            
-            return rendered_html
+            return template.render(template_data)
             
         except TemplateSyntaxError as e:
             error_msg = f"Template syntax error in {template_path_str}: {e.message} at line {e.lineno}."
