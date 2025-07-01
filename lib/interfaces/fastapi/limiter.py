@@ -2,7 +2,7 @@ import time
 from collections import OrderedDict
 from dataclasses import dataclass
 from functools import wraps
-from typing import Any, Type
+from typing import Any
 import threading
 import hashlib
 
@@ -75,52 +75,22 @@ class LRUCache:
         
         for key in expired_keys:
             del self._cache[key]
-    
-    def size(self):
-        return len(self._cache)
-    
-    def items(self):
-        with self._lock:
-            return list(self._cache.items())
 
 
-class DefaultLimiter:
-    def __init__(
-            self,
-            limit,
-            seconds: int,
-            max_memory_entries: int = 10000,
-            cleanup_interval: int = 300,
-            exception: Type[Exception] | None = None,
-            exception_message: Any = "",
-    ):
-        self._limit = limit
-        self._seconds = seconds
-        self._local_session = LRUCache(max_memory_entries, cleanup_interval)
-        self._exception_cls = RateLimitException
-        self._exception_message = exception_message
-
-    def raise_exception(self):
-        """An exception is raised when the rate limit reaches the limit.
-
-        If there is an exception class passed by the user, the exception passed by the user is generated.
-        If the exception class passed by the user does not exist, a RateLimitException is thrown.
-        """
-        raise self._exception_cls(self._exception_message)
-
-
-class RateLimiter(DefaultLimiter):
+class RateLimiter:
     def __init__(
         self,
         limit: int,
         seconds: int,
         max_memory_entries: int = 10000,
         cleanup_interval: int = 300,
-        exception: Type[Exception] | None = None,
         exception_message: Any = "Rate Limit Exceed",
     ):
-        self.exception_message = exception_message
-        super().__init__(limit, seconds, max_memory_entries, cleanup_interval, exception, self.exception_message)
+        self._limit = limit
+        self._seconds = seconds
+        self._local_session = LRUCache(max_memory_entries, cleanup_interval)
+        self._exception_cls = RateLimitException
+        self._exception_message = exception_message
 
     def __call__(self, func):
         @wraps(func)
@@ -132,22 +102,11 @@ class RateLimiter(DefaultLimiter):
 
         return wrapper
     
-    async def is_rate_limited(self, request) -> bool:
-        """Check if a request is currently rate limited without raising exceptions.
-        
-        Args:
-            request: FastAPI.Request Object
-            
-        Returns:
-            bool: True if rate limited, False otherwise
-        """
-        key = self.__get_key(request, LimitTypeKey.RateLimit)
-        current_time = time.time()
-        existing_data = self._local_session.get(key, (0, 0))
-        last_request_time, request_count = existing_data
+    def raise_exception(self):
+        """An exception is raised when the rate limit reaches the limit."""
+        raise self._exception_cls(self._exception_message)
 
-        return (current_time - last_request_time) < self._seconds and request_count >= self._limit
-
+    
     def __get_key(self, request, key_name: str):
         """Creates and returns a RateLimit Key based on JWT token.
         
