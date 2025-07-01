@@ -4,7 +4,7 @@ from typing import Optional, Any
 from fastapi import Depends, HTTPException, status
 from fastapi.security import SecurityScopes, HTTPAuthorizationCredentials, HTTPBearer
 
-from .config import get_settings
+from .settings import get_settings
 
 
 class UnauthorizedException(HTTPException):
