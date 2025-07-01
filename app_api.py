@@ -1,3 +1,15 @@
+"""
+Filename: app_api.py
+
+Description: FastAPI application entry point for AB-Grid REST API server with health monitoring and custom exception handling.
+
+Author: Pierpaolo Calanna
+
+Date Created: Jul 1, 2025
+
+The code is part of the AB-Grid project and is licensed under the MIT License.
+"""
+
 from fastapi import FastAPI, Request, status
 from fastapi.responses import JSONResponse
 from lib.core.core_schemas import PydanticValidationException

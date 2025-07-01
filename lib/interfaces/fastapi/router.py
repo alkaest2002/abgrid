@@ -1,3 +1,14 @@
+"""
+Filename: router.py
+
+Description: FastAPI router configuration for AB-Grid API endpoints, providing report generation with authentication and multi-format output support.
+
+Author: Pierpaolo Calanna
+
+Date Created: Jul 1, 2025
+
+The code is part of the AB-Grid project and is licensed under the MIT License.
+"""
 
 from typing import Literal
 from xmlrpc.client import Boolean

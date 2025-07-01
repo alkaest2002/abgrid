@@ -1,4 +1,14 @@
+"""
+Filename: security.py
 
+Description: JWT token verification and authentication handling for Auth0 integration with FastAPI security middleware.
+
+Author: Pierpaolo Calanna
+
+Date Created: Jul 1, 2025
+
+The code is part of the AB-Grid project and is licensed under the MIT License.
+"""
 import jwt
 from typing import Optional, Any
 from fastapi import Depends, HTTPException, status

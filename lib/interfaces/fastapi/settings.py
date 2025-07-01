@@ -1,3 +1,15 @@
+"""
+Filename: settings.py
+
+Description: Application configuration management using Pydantic Settings for Auth0 authentication and environment variable handling.
+
+Author: Pierpaolo Calanna
+
+Date Created: Jul 1, 2025
+
+The code is part of the AB-Grid project and is licensed under the MIT License.
+"""
+
 from functools import lru_cache
 from pydantic_settings import BaseSettings
 

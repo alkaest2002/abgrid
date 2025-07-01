@@ -1,8 +1,10 @@
 """
 Filename: utils.py
+
 Description: Implements a decorator to print notifications for function execution and utility functions for AB-Grid project.
 
 Author: Pierpaolo Calanna
+
 Date Created: May 3, 2025
 
 The code is part of the AB-Grid project and is licensed under the MIT License.

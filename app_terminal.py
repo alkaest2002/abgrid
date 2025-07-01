@@ -1,8 +1,11 @@
 """
-Terminal application for ABGrid project management.
+Filename: app_terminal.py
+
+Description: Command-line interface for AB-Grid project management, providing initialization, data processing, and batch report generation capabilities.
 
 Author: Pierpaolo Calanna
-Date Created: Wed Jun 25 2025
+
+Date Created: May 3, 2025
 
 The code is part of the AB-Grid project and is licensed under the MIT License.
 """

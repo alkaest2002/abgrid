@@ -1,20 +1,19 @@
 """
-Terminal logging utilities for the AB-Grid project.
+Filename: terminal_logger.py
 
-This module provides logging functionality with decorators for function execution tracking,
-error handling, and formatted output. It includes traceback extraction and pretty printing
-capabilities for enhanced debugging and user feedback.
+Description: This module provides logging functionality with decorators for function execution tracking,
+error handling, and formatted output. 
 
 Author: Pierpaolo Calanna
-Date Created: Wed Jun 25 2025
+
+Date Created:May 3, 2025
 
 The code is part of the AB-Grid project and is licensed under the MIT License.
 """
 
-import textwrap
 from functools import wraps
 from pathlib import Path
-from typing import Any, Callable, List, Optional, Set, TypeVar, Union
+from typing import Any, Callable, Optional, Set, TypeVar, Union
 from lib.core.core_schemas import PydanticValidationException
 from lib.core.core_templates import TemplateRenderError
 

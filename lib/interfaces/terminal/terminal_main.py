@@ -1,16 +1,10 @@
 """
 Filename: abgrid_main.py
-Description: Main module for managing project initialization, file generation, and report rendering.
 
-This module serves as the primary interface for AB-Grid project operations, providing
-comprehensive functionality for project lifecycle management including initialization,
-group configuration, answer sheet generation, and report creation with optional sociograms.
-
-The module uses a decorator-based error handling system that automatically captures
-exceptions and dispatches error events through the event system for consistent logging
-and error reporting across all operations.
+Description: Terminal main module for managing project initialization, file generation, and report rendering.
 
 Author: Pierpaolo Calanna
+
 Date Created: Wed Jun 25 2025
 
 The code is part of the AB-Grid project and is licensed under the MIT License.
