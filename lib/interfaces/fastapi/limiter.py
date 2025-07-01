@@ -117,11 +117,10 @@ class RateLimiter(DefaultLimiter):
         max_memory_entries: int = 10000,
         cleanup_interval: int = 300,
         exception: Type[Exception] | None = None,
-        exception_status: int = 429,  # This field is unused with RateLimitException
         exception_message: Any = "Rate Limit Exceed",
     ):
         self.exception_message = exception_message
-        super().__init__(limit, seconds, max_memory_entries, cleanup_interval, exception, exception_status, self.exception_message)
+        super().__init__(limit, seconds, max_memory_entries, cleanup_interval, exception, self.exception_message)
 
     def __call__(self, func):
         @wraps(func)
