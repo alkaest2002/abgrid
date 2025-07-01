@@ -17,7 +17,7 @@ from fastapi import APIRouter, HTTPException, Query, Security, status, Request
 from fastapi.responses import HTMLResponse, JSONResponse
 
 from .security import VerifyToken
-from .limiter import RateLimiter, FailedLimiter  
+from .limiter import RateLimiter
 from lib.core.core_data import CoreData
 from lib.core.core_schemas import ABGridSchema
 from lib.core.core_templates import CoreRenderer
