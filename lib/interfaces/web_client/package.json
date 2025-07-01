@@ -1,0 +1,22 @@
+{
+  "name": "web_client",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "devDependencies": {
+    "vite": "^6.3.5"
+  },
+  "dependencies": {
+    "@alpinejs/persist": "^3.14.9",
+    "@tailwindcss/vite": "^4.1.11",
+    "@unseenco/taxi": "^1.9.0",
+    "alpinejs": "^3.14.9",
+    "async-alpine": "^2.0.2",
+    "tailwindcss": "^4.1.11"
+  }
+}

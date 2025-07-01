@@ -1,0 +1,18 @@
+@import "tailwindcss";
+
+.fade-in {
+    animation: fadeIn 1s;
+}
+
+@keyframes fadeIn {
+    0% {
+        opacity: 0;
+    }
+    100% {
+        opacity: 1;
+    }
+}
+
+[x-cloak] {
+    display: none !important;
+}
