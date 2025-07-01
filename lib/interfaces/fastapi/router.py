@@ -1,68 +1,36 @@
 
 from typing import Literal
 
-from fastapi import FastAPI, HTTPException, Request, Query, Security, status
+from fastapi import APIRouter, HTTPException, Query, Security, status
 from fastapi.responses import HTMLResponse, JSONResponse
 
-from .utils import VerifyToken
+from .security import VerifyToken
 from lib.core.core_data import CoreData
-from lib.core.core_schemas import ABGridSchema, PydanticValidationException
+from lib.core.core_schemas import ABGridSchema
 from lib.core.core_templates import CoreRenderer
 from lib.utils import to_json
 
-def get_server() -> FastAPI:
+def get_router() -> APIRouter:
     """
-    Create and configure a FastAPI server instance.
+    Create and configure a FastAPI router instance.
 
     Returns:
-        FastAPI: Configured FastAPI application instance.
+        FastAPI: Configured FastAPI router instance.
     """
 
-    # Init Fastapi
-    app = FastAPI()
+    # Init router
+    router = APIRouter(prefix="/api")
 
     # Init auth
     auth = VerifyToken()
     
-    # Instantiate abgrid core data
-    core_data = CoreData()
+    # Init abgrid data
+    abgrid_data = CoreData()
 
-    # Initialize abgrid core renderer
-    renderer = CoreRenderer()
+    # Init abgrid renderer
+    abgrid_renderer = CoreRenderer()
 
-    @app.exception_handler(PydanticValidationException)
-    async def custom_pydantic_validation_exception_handler(
-        request: Request, exc: PydanticValidationException
-    ) -> JSONResponse:
-        """
-        Custom exception handler for PydanticValidationException.
-
-        Args:
-            request (Request): The request that resulted in the exception.
-            exc (PydanticValidationException): The exception instance.
-        
-        Returns:
-            JSONResponse: A JSON response with status code 422 and error details.
-        """
-        return JSONResponse(
-            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
-            content={"detail": exc.errors}
-        )
-
-    @app.get("/api/public")
-    def public() -> JSONResponse:
-        """
-        Public endpoint that can be accessed without authentication.
-
-        Returns:
-            dict: A message indicating the endpoint is publicly accessible.
-        """
-        return JSONResponse(
-            status_code=status.HTTP_200_OK,
-            content={"msg": "AB-Grid server is up and running"}
-        )
-
-    @app.post("/api/report")
+    @router.post("/report")
     def get_report(
         model: ABGridSchema, 
         language: str = Query(..., description="Language of the report"),
@@ -70,7 +38,7 @@ def get_server() -> FastAPI:
         auth_result: str = Security(auth.verify)
     ):
         """
-        Endpoint to retrieve report data based on a validated ABGridSchema model and specified type and language.
+        Endpoint to retrieve report based on a validated ABGridSchema model and specified type and language.
 
         Args:
             model (ABGridSchema): Parsed and validated instance of ABGridSchema from the request body.
@@ -82,11 +50,12 @@ def get_server() -> FastAPI:
             HTMLResponse or JSONResponse: The report data in the specified format.
         
         Raises:
+            FileNotFoundError if the requested html template is not found
             HTTPException: If a validation or unexpected error occurs during processing.
         """
         try:
-            # Get Report data
-            report_data = core_data.get_report_data(model, True)
+            # Get report data
+            report_data = abgrid_data.get_report_data(model, True)
 
             # User requested html report
             if type_of_report == "html":
@@ -103,7 +72,6 @@ def get_server() -> FastAPI:
             )
         
         except Exception as e:
-            # General exceptions catch-all
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, 
                 detail=str(e)
@@ -121,7 +89,7 @@ def get_server() -> FastAPI:
             HTMLResponse: An HTML response containing the rendered report.
         """
         report_template = f"./{language}/report.html"
-        rendered_report = renderer.render_html(report_template, report_data)
+        rendered_report = abgrid_renderer.render_html(report_template, report_data)
         return HTMLResponse(
             status_code=status.HTTP_200_OK,
             content=rendered_report
@@ -143,4 +111,4 @@ def get_server() -> FastAPI:
             content=json_serializable_data
         )
 
-    return app
+    return router
