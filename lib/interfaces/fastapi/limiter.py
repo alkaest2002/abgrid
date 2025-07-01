@@ -155,36 +155,45 @@ class SimpleRateLimiter:
         Raises:
             RateLimitException: When the rate limit is exceeded
         """
+        # Get time
         current_time: float = time.time()
         
+        # Thread safe operation
         with self._lock:
             # Auto-cleanup: remove entries older than 2x window to prevent memory leaks
             self._cleanup_expired(current_time)
             
+            # user identified by key is found in cache
             if key in self._cache:
+                # Get time and count of found user key
                 window_start, count = self._cache[key]
                 
                 # If we're still in the same time window
                 if (current_time - window_start) < self.window_seconds:
+                    
+                    # If user hits limit
                     if count >= self.limit:
                         raise RateLimitException(
                             f"Rate limit exceeded: {count}/{self.limit} requests "
                             f"in {self.window_seconds}s window"
                         )
                     
-                    # Update count and move to end (LRU)
+                    # Update count
                     self._cache[key] = (window_start, count + 1)
-                    self._cache.move_to_end(key)
                 else:
-                    # New time window - reset counter
+                    # New time window + reset counter
                     self._cache[key] = (current_time, 1)
-                    self._cache.move_to_end(key)
+                
+                # Move user to end (LRU)
+                self._cache.move_to_end(key)
             else:
-                # First request for this key
-                # Evict oldest entry if at capacity (LRU eviction)
+                # If cache hitted maximum capacity
                 if len(self._cache) >= self.max_cache_size:
+                    
+                    # Evict oldest entry (LRU eviction)
                     self._cache.popitem(last=False)
                 
+                # First request for user identified by this key
                 self._cache[key] = (current_time, 1)
 
     def _cleanup_expired(self, current_time: float) -> None:
@@ -199,11 +208,15 @@ class SimpleRateLimiter:
         Args:
             current_time: Current timestamp for comparison
         """
+        # Define cutoff time
         cutoff_time: float = current_time - (2 * self.window_seconds)
+        
+        # Get expired keys
         expired_keys: List[str] = [
             k for k, (window_start, _) in self._cache.items() 
             if window_start < cutoff_time
         ]
         
+        # Delete expired keys
         for key in expired_keys:
             del self._cache[key]
