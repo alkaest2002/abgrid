@@ -74,7 +74,7 @@ class AnonymousJWT:
             if payload.get("expires_at", 0) < int(time.time()):
                 raise HTTPException(
                     status_code=status.HTTP_401_UNAUTHORIZED,
-                    detail="Token expired"
+                    detail="JWT token expired"
                 )
             
             return payload
@@ -82,7 +82,7 @@ class AnonymousJWT:
         except jwt.InvalidTokenError:
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
-                detail="Invalid token"
+                detail="Invalid JWT token"
             )
     
     def should_refresh(self, token: str) -> bool:
