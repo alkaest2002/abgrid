@@ -12,11 +12,34 @@ The code is part of the AB-Grid project and is licensed under the MIT License.
 
 from fastapi import FastAPI, Request, status
 from fastapi.responses import JSONResponse
+from starlette.middleware.cors import CORSMiddleware
 from lib.core.core_schemas import PydanticValidationException
 from lib.interfaces.fastapi.limiter import RateLimitException
 from lib.interfaces.fastapi.router import get_router
 
+# Initialization of FastAPI application
 app = FastAPI()
+
+# Use a more "random" port number within the dynamic range
+fancy_port = 53472
+
+# Define origins that should be allowed to access your server
+origins = [
+    f"http://localhost:{fancy_port}",
+    f"http://127.0.0.1:{fancy_port}",
+    # Additional specific IPs or domain names can be added if needed
+]
+
+# Add CORSMiddleware with slightly restricted settings
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,  # Restrict to the specific local port your app will use
+    allow_credentials=True,  # Allow credentials for authentication
+    allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],  # Methods your app might use
+    allow_headers=["Authorization", "Content-Type"],  # Common headers used in requests
+)
+
+# Include application router
 app.include_router(get_router())
 
 @app.exception_handler(PydanticValidationException)
@@ -57,14 +80,13 @@ async def rate_limit_exception_handler(
         content={"detail": exc.message}
     )
 
-
 @app.get("/health")
 def health_check() -> JSONResponse:
     """
     Public endpoint that can be accessed without authentication.
 
     Returns:
-        dict: A message indicating the endpoint is publicly accessible.
+        JSONResponse: A message indicating the endpoint is publicly accessible.
     """
     return JSONResponse(
         status_code=status.HTTP_200_OK,
