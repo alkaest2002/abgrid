@@ -1,7 +1,7 @@
 """
 Filename: settings.py
 
-Description: Updated router with anonymous JWT authentication.
+Description: FastApi router with strict JWT authentication (except /token endpoint)
 
 Author: Pierpaolo Calanna
 
@@ -30,13 +30,14 @@ def get_router() -> APIRouter:
     abgrid_data = CoreData()
     abgrid_renderer = CoreRenderer()
 
-    # Token generation endpoint
+    # Token generation endpoint - NO AUTH REQUIRED
     @router.get("/token")
     async def get_token():
-        """Get a new anonymous JWT token."""
+        """Get a new anonymous JWT token. This is the ONLY endpoint that doesn't require auth."""
         new_token = auth.jwt_handler.generate_token()
         return {"token": new_token}
 
+    # Protected endpoint - AUTH REQUIRED
     @router.post("/report")
     @SimpleRateLimiter(limit=1, window_seconds=5)       # Burst protection
     @SimpleRateLimiter(limit=100, window_seconds=3600)  # Hourly limit
@@ -47,9 +48,9 @@ def get_router() -> APIRouter:
         language: str = Query(..., description="Language of the report"),
         type_of_report: Literal['html', 'json'] = Query(..., description="The type of report desired"),
         with_sociogram: bool = Query(..., description="Include sociogram"),
-        user_data: dict = Depends(auth.verify_token)
+        user_data: dict = Depends(auth.verify_token)  # JWT TOKEN REQUIRED
     ):
-        """Generate report with anonymous JWT authentication."""
+        """Generate report with anonymous JWT authentication. JWT token is REQUIRED."""
         try:
             # Get report data
             report_data = abgrid_data.get_report_data(model, with_sociogram)
