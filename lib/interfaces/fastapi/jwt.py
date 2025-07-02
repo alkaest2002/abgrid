@@ -1,41 +1,40 @@
-"""
-Filename: jwt.py
-
-Description: Simple anonymous JWT token system for tracking and rate limiting.
-
-Author: Pierpaolo Calanna
-
-Date Created: Jul 1, 2025
-
-The code is part of the AB-Grid project and is licensed under the MIT License.
-"""
-
-import os
 import jwt
 import uuid
 import time
 from datetime import datetime, timedelta, timezone
 from typing import Dict, Any
 from fastapi import HTTPException, status
-from dotenv import load_dotenv
+from functools import lru_cache
+from pydantic import Field
+from pydantic_settings import BaseSettings
 
-load_dotenv() 
+class Settings(BaseSettings):
+    auth_secret: str = Field(..., env='AUTH_SECRET')
+    token_lifetime_hours: int = Field(default=12, env='TOKEN_LIFETIME_HOURS')
+
+    class Config:
+        env_file = './lib/interfaces/fastapi/.env'
+        case_sensitive = False
+
+    @classmethod
+    @lru_cache()
+    def load(cls):
+        return cls()
 
 class AnonymousJWT:
     """Simple JWT handler for anonymous user tracking."""
 
-    def __init__(self, secret_key: str = os.getenv("AUTH_SECRET"), token_lifetime_hours: int = 12) -> None:
+    def __init__(self, settings: Settings = Settings.load()) -> None:
         """
         Initializes an AnonymousJWT instance.
 
         Args:
-            secret_key: The secret key for signing JWTs.
-            token_lifetime_hours: The lifetime of a token in hours.
+            settings: An instance of Settings for configuration.
         """
-        self.secret_key = secret_key
+        self.secret_key = settings.auth_secret
         self.algorithm = "HS256"
-        self.token_lifetime = timedelta(hours=token_lifetime_hours)
-    
+        self.token_lifetime = timedelta(hours=settings.token_lifetime_hours)
+
     def generate_token(self) -> str:
         """
         Generate a new anonymous JWT token with UUID.
@@ -45,15 +44,15 @@ class AnonymousJWT:
         """
         now = datetime.now(timezone.utc)
         expires = now + self.token_lifetime
-        
+
         payload = {
             "user_id": str(uuid.uuid4()),
             "issued_at": int(now.timestamp()),
             "expires_at": int(expires.timestamp())
         }
-        
+
         return jwt.encode(payload, self.secret_key, algorithm=self.algorithm)
-    
+
     def verify_token(self, token: str) -> Dict[str, Any]:
         """
         Verify and decode a JWT token.
@@ -69,22 +68,18 @@ class AnonymousJWT:
         """
         try:
             payload = jwt.decode(token, self.secret_key, algorithms=[self.algorithm])
-            
-            # Check if token is expired
             if payload.get("expires_at", 0) < int(time.time()):
                 raise HTTPException(
                     status_code=status.HTTP_401_UNAUTHORIZED,
                     detail="JWT token expired"
                 )
-            
             return payload
-        
         except jwt.InvalidTokenError:
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
                 detail="Invalid JWT token"
             )
-    
+
     def should_refresh(self, token: str) -> bool:
         """
         Check if a token should be refreshed (when 75% of lifetime has passed).
@@ -99,12 +94,10 @@ class AnonymousJWT:
             payload = jwt.decode(token, self.secret_key, algorithms=[self.algorithm])
             issued_at = payload.get("issued_at", 0)
             expires_at = payload.get("expires_at", 0)
-            
-            # Calculate 75% of token lifetime
+
             lifetime_seconds = expires_at - issued_at
             refresh_threshold = issued_at + (lifetime_seconds * 0.75)
-            
+
             return int(time.time()) > refresh_threshold
-        
         except jwt.InvalidTokenError:
             return True  # Invalid token should be refreshed
