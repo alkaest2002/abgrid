@@ -10,3 +10,4 @@ ipython/data
 ipython/analysis
 ipython/*.xlsx
 .cache/
+.devServer/
