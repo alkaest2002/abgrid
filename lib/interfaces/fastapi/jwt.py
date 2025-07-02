@@ -99,5 +99,7 @@ class AnonymousJWT:
             refresh_threshold = issued_at + (lifetime_seconds * 0.75)
 
             return int(time.time()) > refresh_threshold
+        
+        # Invalid token should be refreshed
         except jwt.InvalidTokenError:
-            return True  # Invalid token should be refreshed
+            return True  

@@ -10,16 +10,11 @@ Date Created: Jul 1, 2025
 The code is part of the AB-Grid project and is licensed under the MIT License.
 """
 
-from typing import Optional, Any, Dict
-from fastapi import Depends, HTTPException, status, Response
-from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 import jwt
-
-from .jwt import AnonymousJWT
-
 from typing import Optional, Any, Dict
 from fastapi import Depends, HTTPException, status, Response
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
+
 from .jwt import AnonymousJWT
 
 class Auth:
