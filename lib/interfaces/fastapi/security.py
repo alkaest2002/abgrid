@@ -1,118 +1,63 @@
 """
-Filename: security.py
-
-Description: JWT token verification and authentication handling for Auth0 integration with FastAPI security middleware.
-
-Author: Pierpaolo Calanna
-
-Date Created: Jul 1, 2025
-
-The code is part of the AB-Grid project and is licensed under the MIT License.
+Simple anonymous JWT security for FastAPI.
 """
-import jwt
-from typing import Optional, Any
-from fastapi import Depends, HTTPException, status
-from fastapi.security import SecurityScopes, HTTPAuthorizationCredentials, HTTPBearer
+from typing import Optional, Any, Dict
+from fastapi import Depends, HTTPException, status, Response
+from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 
-from .settings import get_settings
-
-
-class UnauthorizedException(HTTPException):
-    """Exception for unauthorized access, results in HTTP 403 error."""
-    
-    def __init__(self, detail: str, **kwargs: Any) -> None:
-        """Initialize with detail message and optional keyword arguments."""
-        super().__init__(status.HTTP_403_FORBIDDEN, detail=detail)
+from .jwt import AnonymousJWT
 
 
 class UnauthenticatedException(HTTPException):
-    """Exception for unauthenticated access, results in HTTP 401 error."""
-    
     def __init__(self) -> None:
-        """Initialize with a predefined detail message for unauthenticated access."""
         super().__init__(
-            status_code=status.HTTP_401_UNAUTHORIZED, detail="Requires authentication"
+            status_code=status.HTTP_401_UNAUTHORIZED, 
+            detail="Requires authentication"
         )
 
-class VerifyToken:
-    """Handles token verification using PyJWT."""
+class Auth:
+    """Simple JWT token verification for anonymous users."""
 
     def __init__(self) -> None:
-        """Initialize the verifier with configuration settings and JWKS client."""
-        self.config = get_settings()
+        self.jwt_handler = AnonymousJWT()
 
-        # Get the JWKS URL to handle key verification
-        jwks_url = f'https://{self.config.auth0_domain}/.well-known/jwks.json'
-        self.jwks_client = jwt.PyJWKClient(jwks_url)
-
-    async def verify(
+    async def verify_token(
         self,
-        security_scopes: SecurityScopes,
-        token: Optional[HTTPAuthorizationCredentials] = Depends(HTTPBearer())
-    ) -> dict:
+        response: Response,
+        token: Optional[HTTPAuthorizationCredentials] = Depends(HTTPBearer(auto_error=False))
+    ) -> Dict[str, Any]:
         """
-        Verify the provided JWT token against the JWKS.
-
+        Verify JWT token and auto-refresh if needed.
+        
         Args:
-            security_scopes (SecurityScopes): Required security scopes for the operation.
-            token (Optional[HTTPAuthorizationCredentials]): JWT token for authentication, defaults to using HTTPBearer.
-
+            response: FastAPI response object for setting new token header
+            token: JWT token from Authorization header
+            
         Returns:
-            dict: Decoded JWT payload if verification is successful.
-
-        Raises:
-            UnauthenticatedException: If no token is provided.
-            UnauthorizedException: If there's an error in token decoding or the token does not match required claims.
+            dict: Token payload with user_id
         """
-        if token is None:
-            raise UnauthenticatedException
-
+        # If no token provided, generate a new one
+        if not token:
+            new_token = self.jwt_handler.generate_token()
+            response.headers["X-New-Token"] = new_token
+            
+            # Return payload for new token
+            return self.jwt_handler.verify_token(new_token)
+        
         try:
-            # Retrieve the signing key from the JWKS using the token's key ID
-            signing_key = self.jwks_client.get_signing_key_from_jwt(token.credentials).key
-        except jwt.exceptions.PyJWKClientError as error:
-            raise UnauthorizedException(str(error))
-        except jwt.exceptions.DecodeError as error:
-            raise UnauthorizedException(str(error))
-
-        try:
-            # Decode and validate the token
-            payload = jwt.decode(
-                token.credentials,
-                signing_key,
-                algorithms=self.config.auth0_algorithms,
-                audience=self.config.auth0_api_audience,
-                issuer=self.config.auth0_issuer,
-            )
-        except Exception as error:
-            raise UnauthorizedException(str(error))
-
-        # Check for required scopes in the token claims
-        if len(security_scopes.scopes) > 0:
-            self._check_claims(payload, 'scope', security_scopes.scopes)
-
-        return payload
-
-    def _check_claims(self, payload: dict, claim_name: str, expected_value: list) -> None:
-        """
-        Check if the expected claims are present in the token payload.
-
-        Args:
-            payload (dict): The JWT payload.
-            claim_name (str): The name of the claim to check.
-            expected_value (list): List of expected values for the claim.
-
-        Raises:
-            UnauthorizedException: If the claim is missing or does not contain the expected values.
-        """
-        if claim_name not in payload:
-            raise UnauthorizedException(detail=f'No claim "{claim_name}" found in token')
-
-        payload_claim = payload[claim_name]
-
-        if claim_name == 'scope':
-            payload_claim = payload[claim_name].split(' ')
-
-        for value in expected_value:
-            if value not in payload_claim:
-                raise UnauthorizedException(detail=f'Missing "{claim_name}" scope')
+            # Verify existing token
+            payload = self.jwt_handler.verify_token(token.credentials)
+            
+            # Check if token should be refreshed
+            if self.jwt_handler.should_refresh(token.credentials):
+                new_token = self.jwt_handler.generate_token()
+                response.headers["X-Refresh-Token"] = new_token
+            
+            return payload
+            
+        except HTTPException:
+            # Token is invalid/expired, generate new one
+            new_token = self.jwt_handler.generate_token()
+            response.headers["X-New-Token"] = new_token
+            
+            return self.jwt_handler.verify_token(new_token)

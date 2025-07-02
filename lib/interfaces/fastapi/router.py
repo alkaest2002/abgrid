@@ -1,7 +1,7 @@
 """
-Filename: router.py
+Filename: settings.py
 
-Description: FastAPI router configuration for AB-Grid API endpoints, providing report generation with authentication and multi-format output support.
+Description: Updated router with anonymous JWT authentication.
 
 Author: Pierpaolo Calanna
 
@@ -9,78 +9,53 @@ Date Created: Jul 1, 2025
 
 The code is part of the AB-Grid project and is licensed under the MIT License.
 """
-
 from typing import Literal
-from xmlrpc.client import Boolean
 
-from fastapi import APIRouter, HTTPException, Query, Security, status, Request
+from fastapi import APIRouter, HTTPException, Query, Depends, status, Request, Response
 from fastapi.responses import HTMLResponse, JSONResponse
 
-from .security import VerifyToken
+from .security import Auth
 from .limiter import SimpleRateLimiter
 from lib.core.core_data import CoreData
 from lib.core.core_schemas import ABGridSchema
 from lib.core.core_templates import CoreRenderer
 from lib.utils import to_json
 
+
 def get_router() -> APIRouter:
-    """
-    Create and configure a FastAPI router instance.
-
-    Returns:
-        FastAPI: Configured FastAPI router instance.
-    """
-
-    # Init router
     router = APIRouter(prefix="/api")
-
-    # Init auth
-    auth = VerifyToken()
     
-    # Init abgrid data
+    # Init components
+    auth = Auth()
     abgrid_data = CoreData()
-
-    # Init abgrid renderer
     abgrid_renderer = CoreRenderer()
 
+    # Token generation endpoint
+    @router.get("/token")
+    async def get_token():
+        """Get a new anonymous JWT token."""
+        new_token = auth.jwt_handler.generate_token()
+        return {"token": new_token}
+
     @router.post("/report")
-    @SimpleRateLimiter(limit=1, window_seconds=5)       # Apply burst protection first
-    @SimpleRateLimiter(limit=100, window_seconds=3600)  # Then apply hourly limit
+    @SimpleRateLimiter(limit=1, window_seconds=5)       # Burst protection
+    @SimpleRateLimiter(limit=100, window_seconds=3600)  # Hourly limit
     async def get_report(
         request: Request,
+        response: Response, 
         model: ABGridSchema, 
         language: str = Query(..., description="Language of the report"),
         type_of_report: Literal['html', 'json'] = Query(..., description="The type of report desired"),
-        with_sociogram: Boolean = Query(..., description="Include sociogram"),
-        _: dict = Security(auth.verify)
+        with_sociogram: bool = Query(..., description="Include sociogram"),
+        user_data: dict = Depends(auth.verify_token)
     ):
-        """
-        Endpoint to retrieve report based on a validated ABGridSchema model and specified type and language.
-
-        Args:
-            request (Request): FastAPI request object (required for rate limiting).
-            model (ABGridSchema): Parsed and validated instance of ABGridSchema from the request body.
-            language (str): Language of the report.
-            type_of_report (str): Type of the report, either 'html' or 'json'.
-            with_sociogram: (bool) include sociogram
-            token (str): Authorization token obtained via HTTPBearer.
-        
-        Returns:
-            HTMLResponse or JSONResponse: The report data in the specified format.
-        
-        Raises:
-            FileNotFoundError if the requested html template is not found
-            HTTPException: If a validation or unexpected error occurs during processing.
-        """
+        """Generate report with anonymous JWT authentication."""
         try:
             # Get report data
             report_data = abgrid_data.get_report_data(model, with_sociogram)
 
-            # User requested html report
             if type_of_report == "html":
                 return _generate_html_report(language, report_data)
-
-            # User requested report json data
             elif type_of_report == "json":
                 return _generate_json_report(report_data)
 
@@ -89,7 +64,6 @@ def get_router() -> APIRouter:
                 status_code=status.HTTP_404_NOT_FOUND, 
                 detail=f"Language {language} is not available"
             )
-        
         except Exception as e:
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, 
@@ -97,16 +71,6 @@ def get_router() -> APIRouter:
             )
 
     def _generate_html_report(language: str, report_data: dict) -> HTMLResponse:
-        """
-        Generate HTML report from the report data.
-
-        Args:
-            language (str): Language of the report.
-            report_data (dict): The report data to render.
-        
-        Returns:
-            HTMLResponse: An HTML response containing the rendered report.
-        """
         report_template = f"./{language}/report.html"
         rendered_report = abgrid_renderer.render_html(report_template, report_data)
         return HTMLResponse(
@@ -115,15 +79,6 @@ def get_router() -> APIRouter:
         )
 
     def _generate_json_report(report_data: dict) -> JSONResponse:
-        """
-        Generate JSON report from the report data.
-
-        Args:
-            report_data (dict): The report data to convert.
-        
-        Returns:
-            JSONResponse: A JSON response containing the report data.
-        """
         json_serializable_data = to_json(report_data)
         return JSONResponse(
             status_code=status.HTTP_200_OK,
