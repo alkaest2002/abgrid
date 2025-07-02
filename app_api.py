@@ -20,7 +20,7 @@ from lib.interfaces.fastapi.router import get_router
 # Initialization of FastAPI application
 app = FastAPI()
 
-# Use a more "random" port number within the dynamic range
+# Use a "random" port number within the dynamic range
 fancy_port = 53472
 
 # Define origins that should be allowed to access your server

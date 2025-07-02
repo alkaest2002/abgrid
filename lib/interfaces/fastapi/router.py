@@ -15,7 +15,7 @@ from typing import Literal, Dict, Any
 from fastapi import APIRouter, HTTPException, Query, Depends, status, Request, Response
 from fastapi.responses import HTMLResponse, JSONResponse
 
-from .security import Auth
+from .auth import Auth
 from .limiter import SimpleRateLimiter
 from lib.core.core_data import CoreData
 from lib.core.core_schemas import ABGridSchema
@@ -50,8 +50,8 @@ def get_router() -> APIRouter:
         return {"token": new_token}
 
     @router.post("/report")
-    @SimpleRateLimiter(limit=1, window_seconds=5)       # Burst protection
-    @SimpleRateLimiter(limit=100, window_seconds=3600)  # Hourly limit
+    @SimpleRateLimiter(limit=1, window_seconds=5)      # Burst protection
+    @SimpleRateLimiter(limit=50, window_seconds=3600)  # Hourly limit
     async def get_report(
         request: Request,
         response: Response, 

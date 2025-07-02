@@ -1,5 +1,5 @@
 """
-Filename: security.py
+Filename: auth.py
 
 Description: Auth class to verify JWT tokens.
 
@@ -13,19 +13,14 @@ The code is part of the AB-Grid project and is licensed under the MIT License.
 from typing import Optional, Any, Dict
 from fastapi import Depends, HTTPException, status, Response
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
+import jwt
 
 from .jwt import AnonymousJWT
 
-class UnauthenticatedException(HTTPException):
-    """
-    Exception raised when a JWT token is required but not provided.
-    """
-    def __init__(self) -> None:
-        """Initialize an UnauthenticatedException with a 401 status code."""
-        super().__init__(
-            status_code=status.HTTP_401_UNAUTHORIZED, 
-            detail="JWT token required"
-        )
+from typing import Optional, Any, Dict
+from fastapi import Depends, HTTPException, status, Response
+from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
+from .jwt import AnonymousJWT
 
 class Auth:
     """Simple JWT token verification for anonymous users."""
@@ -44,18 +39,15 @@ class Auth:
         
         Args:
             response: FastAPI response object for setting the new token header.
-            token: JWT token from Authorization header (REQUIRED).
+            token: JWT token from Authorization header, automatically handled by FastAPI.
             
         Returns:
             A dictionary containing the token payload with user_id.
-            
+
         Raises:
-            UnauthenticatedException: If no token is provided.
+            HTTPException: If the token is invalid or expired (HTTP 401).
         """
-        # HTTPBearer with auto_error=True will automatically raise 401 if no token
-        if not token:
-            raise UnauthenticatedException()
-        
+        # The dependency will automatically handle missing token cases and raise 401
         try:
             # Verify the existing token
             payload = self.jwt_handler.verify_token(token.credentials)
@@ -67,8 +59,7 @@ class Auth:
             
             return payload
             
-        except HTTPException:
-            # Token is invalid/expired - don't generate a new one, just fail
+        except jwt.InvalidTokenError:
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
                 detail="Invalid or expired token"
