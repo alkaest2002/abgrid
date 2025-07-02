@@ -9,14 +9,19 @@
 </head>
 
 <body>
-    <div data-taxi>
+    <div class="flex items-center justify-center w-screen h-screen m-auto" data-taxi>
         <div data-taxi-view>
-            <h1 class="text-3xl font-bold underline">
+            <h1 class="text-3xl font-bold">
+                <button 
+                    x-data="{ ...viewBase(), ...componentButton('bg-red-600') }" 
+                    x-bind="{ ...vButton, ...cButton }">
+                </button>
                 <a href="pages/about.html">Hello world!</a>
             </h1>
         </div>
     </div>
-    <script type="module" src="/src/js/main.js"></script>
+        
+    <script type="module" src="src/js/main.js"></script>
 </body>
 
 </html>

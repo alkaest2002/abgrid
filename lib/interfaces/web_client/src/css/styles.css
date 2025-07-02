@@ -1,4 +1,5 @@
 @import "tailwindcss";
+@source inline("bg-indigo-600", "bg-red-600");
 
 .fade-in {
     animation: fadeIn 1s;
