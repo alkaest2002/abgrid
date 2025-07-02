@@ -1,7 +1,7 @@
 """
-Filename: settings.py
+Filename: limiter.py
 
-Description: Simple Rate limiter system.
+Description: Simple rate limiter system.
 
 Author: Pierpaolo Calanna
 
@@ -17,42 +17,32 @@ from collections import OrderedDict
 from functools import wraps
 from typing import Tuple, Callable, Any, Awaitable, List
 
-
 class RateLimitException(Exception):
     """
-    Exception raised when rate limit is exceeded.
-    
-    This exception is thrown when a user exceeds the configured
-    rate limit for API requests within the specified time window.
-    
+    Exception raised when the rate limit is exceeded.
+
     Attributes:
-        message: The error message describing the rate limit violation
+        message: The error message describing the rate limit violation.
     """
     def __init__(self, message: str = "Rate limit exceeded") -> None:
+        """Initialize a RateLimitException with a default error message."""
         self.message = message
         super().__init__(message)
 
-
 class SimpleRateLimiter:
     """
-    JWT-based rate limiter using sliding window approach with LRU cache.
-    
+    JWT-based rate limiter using a sliding window approach with LRU cache.
+
     This rate limiter extracts JWT tokens from Authorization headers and
-    applies rate limiting per token per endpoint. It uses a sliding window
-    approach with automatic cleanup to prevent memory leaks.
-    
-    Features:
-    - JWT token-based rate limiting
-    - Per-endpoint rate limiting
-    - Sliding window implementation
-    - LRU cache with configurable size
-    - Automatic cleanup of expired entries
-    - Thread-safe operations
+    applies rate limiting per token per endpoint.
     
     Args:
-        limit: Maximum number of requests allowed per window
-        window_seconds: Time window duration in seconds
-        max_cache_size: Maximum number of entries to keep in cache
+        limit: Maximum number of requests allowed per window.
+        window_seconds: Time window duration in seconds.
+        max_cache_size: Maximum number of entries to keep in cache.
+    
+    Raises:
+        ValueError: If any parameter is <= 0.
     """
     
     def __init__(
@@ -63,14 +53,11 @@ class SimpleRateLimiter:
     ) -> None:
         """
         Initialize the rate limiter.
-        
+
         Args:
-            limit: Maximum requests allowed per window (must be > 0)
-            window_seconds: Duration of rate limit window in seconds (must be > 0)
-            max_cache_size: Maximum cache entries to prevent memory leaks (must be > 0)
-            
-        Raises:
-            ValueError: If any parameter is <= 0
+            limit: Maximum requests allowed per window (must be > 0).
+            window_seconds: Duration of rate limit window in seconds (must be > 0).
+            max_cache_size: Maximum cache entries to prevent memory leaks (must be > 0).
         """
         if limit <= 0:
             raise ValueError("limit must be greater than 0")
@@ -79,7 +66,7 @@ class SimpleRateLimiter:
         if max_cache_size <= 0:
             raise ValueError("max_cache_size must be greater than 0")
         
-        # Create unique identifier for this limiter instance
+        # Create a unique identifier for this limiter instance
         self.limiter_id = f"{limit}req_{window_seconds}s"
             
         # Store values
@@ -94,19 +81,18 @@ class SimpleRateLimiter:
     def __call__(self, func: Callable[..., Awaitable[Any]]) -> Callable[..., Awaitable[Any]]:
         """
         Decorator that applies rate limiting to an async function.
-        
-        The decorated function must accept a 'request' parameter (either as
-        positional or keyword argument) that contains the HTTP request object
-        with headers.
+
+        The decorated function must accept a 'request' parameter that contains 
+        the HTTP request object with headers.
         
         Args:
-            func: Async function to be rate limited
+            func: Async function to be rate limited.
             
         Returns:
-            Wrapped async function with rate limiting applied
-            
+            Wrapped async function with rate limiting applied.
+
         Raises:
-            RateLimitException: When rate limit is exceeded or JWT token is missing
+            RateLimitException: When rate limit is exceeded or JWT token is missing.
         """
         @wraps(func)
         async def wrapper(*args: Any, **kwargs: Any) -> Any:
@@ -124,19 +110,16 @@ class SimpleRateLimiter:
     def _get_cache_key(self, request: Any) -> str:
         """
         Extract JWT token from request and create a unique cache key.
-        
-        The cache key combines the hashed JWT token with the request path
-        to provide per-user per-endpoint rate limiting.
-        
+
         Args:
-            request: HTTP request object with headers and url attributes
+            request: HTTP request object with headers and url attributes.
             
         Returns:
-            Unique cache key string in format "rate_limit:{token_hash}:{path}"
-            
+            Unique cache key string in format "rate_limit:{token_hash}:{path}".
+
         Raises:
             RateLimitException: If Authorization header is missing, malformed,
-                              or doesn't contain a Bearer token
+                                or doesn't contain a Bearer token.
         """
         # Get Authorization header
         auth_header: str = getattr(request.headers, 'get', lambda k, d: '')("Authorization", "")
@@ -156,19 +139,14 @@ class SimpleRateLimiter:
     def _check_rate_limit(self, key: str) -> None:
         """
         Check if request exceeds rate limit and update counters.
-        
-        This method implements the sliding window algorithm:
-        1. Clean up expired entries
-        2. Check if key exists and is within current window
-        3. If within window and at limit, raise exception
-        4. If within window and under limit, increment counter
-        5. If outside window or new key, start new window
+
+        Implements the sliding window algorithm.
         
         Args:
-            key: Unique cache key for the request
+            key: Unique cache key for the request.
             
         Raises:
-            RateLimitException: When the rate limit is exceeded
+            RateLimitException: When the rate limit is exceeded.
         """
         # Get time
         current_time: float = time.time()
@@ -178,7 +156,7 @@ class SimpleRateLimiter:
             # Auto-cleanup: remove entries older than 2x window to prevent memory leaks
             self._cleanup_expired(current_time)
             
-            # user identified by key is found in cache
+            # User identified by key is found in cache
             if key in self._cache:
                 # Get time and count of found user key
                 window_start, count = self._cache[key]
@@ -202,7 +180,7 @@ class SimpleRateLimiter:
                 # Move user to end (LRU)
                 self._cache.move_to_end(key)
             else:
-                # If cache hitted maximum capacity
+                # If cache hits maximum capacity
                 if len(self._cache) >= self.max_cache_size:
                     
                     # Evict oldest entry (LRU eviction)
@@ -214,14 +192,9 @@ class SimpleRateLimiter:
     def _cleanup_expired(self, current_time: float) -> None:
         """
         Remove cache entries older than 2x window_seconds to prevent memory leaks.
-        
-        This cleanup ensures that even if entries are not accessed for a long time,
-        they will be removed from memory. We use 2x window_seconds as the cutoff
-        to ensure we don't accidentally remove entries that might still be relevant
-        for edge cases in timing.
-        
+
         Args:
-            current_time: Current timestamp for comparison
+            current_time: Current timestamp for comparison.
         """
         # Define cutoff time
         cutoff_time: float = current_time - (2 * self.window_seconds)
