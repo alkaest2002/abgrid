@@ -50,7 +50,7 @@ def get_router() -> APIRouter:
         return {"token": new_token}
 
     @router.post("/report")
-    @SimpleRateLimiter(limit=1, window_seconds=10)     # Burst protection
+    @SimpleRateLimiter(limit=1, window_seconds=15)     # Burst protection
     @SimpleRateLimiter(limit=50, window_seconds=3600)  # Hourly limit
     async def get_report(
         request: Request,
