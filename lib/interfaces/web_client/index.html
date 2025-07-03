@@ -21,14 +21,13 @@
                 
                 <button 
                     x-bind="{ ...authButton, ...button }"
-                    x-show="!$store.abgrid.isAuthFlowRunning || !$store.abgrid.isLogoutFlowRunning"
                     x-cloak
                 >
                 </button>
                 
                 <button 
                     x-data 
-                    x-show="$store.abgrid.isLoginFlowRunning || $store.abgrid.isLogoutFlowRunning" 
+                    x-show="false" 
                     disabled type="button"
                     class="w-48 px-3.5 py-2.5  rounded-md text-sm font-medium text-gray-900 bg-white border border-gray-200 shadow-xs focus-visible:outline-2  focus-visible:outline-offset-2 inline-flex items-center"
                 >
