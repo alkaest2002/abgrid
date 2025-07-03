@@ -37,7 +37,7 @@ def get_router() -> APIRouter:
     abgrid_renderer = CoreRenderer()
 
     @router.get("/token")
-    async def get_token() -> Dict[str, str]:
+    async def get_token() -> JSONResponse:
         """
         Get a new anonymous JWT token.
 
@@ -46,8 +46,13 @@ def get_router() -> APIRouter:
         Returns:
             A dictionary containing the new token.
         """
-        new_token = auth.jwt_handler.generate_token()
-        return {"token": new_token}
+        # Generate token
+        token = auth.jwt_handler.generate_token()
+
+        return JSONResponse(
+            status_code=status.HTTP_200_OK,
+            content={"detail": token}
+        )
 
     @router.post("/report")
     @SimpleRateLimiter(limit=1, window_seconds=15)     # Burst protection
@@ -88,8 +93,8 @@ def get_router() -> APIRouter:
 
         except Exception as e:
             raise HTTPException(
-                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, 
-                detail=str(e)
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                content={"detail": str(e)}
             )
 
     def _generate_html_report(language: str, report_data: Dict[str, Any]) -> HTMLResponse:
@@ -107,7 +112,7 @@ def get_router() -> APIRouter:
         rendered_report = abgrid_renderer.render_html(report_template, report_data)
         return HTMLResponse(
             status_code=status.HTTP_200_OK,
-            content=rendered_report
+            content={"detail": rendered_report}
         )
 
     def _generate_json_report(report_data: Dict[str, Any]) -> JSONResponse:
@@ -123,7 +128,7 @@ def get_router() -> APIRouter:
         json_serializable_data = to_json(report_data)
         return JSONResponse(
             status_code=status.HTTP_200_OK,
-            content=json_serializable_data
+            content={"detail": json_serializable_data}
         )
 
     return router

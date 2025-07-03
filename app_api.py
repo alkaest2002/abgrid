@@ -92,5 +92,5 @@ def health_check() -> JSONResponse:
     """
     return JSONResponse(
         status_code=status.HTTP_200_OK,
-        content={"msg": "AB-Grid server is alive and kicking."}
+        content={"detail": "AB-Grid server is alive and kicking."}
     )
