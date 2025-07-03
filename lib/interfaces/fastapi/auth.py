@@ -14,7 +14,7 @@ from typing import Optional, Any, Dict
 from fastapi import Depends
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 
-from .jwt import AnonymousJWT
+from .auth_jwt import AnonymousJWT
 
 class Auth:
     """Simple JWT token verification for anonymous users."""
