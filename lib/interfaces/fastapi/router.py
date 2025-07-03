@@ -12,7 +12,7 @@ The code is part of the AB-Grid project and is licensed under the MIT License.
 
 from typing import Literal, Dict, Any
 
-from fastapi import APIRouter, HTTPException, Query, Depends, status, Request, Response
+from fastapi import APIRouter, HTTPException, Query, Depends, status, Request
 from fastapi.responses import HTMLResponse, JSONResponse
 
 from .auth import Auth
@@ -54,7 +54,6 @@ def get_router() -> APIRouter:
     @SimpleRateLimiter(limit=50, window_seconds=3600)  # Hourly limit
     async def get_report(
         request: Request,
-        response: Response, 
         model: ABGridSchema, 
         language: str = Query(..., description="Language of the report"),
         type_of_report: Literal['html', 'json'] = Query(..., description="The type of report desired"),
@@ -66,7 +65,6 @@ def get_router() -> APIRouter:
 
         Args:
             request: HTTP request object.
-            response: HTTP response object to set headers.
             model: The schema model for the ABGrid system.
             language: The language of the generated report.
             type_of_report: The type of the report ('html' or 'json').
@@ -88,11 +86,6 @@ def get_router() -> APIRouter:
             elif type_of_report == "json":
                 return _generate_json_report(report_data)
 
-        except FileNotFoundError as e:
-             raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND, 
-                detail=f"Language {language} is not available"
-            )
         except Exception as e:
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, 

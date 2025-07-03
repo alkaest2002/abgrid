@@ -46,12 +46,13 @@ class AnonymousJWT:
         expires = now + self.token_lifetime
 
         payload = {
-            "user_id": str(uuid.uuid4()),
-            "issued_at": int(now.timestamp()),
-            "expires_at": int(expires.timestamp())
+            "sub": str(uuid.uuid4()),
+            "iat": now,                
+            "exp": expires 
         }
-
+    
         return jwt.encode(payload, self.secret_key, algorithm=self.algorithm)
+
 
     def verify_token(self, token: str) -> Dict[str, Any]:
         """
@@ -67,39 +68,10 @@ class AnonymousJWT:
             HTTPException: If the token is expired or invalid.
         """
         try:
-            payload = jwt.decode(token, self.secret_key, algorithms=[self.algorithm])
-            if payload.get("expires_at", 0) < int(time.time()):
-                raise HTTPException(
-                    status_code=status.HTTP_401_UNAUTHORIZED,
-                    detail="JWT token expired"
-                )
-            return payload
+            return jwt.decode(token, self.secret_key, algorithms=[self.algorithm])
+        
         except jwt.InvalidTokenError:
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
-                detail="Invalid JWT token"
+                detail="Invalid or expired JWT token"
             )
-
-    def should_refresh(self, token: str) -> bool:
-        """
-        Check if a token should be refreshed (when 75% of lifetime has passed).
-
-        Args:
-            token: The JWT token to check.
-
-        Returns:
-            True if the token should be refreshed, False otherwise.
-        """
-        try:
-            payload = jwt.decode(token, self.secret_key, algorithms=[self.algorithm])
-            issued_at = payload.get("issued_at", 0)
-            expires_at = payload.get("expires_at", 0)
-
-            lifetime_seconds = expires_at - issued_at
-            refresh_threshold = issued_at + (lifetime_seconds * 0.75)
-
-            return int(time.time()) > refresh_threshold
-        
-        # Invalid token should be refreshed
-        except jwt.InvalidTokenError:
-            return True  
