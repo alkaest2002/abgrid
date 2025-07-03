@@ -9,7 +9,6 @@ Date Created: May 3, 2025
 
 The code is part of the AB-Grid project and is licensed under the MIT License.
 """
-import os
 from pathlib import Path
 from typing import Any, Dict
 from jinja2 import Environment, FileSystemLoader, StrictUndefined, FileSystemBytecodeCache, select_autoescape
