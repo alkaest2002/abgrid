@@ -13,7 +13,7 @@ class Settings(BaseSettings):
     token_lifetime_hours: int = Field(default=12, env='TOKEN_LIFETIME_HOURS')
 
     class Config:
-        env_file = './lib/interfaces/fastapi/.env'
+        env_file = '.env'
         case_sensitive = False
 
     @classmethod
