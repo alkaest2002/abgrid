@@ -25,7 +25,9 @@ fancy_port = 53472
 
 # Define origins that should be allowed to access your server
 origins = [
+    f"https://localhost:{fancy_port}",
     f"http://localhost:{fancy_port}",
+    f"https://127.0.0.1:{fancy_port}",
     f"http://127.0.0.1:{fancy_port}",
     # Additional specific IPs or domain names can be added if needed
 ]
