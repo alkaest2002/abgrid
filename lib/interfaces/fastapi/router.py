@@ -80,12 +80,12 @@ def get_router() -> APIRouter:
         """
 
         # Get report data
-        template_data = abgrid_data.get_group_data(model)
+        group_data = abgrid_data.get_group_data(model)
 
         # Render the template with group-specific data
         try:
             template_path = f"/{language}/group.html"
-            rendered_template = abgrid_renderer.render_html(template_path, template_data)
+            rendered_group = abgrid_renderer.render_html(template_path, group_data)
         
         except Exception as e:
             raise HTTPException(
@@ -99,7 +99,7 @@ def get_router() -> APIRouter:
         filename = f"{safe_title}_g{model.group}.yaml"
         
         return PlainTextResponse(
-            content=rendered_template,
+            content=rendered_group,
             media_type="text/yaml",
             headers={
                 "Content-Disposition": f"attachment; filename={filename}",
@@ -150,7 +150,7 @@ def get_router() -> APIRouter:
                 content={"detail": str(e)}
             )
 
-    def _generate_html_report(language: str, template_data: Dict[str, Any]) -> HTMLResponse:
+    def _generate_html_report(language: str, report_data: Dict[str, Any]) -> HTMLResponse:
         """
         Generate an HTML report.
 
@@ -162,10 +162,10 @@ def get_router() -> APIRouter:
             HTMLResponse object containing the rendered HTML.
         """
         template_path = f"./{language}/report.html"
-        rendered_template = abgrid_renderer.render_html(template_path, template_data)
+        rendered_report = abgrid_renderer.render_html(template_path, report_data)
         return HTMLResponse(
             status_code=status.HTTP_200_OK,
-            content={"detail": rendered_template}
+            content={"detail": rendered_report}
         )
 
     def _generate_json_report(report_data: Dict[str, Any]) -> JSONResponse:
