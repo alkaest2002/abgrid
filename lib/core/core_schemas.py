@@ -133,12 +133,6 @@ def validate_group_field(value: Any) -> List[Dict[str, Any]]:
             "value_to_blame": value,
             "error_message": "Must be an integer"
         })
-    elif not (1 <= value <= 50):
-        errors.append({
-            "location": "group",
-            "value_to_blame": value,
-            "error_message": "Must be between 1 and 50"
-        })
     
     return errors
 
