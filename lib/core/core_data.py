@@ -13,7 +13,7 @@ import datetime
 import pandas as pd
 from typing import Any, Dict, Optional, TypedDict
 
-from lib.core.core_schemas import ABGridSchema
+from lib.core.core_schemas import ABGridReportSchema
 from lib.core.core_sna import CoreSna, SNADict
 from lib.core.core_sociogram import CoreSociogram, SociogramDict
 
@@ -50,7 +50,7 @@ class ReportDataDict(TypedDict):
 class CoreData:
     """Processes AB-Grid data for report generation."""
           
-    def get_report_data(self, validated_model: ABGridSchema, with_sociogram: bool = False) -> Dict[str, Any]:
+    def get_report_data(self, validated_model: ABGridReportSchema, with_sociogram: bool = False) -> Dict[str, Any]:
         """Generate comprehensive report data with SNA and optional sociogram analysis.
         
         Args:
