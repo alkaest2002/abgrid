@@ -10,6 +10,9 @@ group: 1
 # CHANGE THE FOLLOWING DATA TO SUITE YOUR NEEDS
 #
 ##################################################################################
+project_title: Demo
+question_a: Whom would you choose to spend a free outing with?
+question_b: Whom would you not choose to spend a free outing with?
 # add choices of each participant
 # follow strictly this format
 # es. - A: B,C
