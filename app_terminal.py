@@ -94,11 +94,8 @@ def handle_batch_processing(data_folder: Path, with_sociogram: bool, language: s
     """
     for project_folder_path in get_folders_to_process(data_folder):
         project = project_folder_path.name
-        project_filepath = next(project_folder_path.glob(f"{project}.*"))
         groups_filepaths = get_group_filepaths(project_folder_path)
-        
-        terminal_main = TerminalMain(project, project_folder_path, 
-                                   project_filepath, groups_filepaths, language)
+        terminal_main = TerminalMain(project, project_folder_path, groups_filepaths, language)
         terminal_main.generate_reports(with_sociogram)
 
 def handle_project_actions(args: argparse.Namespace, project_folderpath: Path) -> None:
@@ -110,8 +107,7 @@ def handle_project_actions(args: argparse.Namespace, project_folderpath: Path) -
     """
     groups_filepaths = get_group_filepaths(project_folderpath)
     groups_already_created = len(groups_filepaths)
-    groups_to_create = range(groups_already_created + 1, 
-                           groups_already_created + args.groups + 1)
+    groups_to_create = range(groups_already_created + 1, groups_already_created + args.groups + 1)
     
     terminal_main = TerminalMain(args.project, project_folderpath, groups_filepaths, args.language)
     
