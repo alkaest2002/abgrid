@@ -21,16 +21,14 @@
                     </div>
                 </div>
             </main>
-            
             <!-- Bottom navigation area with your buttons -->
-            <div class="p-6" x-data="{ ...viewBase(), ...componentButton() }">
-                <div class="flex justify-center gap-4">
-                    <button x-bind="{ ...authButton, ...button }" x-cloak>
-                    </button>
-                    <button x-data x-show="false" disabled type="button"
-                        class="px-6 py-3 rounded-full text-sm font-medium text-white bg-pink-700 border border-pink-200 shadow-sm inline-flex items-center opacity-75">
-                    </button>
-                </div>
+            <div class="h-24 flex justify-center" x-load="visible"  x-data="viewSwitcher">
+                <button 
+                    x-data="componentButton(magicButton.label, magicButton.action)" 
+                    :class="buttonClasses"
+                    x-html="buttonLabel" 
+                    @click="buttonAction">
+                </button>
             </div>
         </div>
     </div>
