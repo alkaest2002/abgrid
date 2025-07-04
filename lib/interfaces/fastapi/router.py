@@ -82,6 +82,8 @@ def get_router() -> APIRouter:
 
         # Prepare template data
         template_data = model.model_dump()
+        
+        # Change prop for jinja template 
         template_data["members"] = SYMBOLS[:template_data["members"]]
             
         # Render the template with group-specific data
