@@ -19,7 +19,7 @@ from pathlib import Path
 from typing import Dict, Any, List, Tuple, Union
 from lib.utils import to_json
 from lib.core import SYMBOLS
-from lib.core.core_schemas import ABGridSchema
+from lib.core.core_schemas import ABGridReportSchema
 from lib.core.core_data import CoreData
 from lib.core.core_templates import abgrid_jinja_env, CoreRenderer
 from lib.interfaces.terminal.terminal_logger import logger_decorator
@@ -206,7 +206,7 @@ class TerminalMain:
             group_data = self._load_yaml_data(group_file)
             
             # Validate current group data
-            validated_data = ABGridSchema.model_validate(group_data)
+            validated_data = ABGridReportSchema.model_validate(group_data)
             
             # Get report Data
             report_data = self.core_data.get_report_data(validated_data, with_sociogram)
