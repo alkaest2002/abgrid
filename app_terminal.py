@@ -29,8 +29,8 @@ def setup_argument_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(prog="ABGrid")
     
     parser.add_argument("-a", "--action", required=True, 
-                        choices=["init", "groups", "sheets", "reports", "batch"], 
-                        help="Action to perform: 'init', 'groups', 'sheets', 'reports', or 'batch'.")
+                        choices=["init", "groups", "reports", "batch"], 
+                        help="Action to perform: 'init', 'groups', 'reports', or 'batch'.")
     parser.add_argument("-p", "--project", required=True, 
                         help="Name of the project.")
     parser.add_argument("-g", "--groups", type=int, choices=range(1, 51), default=1,
@@ -118,8 +118,6 @@ def handle_project_actions(args: argparse.Namespace, project_folderpath: Path) -
     match args.action:
         case "groups":
             terminal_main.generate_group_inputs(groups_to_create, args.members_per_group, args.language)
-        case "sheets":
-            terminal_main.generate_answersheets()
         case "reports":
             terminal_main.generate_reports(args.with_sociogram)
 

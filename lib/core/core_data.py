@@ -22,7 +22,6 @@ class RelevantNodesDict(TypedDict):
     a: pd.DataFrame  # Positive relevance nodes DataFrame
     b: pd.DataFrame  # Negative relevance nodes DataFrame
 
-
 class IsolatedNodesDict(TypedDict):
     """Dictionary structure for isolated nodes by network type."""
     a: pd.Index  # Isolated nodes from network A
@@ -49,26 +48,7 @@ class ReportDataDict(TypedDict):
 
 
 class CoreData:
-    """Processes AB-Grid data for answersheet and report generation."""
-
-    def get_answersheet_data(self, validated_model: ABGridSchema) -> Dict[str, Any]:
-        """Generate answersheet data from validated model.
-        
-        Args:
-            validated_model: Validated ABGrid schema instance
-            
-        Returns:
-            Dictionary containing answersheet data with participants list
-        """
-        # Convert model to dict
-        answersheet_data = validated_model.model_dump()
-
-        # Add list of participants
-        answersheet_data.update({
-            "participants":  sum(map(lambda x: list(x.keys()), validated_model.choices_a), [])
-        })
-
-        return answersheet_data
+    """Processes AB-Grid data for report generation."""
           
     def get_report_data(self, validated_model: ABGridSchema, with_sociogram: bool = False) -> Dict[str, Any]:
         """Generate comprehensive report data with SNA and optional sociogram analysis.

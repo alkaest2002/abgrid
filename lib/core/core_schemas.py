@@ -35,11 +35,8 @@ class ABGridSchema(BaseModel):
     
     Attributes:
         project_title: The project title (1-80 characters)
-        prompt: Project prompt (1-500 characters)
         question_a: First question text (1-300 characters)
-        question_a_choices: Answer choices for question A (1-150 characters)
         question_b: Second question text (1-300 characters)
-        question_b_choices: Answer choices for question B (1-150 characters)
         group: Group identifier (1-50)
         choices_a: List of choice dictionaries for question A
         choices_b: List of choice dictionaries for question B
@@ -53,12 +50,9 @@ class ABGridSchema(BaseModel):
     
     # Fields - using Any to bypass Pydantic's built-in validation
     project_title: Any
-    group: Any
-    prompt: Any
     question_a: Any
-    question_a_choices: Any
     question_b: Any
-    question_b_choices: Any
+    group: Any
     choices_a: Any
     choices_b: Any
     
@@ -112,11 +106,8 @@ class ABGridSchema(BaseModel):
         # String fields validation
         string_fields = {
             "project_title": (1, 80),
-            "prompt": (1, 500),
             "question_a": (1, 300),
-            "question_a_choices": (1, 150),
             "question_b": (1, 300),
-            "question_b_choices": (1, 150),
         }
 
         for field_name, (min_len, max_len) in string_fields.items():

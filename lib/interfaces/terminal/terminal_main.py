@@ -35,7 +35,7 @@ class TerminalMain:
     Main class for AB-Grid project management and document generation.
     
     This class provides comprehensive functionality for managing AB-Grid projects
-    including initialization, group file generation, answer sheet creation, and
+    including initialization, group file generation, and
     report generation with optional sociogram support.
     """
     
@@ -62,13 +62,8 @@ class TerminalMain:
         self.project = project
         self.project_folderpath = project_folderpath
         self.groups_filepaths = groups_filepaths
-        self.answersheets_path = project_folderpath / "answersheets"
         self.reports_path = project_folderpath / "reports"
         self.language = language
-        
-        # Ensure answersheets directory exists
-        if not self.answersheets_path.exists():
-            raise OSError(f"Output directory {self.answersheets_path} does not exist.")
         
         # Ensure rerport directory exists
         if not self.reports_path.exists():
@@ -89,8 +84,7 @@ class TerminalMain:
         """
         Initialize a new AB-Grid project with directory structure.
         
-        Creates the project directory structure including subdirectories for reports
-        and answer sheets.
+        Creates the project directory structure including subdirectories for reports.
         
         Args:
             project: Name of the project to initialize
@@ -101,19 +95,18 @@ class TerminalMain:
         
         Notes:
             - Fails if project directory already exists
-            - Creates 'reports' and 'answersheets' subdirectories
+            - Creates 'reports' subdirectory
         """
         # Create the main project directory structure
         # os.makedirs will create intermediate directories if they don't exist
         os.makedirs(project_folderpath, exist_ok=False)  # Fail if project already exists
         os.makedirs(project_folderpath / "reports")
-        os.makedirs(project_folderpath / "answersheets")
         
         # Notify user
         print(f"Project {project} correctly initialized.")
 
     @logger_decorator
-    def generate_group_inputs(
+    def generate_group(
         self, 
         groups: range, 
         members_per_group: int, 
@@ -176,54 +169,6 @@ class TerminalMain:
         # Notify user
         print(f"{group_number} group(s) succesfully generated.")
             
-    @logger_decorator
-    def generate_answersheets(self) -> None:
-        """
-        Generate PDF answer sheets for all configured groups.
-        
-        Creates individual PDF answer sheets for each group by combining project
-        configuration data with group-specific data. Each answer sheet includes
-        Likert scale configuration based on group choices.
-        
-        Args:
-            language: Language code for template selection
-        
-        Returns:
-            None
-        
-        Notes:
-            - Requires existing group files and valid project configuration
-            - Answer sheets are saved in the 'answersheets' subdirectory
-            - Likert scale symbols are automatically configured based on choices_a
-        """
-        # Validate that group files exist
-        if not self.groups_filepaths:
-            raise ValueError("No group files found.")
-
-        # Process each group file to generate individual answer sheets
-        for group_file in self.groups_filepaths:
-            
-            # Load current group data
-            group_data = self._load_yaml_data(group_file)
-            
-            # Validate current group data
-            validated_data = ABGridSchema.model_validate(group_data)
-            
-            # Init sheets_data
-            sheets_data = self.core_data.get_answersheet_data(validated_data)
-
-            # Notify user
-            print(f"Generating answersheets for {group_file.stem}. Please, wait...")
-            
-            # Generate and save the PDF answer sheet
-            rendered_answersheets = self.renderer.render_html(f"./{self.language}/answersheet.html", sheets_data)
-            
-            # Generate PDF answersheets
-            self._generate_pdf("answersheet", rendered_answersheets, group_file.stem, self.answersheets_path)
-
-            # Notify user
-            print(f"Answersheets for {group_file.stem} succesfully generated.")
-
     @logger_decorator
     def generate_reports(self, with_sociogram: bool = False) -> None:
         """
