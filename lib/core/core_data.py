@@ -13,7 +13,8 @@ import datetime
 import pandas as pd
 from typing import Any, Dict, Optional, TypedDict
 
-from lib.core.core_schemas import ABGridReportSchema
+from lib.core import SYMBOLS
+from lib.core.core_schemas import ABGridGroupSchema, ABGridReportSchema
 from lib.core.core_sna import CoreSna, SNADict
 from lib.core.core_sociogram import CoreSociogram, SociogramDict
 
@@ -49,6 +50,24 @@ class ReportDataDict(TypedDict):
 
 class CoreData:
     """Processes AB-Grid data for report generation."""
+
+
+    def get_group_data(self, validated_model: ABGridGroupSchema) -> Dict[str, Any]:
+        """Extracts and processes group data from a validated ABGridGroupSchema model.
+
+        Args:
+            validated_model: An instance of ABGridGroupSchema containing validated group data.
+
+        Returns:
+            A dictionary containing the group data with associated member symbols
+            from the validated ABGridGroupSchema model.
+        """
+        group_data = validated_model.model_dump()
+
+        group_data["members"] = SYMBOLS[:group_data["members"]]
+
+        return group_data
+
           
     def get_report_data(self, validated_model: ABGridReportSchema, with_sociogram: bool = False) -> Dict[str, Any]:
         """Generate comprehensive report data with SNA and optional sociogram analysis.

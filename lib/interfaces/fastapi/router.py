@@ -56,8 +56,7 @@ def get_router() -> APIRouter:
         )
     
     @router.post("/group")
-    @SimpleRateLimiter(limit=1, window_seconds=15)     # Burst protection
-    @SimpleRateLimiter(limit=50, window_seconds=3600)  # Hourly limit
+    @SimpleRateLimiter(limit=1, window_seconds=5)
     async def create_group(
         request: Request,
         model: ABGridGroupSchema, 
@@ -80,12 +79,9 @@ def get_router() -> APIRouter:
             HTTPException: If group configuration file generation fails.
         """
 
-        # Prepare template data
-        template_data = model.model_dump()
-        
-        # Change prop for jinja template 
-        template_data["members"] = SYMBOLS[:template_data["members"]]
-            
+        # Get report data
+        template_data = abgrid_data.get_group_data(model)
+
         # Render the template with group-specific data
         try:
             template_path = f"/{language}/group.html"
@@ -113,8 +109,7 @@ def get_router() -> APIRouter:
 
 
     @router.post("/report")
-    @SimpleRateLimiter(limit=1, window_seconds=15)     # Burst protection
-    @SimpleRateLimiter(limit=50, window_seconds=3600)  # Hourly limit
+    @SimpleRateLimiter(limit=1, window_seconds=15)
     async def get_report(
         request: Request,
         model: ABGridReportSchema, 
