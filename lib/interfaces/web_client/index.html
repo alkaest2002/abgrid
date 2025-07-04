@@ -9,7 +9,7 @@
     <title>AB-Grid app</title>
 </head>
 
-<body class="h-screen overflow-hidden" x-data="componentOnline">
+<body class="h-screen overflow-hidden" x-data="{ ...componentOnline(), ...componentNavigation() }">
     <div class="h-full" data-taxi>
         <div data-taxi-view class="h-full flex flex-col">
             <!-- Main content area -->
@@ -25,20 +25,18 @@
                     </div>
                 </div>
             </main>
-            
             <!-- Bottom navigation area with your buttons -->
             <div class="h-24 flex justify-center" x-data="viewBase">
                 <button 
-                    x-data="componentButton(magicButton.label, magicButton.action)"
+                    x-data="componentButton(magicButton.label, magicButton.action)" 
                     :class="buttonClasses"
-                    x-html="buttonLabel"
+                    x-html="buttonLabel" 
                     @click="buttonAction"
                 >
                 </button>
             </div>
         </div>
     </div>
-
     <script type="module" src="/src/js/main.js"></script>
 </body>
 
