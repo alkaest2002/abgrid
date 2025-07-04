@@ -117,7 +117,7 @@ def handle_project_actions(args: argparse.Namespace, project_folderpath: Path) -
     
     match args.action:
         case "groups":
-            terminal_main.generate_group_inputs(groups_to_create, args.members_per_group, args.language)
+            terminal_main.generate_group(groups_to_create, args.members_per_group, args.language)
         case "reports":
             terminal_main.generate_reports(args.with_sociogram)
 
