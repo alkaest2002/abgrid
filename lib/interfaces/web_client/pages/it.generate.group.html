@@ -15,9 +15,12 @@
             <main class="flex-1 overflow-y-auto p-6">
                 <div class="max-w-4xl mx-auto h-full flex flex-col justify-center items-center">
                     <div class="text-center">
-                        <h1 class="text-3xl font-bold mb-6">
+                        <h1 class="text-3xl font-bold">
                             AB-Grid - Group
                         </h1>
+                        <p>
+                            Genera file di gruppo
+                        </p>
                     </div>
                 </div>
             </main>
@@ -27,7 +30,8 @@
                     x-data="componentButton(magicButton.label, magicButton.action)" 
                     :class="buttonClasses"
                     x-html="buttonLabel" 
-                    @click="buttonAction">
+                    @click="buttonAction"
+                >
                 </button>
             </div>
         </div>
