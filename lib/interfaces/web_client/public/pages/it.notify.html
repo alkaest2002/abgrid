@@ -31,10 +31,8 @@
             <!-- Bottom navigation area with your buttons -->
             <div class="h-24 flex justify-center" x-load="visible"  x-data="viewNotify">
                 <button 
-                    x-data="componentButton(magicButton.label, magicButton.action)" 
-                    :class="buttonClasses"
-                    x-html="buttonLabel" 
-                    @click="buttonAction"
+                    x-data="componentMagicButton(magicButton.label, magicButton.action)" 
+                    x-bind="magicButton"
                 >
                 </button>
             </div>
