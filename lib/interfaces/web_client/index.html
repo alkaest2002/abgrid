@@ -9,7 +9,10 @@
     <title>AB-Grid app</title>
 </head>
 
-<body class="h-screen overflow-hidden" x-data="{ ...componentOnline(), ...componentNavigation() }">
+<body 
+    class="h-screen overflow-hidden" 
+    x-data="{ ...componentOnline(), ...componentNavigation(), ...componentToast() }"
+>
     <div class="h-full" data-taxi>
         <div data-taxi-view class="h-full flex flex-col">
             <!-- Main content area -->
