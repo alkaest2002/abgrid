@@ -10,6 +10,7 @@ Date Created: Jul 1, 2025
 The code is part of the AB-Grid project and is licensed under the MIT License.
 """
 
+from itertools import product
 from fastapi import FastAPI, Request, status
 from fastapi.responses import JSONResponse
 from starlette.middleware.cors import CORSMiddleware
@@ -21,16 +22,13 @@ from lib.interfaces.fastapi.router import get_router
 app = FastAPI()
 
 # Use a "random" port number within the dynamic range
-fancy_port = 53472
+fancy_port = [ "53472", "53247", "53274", "53472", "53427", "53724", "53742" ]
 
-# Define origins that should be allowed to access your server
-origins = [
-    f"https://localhost:{fancy_port}",
-    f"http://localhost:{fancy_port}",
-    f"https://127.0.0.1:{fancy_port}",
-    f"http://127.0.0.1:{fancy_port}",
-    # Additional specific IPs or domain names can be added if needed
-]
+# Define domains that should be allowed to access your server
+domains = [ "https://localhost", "https://127.0.0.1", "http://localhost", "http://127.0.0.1" ]
+
+# Define origines that should be allowed to access your server
+origins = [f"{domain}:{port}" for domain, port in product(domains, fancy_port)]
 
 # Add CORSMiddleware with slightly restricted settings
 app.add_middleware(
