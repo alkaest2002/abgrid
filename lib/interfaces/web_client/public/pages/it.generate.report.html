@@ -8,7 +8,11 @@
     <title>AB-Grid app</title>
 </head>
 
-<body class="h-screen overflow-hidden" x-data="{ ...componentOnline(), ...componentNavigation(), ...componentToast }">
+<body 
+    class="h-screen overflow-hidden" 
+    x-data="{ ...componentToast(), ...componentOnline(), ...componentNavigation() }"
+    x-init="() => { initToast(); initOnline(), initNaviagation() }"
+>
     <div class="h-full" data-taxi>
         <div data-taxi-view class="h-full flex flex-col">
             <!-- Main content area -->
