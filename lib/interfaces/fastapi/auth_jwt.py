@@ -36,10 +36,11 @@ class AnonymousJWT:
 
     def generate_token(self) -> str:
         """
-        Generate a new anonymous JWT token with UUID.
+        Generate a new anonymous JWT token with a unique identifier.
 
         Returns:
-            A string representing the encoded JWT token.
+            A string representing the encoded JWT token containing a UUID as subject,
+            issued at timestamp, and expiration time.
         """
         now = datetime.now(timezone.utc)
         expires = now + self.token_lifetime

@@ -27,14 +27,14 @@ class Auth:
         self,
         token: Optional[HTTPAuthorizationCredentials] = Depends(HTTPBearer(auto_error=True))
     ) -> Dict[str, Any]:
-        """
-        Verify JWT token and auto-refresh if needed.
+        """"
+        Verify JWT token.
         
         Args:
             token: JWT token from Authorization header, automatically handled by FastAPI.
             
         Returns:
-            A dictionary containing the token payload with user_id.
+            A dictionary containing the decoded token payload.
 
         Raises:
             HTTPException: If the token is invalid or expired (HTTP 401).

@@ -165,7 +165,7 @@ def get_router() -> APIRouter:
         rendered_report = abgrid_renderer.render_html(template_path, report_data)
         return HTMLResponse(
             status_code=status.HTTP_200_OK,
-            content={"detail": rendered_report}
+            content=rendered_report
         )
 
     def _generate_json_report(report_data: Dict[str, Any]) -> JSONResponse:

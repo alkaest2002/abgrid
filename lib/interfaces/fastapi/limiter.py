@@ -134,7 +134,8 @@ class SimpleRateLimiter:
         # Get request path, fallback to empty string if not available
         path: str = getattr(getattr(request, 'url', None), 'path', '') or ''
         
-        return f"rate_limit:{self.limiter_id}:{token_hash}:{request.url.path}"
+        return f"rate_limit:{self.limiter_id}:{token_hash}:{path}"
+        
 
     def _check_rate_limit(self, key: str) -> None:
         """
