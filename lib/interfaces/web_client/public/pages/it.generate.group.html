@@ -42,7 +42,11 @@
                                 <label for="project_title"
                                     class="block text-sm font-medium text-gray-700 text-left">Titolo del
                                     progetto</label>
-                                <input type="text" id="project_title" name="project_title"
+                                <input 
+                                    type="text" 
+                                    id="project_title" 
+                                    name="project_title"
+                                    x-model="$store.abgrid.groupData.project_title"
                                     placeholder="es. Raccolta dati 2025"
                                     class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none"
                                     required>
@@ -50,7 +54,11 @@
                             <div class="mb-4">
                                 <label for="question_a"
                                     class="block text-sm font-medium text-gray-700 text-left">Domanda A</label>
-                                <input type="text" id="question_a" name="question_a"
+                                <input 
+                                    type="text" 
+                                    id="question_a" 
+                                    x-model="$store.abgrid.groupData.question_a"
+                                    name="question_a"
                                     placeholder="es. Chi vorresti nel tuo gruppo di lavoro ideale?"
                                     class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none"
                                     required>
@@ -58,17 +66,26 @@
                             <div class="mb-4">
                                 <label for="question_b"
                                     class="block text-sm font-medium text-gray-700 text-left">Domanda B</label>
-                                <input type="text" id="question_b" name="question_b"
+                                <input 
+                                    type="text" 
+                                    id="question_b"
+                                    x-model="$store.abgrid.groupData.question_b"
+                                    name="question_b"
                                     placeholder="es. Chi non vorresti nel tuo gruppo di lavoro ideale?"
                                     class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none"
                                     required>
                             </div>
                             <div class="grid grid-cols-2 gap-4 mb-4">
                                 <div>
-                                    <label for="groups"
+                                    <label for="group"
                                         class="block text-sm font-medium text-gray-700 text-left">Identificativo
                                         gruppo</label>
-                                    <input type="number" id="groups" name="groups" placeholder="es. 1"
+                                    <input 
+                                        type="number" 
+                                        id="groupp"
+                                        x-model="$store.abgrid.groupData.group"
+                                        name="group" 
+                                        placeholder="es. 1"
                                         class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none"
                                         required>
                                 </div>
@@ -76,13 +93,21 @@
                                     <label for="members"
                                         class="block text-sm font-medium text-gray-700 text-left">Numero di
                                         membri</label>
-                                    <input type="number" id="members" name="members" placeholder="es. 8"
+                                    <input 
+                                        type="number" 
+                                        id="members" 
+                                        x-model="$store.abgrid.groupData.members"
+                                        name="members" 
+                                        placeholder="es. 8"
                                         class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none"
                                         required>
                                 </div>
                             </div>
                             <div>
-                                <button type="submit" class="bg-blue-700 text-white py-2 px-4 rounded-md shadow-sm">
+                                <button
+                                    :class="{ 'opacity-25 cursor-not-allowed': !$store.abgrid.groupDataIsComplete }"
+                                    class="bg-blue-700 text-white py-2 px-4 rounded-md shadow-sm"
+                                >
                                     Scarica file
                                 </button>
                             </div>
