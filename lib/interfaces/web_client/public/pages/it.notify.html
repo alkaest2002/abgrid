@@ -12,7 +12,7 @@
     x-data="{ ...componentToast(), ...componentOnline(), ...componentNavigation(), ...componentApi() }"
     x-init="() => { initToast(); initOnline(); initNavigation(); initApi() }">
     <div class="h-full" data-taxi>
-        <div data-taxi-view class="h-full flex flex-col">
+        <div data-taxi-view class="h-full flex flex-col" x-data="viewNotify">
             <!-- Main content area -->
             <main class="flex-1 overflow-y-auto p-6">
                 <div class="max-w-4xl mx-auto h-full flex flex-col justify-center items-center">
@@ -27,7 +27,7 @@
                 </div>
             </main>
             <!-- Bottom navigation area with your buttons -->
-            <div class="h-24 flex justify-center" x-load="visible" x-data="viewNotify">
+            <div class="h-24 flex justify-center">
                 <button x-data="componentMagicButton(magicButton.label, magicButton.action)" x-bind="magicButton">
                 </button>
             </div>
