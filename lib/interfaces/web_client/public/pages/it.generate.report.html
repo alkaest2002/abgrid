@@ -12,13 +12,18 @@
     x-data="{ ...componentToast(), ...componentOnline(), ...componentNavigation(), ...componentApi() }"
     x-init="() => { initToast(); initOnline(); initNaviagation(); initApi() }">
     <template x-teleport="body">
-        <div x-show="toastVisible" x-transition @click="toastRemoveCurrent()"
-            class="fixed top-4 right-4 bg-white border border-gray-300 shadow-lg p-4 cursor-pointer">
+        <div 
+            x-transition 
+            x-show="toastVisible" 
+            @click="toastRemoveCurrent()"
+            class="fixed top-4 right-4 bg-white border border-gray-300 shadow-lg p-4 cursor-pointer"
+        >
             <div class="flex items-center gap-2">
-                <span x-show="toastQueue.length > 1" class="bg-red-500 text-white text-xs px-2 py-0.5 rounded-full"
+                <span 
+                    x-show="toastQueue.length > 0" class="bg-gray-700 text-white text-xs px-2 py-0.5 rounded-full" 
                     x-text="toastQueue.length">
                 </span>
-                <span x-text="toastCurrentMessage"></span>
+                <span x-text="toastQueue[0]" class="text-sm"></span>
             </div>
         </div>
     </template>
