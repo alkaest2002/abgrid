@@ -46,13 +46,13 @@
                             <p class="mb-9">
                                 Il file di gruppo serve per la generazione del report AB-Grid. A parte le
                                 informazioni di configurazione qui richieste, dovrai completare il file con i dati
-                                effettivamente raccolti. Consulta il <a href="#" class="text-blue-700">manuale</a>  (capitolo II. raccolta dei dati).
+                                effettivamente raccolti. Consulta il <a href="#" class="text-blue-700">manuale</a>  (capitolo II - raccolta dei dati).
                             </p>
                             <div class="w-full">
                                 <form>
                                     <div class="mb-4">
                                         <label for="project_title"
-                                            class="block text-sm font-medium text-gray-700 text-left">Titolo del
+                                            class="block text-sm font-semibold text-gray-700 text-left">Titolo del
                                             progetto</label>
                                         <input type="text" id="project_title" name="project_title"
                                             x-model="$store.abgrid.groupData.project_title"
@@ -62,7 +62,7 @@
                                     </div>
                                     <div class="mb-4">
                                         <label for="question_a"
-                                            class="block text-sm font-medium text-gray-700 text-left">Domanda A</label>
+                                            class="block text-sm font-semibold text-gray-700 text-left">Domanda A</label>
                                         <input type="text" id="question_a" x-model="$store.abgrid.groupData.question_a"
                                             name="question_a"
                                             placeholder="es. chi vorresti nel tuo gruppo di lavoro ideale?"
@@ -71,7 +71,7 @@
                                     </div>
                                     <div class="mb-4">
                                         <label for="question_b"
-                                            class="block text-sm font-medium text-gray-700 text-left">Domanda B</label>
+                                            class="block text-sm font-semibold text-gray-700 text-left">Domanda B</label>
                                         <input type="text" id="question_b" x-model="$store.abgrid.groupData.question_b"
                                             name="question_b"
                                             placeholder="es. chi non vorresti nel tuo gruppo di lavoro ideale?"
@@ -81,7 +81,7 @@
                                     <div class="grid grid-cols-2 gap-4 mb-4">
                                         <div>
                                             <label for="group"
-                                                class="block text-sm font-medium text-gray-700 text-left">Identificativo
+                                                class="block text-sm font-semibold text-gray-700 text-left">Identificativo
                                                 gruppo</label>
                                             <input type="number" id="groupp" x-model="$store.abgrid.groupData.group"
                                                 name="group" placeholder="es. 1"
@@ -90,7 +90,7 @@
                                         </div>
                                         <div>
                                             <label for="members"
-                                                class="block text-sm font-medium text-gray-700 text-left">Numero di
+                                                class="block text-sm font-semibold text-gray-700 text-left">Numero di
                                                 membri</label>
                                             <input type="number" id="members" x-model="$store.abgrid.groupData.members"
                                                 name="members" placeholder="es. 8"
