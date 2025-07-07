@@ -17,6 +17,7 @@
     "@tailwindcss/vite": "^4.1.11",
     "@unseenco/taxi": "^1.9.0",
     "alpinejs": "^3.14.9",
+    "alpinejs-i18n": "^2.5.3",
     "async-alpine": "^2.0.2",
     "tailwindcss": "^4.1.11"
   }
