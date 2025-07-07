@@ -8,12 +8,14 @@
     <title>AB-Grid app</title>
 </head>
 
-<body class="h-screen overflow-hidden max-w-4xl mx-auto p-9"
+<body class="h-screen overflow-hidden max-w-4xl mx-auto pb-6"
     x-data="{ ...componentToast(), ...componentOnline(), ...componentNavigation(), ...componentApi() }"
     x-init="() => { initToast(); initOnline(); initNavigation(); initApi() }">
+    
+    <!-- Toast -->
     <template x-teleport="body">
         <div x-bind="toastContainer"
-            class="fixed top-6 right-6 p-6 bg-gray-100 border border-gray-300 rounded-md shadow-lg cursor-pointer">
+            class="fixed top-6 right-6 p-3 bg-gray-100 border border-gray-300 rounded-md shadow-lg cursor-pointer">
             <div class="flex items-center gap-2">
                 <span x-bind="toastBadge" class="text-white text-xs px-2 py-0.5 rounded-full">
                 </span>
@@ -24,7 +26,7 @@
     </template>
     
     <div class="h-full" data-taxi>
-        <div class="h-full flex flex-col" x-load="visible" x-data="viewGroupDropzone" data-taxi-view >
+        <div class="h-full flex flex-col" data-taxi-view x-load="visible" x-data="viewGroupDropzone" x-bind="dropzone">
             <!-- Top area - fixed height -->
             <header class="h-24 flex items-center justify-start p-9">
                 <div class="w-full">
@@ -41,17 +43,32 @@
             <main id="main" class="flex-1 overflow-y-auto px-6 relative">
                 <div class="h-full">
                     <div class="h-full rounded-lg p-6 bg-gray-100">
-                        <!-- Your main content goes here -->
-                        <div class="h-full flex flex-col justify-center items-center">
+                        <!-- Main content goes here -->
+                        <div class="h-full flex flex-col justify-center items-center" x-show="!fileWasDropped">
                             <svg xmlns="http://www.w3.org/2000/svg" class="h-12 fill-gray-500 mb-3" viewBox="0 0 576 512"><!--!Font Awesome Free 6.7.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2025 Fonticons, Inc.--><path d="M0 64C0 28.7 28.7 0 64 0L224 0l0 128c0 17.7 14.3 32 32 32l128 0 0 38.6C310.1 219.5 256 287.4 256 368c0 59.1 29.1 111.3 73.7 143.3c-3.2 .5-6.4 .7-9.7 .7L64 512c-35.3 0-64-28.7-64-64L0 64zm384 64l-128 0L256 0 384 128zm48 96a144 144 0 1 1 0 288 144 144 0 1 1 0-288zm16 80c0-8.8-7.2-16-16-16s-16 7.2-16 16l0 48-48 0c-8.8 0-16 7.2-16 16s7.2 16 16 16l48 0 0 48c0 8.8 7.2 16 16 16s16-7.2 16-16l0-48 48 0c8.8 0 16-7.2 16-16s-7.2-16-16-16l-48 0 0-48z"/></svg>
-                            <p class="text-gray-500 text-center leading-5">
-                                Trascina qui<br>il file di gruppo completato
+                            <p class="text-gray-500 text-center leading-6">
+                                Trascina qui
+                            </p>
+                            <p class="text-gray-500 text-center leading-6 mb-3">
+                                il file di gruppo compilato.
+                            </p>
+                            <p class="text-gray-400 text-sm text-center leading-5">
+                                Hai verificato la compatibilità con lo
+                                <a href="https://it.wikipedia.org/wiki/YAML" target="_blank" class="text-blue-700">standard YAML</a>?
+                            </p>
+                        </div>
+                        <div class="h-full flex flex-col justify-center items-center" x-show="fileWasDropped">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-12 fill-gray-500 mb-3" viewBox="0 0 512 512"><!--!Font Awesome Free 6.7.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2025 Fonticons, Inc.--><path d="M313.4 32.9c26 5.2 42.9 30.5 37.7 56.5l-2.3 11.4c-5.3 26.7-15.1 52.1-28.8 75.2l144 0c26.5 0 48 21.5 48 48c0 18.5-10.5 34.6-25.9 42.6C497 275.4 504 288.9 504 304c0 23.4-16.8 42.9-38.9 47.1c4.4 7.3 6.9 15.8 6.9 24.9c0 21.3-13.9 39.4-33.1 45.6c.7 3.3 1.1 6.8 1.1 10.4c0 26.5-21.5 48-48 48l-97.5 0c-19 0-37.5-5.6-53.3-16.1l-38.5-25.7C176 420.4 160 390.4 160 358.3l0-38.3 0-48 0-24.9c0-29.2 13.3-56.7 36-75l7.4-5.9c26.5-21.2 44.6-51 51.2-84.2l2.3-11.4c5.2-26 30.5-42.9 56.5-37.7zM32 192l64 0c17.7 0 32 14.3 32 32l0 224c0 17.7-14.3 32-32 32l-64 0c-17.7 0-32-14.3-32-32L0 224c0-17.7 14.3-32 32-32z"/></svg>
+                            <p class="text-gray-500 text-center leading-6">
+                               File correttamente caricato
+                            </p>
+                            <p class="text-gray-400 text-sm text-center leading-5" x-text="filename">
                             </p>
                         </div>
                     </div>
                 </div>
             </main>
-
+            
             <!-- Bottom area - fixed height -->
             <footer class="h-10 flex justify-center items-center">
                 <div class="p-3 rounded-full relative top-[-50%] bg-gray-100">
