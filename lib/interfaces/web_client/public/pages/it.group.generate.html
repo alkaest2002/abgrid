@@ -40,7 +40,7 @@
             <!-- Center area - takes available space with rounded border -->
             <main class="flex-1 overflow-y-auto px-6">
                 <div class="max-w-4xl mx-auto h-full">
-                    <div class="h-full border border-gray-200 rounded-lg p-6 bg-white shadow-sm">
+                    <div class="h-full rounded-lg p-6 bg-gray-100">
                         <!-- Your main content goes here -->
                         <div class="h-full p-6">
                             <p class="mb-9">
@@ -57,7 +57,7 @@
                                         <input type="text" id="project_title" name="project_title"
                                             x-model="$store.abgrid.groupData.project_title"
                                             placeholder="es. raccolta dati 2025"
-                                            class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none"
+                                            class="mt-1 block w-full px-3 py-2 bg-white rounded-md shadow-sm focus:outline-none"
                                             required>
                                     </div>
                                     <div class="mb-4">
@@ -66,7 +66,7 @@
                                         <input type="text" id="question_a" x-model="$store.abgrid.groupData.question_a"
                                             name="question_a"
                                             placeholder="es. chi vorresti nel tuo gruppo di lavoro ideale?"
-                                            class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none"
+                                            class="mt-1 block w-full px-3 py-2 bg-white rounded-md shadow-sm focus:outline-none"
                                             required>
                                     </div>
                                     <div class="mb-4">
@@ -75,7 +75,7 @@
                                         <input type="text" id="question_b" x-model="$store.abgrid.groupData.question_b"
                                             name="question_b"
                                             placeholder="es. chi non vorresti nel tuo gruppo di lavoro ideale?"
-                                            class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none"
+                                            class="mt-1 block w-full px-3 py-2 bg-white rounded-md shadow-sm focus:outline-none"
                                             required>
                                     </div>
                                     <div class="grid grid-cols-2 gap-4 mb-4">
@@ -85,7 +85,7 @@
                                                 gruppo</label>
                                             <input type="number" id="groupp" x-model="$store.abgrid.groupData.group"
                                                 name="group" placeholder="es. 1"
-                                                class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none"
+                                                class="mt-1 block w-full px-3 py-2 bg-white rounded-md shadow-sm focus:outline-none"
                                                 required>
                                         </div>
                                         <div>
@@ -94,7 +94,7 @@
                                                 membri</label>
                                             <input type="number" id="members" x-model="$store.abgrid.groupData.members"
                                                 name="members" placeholder="es. 8"
-                                                class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none"
+                                                class="mt-1 block w-full px-3 py-2 bg-white rounded-md shadow-sm focus:outline-none"
                                                 required>
                                         </div>
                                     </div>
@@ -119,9 +119,11 @@
             </main>
 
             <!-- Bottom area - fixed height -->
-            <footer class="h-20 flex justify-center items-center">
-                <button x-data="componentMagicButton(magicButton.label, magicButton.action)" x-bind="magicButton">
-                </button>
+            <footer class="h-10 flex justify-center items-center">
+                <div class="p-3 rounded-full relative top-[-50%] bg-gray-100">
+                    <button x-data="componentMagicButton(magicButton.label, magicButton.action)" x-bind="magicButton">
+                    </button>
+                </div>
             </footer>
         </div>
     </div>

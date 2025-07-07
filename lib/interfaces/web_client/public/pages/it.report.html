@@ -40,7 +40,7 @@
             <!-- Center area - takes available space with rounded border -->
             <main id="main" class="flex-1 overflow-y-auto px-6 relative">
                 <div class="h-full">
-                    <div class="h-full border border-gray-200 rounded-lg p-6 bg-white shadow-sm">
+                    <div class="h-full rounded-lg p-6 bg-gray-100">
                         <!-- Your main content goes here -->
                         <div class="h-full flex flex-col justify-center items-center">
                             <p class="text-gray-500">
@@ -52,9 +52,11 @@
             </main>
 
             <!-- Bottom area - fixed height -->
-            <footer class="h-20 flex justify-center items-center">
-                <button x-data="componentMagicButton(magicButton.label, magicButton.action)" x-bind="magicButton">
-                </button>
+            <footer class="h-10 flex justify-center items-center">
+                <div class="p-3 rounded-full relative top-[-50%] bg-gray-100">
+                    <button x-data="componentMagicButton(magicButton.label, magicButton.action)" x-bind="magicButton">
+                    </button>
+                </div>
             </footer>
         </div>
     </div>
