@@ -13,7 +13,7 @@
     x-init="() => { initToast(); initOnline(); initNavigation(); initApi() }">
     <template x-teleport="body">
         <div x-bind="toastContainer"
-            class="fixed top-4 right-4 p-4 bg-white border border-gray-300 rounded-md shadow-lg cursor-pointer">
+            class="fixed bottom-4 right-4 p-4 bg-white border border-gray-300 rounded-md shadow-lg cursor-pointer">
             <div class="flex items-center gap-2">
                 <span x-bind="toastBadge" class="text-white text-xs px-2 py-0.5 rounded-full">
                 </span>
@@ -26,7 +26,7 @@
         <div data-taxi-view class="h-full flex flex-col" x-load="visible" x-data="viewGroupGenerate">
             <!-- Main content area -->
             <main class="flex-1 overflow-y-auto p-6">
-                <div class="max-w-4xl mx-auto h-full flex flex-col justify-center items-center">
+                <div class="max-w-4xl mx-auto h-full flex flex-col justify-start items-center pt-12">
                     <div class="text-center">
                         <h1 class="text-3xl font-bold mb-3">
                             Crea file di gruppo
