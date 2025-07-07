@@ -24,7 +24,8 @@
     </template>
 
     <div class="h-full" data-taxi>
-        <div id="content" class="h-full flex flex-col relative" x-load="visible" x-data="viewGroupGenerate" data-taxi-view>
+        <div id="content" class="h-full flex flex-col relative" x-load="visible" x-data="viewGroupGenerate"
+            data-taxi-view>
             <!-- Top area - fixed height -->
             <header class="h-24 flex items-center justify-start p-9">
                 <div>
@@ -46,10 +47,29 @@
                             <p class="mb-9">
                                 Il file di gruppo serve per la generazione del report AB-Grid. A parte le
                                 informazioni di configurazione qui richieste, dovrai completare il file con i dati
-                                effettivamente raccolti. Consulta il <a href="#" class="text-blue-700">manuale</a>  (capitolo II - raccolta dei dati).
+                                effettivamente raccolti. Consulta il <a href="#" class="text-blue-700">manuale</a>
+                                (capitolo II - raccolta dei dati).
                             </p>
                             <div class="w-full">
-                                <form>
+                                <div class="flex items-center gap-3 mb-6">
+                                    <div
+                                        class="group relative inline-flex w-11 shrink-0 rounded-full bg-gray-200 p-0.5 inset-ring inset-ring-gray-900/5 outline-offset-2 outline-indigo-600 transition-colors duration-200 ease-in-out has-checked:bg-indigo-600 has-focus-visible:outline-2">
+                                        <span
+                                            class="size-5 rounded-full bg-white shadow-xs ring-1 ring-gray-900/5 transition-transform duration-200 ease-in-out group-has-checked:translate-x-5"></span>
+                                        <input 
+                                        type="checkbox"
+                                            class="absolute inset-0 appearance-none focus:outline-hidden"
+                                            x-model="newGroupFile"
+                                            id="new-group" name="new-group" />
+                                    </div>
+                                    <div class="flex grow flex-col text-sm">
+                                        <label id="new-group-label" class="font-medium text-gray-900">Nuovo file di
+                                            gruppo</label>
+                                        <span id="new-group-description" class="text-gray-500">(da scaricare)</span>
+                                    </div>
+                                </div>
+                                <div class="relative p-3">
+                                    <div class="absolute inset-0 bg-gray-50 opacity-75 transition-all" x-show="!newGroupFile"></div>
                                     <div class="mb-4">
                                         <label for="project_title"
                                             class="block text-sm font-semibold text-gray-700 text-left">Titolo del
@@ -62,7 +82,8 @@
                                     </div>
                                     <div class="mb-4">
                                         <label for="question_a"
-                                            class="block text-sm font-semibold text-gray-700 text-left">Domanda A</label>
+                                            class="block text-sm font-semibold text-gray-700 text-left">Domanda
+                                            A</label>
                                         <input type="text" id="question_a" x-model="$store.abgrid.groupData.question_a"
                                             name="question_a"
                                             placeholder="es. chi vorresti nel tuo gruppo di lavoro ideale?"
@@ -71,14 +92,15 @@
                                     </div>
                                     <div class="mb-4">
                                         <label for="question_b"
-                                            class="block text-sm font-semibold text-gray-700 text-left">Domanda B</label>
+                                            class="block text-sm font-semibold text-gray-700 text-left">Domanda
+                                            B</label>
                                         <input type="text" id="question_b" x-model="$store.abgrid.groupData.question_b"
                                             name="question_b"
                                             placeholder="es. chi non vorresti nel tuo gruppo di lavoro ideale?"
                                             class="mt-1 block w-full px-3 py-2 bg-white rounded-md shadow-sm focus:outline-none"
                                             required>
                                     </div>
-                                    <div class="grid grid-cols-2 gap-4 mb-4">
+                                    <div class="grid grid-cols-2 gap-2">
                                         <div>
                                             <label for="group"
                                                 class="block text-sm font-semibold text-gray-700 text-left">Identificativo
@@ -98,20 +120,12 @@
                                                 required>
                                         </div>
                                     </div>
-                                    <div>
-                                        <button x-bind="resetButton"
-                                            class="bg-red-700 text-white py-2 px-4 rounded-md shadow-sm">
-                                            reset
-                                        </button>
-                                        <button x-bind="generateGroupButton"
-                                            class="bg-blue-700 text-white py-2 px-4 rounded-md shadow-sm">
-                                            Scarica file
-                                        </button>
-                                    </div>
-                                </form>
+                                </div>
+
                             </div>
                             <p class="mt-6 text-sm text-gray-700">
-                                <span class="font-semibold">Nota bene</span>: salta questa fase se hai già scaricato e completato un file di gruppo.
+                                <span class="font-semibold">Nota bene</span>: salta questa fase se hai già scaricato e
+                                completato un file di gruppo.
                             </p>
                         </div>
                     </div>
