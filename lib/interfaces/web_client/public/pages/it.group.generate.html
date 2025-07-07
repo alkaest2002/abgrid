@@ -8,7 +8,7 @@
     <title>AB-Grid app</title>
 </head>
 
-<body class="h-screen overflow-hidden max-w-4xl mx-auto p-9"
+<body class="h-screen overflow-hidden max-w-4xl mx-auto pb-6"
     x-data="{ ...componentToast(), ...componentOnline(), ...componentNavigation(), ...componentApi() }"
     x-init="() => { initToast(); initOnline(); initNavigation(); initApi() }">
     <template x-teleport="body">
@@ -42,7 +42,7 @@
             <main class="flex-1 overflow-y-auto px-6">
                 <div class="max-w-4xl mx-auto h-full">
                     <div class="h-full rounded-lg p-6 bg-gray-100">
-                        <!-- Your main content goes here -->
+                        <!-- Main content goes here -->
                         <div class="h-full p-6">
                             <p class="mb-9">
                                 Il file di gruppo serve per la generazione del report AB-Grid. Una volta fornite le
