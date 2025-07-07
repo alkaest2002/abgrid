@@ -22,6 +22,7 @@
             "field_is_too_short": "il campo è troppo corto",
             "field_must_be_a_string": "il campo deve essere una stringa",
             "field_must_be_an_integer": "il campo deve essere un intero",
+            "invalid_file_type": "tipo di file non compatibile",
             "key_cannot_be_present_in_its_own_values": "la chiave non può essere presente nei propri valori",
             "key_must_be_a_single_alphabetic_character": "la chiave deve essere un singolo carattere alfabetico",
             "keys_are_not_correct": "le chiavi non sono corrette",
