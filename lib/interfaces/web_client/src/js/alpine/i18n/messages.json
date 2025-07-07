@@ -29,6 +29,10 @@
             "value_must_contain_only_single_alphabetic_characters": "il valore deve contenere solo singoli caratteri alfabetici",
             "values_contain_duplicates": "i valori contengono duplicati",
             "values_contain_invalid_keys": "i valori contengono chiavi non valide"
+        },
+        "ops": {
+            "generateGroup": "generazione del file di gruppo",
+            "generateReport": "generazione del report"
         }
     }
 }

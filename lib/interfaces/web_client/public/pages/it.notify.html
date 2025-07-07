@@ -38,14 +38,16 @@
                             </template>
                             <template x-bind="templateApiError">
                                 <div class="w-full mx-auto">
-                                    <p class="mb-6">Di seguito sono riportati i messagi di errore provenienti dal
-                                        server.</p>
-                                    <p x-bind="templateApiErrorEndpoint" class="font-bold uppercase mb-2"></p>
-                                    <ul class="list-inside list-disc">
+                                    <p class="mb-6"><span class="font-bold">Attenzione: </span> il server ha riscontrato degli errori nei dati che hai inviato per l'elaborazione della tua richiesta <span x-bind="templateApiErrorOperation" class="italic text-gray-500"></span>. Apporta le modifiche elencate nella tabella sottostante prima riprovare l'operazione.</p>
+                                    <p class="font-semibold mb-2">Tabella degli errori</p>
+                                    <table class="w-full text-sm text-left border-y-1 border-gray-400">
                                         <template x-for="message in $store.abgrid.apiResponse.data.detail">
-                                            <li x-html="formatErrorMessage(message)"></li>
+                                            <tr class="odd:bg-white even:bg-gray-50 border-b border-dashed border-gray-400">
+                                                <td x-text="$t('groupData.' + message.location)" class="font-bold p-3"></td>
+                                                <td x-text="$t('errors.' + message.error_message)" class="p-3"></td>
+                                            </tr>
                                         </template>
-                                    </ul>
+                                    </table>
                                 </div>
                             </template>
                         </div>
