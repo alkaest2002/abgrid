@@ -2,7 +2,7 @@
     "it": {
         "app_is_online": "connessione internet ripristinata",
         "app_is_offline": "attenzine: connessione internet assente",
-        "session_was_correctly_initialized": "la sessione è stata correttamente inizializzata",
+        "session_was_correctly_initialized": "il server AB-Grid è operativo",
         "groupData": {
             "project_title": "titolo progetto",
             "question_a": "domanda A",
