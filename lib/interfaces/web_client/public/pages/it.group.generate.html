@@ -8,12 +8,12 @@
     <title>AB-Grid app</title>
 </head>
 
-<body class="h-screen overflow-hidden"
+<body class="h-screen overflow-hidden max-w-4xl mx-auto"
     x-data="{ ...componentToast(), ...componentOnline(), ...componentNavigation(), ...componentApi() }"
     x-init="() => { initToast(); initOnline(); initNavigation(); initApi() }">
     <template x-teleport="body">
         <div x-bind="toastContainer"
-            class="fixed bottom-4 right-4 p-4 bg-white border border-gray-300 rounded-md shadow-lg cursor-pointer">
+            class="fixed top-6 right-6 p-4 bg-white border border-gray-300 rounded-md shadow-lg cursor-pointer">
             <div class="flex items-center gap-2">
                 <span x-bind="toastBadge" class="text-white text-xs px-2 py-0.5 rounded-full">
                 </span>
@@ -22,110 +22,105 @@
             </div>
         </div>
     </template>
+
     <div class="h-full" data-taxi>
-        <div data-taxi-view class="h-full flex flex-col" x-load="visible" x-data="viewGroupGenerate">
-            <!-- Main content area -->
-            <main class="flex-1 overflow-y-auto p-6">
-                <div class="max-w-4xl mx-auto h-full flex flex-col justify-start items-center pt-12">
-                    <div class="text-center">
-                        <h1 class="text-3xl font-bold mb-3">
-                            Crea file di gruppo
-                        </h1>
-                        <p class="px-12 mb-12">
-                            Il file di gruppo contiene i dati per la generazione del report AB-Grid. A parte le informazioni di configurazione qui richieste, dovrai completare il file con i dati AB-Grid effettivamente raccolti. Puoi
-                            passare alla fase successiva se hai già scaricato e completato un file di gruppo.
-                        </p>
-                    </div>
-                    <div class="w-full">
-                        <form>
-                            <div class="mb-4">
-                                <label for="project_title"
-                                    class="block text-sm font-medium text-gray-700 text-left">Titolo del
-                                    progetto</label>
-                                <input 
-                                    type="text" 
-                                    id="project_title" 
-                                    name="project_title"
-                                    x-model="$store.abgrid.groupData.project_title"
-                                    placeholder="es. Raccolta dati 2025"
-                                    class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none"
-                                    required>
+        <div id="content" class="h-full flex flex-col relative" x-load="visible" x-data="viewGroupGenerate" data-taxi-view>
+            <!-- Top area - fixed height -->
+            <header class="h-24 flex items-center justify-start p-9">
+                <div>
+                    <h1 class="text-3xl font-bold">
+                        AB-Grid
+                    </h1>
+                    <p class="text-sm text-gray-600">
+                        Software per la generazione di report AB-Grid
+                    </p>
+                </div>
+            </header>
+
+            <!-- Center area - takes available space with rounded border -->
+            <main class="flex-1 overflow-y-auto px-6">
+                <div class="max-w-4xl mx-auto h-full">
+                    <div class="h-full border border-gray-200 rounded-lg p-6 bg-white shadow-sm">
+                        <!-- Your main content goes here -->
+                        <div class="h-full flex flex-col justify-start items-center p-6">
+                            <p class="mb-9">
+                                Il file di gruppo contiene i dati per la generazione del report AB-Grid. A parte le
+                                informazioni di configurazione qui richieste, dovrai completare il file con i dati
+                                AB-Grid effettivamente raccolti. Puoi
+                                passare alla fase successiva se hai già scaricato e completato un file di gruppo.
+                            </p>
+                            <div class="w-full">
+                                <form>
+                                    <div class="mb-4">
+                                        <label for="project_title"
+                                            class="block text-sm font-medium text-gray-700 text-left">Titolo del
+                                            progetto</label>
+                                        <input type="text" id="project_title" name="project_title"
+                                            x-model="$store.abgrid.groupData.project_title"
+                                            placeholder="es. Raccolta dati 2025"
+                                            class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none"
+                                            required>
+                                    </div>
+                                    <div class="mb-4">
+                                        <label for="question_a"
+                                            class="block text-sm font-medium text-gray-700 text-left">Domanda A</label>
+                                        <input type="text" id="question_a" x-model="$store.abgrid.groupData.question_a"
+                                            name="question_a"
+                                            placeholder="es. Chi vorresti nel tuo gruppo di lavoro ideale?"
+                                            class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none"
+                                            required>
+                                    </div>
+                                    <div class="mb-4">
+                                        <label for="question_b"
+                                            class="block text-sm font-medium text-gray-700 text-left">Domanda B</label>
+                                        <input type="text" id="question_b" x-model="$store.abgrid.groupData.question_b"
+                                            name="question_b"
+                                            placeholder="es. Chi non vorresti nel tuo gruppo di lavoro ideale?"
+                                            class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none"
+                                            required>
+                                    </div>
+                                    <div class="grid grid-cols-2 gap-4 mb-4">
+                                        <div>
+                                            <label for="group"
+                                                class="block text-sm font-medium text-gray-700 text-left">Identificativo
+                                                gruppo</label>
+                                            <input type="number" id="groupp" x-model="$store.abgrid.groupData.group"
+                                                name="group" placeholder="es. 1"
+                                                class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none"
+                                                required>
+                                        </div>
+                                        <div>
+                                            <label for="members"
+                                                class="block text-sm font-medium text-gray-700 text-left">Numero di
+                                                membri</label>
+                                            <input type="number" id="members" x-model="$store.abgrid.groupData.members"
+                                                name="members" placeholder="es. 8"
+                                                class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none"
+                                                required>
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <button x-bind="resetButton"
+                                            class="bg-red-700 text-white py-2 px-4 rounded-md shadow-sm cursor-pointer">
+                                            reset
+                                        </button>
+                                        <button x-bind="generateGroupButton"
+                                            class="bg-blue-700 text-white py-2 px-4 rounded-md shadow-sm cursor-pointer">
+                                            Scarica file
+                                        </button>
+                                    </div>
+                                </form>
                             </div>
-                            <div class="mb-4">
-                                <label for="question_a"
-                                    class="block text-sm font-medium text-gray-700 text-left">Domanda A</label>
-                                <input 
-                                    type="text" 
-                                    id="question_a" 
-                                    x-model="$store.abgrid.groupData.question_a"
-                                    name="question_a"
-                                    placeholder="es. Chi vorresti nel tuo gruppo di lavoro ideale?"
-                                    class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none"
-                                    required>
-                            </div>
-                            <div class="mb-4">
-                                <label for="question_b"
-                                    class="block text-sm font-medium text-gray-700 text-left">Domanda B</label>
-                                <input 
-                                    type="text" 
-                                    id="question_b"
-                                    x-model="$store.abgrid.groupData.question_b"
-                                    name="question_b"
-                                    placeholder="es. Chi non vorresti nel tuo gruppo di lavoro ideale?"
-                                    class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none"
-                                    required>
-                            </div>
-                            <div class="grid grid-cols-2 gap-4 mb-4">
-                                <div>
-                                    <label for="group"
-                                        class="block text-sm font-medium text-gray-700 text-left">Identificativo
-                                        gruppo</label>
-                                    <input 
-                                        type="number" 
-                                        id="groupp"
-                                        x-model="$store.abgrid.groupData.group"
-                                        name="group" 
-                                        placeholder="es. 1"
-                                        class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none"
-                                        required>
-                                </div>
-                                <div>
-                                    <label for="members"
-                                        class="block text-sm font-medium text-gray-700 text-left">Numero di
-                                        membri</label>
-                                    <input 
-                                        type="number" 
-                                        id="members" 
-                                        x-model="$store.abgrid.groupData.members"
-                                        name="members" 
-                                        placeholder="es. 8"
-                                        class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none"
-                                        required>
-                                </div>
-                            </div>
-                            <div>
-                                <button
-                                    x-bind="resetButton"
-                                    class="bg-red-700 text-white py-2 px-4 rounded-md shadow-sm cursor-pointer"
-                                >
-                                    reset
-                                </button>
-                                <button
-                                    x-bind="generateGroupButton"
-                                    class="bg-blue-700 text-white py-2 px-4 rounded-md shadow-sm cursor-pointer"
-                                >
-                                    Scarica file
-                                </button>
-                            </div>
-                        </form>
+                        </div>
                     </div>
                 </div>
             </main>
-            <!-- Bottom navigation area with your buttons -->
-            <div class="h-24 flex justify-center">
+
+            <!-- Bottom area - fixed height -->
+            <footer class="h-20 flex justify-center items-center">
                 <button x-data="componentMagicButton(magicButton.label, magicButton.action)" x-bind="magicButton">
                 </button>
-            </div>
+            </footer>
         </div>
     </div>
 

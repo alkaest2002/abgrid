@@ -8,41 +8,56 @@
     <title>AB-Grid app</title>
 </head>
 
-<body class="h-screen overflow-hidden"
+<body class="h-screen overflow-hidden max-w-4xl mx-auto"
     x-data="{ ...componentToast(), ...componentOnline(), ...componentNavigation(), ...componentApi() }"
     x-init="() => { initOnline(); initNavigation(); initApi() }">
+
     <div class="h-full" data-taxi>
-        <div data-taxi-view class="h-full flex flex-col" x-data="viewNotify">
-            <!-- Main content area -->
-            <main class="flex-1 overflow-y-auto p-6">
-                <div class="max-w-4xl mx-auto h-full flex flex-col justify-start items-center pt-12">
-                    <div class="w-full mx-auto">
-                        <h1 class="text-3xl font-bold text-center">
-                            AB-Grid
-                        </h1>
-                        <template x-bind="templateGroup">
-                        </template>
-                        <template x-bind="templateReport">
-                        </template>
-                        <template x-bind="templateApiError">
-                            <div class="w-full mx-auto">
-                                <p class="mb-6">Di seguito sono riportati i messagi di errore provenienti dal server.</p>
-                                <p  x-bind="templateApiErrorEndpoint" class="font-bold uppercase mb-2"></p>
-                                <ul class="list-inside list-disc">
-                                    <template x-for="message in $store.abgrid.apiResponse.data.detail">
-                                        <li x-html="formatErrorMessage(message)"></li>
-                                    </template>
-                                </ul>
-                            </div>
-                        </template>
+        <div class="h-full flex flex-col" x-data="viewNotify" data-taxi-view>
+            <!-- Top area - fixed height -->
+            <header class="h-24 flex items-center justify-start p-9">
+                <div class="w-full">
+                    <h1 class="text-3xl font-bold">
+                        AB-Grid
+                    </h1>
+                    <p class="text-sm text-gray-600">
+                        Software per la generazione di report AB-Grid
+                    </p>
+                </div>
+            </header>
+
+            <!-- Center area - takes available space with rounded border -->
+            <main id="main" class="flex-1 overflow-y-auto px-6 relative">
+                <div class="h-full">
+                    <div class="h-full border border-gray-200 rounded-lg p-6 bg-white shadow-sm">
+                        <!-- Your main content goes here -->
+                        <div class="h-full flex flex-col justify-start items-start p-6">
+                            <template x-bind="templateGroup">
+                            </template>
+                            <template x-bind="templateReport">
+                            </template>
+                            <template x-bind="templateApiError">
+                                <div class="w-full mx-auto">
+                                    <p class="mb-6">Di seguito sono riportati i messagi di errore provenienti dal
+                                        server.</p>
+                                    <p x-bind="templateApiErrorEndpoint" class="font-bold uppercase mb-2"></p>
+                                    <ul class="list-inside list-disc">
+                                        <template x-for="message in $store.abgrid.apiResponse.data.detail">
+                                            <li x-html="formatErrorMessage(message)"></li>
+                                        </template>
+                                    </ul>
+                                </div>
+                            </template>
+                        </div>
                     </div>
                 </div>
             </main>
-            <!-- Bottom navigation area with your buttons -->
-            <div class="h-24 flex justify-center">
+
+            <!-- Bottom area - fixed height -->
+            <footer class="h-20 flex justify-center items-center">
                 <button x-data="componentMagicButton(magicButton.label, magicButton.action)" x-bind="magicButton">
                 </button>
-            </div>
+            </footer>
         </div>
     </div>
 
