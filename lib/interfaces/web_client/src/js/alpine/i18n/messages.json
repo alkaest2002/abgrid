@@ -1,5 +1,31 @@
 {
     "it": {
-        "try": "prova"
+        "home": "home",
+        "groupData": {
+            "project_title": "titolo progetto",
+            "question_a": "domanda A",
+            "question_b": "domanda B",
+            "group": "identificativo del gruppo",
+            "members": "membri"
+        },
+        "errors": {
+            "choice_must_be_a_single_key_value_pair": "la scelta deve essere una singola  coppia chiave: valori",
+            "choices_exceeds_availability_of_symbols": "le scelte superano la disponibilità dei simboli",
+            "field_cannot_be_empty": "il campo non può essere vuoto",
+            "field_contains_invalid_characters": "il campo contiene caratteri non validi",
+            "field_is_out_of_range": "il campo è fuori dal range consentito",
+            "field_is_required": "il campo è obbligatorio",
+            "field_is_too_long": "il campo è troppo lungo",
+            "field_is_too_short": "il campo è troppo corto",
+            "field_must_be_a_string": "il campo deve essere una stringa",
+            "field_must_be_an_integer": "il campo deve essere un intero",
+            "key_cannot_be_present_in_its_own_values": "la chiave non può essere presente nei propri valori",
+            "key_must_be_a_single_alphabetic_character": "la chiave deve essere un singolo carattere alfabetico",
+            "keys_are_not_correct": "le chiavi non sono corrette",
+            "keys_in_a_and_b_must_be_identical": "le chiavi in A e B devono essere identiche",
+            "value_must_contain_only_single_alphabetic_characters": "il valore deve contenere solo singoli caratteri alfabetici",
+            "values_contain_duplicates": "i valori contengono duplicati",
+            "values_contain_invalid_keys": "i valori contengono chiavi non valide"
+        }
     }
 }

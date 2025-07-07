@@ -57,12 +57,6 @@ def validate_text_field(field_name: str, value: Any, min_len: int, max_len: int)
         
     Returns:
         List of error dictionaries. Empty list if validation passes.
-        
-    Examples:
-        >>> validate_text_field("title", "Hello World", 1, 50)
-        []
-        >>> validate_text_field("title", "", 1, 50)
-        [{'location': 'title', 'value_to_blame': '', 'error_message': 'Must be at least 1 characters long'}]
     """
     errors = []
     
@@ -70,7 +64,7 @@ def validate_text_field(field_name: str, value: Any, min_len: int, max_len: int)
         errors.append({
             "location": field_name,
             "value_to_blame": None,
-            "error_message": "Field is required"
+            "error_message": "field_is_required"
         })
         return errors
     
@@ -78,7 +72,7 @@ def validate_text_field(field_name: str, value: Any, min_len: int, max_len: int)
         errors.append({
             "location": field_name,
             "value_to_blame": value,
-            "error_message": "Must be a string"
+            "error_message": "field_must_be_a_string"
         })
         return errors
     
@@ -86,23 +80,22 @@ def validate_text_field(field_name: str, value: Any, min_len: int, max_len: int)
         errors.append({
             "location": field_name,
             "value_to_blame": value,
-            "error_message": f"Must be at least {min_len} characters long"
+            "error_message": f"field_is_too_short"
         })
     
     if len(value) > max_len:
         errors.append({
             "location": field_name,
             "value_to_blame": value,
-            "error_message": f"Must be at most {max_len} characters long"
+            "error_message": f"field_is_too_long"
         })
 
     # Check for forbidden characters
-    if forbidden_chars_found := forbidden_chars.findall(value):
-        unique_forbidden = list(dict.fromkeys(forbidden_chars_found))
+    if forbidden_chars.findall(value):
         errors.append({
             "location": field_name,
             "value_to_blame": value,
-            "error_message": f"Contains invalid characters: {''.join(unique_forbidden)}"
+            "error_message": f"field_contains_invalid_characters"
         })
     
     return errors
@@ -125,13 +118,13 @@ def validate_group_field(value: Any) -> List[Dict[str, Any]]:
         errors.append({
             "location": "group",
             "value_to_blame": None,
-            "error_message": "Field is required"
+            "error_message": "field_is_required"
         })
     elif not isinstance(value, int):
         errors.append({
             "location": "group",
             "value_to_blame": value,
-            "error_message": "Must be an integer"
+            "error_message": "field_must_be_an_integer"
         })
     
     return errors
@@ -210,19 +203,19 @@ class ABGridGroupSchema(BaseModel):
             errors.append({
                 "location": "members",
                 "value_to_blame": None,
-                "error_message": "Field is required"
+                "error_message": "field_is_required"
             })
         elif not isinstance(value, int):
             errors.append({
                 "location": "members",
                 "value_to_blame": value,
-                "error_message": "Must be an integer"
+                "error_message": "field_must_be_an_integer"
             })
         elif not (6 <= value <= 50):
             errors.append({
                 "location": "members",
                 "value_to_blame": value,
-                "error_message": "Must be between 6 and 50"
+                "error_message": "field_is_out_of_range"
             })
         
 
@@ -301,7 +294,7 @@ class ABGridReportSchema(BaseModel):
                     "choices_a_keys": sorted(choices_a_keys),
                     "choices_b_keys": sorted(choices_b_keys)
                 },
-                "error_message": "Keys in choices_a and choices_b must be identical"
+                "error_message": "keys_in_a_and_b_must_be_identical"
             })
         
         if errors:
@@ -340,7 +333,7 @@ class ABGridReportSchema(BaseModel):
             errors.append({
                 "location": field_name,
                 "value_to_blame": choices,
-                "error_message": "List cannot be empty"
+                "error_message": "field_cannot_be_empty"
             })
             return extracted_keys
         
@@ -348,7 +341,7 @@ class ABGridReportSchema(BaseModel):
             errors.append({
                 "location": field_name,
                 "value_to_blame": choices,
-                "error_message": f"Number of choices ({len(choices)}) exceeds maximum allowed ({len(SYMBOLS)})"
+                "error_message": f"choices_exceeds_availability_of_symbols"
             })
             return extracted_keys
         
@@ -362,7 +355,7 @@ class ABGridReportSchema(BaseModel):
                 errors.append({
                     "location": choice_location,
                     "value_to_blame": choice_dict,
-                    "error_message": "Each choice must be a dictionary with exactly one key-value pair"
+                    "error_message": "choice_must_be_a_single_key_value_pair"
                 })
                 continue
             
@@ -374,7 +367,7 @@ class ABGridReportSchema(BaseModel):
                 errors.append({
                     "location": f"{choice_location}.{key}",
                     "value_to_blame": key,
-                    "error_message": "Key must be a single alphabetic character"
+                    "error_message": "key_must_be_a_single_alphabetic_character"
                 })
             else:
                 extracted_keys.add(key)
@@ -389,7 +382,7 @@ class ABGridReportSchema(BaseModel):
                         errors.append({
                             "location": f"{choice_location}.{key}",
                             "value_to_blame": value_str,
-                            "error_message": "Value must contain only single alphabetic characters"
+                            "error_message": "value_must_contain_only_single_alphabetic_characters"
                         })
                     
                     # Check key doesn't reference itself
@@ -397,7 +390,7 @@ class ABGridReportSchema(BaseModel):
                         errors.append({
                             "location": f"{choice_location}.{key}",
                             "value_to_blame": value_str,
-                            "error_message": "Key cannot be present in its own values"
+                            "error_message": "key_cannot_be_present_in_its_own_values"
                         })
                     
                     # Check for duplicates
@@ -405,7 +398,7 @@ class ABGridReportSchema(BaseModel):
                         errors.append({
                             "location": f"{choice_location}.{key}",
                             "value_to_blame": value_str,
-                            "error_message": "Values contain duplicates"
+                            "error_message": "values_contain_duplicates"
                         })
                     
                     # Check references are valid (will be validated against expected_keys)
@@ -414,7 +407,7 @@ class ABGridReportSchema(BaseModel):
                         errors.append({
                             "location": f"{choice_location}.{key}",
                             "value_to_blame": value_str,
-                            "error_message": "Values contain invalid references"
+                            "error_message": "values_contain_invalid_keys"
                         })
         
         # Check keys match expected pattern
@@ -422,7 +415,7 @@ class ABGridReportSchema(BaseModel):
             errors.append({
                 "location": f"{field_name}.keys",
                 "value_to_blame": sorted(extracted_keys),
-                "error_message": "Keys are not correct"
+                "error_message": "keys_are_not_correct"
             })
         
         return extracted_keys
