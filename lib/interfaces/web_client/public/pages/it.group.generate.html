@@ -11,9 +11,11 @@
 <body class="h-screen overflow-hidden max-w-4xl mx-auto pb-6"
     x-data="{ ...componentToast(), ...componentOnline(), ...componentNavigation(), ...componentApi() }"
     x-init="() => { initToast(); initOnline(); initNavigation(); initApi() }">
+    
+    <!-- Toast -->
     <template x-teleport="body">
         <div x-bind="toastContainer"
-            class="fixed top-6 right-6 p-4 bg-white border border-gray-300 rounded-md shadow-lg cursor-pointer">
+            class="fixed top-6 right-6 p-3 bg-white border border-gray-300 rounded-md shadow-lg cursor-pointer">
             <div class="flex items-center gap-2">
                 <span x-bind="toastBadge" class="text-white text-xs px-2 py-0.5 rounded-full">
                 </span>

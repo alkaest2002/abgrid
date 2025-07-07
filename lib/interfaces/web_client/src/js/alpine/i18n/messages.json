@@ -13,6 +13,7 @@
         "errors": {
             "choice_must_be_a_single_key_value_pair": "la scelta deve essere una singola  coppia chiave: valori",
             "choices_exceeds_availability_of_symbols": "le scelte superano la disponibilità dei simboli",
+            "yaml_load_failure": "si è verificato un problema nel caricamento del file",
             "field_cannot_be_empty": "il campo non può essere vuoto",
             "field_contains_invalid_characters": "il campo contiene caratteri non validi",
             "field_is_out_of_range": "il campo è fuori dal range consentito",
@@ -31,6 +32,7 @@
             "values_contain_invalid_keys": "i valori contengono chiavi non valide"
         },
         "ops": {
+            "successful_operation": "l'operazione si è conclusa con successo",
             "generateGroup": "generazione del file di gruppo",
             "generateReport": "generazione del report"
         }

@@ -12,6 +12,19 @@
     x-data="{ ...componentToast(), ...componentOnline(), ...componentNavigation(), ...componentApi() }"
     x-init="() => { initOnline(); initNavigation(); initApi() }">
 
+    <!-- Toast -->
+    <template x-teleport="body">
+        <div x-bind="toastContainer"
+            class="fixed top-6 right-6 p-3 bg-white border border-gray-300 rounded-md shadow-lg cursor-pointer">
+            <div class="flex items-center gap-2">
+                <span x-bind="toastBadge" class="text-white text-xs px-2 py-0.5 rounded-full">
+                </span>
+                <span x-bind="toastMessage" class="text-sm">
+                </span>
+            </div>
+        </div>
+    </template>
+
     <div class="h-full" data-taxi>
         <div class="h-full flex flex-col" x-data="viewNotify" data-taxi-view>
             <!-- Top area - fixed height -->
