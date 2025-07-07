@@ -45,22 +45,42 @@
                         <!-- Your main content goes here -->
                         <div class="h-full p-6">
                             <p class="mb-9">
-                                Il file di gruppo serve per la generazione del report AB-Grid. A parte le
-                                informazioni di configurazione qui richieste, dovrai completare il file con i dati
+                                Il file di gruppo serve per la generazione del report AB-Grid. Oltre alle
+                                informazioni qui richieste, dovrai scaricare e completare il file con i dati
                                 effettivamente raccolti. Consulta il <a href="#" class="text-blue-700">manuale</a>
-                                (capitolo II - raccolta dei dati).
+                                (<span class="italic">capitolo II - raccolta dei dati</span>) per approfondire meglio.
                             </p>
                             <div class="w-full">
                                 <div class="flex items-center gap-3 mb-6">
                                     <div
                                         class="group relative inline-flex w-11 shrink-0 rounded-full bg-gray-200 p-0.5 inset-ring inset-ring-gray-900/5 outline-offset-2 outline-indigo-600 transition-colors duration-200 ease-in-out has-checked:bg-indigo-600 has-focus-visible:outline-2">
                                         <span
-                                            class="size-5 rounded-full bg-white shadow-xs ring-1 ring-gray-900/5 transition-transform duration-200 ease-in-out group-has-checked:translate-x-5"></span>
+                                            class="relative size-5 rounded-full bg-white shadow-xs ring-1 ring-gray-900/5 transition-transform duration-200 ease-in-out group-has-checked:translate-x-5">
+                                            <span
+                                                class="absolute inset-0 flex size-full items-center justify-center opacity-100 transition-opacity duration-200 ease-in group-has-checked:opacity-0 group-has-checked:duration-100 group-has-checked:ease-out"
+                                                aria-hidden="true">
+                                                <svg class="size-3 text-gray-400" fill="none" viewBox="0 0 12 12">
+                                                    <path d="M4 8l2-2m0 0l2-2M6 6L4 4m2 2l2 2" stroke="currentColor"
+                                                        stroke-width="2" stroke-linecap="round"
+                                                        stroke-linejoin="round" />
+                                                </svg>
+                                            </span>
+                                            <span
+                                                class="absolute inset-0 flex size-full items-center justify-center opacity-0 transition-opacity duration-100 ease-out group-has-checked:opacity-100 group-has-checked:duration-200 group-has-checked:ease-in"
+                                                aria-hidden="true">
+                                                <svg class="size-3 text-indigo-600" fill="currentColor"
+                                                    viewBox="0 0 12 12">
+                                                    <path
+                                                        d="M3.707 5.293a1 1 0 00-1.414 1.414l1.414-1.414zM5 8l-.707.707a1 1 0 001.414 0L5 8zm4.707-3.293a1 1 0 00-1.414-1.414l1.414 1.414zm-7.414 2l2 2 1.414-1.414-2-2-1.414 1.414zm3.414 2l4-4-1.414-1.414-4 4 1.414 1.414z" />
+                                                </svg>
+                                            </span>
+                                        </span>
                                         <input 
-                                        type="checkbox"
+                                            type="checkbox"
                                             class="absolute inset-0 appearance-none focus:outline-hidden"
-                                            x-model="newGroupFile"
-                                            id="new-group" name="new-group" />
+                                            name="new-group"
+                                            x-model="newGroupFile" 
+                                        />
                                     </div>
                                     <div class="flex grow flex-col text-sm">
                                         <label id="new-group-label" class="font-medium text-gray-900">Nuovo file di
@@ -68,8 +88,10 @@
                                         <span id="new-group-description" class="text-gray-500">(da scaricare)</span>
                                     </div>
                                 </div>
-                                <div class="relative p-3">
-                                    <div class="absolute inset-0 bg-gray-50 opacity-75 transition-all" x-show="!newGroupFile"></div>
+                                <div class="relative p-3 rounded-2xl">
+                                    <div class="absolute inset-0 bg-gray-50 rounded-xl opacity-75" x-show="!newGroupFile"
+                                        x-transition:leave="transition ease-out duration-200"
+                                        x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0"></div>
                                     <div class="mb-4">
                                         <label for="project_title"
                                             class="block text-sm font-semibold text-gray-700 text-left">Titolo del
@@ -77,7 +99,7 @@
                                         <input type="text" id="project_title" name="project_title"
                                             x-model="$store.abgrid.groupData.project_title"
                                             placeholder="es. raccolta dati 2025"
-                                            class="mt-1 block w-full px-3 py-2 bg-white rounded-md shadow-sm focus:outline-none"
+                                            class="mt-1 block w-full px-3 py-2 bg-white rounded-md shadow-sm focus:outline-none placeholder:text-sm"
                                             required>
                                     </div>
                                     <div class="mb-4">
@@ -87,7 +109,7 @@
                                         <input type="text" id="question_a" x-model="$store.abgrid.groupData.question_a"
                                             name="question_a"
                                             placeholder="es. chi vorresti nel tuo gruppo di lavoro ideale?"
-                                            class="mt-1 block w-full px-3 py-2 bg-white rounded-md shadow-sm focus:outline-none"
+                                            class="mt-1 block w-full px-3 py-2 bg-white rounded-md shadow-sm focus:outline-none placeholder:text-sm"
                                             required>
                                     </div>
                                     <div class="mb-4">
@@ -97,7 +119,7 @@
                                         <input type="text" id="question_b" x-model="$store.abgrid.groupData.question_b"
                                             name="question_b"
                                             placeholder="es. chi non vorresti nel tuo gruppo di lavoro ideale?"
-                                            class="mt-1 block w-full px-3 py-2 bg-white rounded-md shadow-sm focus:outline-none"
+                                            class="mt-1 block w-full px-3 py-2 bg-white rounded-md shadow-sm focus:outline-none placeholder:text-sm"
                                             required>
                                     </div>
                                     <div class="grid grid-cols-2 gap-2">
@@ -107,7 +129,7 @@
                                                 gruppo</label>
                                             <input type="number" id="groupp" x-model="$store.abgrid.groupData.group"
                                                 name="group" placeholder="es. 1"
-                                                class="mt-1 block w-full px-3 py-2 bg-white rounded-md shadow-sm focus:outline-none"
+                                                class="mt-1 block w-full px-3 py-2 bg-white rounded-md shadow-sm focus:outline-none placeholder:text-sm"
                                                 required>
                                         </div>
                                         <div>
@@ -116,7 +138,7 @@
                                                 membri</label>
                                             <input type="number" id="members" x-model="$store.abgrid.groupData.members"
                                                 name="members" placeholder="es. 8"
-                                                class="mt-1 block w-full px-3 py-2 bg-white rounded-md shadow-sm focus:outline-none"
+                                                class="mt-1 block w-full px-3 py-2 bg-white rounded-md shadow-sm focus:outline-none placeholder:text-sm"
                                                 required>
                                         </div>
                                     </div>
