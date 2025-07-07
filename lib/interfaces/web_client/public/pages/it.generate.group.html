@@ -105,7 +105,13 @@
                             </div>
                             <div>
                                 <button
-                                    :class="{ 'opacity-25 cursor-not-allowed': !$store.abgrid.groupDataIsComplete }"
+                                    x-bind="resetButton"
+                                    class="bg-red-700 text-white py-2 px-4 rounded-md shadow-sm"
+                                >
+                                    reset
+                                </button>
+                                <button
+                                    x-bind="generateGroupButton"
                                     class="bg-blue-700 text-white py-2 px-4 rounded-md shadow-sm"
                                 >
                                     Scarica file

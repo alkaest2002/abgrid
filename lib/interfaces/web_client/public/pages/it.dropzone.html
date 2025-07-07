@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="it">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="/src/css/styles.css" />
+    <title>AB-Grid app</title>
+</head>
+
+<body class="h-screen overflow-hidden"
+    x-data="{ ...componentToast(), ...componentOnline(), ...componentNavigation(), ...componentApi() }"
+    x-init="() => { initToast(); initOnline(); initNavigation(); initApi() }">
+    <template x-teleport="body">
+        <div x-bind="toastContainer"
+            class="fixed top-4 right-4 bg-white border border-gray-300 shadow-lg p-4 cursor-pointer">
+            <div class="flex items-center gap-2">
+                <span x-bind="toastBadge" class="text-white text-xs px-2 py-0.5 rounded-full">
+                </span>
+                <span x-bind="toastMessage" class="text-sm">
+                </span>
+            </div>
+        </div>
+    </template>
+    <div class="h-full" data-taxi>
+        <div data-taxi-view class="h-full flex flex-col" x-load="visible" x-data="viewDropzone">
+            <!-- Main content area -->
+            <main class="flex-1 overflow-y-auto p-6">
+                <div class="max-w-4xl mx-auto h-full flex flex-col justify-center items-center">
+                    <div class="text-center">
+                        <h1 class="text-3xl font-bold">
+                            AB-Grid - Report
+                        </h1>
+                        <p>
+                           Dropzone
+                        </p>
+                    </div>
+                </div>
+            </main>
+            <!-- Bottom navigation area with your buttons -->
+            <div class="h-24 flex justify-center">
+                <button x-data="componentMagicButton(magicButton.label, magicButton.action)" x-bind="magicButton">
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script type="module" src="/src/js/main.js"></script>
+</body>
+
+</html>
