@@ -8,7 +8,7 @@
     <title>AB-Grid app</title>
 </head>
 
-<body class="h-screen overflow-hidden max-w-4xl mx-auto"
+<body class="h-screen overflow-hidden max-w-4xl mx-auto p-9"
     x-data="{ ...componentToast(), ...componentOnline(), ...componentNavigation(), ...componentApi() }"
     x-init="() => { initToast(); initOnline(); initNavigation(); initApi() }">
     <template x-teleport="body">
@@ -42,12 +42,11 @@
                 <div class="max-w-4xl mx-auto h-full">
                     <div class="h-full border border-gray-200 rounded-lg p-6 bg-white shadow-sm">
                         <!-- Your main content goes here -->
-                        <div class="h-full flex flex-col justify-start items-center p-6">
+                        <div class="h-full p-6">
                             <p class="mb-9">
-                                Il file di gruppo contiene i dati per la generazione del report AB-Grid. A parte le
+                                Il file di gruppo serve per la generazione del report AB-Grid. A parte le
                                 informazioni di configurazione qui richieste, dovrai completare il file con i dati
-                                AB-Grid effettivamente raccolti. Puoi
-                                passare alla fase successiva se hai già scaricato e completato un file di gruppo.
+                                effettivamente raccolti. Consulta il <a href="#" class="text-blue-700">manuale</a>  (capitolo II. raccolta dei dati).
                             </p>
                             <div class="w-full">
                                 <form>
@@ -57,7 +56,7 @@
                                             progetto</label>
                                         <input type="text" id="project_title" name="project_title"
                                             x-model="$store.abgrid.groupData.project_title"
-                                            placeholder="es. Raccolta dati 2025"
+                                            placeholder="es. raccolta dati 2025"
                                             class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none"
                                             required>
                                     </div>
@@ -66,7 +65,7 @@
                                             class="block text-sm font-medium text-gray-700 text-left">Domanda A</label>
                                         <input type="text" id="question_a" x-model="$store.abgrid.groupData.question_a"
                                             name="question_a"
-                                            placeholder="es. Chi vorresti nel tuo gruppo di lavoro ideale?"
+                                            placeholder="es. chi vorresti nel tuo gruppo di lavoro ideale?"
                                             class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none"
                                             required>
                                     </div>
@@ -75,7 +74,7 @@
                                             class="block text-sm font-medium text-gray-700 text-left">Domanda B</label>
                                         <input type="text" id="question_b" x-model="$store.abgrid.groupData.question_b"
                                             name="question_b"
-                                            placeholder="es. Chi non vorresti nel tuo gruppo di lavoro ideale?"
+                                            placeholder="es. chi non vorresti nel tuo gruppo di lavoro ideale?"
                                             class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none"
                                             required>
                                     </div>
@@ -111,6 +110,9 @@
                                     </div>
                                 </form>
                             </div>
+                            <p class="mt-6 text-sm text-gray-700">
+                                <span class="font-semibold">Nota bene</span>: salta questa fase se hai già scaricato e completato un file di gruppo.
+                            </p>
                         </div>
                     </div>
                 </div>

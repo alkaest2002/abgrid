@@ -8,9 +8,10 @@
     <title>AB-Grid app</title>
 </head>
 
-<body class="h-screen overflow-hidden max-w-4xl mx-auto"
+<body class="h-screen overflow-hidden max-w-4xl mx-auto p-9"
     x-data="{ ...componentToast(), ...componentOnline(), ...componentNavigation(), ...componentApi() }"
     x-init="() => { initToast(); initOnline(); initNavigation(); initApi() }">
+    
     <template x-teleport="body">
         <div x-bind="toastContainer"
             class="fixed top-6 right-6 p-4 bg-white border border-gray-300 rounded-md shadow-lg cursor-pointer">
@@ -43,7 +44,9 @@
                     <div class="h-full border border-gray-200 rounded-lg p-6 bg-white shadow-sm">
                         <!-- Your main content goes here -->
                         <div class="h-full flex flex-col justify-center items-center">
-                            <p class="text-gray-500">Main content area</p>
+                            <p class="text-gray-500">
+                                Main content area
+                            </p>
                         </div>
                     </div>
                 </div>

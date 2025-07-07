@@ -8,12 +8,12 @@
     <title>AB-Grid app</title>
 </head>
 
-<body class="h-screen overflow-hidden max-w-4xl mx-auto"
+<body class="h-screen overflow-hidden max-w-4xl mx-auto p-9"
     x-data="{ ...componentToast(), ...componentOnline(), ...componentNavigation(), ...componentApi() }"
     x-init="() => { initToast(); initOnline(); initNavigation(); initApi() }">
-    <template x-teleport="#content">
+    <template x-teleport="body">
         <div x-bind="toastContainer"
-            class="fixed bottom-6 right-6 p-4 bg-white border border-gray-300 rounded-md shadow-lg cursor-pointer">
+            class="fixed top-6 right-6 p-4 bg-white border border-gray-300 rounded-md shadow-lg cursor-pointer">
             <div class="flex items-center gap-2">
                 <span x-bind="toastBadge" class="text-white text-xs px-2 py-0.5 rounded-full">
                 </span>
@@ -22,26 +22,40 @@
             </div>
         </div>
     </template>
+    
     <div class="h-full" data-taxi>
-        <div id="content" class="h-full flex flex-col" x-load="visible" x-data="viewReport" data-taxi-view>
-            <!-- Main content area -->
-            <main class="flex-1 overflow-y-auto p-6">
-                <div class="max-w-4xl mx-auto h-full flex flex-col justify-start items-center pt-12">
-                    <div class="text-center">
-                        <h1 class="text-3xl font-bold">
-                            AB-Grid - Report
-                        </h1>
-                        <p>
-                            Genera report
-                        </p>
+        <div class="h-full flex flex-col" x-load="visible" x-data="viewReport" data-taxi-view >
+            <!-- Top area - fixed height -->
+            <header class="h-24 flex items-center justify-start p-9">
+                <div class="w-full">
+                    <h1 class="text-3xl font-bold">
+                        AB-Grid
+                    </h1>
+                    <p class="text-sm text-gray-600">
+                        Software per la generazione di report
+                    </p>
+                </div>
+            </header>
+
+            <!-- Center area - takes available space with rounded border -->
+            <main id="main" class="flex-1 overflow-y-auto px-6 relative">
+                <div class="h-full">
+                    <div class="h-full border border-gray-200 rounded-lg p-6 bg-white shadow-sm">
+                        <!-- Your main content goes here -->
+                        <div class="h-full flex flex-col justify-center items-center">
+                            <p class="text-gray-500">
+                                Main content area
+                            </p>
+                        </div>
                     </div>
                 </div>
             </main>
-            <!-- Bottom navigation area with your buttons -->
-            <div class="h-24 flex justify-center">
+
+            <!-- Bottom area - fixed height -->
+            <footer class="h-20 flex justify-center items-center">
                 <button x-data="componentMagicButton(magicButton.label, magicButton.action)" x-bind="magicButton">
                 </button>
-            </div>
+            </footer>
         </div>
     </div>
 
