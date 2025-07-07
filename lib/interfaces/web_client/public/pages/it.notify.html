@@ -16,13 +16,25 @@
             <!-- Main content area -->
             <main class="flex-1 overflow-y-auto p-6">
                 <div class="max-w-4xl mx-auto h-full flex flex-col justify-center items-center">
-                    <div class="text-center">
-                        <h1 class="text-3xl font-bold">
+                    <div>
+                        <h1 class="text-3xl font-bold text-center">
                             AB-Grid - Notify
                         </h1>
-                        <p>
-                            Testo delle notifiche
-                        </p>
+                        <template x-bind="templateGroup">
+                        </template>
+                        <template x-bind="templateReport">
+                        </template>
+                        <template x-bind="templateApiError">
+                            <div>
+                                <p class="mb-6">Di seguito sono riportati i messagi di errore provenienti dal server.</p>
+                                <p  x-bind="templateApiErrorEndpoint" class="font-bold uppercase mb-1"></p>
+                                <ul class="list-inside list-disc">
+                                    <template x-for="message in $store.abgrid.apiResponse.data.detail">
+                                        <li x-text="`${message.location}: ${message.error_message}`"></li>
+                                    </template>
+                                </ul>
+                            </div>
+                        </template>
                     </div>
                 </div>
             </main>

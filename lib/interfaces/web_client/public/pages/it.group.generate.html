@@ -32,8 +32,8 @@
                             Crea file di gruppo
                         </h1>
                         <p class="px-12 mb-12">
-                            Il file di gruppo serve a raccogliere i dati per la generazione del report AB-Grid. Puoi
-                            passare alla fase successiva se hai già creato e completato il file.
+                            Il file di gruppo contiene i dati per la generazione del report AB-Grid. A parte le informazioni di configurazione qui richieste, dovrai completare il file con i dati AB-Grid effettivamente raccolti. Puoi
+                            passare alla fase successiva se hai già scaricato e completato un file di gruppo.
                         </p>
                     </div>
                     <div class="w-full">
@@ -83,7 +83,7 @@
                                     <input 
                                         type="number" 
                                         id="groupp"
-                                        x-model="$store.abgrid.groupData.group"
+                                        x-model.number="$store.abgrid.groupData.group"
                                         name="group" 
                                         placeholder="es. 1"
                                         class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none"
@@ -106,13 +106,13 @@
                             <div>
                                 <button
                                     x-bind="resetButton"
-                                    class="bg-red-700 text-white py-2 px-4 rounded-md shadow-sm"
+                                    class="bg-red-700 text-white py-2 px-4 rounded-md shadow-sm cursor-pointer"
                                 >
                                     reset
                                 </button>
                                 <button
                                     x-bind="generateGroupButton"
-                                    class="bg-blue-700 text-white py-2 px-4 rounded-md shadow-sm"
+                                    class="bg-blue-700 text-white py-2 px-4 rounded-md shadow-sm cursor-pointer"
                                 >
                                     Scarica file
                                 </button>
