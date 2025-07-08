@@ -45,8 +45,8 @@
                     <div class="h-full rounded-lg p-6 bg-gray-100">
                         <!-- Main content goes here -->
                         <div class="h-full flex flex-col justify-start items-center overflow-y-scroll">
-                            <div class="w-full">
-                                <p class="font-semibold">1. Informazioni sul progetto</p>
+                            <div class="w-full p-6">
+                                <p class="font-semibold mb-1">1. Informazioni sul progetto</p>
                                 <p class="mb-3 text-gray-500 text-xs">Puoi modificare la colonna dei valori di questa tabella, facendo click sulla cella interessata. Le chiavi possono essere modificate solo sul file originale che hai caricato nella schermata precedente.</p>
                                 <table class="w-full table-fixed text-sm text-left border-y-1 border-gray-400">
                                     <tr>
@@ -55,15 +55,18 @@
                                     </tr>
                                     <template x-for="(value, key) in $store.abgrid.projectFieldsInReportData">
                                         <tr 
-                                            class="odd:bg-white even:bg-gray-50 border-b border-dashed border-gray-400">
-                                            <td x-text="$t('groupData.' +key)" class="font-bold p-2"></td>
+                                            x-bind="reportProjectFieldFactory(key)"
+                                            class="odd:bg-white even:bg-gray-50 border-b border-dashed border-gray-400"
+                                        >
+                                            <td x-bind="reportProjectFieldIdFactory(key)" class="font-bold p-2"></td>
                                             <td class="p-2">
-                                                <span x-text="value" class="pl-1"></span>
+                                                <span x-bind="reportProjectFieldSpanFactory(key,value)" class="pl-1"></span>
+                                                <input x-bind="reportProjectFieldInputFactory(key,value)" class="pl-1 w-full">
                                             </td>
                                         </tr>
                                     </template>
                                 </table>
-                                <p class="font-semibold mt-6">2. Scelte A</p>
+                                <p class="font-semibold mt-9 mb-1">2. Scelte A</p>
                                 <p class="mb-3 text-gray-500 text-xs">Puoi modificare la colonna dei valori di questa tabella, facendo click sulla cella interessata. Le chiavi possono essere modificate solo sul file originale che hai caricato nella schermata precedente.</p>
                                 <table class="w-full table-fixed text-sm text-left border-y-1 border-gray-400">
                                     <tr>
@@ -76,12 +79,12 @@
                                             <td x-bind="reportChoiceIdFactory(choice)" class="font-bold p-2"></td>
                                             <td class="p-2">
                                                 <span x-bind="reportChoiceSpanFactory(choice)" class="pl-1"></span>
-                                                <input x-bind="reportChoiceInputFactory(choice, 'choices_a', index)" class="pl-1">
+                                                <input x-bind="reportChoiceInputFactory(choice, 'choices_a', index)" class="pl-1 w-full">
                                             </td>
                                         </tr>
                                     </template>
                                 </table>
-                                <p class="font-semibold mt-6">3. Scelte B</p>
+                                <p class="font-semibold mt-9 mb-1">3. Scelte B</p>
                                 <p class="mb-3 text-gray-500 text-xs">Puoi modificare la colonna dei valori di questa tabella, facendo click sulla cella interessata. Le chiavi possono essere modificate solo sul file originale che hai caricato nella schermata precedente.</p>
                                 <table class="w-full table-fixed text-sm text-left border-y-1 border-gray-400">
                                     <tr>
@@ -94,7 +97,7 @@
                                             <td x-bind="reportChoiceIdFactory(choice)" class="font-bold p-2"></td>
                                             <td class="p-2">
                                                 <span x-bind="reportChoiceSpanFactory(choice)" class="pl-1"></span>
-                                                <input x-bind="reportChoiceInputFactory(choice, 'choices_b', index)" class="pl-1">
+                                                <input x-bind="reportChoiceInputFactory(choice, 'choices_b', index)" class="pl-1 w-full">
                                             </td>
                                         </tr>
                                     </template>
