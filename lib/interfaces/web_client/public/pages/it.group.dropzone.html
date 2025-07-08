@@ -26,7 +26,7 @@
     </template>
     
     <div class="h-full" data-taxi>
-        <div class="h-full flex flex-col" data-taxi-view x-load="visible" x-data="viewGroupDropzone" x-bind="dropzone">
+        <div class="h-full flex flex-col" data-taxi-view x-load="visible" x-data="viewGroupDropzone">
             <!-- Top area - fixed height -->
             <header class="h-24 flex items-center justify-start p-9">
                 <div class="w-full">
@@ -40,7 +40,7 @@
             </header>
 
             <!-- Center area - takes available space with rounded border -->
-            <main id="main" class="flex-1 overflow-y-auto px-6 relative">
+            <main id="main" class="flex-1 overflow-y-auto px-6 relative cursor-pointer" x-bind="dropzone">
                 <div class="h-full">
                     <div class="h-full rounded-lg p-6 bg-gray-100">
                         <!-- Main content goes here -->
