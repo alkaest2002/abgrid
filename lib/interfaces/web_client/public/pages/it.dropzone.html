@@ -26,7 +26,7 @@
     </template>
 
     <div class="h-full" data-taxi>
-        <div class="h-full flex flex-col" data-taxi-view x-load="visible" x-data="viewGroupDropzone">
+        <div class="h-full flex flex-col" data-taxi-view x-load="visible" x-data="viewDropzone">
 
             <!-- Top area - fixed height -->
             <header class="h-24 flex items-center justify-start p-9">
@@ -47,33 +47,28 @@
                         <!-- Main content goes here -->
                         <div class="h-full flex flex-col justify-center items-center text-center"
                             x-show="!$store.abgrid.reportDataFilename" x-bind="dropzone" x-cloak>
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-12 mb-3 fill-gray-500"
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-12 mb-4 fill-gray-500"
                                 viewBox="0 0 576 512"><!--!Font Awesome Free 6.7.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2025 Fonticons, Inc.-->
                                 <path
                                     d="M0 64C0 28.7 28.7 0 64 0L224 0l0 128c0 17.7 14.3 32 32 32l128 0 0 38.6C310.1 219.5 256 287.4 256 368c0 59.1 29.1 111.3 73.7 143.3c-3.2 .5-6.4 .7-9.7 .7L64 512c-35.3 0-64-28.7-64-64L0 64zm384 64l-128 0L256 0 384 128zm48 96a144 144 0 1 1 0 288 144 144 0 1 1 0-288zm16 80c0-8.8-7.2-16-16-16s-16 7.2-16 16l0 48-48 0c-8.8 0-16 7.2-16 16s7.2 16 16 16l48 0 0 48c0 8.8 7.2 16 16 16s16-7.2 16-16l0-48 48 0c8.8 0 16-7.2 16-16s-7.2-16-16-16l-48 0 0-48z" />
                             </svg>
                             <p class="text-gray-500">
-                                Trascina qui
+                                Trascina qui  il file di gruppo compilato
                             </p>
                             <p class="mb-6 text-gray-500">
-                                il file di gruppo compilato
-                            </p>
-                            <p class="text-sm text-gray-400">
-                                il file deve essere compatibile con lo standard
-                                <a href="https://it.wikipedia.org/wiki/YAML" target="_blank"
-                                    class="text-blue-700">YAML</a>
+                               oppure <kbd class="px-2 py-1.5 text-xs font-semibold text-gray-800 bg-gray-300 border border-gray-200 rounded-lg">Alt</kbd> + <kbd class="px-2 py-1.5 text-xs font-semibold text-gray-800 bg-gray-300 border border-gray-200 rounded-lg">Mouse click</kbd> per selezionare il file
                             </p>
                         </div>
 
-                        <div class="h-full flex flex-col" x-bind="dropzone">
-                            <p class="mb-6 text-sm">
+                        <div class="h-full flex flex-col" x-bind="dropzone" x-show="$store.abgrid.reportDataFilename" x-cloak>
+                            <p class="mb-3 text-sm">
                                 Il file &rarr; <span x-text="$store.abgrid.reportDataFilename" class="italic"></span> è
                                 stato correttamente caricato. Puoi modificarlo in linea, ma ricorda di
                                 rispettare i requisiti dello standard <a href="https://it.wikipedia.org/wiki/YAML"
                                     target="_blank" class="font-semibold text-blue-700">YAML</a>. Puoi cambiare file,
-                                trascinandone uno nuovo in questa finestra oppure premendo la combinazione di tasti
-                                &lang;ALT&rang; + mouse click.
+                                trascinandone uno nuovo in questa finestra oppure premendo la seguente combinazione di tasti:
                             </p>
+                            <p class="mb-6"><kbd class="px-2 py-1.5 text-xs font-semibold text-gray-800 bg-gray-300 border border-gray-200 rounded-lg">Alt</kbd> + <kbd class="px-2 py-1.5 text-xs font-semibold text-gray-800 bg-gray-300 border border-gray-200 rounded-lg">Mouse click</kbd></p>
                             <textarea x-ref="YAMLtextArea" x-show="$store.abgrid.reportDataFilename"
                                 x-text="$store.abgrid.reportDataYAML"
                                 class="w-full h-full overflow-y-scroll p-5 text-sm font-mono text-white bg-blue-700 rounded-md ring-0 outline-0"
