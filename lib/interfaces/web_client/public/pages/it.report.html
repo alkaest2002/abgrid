@@ -48,7 +48,7 @@
                             <div class="w-full p-6">
                                 <p class="font-semibold mb-1">1. Informazioni sul progetto</p>
                                 <p class="mb-3 text-gray-500 text-xs">Puoi modificare la colonna dei valori di questa tabella, facendo click sulla cella interessata. Le chiavi possono essere modificate solo sul file originale che hai caricato nella schermata precedente.</p>
-                                <table class="w-full table-fixed text-sm text-left border-y-1 border-gray-400">
+                                <table class="w-full table-fixed text-sm text-left border-y-1 border-gray-400 serif">
                                     <tr>
                                         <th class="w-30 font-bold p-3 bg-amber-100">Chiave</th>
                                         <th class="font-bold p-3 bg-amber-100">Valore</th>
@@ -58,10 +58,10 @@
                                             x-bind="reportProjectFieldFactory(key)"
                                             class="odd:bg-white even:bg-gray-50 border-b border-dashed border-gray-400"
                                         >
-                                            <td x-bind="reportProjectFieldIdFactory(key)" class="font-bold p-2"></td>
+                                            <td x-bind="reportProjectFieldIdFactory(key)" class="font-bold p-2 font-serif"></td>
                                             <td class="p-2">
-                                                <span x-bind="reportProjectFieldSpanFactory(key,value)" class="pl-1"></span>
-                                                <input x-bind="reportProjectFieldInputFactory(key,value)" class="pl-1 w-full">
+                                                <span x-bind="reportProjectFieldSpanFactory(key,value)" class="pl-1  font-serif"></span>
+                                                <input x-bind="reportProjectFieldInputFactory(key,value)" class="pl-1 w-full font-serif">
                                             </td>
                                         </tr>
                                     </template>
@@ -76,10 +76,10 @@
                                     <template x-for="(choice, index) in $store.abgrid.reportData.choices_a">
                                         <tr x-bind="reportChoiceFactory(choice)"
                                             class="odd:bg-white even:bg-gray-50 border-b border-dashed border-gray-400">
-                                            <td x-bind="reportChoiceIdFactory(choice)" class="font-bold p-2"></td>
+                                            <td x-bind="reportChoiceIdFactory(choice)" class="font-bold p-2 font-serif"></td>
                                             <td class="p-2">
-                                                <span x-bind="reportChoiceSpanFactory(choice)" class="pl-1"></span>
-                                                <input x-bind="reportChoiceInputFactory(choice, 'choices_a', index)" class="pl-1 w-full">
+                                                <span x-bind="reportChoiceSpanFactory(choice)" class="pl-1 font-serif"></span>
+                                                <input x-bind="reportChoiceInputFactory(choice, 'choices_a', index)" class="pl-1 w-full font-serif">
                                             </td>
                                         </tr>
                                     </template>
@@ -94,10 +94,10 @@
                                     <template x-for="(choice, index) in $store.abgrid.reportData.choices_b">
                                         <tr x-bind="reportChoiceFactory(choice)"
                                             class="odd:bg-white even:bg-gray-50 border-b border-dashed border-gray-400">
-                                            <td x-bind="reportChoiceIdFactory(choice)" class="font-bold p-2"></td>
+                                            <td x-bind="reportChoiceIdFactory(choice)" class="font-bold p-2  font-serif"></td>
                                             <td class="p-2">
                                                 <span x-bind="reportChoiceSpanFactory(choice)" class="pl-1"></span>
-                                                <input x-bind="reportChoiceInputFactory(choice, 'choices_b', index)" class="pl-1 w-full">
+                                                <input x-bind="reportChoiceInputFactory(choice, 'choices_b', index)" class="pl-1 w-full  font-serif">
                                             </td>
                                         </tr>
                                     </template>
