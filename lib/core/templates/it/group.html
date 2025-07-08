@@ -1,22 +1,36 @@
-# Informazioni a carattere generale
-project_title: "{{ project_title }}"
-question_a: "{{ question_a }}"
-question_b: "{{ question_b }}"
+#########################################
+# AVVERTENZE
+# Non cambiare le chiavi (ad esempio
+# project_title, question_a, ecc.)
+#########################################
 
+#########################################
+# Informazioni del progetto
+#########################################
+project_title: {{ project_title }}
+question_a: {{ question_a }}
+question_b: {{ question_b }}
+
+#########################################
 # Identificativo numerico del gruppo
+#########################################
 group: {{ group }}
 
-# Indica le scelte di ogni partecipante del gruppo
-# rispettando gli spazi e i trattini
-# es. - A: B,C
+#########################################
+# Indica le scelte di ogni partecipante
+# rispettando questo formato
+# es. - A: C,E
+#########################################
 choices_a:
 {%- for m in members %}
   - {{ m }}: 
 {%- endfor %}
 
+#########################################
 # Indica le scelte di ogni partecipante
-# rispettando gli spazi e i trattini
+# rispettando questo formato
 # es. - A: B,C
+#########################################
 choices_b:
 {%- for m in members %}
   - {{ m }}: 

@@ -1,22 +1,36 @@
-# General information
-project_title: "{{ project_title }}"
-question_a: "{{ question_a }}"
-question_b: "{{ question_b }}"
+#########################################
+# WARNINGS
+# Do not change the keys (for example,
+# project_title, question_a, etc.)
+#########################################
 
+#########################################
+# Project information
+#########################################
+project_title: {{ project_title }}
+question_a: {{ question_a }}
+question_b: {{ question_b }}
+
+#########################################
 # Group ID
+#########################################
 group: {{ group }}
 
-# Add a choices of each participant
+#########################################
+# Add type A choices of each participant
 # strictly following this format
-# es. - A: B,C
+# es. - A: C,E
+#########################################
 choices_a:
 {%- for m in members %}
   - {{ m }}: 
 {%- endfor %}
 
-# add b choices of each participant
+#########################################
+# add type B choices of each participant
 # strictly following this format
-# es. - A: B,C
+# es. - A: B,D,F
+#########################################
 choices_b:
 {%- for m in members %}
   - {{ m }}: 
