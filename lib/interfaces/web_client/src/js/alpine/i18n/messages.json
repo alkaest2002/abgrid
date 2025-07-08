@@ -2,8 +2,7 @@
     "it": {
         "app_is_online": "connessione internet ripristinata",
         "app_is_offline": "attenzione: connessione internet assente",
-        "session_was_correctly_initialized": "il server AB-Grid è operativo",
-        "groupData": {
+        "fields": {
             "project_title": "titolo progetto",
             "question_a": "domanda A",
             "question_b": "domanda B",
@@ -33,10 +32,9 @@
             "values_contain_invalid_keys": "i valori contengono chiavi non valide",
             "yaml_invalid": "il file yaml non è corretto"
         },
-        "ops": {
-            "successful_operation": "l'operazione si è conclusa con successo",
-            "generateGroup": "generazione del file di gruppo",
-            "generateReport": "generazione del report"
+        "success": {
+            "session_was_correctly_initialized": "il server AB-Grid è operativo",
+            "successful_operation": "l'operazione si è conclusa con successo"
         }
     }
 }
