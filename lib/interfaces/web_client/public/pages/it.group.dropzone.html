@@ -11,7 +11,7 @@
 <body class="h-screen overflow-hidden max-w-4xl mx-auto pb-6"
     x-data="{ ...componentToast(), ...componentOnline(), ...componentNavigation(), ...componentApi() }"
     x-init="() => { initToast(); initOnline(); initNavigation(); initApi() }">
-    
+
     <!-- Toast -->
     <template x-teleport="body">
         <div x-bind="toastContainer"
@@ -24,9 +24,10 @@
             </div>
         </div>
     </template>
-    
+
     <div class="h-full" data-taxi>
         <div class="h-full flex flex-col" data-taxi-view x-load="visible" x-data="viewGroupDropzone">
+            
             <!-- Top area - fixed height -->
             <header class="h-24 flex items-center justify-start p-9">
                 <div class="w-full">
@@ -40,12 +41,18 @@
             </header>
 
             <!-- Center area - takes available space with rounded border -->
-            <main id="main" class="flex-1 overflow-y-auto px-6 relative cursor-pointer" x-bind="dropzone">
+            <main id="main" class="flex-1 px-6 relative">
                 <div class="h-full">
-                    <div class="h-full rounded-lg p-6 bg-gray-100">
+                    <div class="h-full rounded-lg p-9 bg-gray-100 relative">
                         <!-- Main content goes here -->
-                        <div class="h-full flex flex-col justify-center items-center text-center" x-show="!$store.abgrid.reportDataFilename">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-12 fill-gray-500 mb-3" viewBox="0 0 576 512"><!--!Font Awesome Free 6.7.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2025 Fonticons, Inc.--><path d="M0 64C0 28.7 28.7 0 64 0L224 0l0 128c0 17.7 14.3 32 32 32l128 0 0 38.6C310.1 219.5 256 287.4 256 368c0 59.1 29.1 111.3 73.7 143.3c-3.2 .5-6.4 .7-9.7 .7L64 512c-35.3 0-64-28.7-64-64L0 64zm384 64l-128 0L256 0 384 128zm48 96a144 144 0 1 1 0 288 144 144 0 1 1 0-288zm16 80c0-8.8-7.2-16-16-16s-16 7.2-16 16l0 48-48 0c-8.8 0-16 7.2-16 16s7.2 16 16 16l48 0 0 48c0 8.8 7.2 16 16 16s16-7.2 16-16l0-48 48 0c8.8 0 16-7.2 16-16s-7.2-16-16-16l-48 0 0-48z"/></svg>
+                        <div class="h-full flex flex-col justify-center items-center text-center"
+                            x-show="!$store.abgrid.reportDataFilename" x-bind="dropzone" x-cloak
+                        >
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-12 fill-gray-500 mb-3"
+                                viewBox="0 0 576 512"><!--!Font Awesome Free 6.7.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2025 Fonticons, Inc.-->
+                                <path
+                                    d="M0 64C0 28.7 28.7 0 64 0L224 0l0 128c0 17.7 14.3 32 32 32l128 0 0 38.6C310.1 219.5 256 287.4 256 368c0 59.1 29.1 111.3 73.7 143.3c-3.2 .5-6.4 .7-9.7 .7L64 512c-35.3 0-64-28.7-64-64L0 64zm384 64l-128 0L256 0 384 128zm48 96a144 144 0 1 1 0 288 144 144 0 1 1 0-288zm16 80c0-8.8-7.2-16-16-16s-16 7.2-16 16l0 48-48 0c-8.8 0-16 7.2-16 16s7.2 16 16 16l48 0 0 48c0 8.8 7.2 16 16 16s16-7.2 16-16l0-48 48 0c8.8 0 16-7.2 16-16s-7.2-16-16-16l-48 0 0-48z" />
+                            </svg>
                             <p class="text-gray-500">
                                 Trascina qui
                             </p>
@@ -54,23 +61,30 @@
                             </p>
                             <p class="text-gray-400 text-sm">
                                 il file deve essere compatibile con lo standard
-                                <a href="https://it.wikipedia.org/wiki/YAML" target="_blank" class="text-blue-700">YAML</a>
+                                <a href="https://it.wikipedia.org/wiki/YAML" target="_blank"
+                                    class="text-blue-700">YAML</a>
                             </p>
                         </div>
-                        <div class="h-full flex flex-col justify-center items-center text-center" x-show="$store.abgrid.reportDataFilename">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-12 fill-gray-500 mb-3" viewBox="0 0 576 512"><!--!Font Awesome Free 6.7.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2025 Fonticons, Inc.--><path d="M0 64C0 28.7 28.7 0 64 0L224 0l0 128c0 17.7 14.3 32 32 32l128 0 0 38.6C310.1 219.5 256 287.4 256 368c0 59.1 29.1 111.3 73.7 143.3c-3.2 .5-6.4 .7-9.7 .7L64 512c-35.3 0-64-28.7-64-64L0 64zm384 64l-128 0L256 0 384 128zM288 368a144 144 0 1 1 288 0 144 144 0 1 1 -288 0zm211.3-43.3c-6.2-6.2-16.4-6.2-22.6 0L416 385.4l-28.7-28.7c-6.2-6.2-16.4-6.2-22.6 0s-6.2 16.4 0 22.6l40 40c6.2 6.2 16.4 6.2 22.6 0l72-72c6.2-6.2 6.2-16.4 0-22.6z"/></svg>
-                               File correttamente caricato
+
+                        <div class="h-full flex flex-col" x-bind="dropzone">
+                            <p class="text-gray-500 text-sm mb-6">
+                                Il file &rarr; <span x-text="$store.abgrid.reportDataFilename" class="italic"></span> è stato correttamente caricato. Puoi modificarlo in linea, ma ricorda di
+                                rispettare i requisiti dello standard <a href="https://it.wikipedia.org/wiki/YAML"
+                                    target="_blank" class="text-blue-700">YAML</a>. Puoi cambiare file, trascinandone uno nuovo in questa finestra oppure premendo la combinazione di tasti &lang;ALT&rang; + mouse click. 
                             </p>
-                            <p class="font-semibold text-gray-500 mb-6" x-text="$store.abgrid.reportDataFilename">
-                            </p>
-                            <p class="text-gray-400 text-sm">
-                                puoi sempre cambiare file trascinandone un altro allo stesso modo
-                            </p>
+                            <textarea
+                                x-ref="YAMLtextArea"
+                                x-show="$store.abgrid.reportDataFilename" x-text="$store.abgrid.reportDataYAML"
+                                class="w-full h-full overflow-y-scroll text-sm font-mono p-5 ring-0 outline-0 bg-violet-950 text-white rounded-lg"
+                                spellcheck="false"
+                                x-cloak
+                            >
+                            </textarea>
                         </div>
                     </div>
                 </div>
             </main>
-            
+
             <!-- Bottom area - fixed height -->
             <footer class="h-10 flex justify-center items-center">
                 <div class="p-3 rounded-full relative top-[-50%] bg-gray-100">
