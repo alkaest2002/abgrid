@@ -11,7 +11,7 @@
 <body class="h-screen overflow-hidden max-w-4xl mx-auto pb-6"
     x-data="{ ...componentToast(), ...componentOnline(), ...componentNavigation(), ...componentApi() }"
     x-init="() => { initToast(); initOnline(); initNavigation(); initApi() }">
-    
+
     <!-- Toast -->
     <template x-teleport="body">
         <div x-bind="toastContainer"
@@ -24,9 +24,9 @@
             </div>
         </div>
     </template>
-    
+
     <div class="h-full" data-taxi>
-        <div class="h-full flex flex-col" x-load="visible" x-data="viewReport" data-taxi-view >
+        <div class="h-full flex flex-col" x-load="visible" x-data="viewReport" data-taxi-view>
             <!-- Top area - fixed height -->
             <header class="h-24 flex items-center justify-start p-9">
                 <div class="w-full">
@@ -45,20 +45,62 @@
                     <div class="h-full rounded-lg p-6 bg-gray-100">
                         <!-- Main content goes here -->
                         <div class="h-full flex flex-col justify-start items-center overflow-y-scroll">
-                            <table>
-                                <template x-for="choice_a in $store.abgrid.reportData.choices_a">
+                            <div class="w-full">
+                                <p class="font-semibold">1. Informazioni sul progetto</p>
+                                <p class="mb-3 text-gray-500 text-xs">Puoi modificare la colonna dei valori di questa tabella, facendo click sulla cella interessata. Le chiavi possono essere modificate solo sul file originale che hai caricato nella schermata precedente.</p>
+                                <table class="w-full table-fixed text-sm text-left border-y-1 border-gray-400">
                                     <tr>
-                                        <td x-text="Object.keys(choice_a)[0]"></td>
-                                        <td x-text="Object.values(choice_a)[0]"></td>
+                                        <th class="w-30 font-bold p-3 bg-amber-100">Chiave</th>
+                                        <th class="font-bold p-3 bg-amber-100">Valore</th>
                                     </tr>
-                                </template>
-                                <template x-for="choice_b in $store.abgrid.reportData.choices_b">
+                                    <template x-for="(value, key) in $store.abgrid.projectFieldsInReportData">
+                                        <tr 
+                                            class="odd:bg-white even:bg-gray-50 border-b border-dashed border-gray-400">
+                                            <td x-text="$t('groupData.' +key)" class="font-bold p-2"></td>
+                                            <td class="p-2">
+                                                <span x-text="value" class="pl-1"></span>
+                                            </td>
+                                        </tr>
+                                    </template>
+                                </table>
+                                <p class="font-semibold mt-6">2. Scelte A</p>
+                                <p class="mb-3 text-gray-500 text-xs">Puoi modificare la colonna dei valori di questa tabella, facendo click sulla cella interessata. Le chiavi possono essere modificate solo sul file originale che hai caricato nella schermata precedente.</p>
+                                <table class="w-full table-fixed text-sm text-left border-y-1 border-gray-400">
                                     <tr>
-                                        <td x-text="Object.keys(choice_b)[0]"></td>
-                                        <td x-text="Object.values(choice_b)[0]""></td>
+                                        <th class="w-20 font-bold p-3 bg-amber-100">Chiave</th>
+                                        <th class="font-bold p-3 bg-amber-100">Valore</th>
                                     </tr>
-                                </template>
-                            </table>
+                                    <template x-for="(choice, index) in $store.abgrid.reportData.choices_a">
+                                        <tr x-bind="reportChoiceFactory(choice)"
+                                            class="odd:bg-white even:bg-gray-50 border-b border-dashed border-gray-400">
+                                            <td x-bind="reportChoiceIdFactory(choice)" class="font-bold p-2"></td>
+                                            <td class="p-2">
+                                                <span x-bind="reportChoiceSpanFactory(choice)" class="pl-1"></span>
+                                                <input x-bind="reportChoiceInputFactory(choice, 'choices_a', index)" class="pl-1">
+                                            </td>
+                                        </tr>
+                                    </template>
+                                </table>
+                                <p class="font-semibold mt-6">3. Scelte B</p>
+                                <p class="mb-3 text-gray-500 text-xs">Puoi modificare la colonna dei valori di questa tabella, facendo click sulla cella interessata. Le chiavi possono essere modificate solo sul file originale che hai caricato nella schermata precedente.</p>
+                                <table class="w-full table-fixed text-sm text-left border-y-1 border-gray-400">
+                                    <tr>
+                                        <th class="w-20 font-bold p-3 bg-amber-100">Chiave</th>
+                                        <th class="font-bold p-3 bg-amber-100">Valore</th>
+                                    </tr>
+                                    <template x-for="(choice, index) in $store.abgrid.reportData.choices_b">
+                                        <tr x-bind="reportChoiceFactory(choice)"
+                                            class="odd:bg-white even:bg-gray-50 border-b border-dashed border-gray-400">
+                                            <td x-bind="reportChoiceIdFactory(choice)" class="font-bold p-2"></td>
+                                            <td class="p-2">
+                                                <span x-bind="reportChoiceSpanFactory(choice)" class="pl-1"></span>
+                                                <input x-bind="reportChoiceInputFactory(choice, 'choices_b', index)" class="pl-1">
+                                            </td>
+                                        </tr>
+                                    </template>
+                                </table>
+                            </div>
+
                         </div>
                     </div>
                 </div>
