@@ -67,19 +67,23 @@
                         </div>
 
                         <div class="h-full flex flex-col" x-bind="dropzone">
-                            <p class="text-gray-500 text-sm mb-6">
+                            <p class="text-sm mb-6">
                                 Il file &rarr; <span x-text="$store.abgrid.reportDataFilename" class="italic"></span> è stato correttamente caricato. Puoi modificarlo in linea, ma ricorda di
                                 rispettare i requisiti dello standard <a href="https://it.wikipedia.org/wiki/YAML"
-                                    target="_blank" class="text-blue-700">YAML</a>. Puoi cambiare file, trascinandone uno nuovo in questa finestra oppure premendo la combinazione di tasti &lang;ALT&rang; + mouse click. 
+                                    target="_blank" class="text-blue-700 font-semibold">YAML</a>. Puoi cambiare file, trascinandone uno nuovo in questa finestra oppure premendo la combinazione di tasti &lang;ALT&rang; + mouse click. 
                             </p>
                             <textarea
                                 x-ref="YAMLtextArea"
                                 x-show="$store.abgrid.reportDataFilename" x-text="$store.abgrid.reportDataYAML"
-                                class="w-full h-full overflow-y-scroll text-sm font-mono p-5 ring-0 outline-0 bg-violet-950 text-white rounded-lg"
+                                class="w-full h-full overflow-y-scroll text-sm font-mono p-5 ring-0 outline-0 bg-blue-700 text-white rounded-md"
                                 spellcheck="false"
                                 x-cloak
                             >
                             </textarea>
+                            <a :href="downloadHref" class="text-blue-700 text-sm mt-2 ml-2 flex items-center gap-1">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 fill-blue-700" viewBox="0 0 512 512"><!--!Font Awesome Free 6.7.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2025 Fonticons, Inc.--><path d="M256 0a256 256 0 1 0 0 512A256 256 0 1 0 256 0zM244.7 395.3l-112-112c-4.6-4.6-5.9-11.5-3.5-17.4s8.3-9.9 14.8-9.9l64 0 0-96c0-17.7 14.3-32 32-32l32 0c17.7 0 32 14.3 32 32l0 96 64 0c6.5 0 12.3 3.9 14.8 9.9s1.1 12.9-3.5 17.4l-112 112c-6.2 6.2-16.4 6.2-22.6 0z"/></svg>
+                                scarica file
+                            </a>
                         </div>
                     </div>
                 </div>
