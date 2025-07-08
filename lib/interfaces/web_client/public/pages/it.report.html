@@ -40,14 +40,25 @@
             </header>
 
             <!-- Center area - takes available space with rounded border -->
-            <main id="main" class="flex-1 overflow-y-auto px-6 relative">
+            <main id="main" class="flex-1 px-6 relative overflow-y-scroll">
                 <div class="h-full">
                     <div class="h-full rounded-lg p-6 bg-gray-100">
                         <!-- Main content goes here -->
-                        <div class="h-full flex flex-col justify-center items-center">
-                            <p class="text-gray-500">
-                                Main content area
-                            </p>
+                        <div class="h-full flex flex-col justify-start items-center overflow-y-scroll">
+                            <table>
+                                <template x-for="choice_a in $store.abgrid.reportData.choices_a">
+                                    <tr>
+                                        <td x-text="Object.keys(choice_a)[0]"></td>
+                                        <td x-text="Object.values(choice_a)[0]"></td>
+                                    </tr>
+                                </template>
+                                <template x-for="choice_b in $store.abgrid.reportData.choices_b">
+                                    <tr>
+                                        <td x-text="Object.keys(choice_b)[0]"></td>
+                                        <td x-text="Object.values(choice_b)[0]""></td>
+                                    </tr>
+                                </template>
+                            </table>
                         </div>
                     </div>
                 </div>

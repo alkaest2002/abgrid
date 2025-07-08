@@ -30,7 +30,8 @@
             "unknown_issue_occurred": "operazione non riuscita, si è verificato un problema",
             "value_must_contain_only_single_alphabetic_characters": "il valore deve contenere solo singoli caratteri alfabetici",
             "values_contain_duplicates": "i valori contengono duplicati",
-            "values_contain_invalid_keys": "i valori contengono chiavi non valide"
+            "values_contain_invalid_keys": "i valori contengono chiavi non valide",
+            "yaml_invalid": "il file yaml non è corretto"
         },
         "ops": {
             "successful_operation": "l'operazione si è conclusa con successo",
