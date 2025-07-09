@@ -33,7 +33,8 @@
             "yaml_invalid": "il file yaml non è corretto"
         },
         "success": {
-            "session_was_correctly_initialized": "il server AB-Grid è operativo",
+            "session_was_initialized": "il server AB-Grid è operativo",
+            "report_was_generated": "il report è stato generato",
             "successful_operation": "l'operazione si è conclusa con successo"
         }
     }
