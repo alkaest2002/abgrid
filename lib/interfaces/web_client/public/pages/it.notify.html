@@ -28,11 +28,11 @@
     <div class="h-full" data-taxi>
         <div class="h-full flex flex-col" x-data="viewNotify" data-taxi-view>
             <!-- Top area - fixed height -->
-            <header class="h-24 flex items-center justify-start p-9">
+            <header class="h-24 flex items-center justify-start p-9 cursor-pointer" x-data @click="navigationGoTo('/')">
                 <div class="w-full">
-                    <h1 class="text-3xl font-bold">
+                    <p class="text-3xl font-bold">
                         AB-Grid
-                    </h1>
+                    </p>
                     <p class="text-sm text-gray-600">
                         Software per la generazione di report
                     </p>
