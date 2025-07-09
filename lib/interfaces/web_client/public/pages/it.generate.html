@@ -8,7 +8,7 @@
     <title>AB-Grid app</title>
 </head>
 
-<body class="h-screen max-w-4xl mx-auto overflow-hidden pb-6"
+<body class="h-screen min-w-4xl max-w-4xl mx-auto overflow-hidden pb-6"
     x-data="{ ...componentToast(), ...componentOnline(), ...componentNavigation(), ...componentApi() }"
     x-init="() => { initToast(); initOnline(); initNavigation(); initApi() }">
 

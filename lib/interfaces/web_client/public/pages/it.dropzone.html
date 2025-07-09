@@ -8,7 +8,7 @@
     <title>AB-Grid app</title>
 </head>
 
-<body class="h-screen max-w-4xl mx-auto overflow-hidden pb-6"
+<body class="h-screen min-w-4xl max-w-4xl mx-auto overflow-hidden pb-6"
     x-data="{ ...componentToast(), ...componentOnline(), ...componentNavigation(), ...componentApi() }"
     x-init="() => { initToast(); initOnline(); initNavigation(); initApi() }">
 
@@ -69,7 +69,7 @@
                             <p class="mb-1">
                                 <kbd class="px-2 py-1.5 text-xs font-semibold text-gray-800 bg-gray-300 border border-gray-200 rounded-lg">Alt</kbd> + <kbd class="px-2 py-1.5 text-xs font-semibold text-gray-800 bg-gray-300 border border-gray-200 rounded-lg">Mouse click</kbd></p>
                             <p class="flex gap-1 items-center justify-end mb-2 text-sm">
-                                <span x-text="$store.abgrid.reportDataFilename" class="text-gray-500"></span>
+                                <span x-text="$store.abgrid.reportDataFilename" class="w-72 text-right truncate text-gray-500"></span>
                                 <span class="text-gray-500"> | </span> 
                                 <a x-bind="dropzoneDownloadLink"
                                     class="inline-flex items-center gap-1 mr-1 text-sm text-blue-700 cursor-pointer">
