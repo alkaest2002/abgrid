@@ -47,7 +47,13 @@
                         <div class="h-full flex flex-col justify-start items-start p-6">
                             <template x-bind="templateReport">
                                 <div>
-
+                                    <p class="mb-3">Il report è stato generato correttamente. Qui sotto puoi scaricare il report in formato HTML/PDF o in formato JSON (solo dati).</p>
+                                    <div>
+                                        <a x-bind="notifyDownloadLinkFactory('html')" class="text-blue-700 cursor-pointer">&rarr; report versione html/pdf</a>
+                                    </div>
+                                    <div>
+                                        <a x-bind="notifyDownloadLinkFactory('json')" class="text-blue-700 cursor-pointer">&rarr; report versione json</a>
+                                    </div>
                                 </div>
                             </template>
                             <template x-bind="templateAppError">
