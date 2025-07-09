@@ -82,63 +82,85 @@
                                             name="new-group" x-model="generateNewGroupFile" />
                                     </div>
                                     <div class="flex grow flex-col text-sm">
-                                        <label id="new-group-label" class="font-medium text-gray-900">nuovo file di
-                                            gruppo</label>
+                                        <label 
+                                            id="new-group-label"
+                                            class="font-medium text-gray-900"
+                                        >
+                                            nuovo file di gruppo
+                                        </label>
                                     </div>
                                 </div>
-                                <div class="relative p-3 rounded-2xl">
-                                    <div class="absolute inset-0 opacity-75 bg-gray-50 rounded-xl"
-                                        x-show="!generateNewGroupFile" x-transition:leave="transition ease-out duration-200"
-                                        x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0"></div>
+                                <div class="relative rounded-2xl">
                                     <div class="mb-4">
-                                        <label for="project_title"
-                                            class="block text-sm font-semibold text-left text-gray-700">Titolo del
-                                            progetto</label>
-                                        <input type="text" id="project_title" name="project_title"
-                                            x-model="$store.abgrid.groupData.project_title"
+                                        <label 
+                                            for="project_title"
+                                            class="block text-sm font-medium text-gray-900"
+                                            x-bind="generateFieldLabel"
+                                        >Titolo del progetto</label>
+                                        <input 
+                                            type="text" 
+                                            id="project_title" 
+                                            name="project_title"
+                                            x-bind="generateStringInputFactory('$store.abgrid.groupData.project_title')"
                                             placeholder="es. raccolta dati 2025"
-                                            class="mt-1 block w-full px-3 py-2 bg-white rounded-md text-sm placeholder:text-sm shadow-sm focus:outline-none"
+                                            class="mt-2 block w-full p-3 bg-white rounded-md text-sm placeholder:text-sm shadow-sm focus:outline-none"
                                             required>
                                     </div>
                                     <div class="mb-4">
-                                        <label for="question_a"
-                                            class="block text-sm font-semibold text-left text-gray-700">Domanda
-                                            A</label>
-                                        <input type="text" id="question_a" x-model="$store.abgrid.groupData.question_a"
+                                        <label 
+                                            for="question_a"
+                                            class="block text-sm font-medium text-gray-900"
+                                            x-bind="generateFieldLabel">Domanda A</label>
+                                        <input 
+                                            type="text" 
+                                            id="question_a" 
+                                            x-bind="generateStringInputFactory('$store.abgrid.groupData.question_a')"
                                             name="question_a"
                                             placeholder="es. chi vorresti nel tuo gruppo di lavoro ideale?"
-                                            class="mt-1 block w-full px-3 py-2 bg-white rounded-md text-sm placeholder:text-sm shadow-sm focus:outline-none"
+                                            class="mt-2 block w-full p-3 bg-white rounded-md text-sm placeholder:text-sm shadow-sm focus:outline-none"
                                             required>
                                     </div>
                                     <div class="mb-4">
-                                        <label for="question_b"
-                                            class="block text-sm font-semibold text-left text-gray-700">Domanda
-                                            B</label>
-                                        <input type="text" id="question_b" x-model="$store.abgrid.groupData.question_b"
+                                        <label
+                                            for="question_b"
+                                            class="block text-sm font-medium text-gray-900"
+                                            x-bind="generateFieldLabel">Domanda B</label>
+                                        <input 
+                                            type="text" 
+                                            id="question_b" 
+                                            x-bind="generateStringInputFactory('$store.abgrid.groupData.question_b')"
                                             name="question_b"
                                             placeholder="es. chi non vorresti nel tuo gruppo di lavoro ideale?"
-                                            class="mt-1 block w-full px-3 py-2 bg-white rounded-md text-sm placeholder:text-sm shadow-sm focus:outline-none"
+                                            class="mt-2 block w-full p-3 bg-white rounded-md text-sm placeholder:text-sm shadow-sm focus:outline-none"
                                             required>
                                     </div>
                                     <div class="grid grid-cols-2 gap-2">
                                         <div>
-                                            <label for="group"
-                                                class="block text-sm font-semibold text-left text-gray-700">Identificativo
-                                                gruppo</label>
-                                            <input type="number" id="groupp"
-                                                x-model.number="$store.abgrid.groupData.group" name="group"
+                                            <label 
+                                                for="group"
+                                                class="block text-sm font-medium text-gray-900"
+                                                x-bind="generateFieldLabel">Identificativo gruppo</label>
+                                            <input 
+                                                type="number" 
+                                                id="groupp"
+                                                x-bind="generateNumberInputFactory('$store.abgrid.groupData.group')"
+                                                name="group"
                                                 placeholder="es. 1"
-                                                class="mt-1 block w-full px-3 py-2 bg-white rounded-md text-sm placeholder:text-sm shadow-sm focus:outline-none"
+                                                class="mt-2 block w-full p-3 bg-white rounded-md text-sm placeholder:text-sm shadow-sm focus:outline-none"
                                                 required>
                                         </div>
                                         <div>
-                                            <label for="members"
-                                                class="block text-sm font-semibold text-left text-gray-700">Numero di
-                                                membri</label>
-                                            <input type="number" id="members"
-                                                x-model.number="$store.abgrid.groupData.members" name="members"
+                                            <label 
+                                                for="members"
+                                                class="block text-sm font-medium text-gray-900"
+                                                x-bind="generateFieldLabel">Numero di membri</label>
+                                            <input 
+                                                type="number" 
+                                                id="members"
+                                                x-bind="generateNumberInputFactory('$store.abgrid.groupData.members')"
+                                                name="members"
                                                 placeholder="es. 8"
-                                                class="mt-1 block w-full px-3 py-2 bg-white rounded-md text-sm placeholder:text-sm shadow-sm focus:outline-none"
+                                                class="mt-2 block w-full p-3 bg-white rounded-md text-sm placeholder:text-sm  text-gray-700 shadow-sm focus:outline-none"
                                                 required>
                                         </div>
                                     </div>
