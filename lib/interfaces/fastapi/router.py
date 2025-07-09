@@ -82,7 +82,6 @@ def get_router() -> APIRouter:
         request: Request,
         model: ABGridReportSchema, 
         language: str = Query(..., description="Language of the report"),
-        type_of_report: Literal['html', 'json'] = Query(..., description="The type of report desired"),
         with_sociogram: bool = Query(..., description="Include sociogram"),
         user_data: Dict[str, Any] = Depends(auth.verify_token)
     ) -> JSONResponse:
@@ -93,46 +92,24 @@ def get_router() -> APIRouter:
             # Get report data
             report_data = abgrid_data.get_report_data(model, with_sociogram)
 
-            if type_of_report == "html":
-                return _generate_html_report(language, report_data)
-            elif type_of_report == "json":
-                return _generate_json_report(report_data)
+            # Render report
+            template_path = f"./{language}/report.html"
+            rendered_report = abgrid_renderer.render_html(template_path, report_data)
+
+            return JSONResponse(
+                status_code=status.HTTP_200_OK,
+                content={
+                    "detail": {
+                        "report_html": rendered_report,
+                        "report_json": to_json(report_data)
+                    }
+                }
+            )
 
         except Exception as e:
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
                 detail=str(e)
             )
-
-    def _generate_html_report(language: str, report_data: Dict[str, Any]) -> JSONResponse:
-        """
-        Generate a JSON response wrapping an HTML report.
-        """
-        template_path = f"./{language}/report.html"
-        rendered_report = abgrid_renderer.render_html(template_path, report_data)
-        return JSONResponse(
-            status_code=status.HTTP_200_OK,
-            content={
-                "detail": {
-                    "report": rendered_report,
-                    "report_type": "html"
-                }
-            }
-        )
-
-    def _generate_json_report(report_data: Dict[str, Any]) -> JSONResponse:
-        """
-        Generate a JSON report.
-        """
-        json_serializable_data = to_json(report_data)
-        return JSONResponse(
-            status_code=status.HTTP_200_OK,
-            content={
-                "detail": {
-                    "report": json_serializable_data,
-                    "report_type": "json"
-                }
-            }
-        )
 
     return router
