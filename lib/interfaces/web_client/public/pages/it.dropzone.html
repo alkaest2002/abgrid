@@ -45,67 +45,91 @@
                 <div class="h-full">
                     <div class="h-full relative p-9 bg-gray-100 rounded-lg">
                         <!-- Main content goes here -->
-                        <div class="h-full flex flex-col justify-center items-center text-center"
-                            x-show="!$store.abgrid.reportDataFilename" x-bind="dropzone" x-cloak>
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-12 mb-4 fill-gray-500"
-                                viewBox="0 0 576 512"><!--!Font Awesome Free 6.7.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2025 Fonticons, Inc.-->
-                                <path
-                                    d="M0 64C0 28.7 28.7 0 64 0L224 0l0 128c0 17.7 14.3 32 32 32l128 0 0 38.6C310.1 219.5 256 287.4 256 368c0 59.1 29.1 111.3 73.7 143.3c-3.2 .5-6.4 .7-9.7 .7L64 512c-35.3 0-64-28.7-64-64L0 64zm384 64l-128 0L256 0 384 128zm48 96a144 144 0 1 1 0 288 144 144 0 1 1 0-288zm16 80c0-8.8-7.2-16-16-16s-16 7.2-16 16l0 48-48 0c-8.8 0-16 7.2-16 16s7.2 16 16 16l48 0 0 48c0 8.8 7.2 16 16 16s16-7.2 16-16l0-48 48 0c8.8 0 16-7.2 16-16s-7.2-16-16-16l-48 0 0-48z" />
-                            </svg>
-                            <p class="text-gray-500">
-                                Trascina qui  il file di gruppo compilato
-                            </p>
-                            <p class="mb-6 text-gray-500">
-                               oppure <kbd class="px-2 py-1.5 text-xs font-semibold text-gray-800 bg-gray-300 border border-gray-200 rounded-lg">Alt</kbd> + <kbd class="px-2 py-1.5 text-xs font-semibold text-gray-800 bg-gray-300 border border-gray-200 rounded-lg">Mouse click</kbd> per selezionare il file
-                            </p>
-                        </div>
-
-                        <div class="h-full flex flex-col" x-bind="dropzone" x-show="$store.abgrid.reportDataFilename" x-cloak>
-                            <p class="mb-4 text-sm">
-                                Puoi modificare il file direttamente qui o scaricarlo e modificarlo con qualunque editor di testi per poi ricaricarlo. Ricorda di rispettare i requisiti dello standard <a href="https://it.wikipedia.org/wiki/YAML"
-                                    target="_blank" class="font-semibold text-blue-700">YAML</a>. Puoi cambiare file,
-                                trascinandone uno nuovo in questa finestra oppure premendo la seguente combinazione di tasti:
-                            </p>
-                            <p class="mb-1">
-                                <kbd class="px-2 py-1.5 text-xs font-semibold text-gray-800 bg-gray-300 border border-gray-200 rounded-lg">Alt</kbd> + <kbd class="px-2 py-1.5 text-xs font-semibold text-gray-800 bg-gray-300 border border-gray-200 rounded-lg">Mouse click</kbd></p>
-                            <div class="flex gap-1 items-center justify-end mb-2 text-sm">
-                                <div class="flex items-center">
-                                    <input type="checkbox" x-model="dropzoneWithSociogram" class="w-4 h-4 text-blue-700 bg-gray-100 border-gray-300 rounded-sm focus:ring-blue-500">
-                                    <label for="default-checkbox" class="ms-2 text-sm font-medium text-gray-700">sociogramma</label>
-                                </div>
-                                <div>
-                                    <span class="text-gray-500"> | </span> 
-                                    <a x-bind="dropzoneDownloadLink"
-                                        class="inline-flex items-center gap-1 mr-1 text-sm text-blue-700 cursor-pointer">
-                                        scarica
-                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 fill-blue-700" viewBox="0 0 448 512"><!--!Font Awesome Free 6.7.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2025 Fonticons, Inc.--><path d="M64 32C28.7 32 0 60.7 0 96L0 416c0 35.3 28.7 64 64 64l320 0c35.3 0 64-28.7 64-64l0-242.7c0-17-6.7-33.3-18.7-45.3L352 50.7C340 38.7 323.7 32 306.7 32L64 32zm0 96c0-17.7 14.3-32 32-32l192 0c17.7 0 32 14.3 32 32l0 64c0 17.7-14.3 32-32 32L96 224c-17.7 0-32-14.3-32-32l0-64zM224 288a64 64 0 1 1 0 128 64 64 0 1 1 0-128z"/></svg>
-                                    </a>
-                                    <span class="text-gray-500"> | </span> 
-                                    <a  x-bind="dropzoneResetLink"
-                                        class="inline-flex items-center gap-1 mr-1 text-sm text-blue-700 cursor-pointer">
-                                        elimina
-                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 fill-blue-700" viewBox="0 0 448 512"><!--!Font Awesome Free 6.7.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2025 Fonticons, Inc.--><path d="M135.2 17.7L128 32 32 32C14.3 32 0 46.3 0 64S14.3 96 32 96l384 0c17.7 0 32-14.3 32-32s-14.3-32-32-32l-96 0-7.2-14.3C307.4 6.8 296.3 0 284.2 0L163.8 0c-12.1 0-23.2 6.8-28.6 17.7zM416 128L32 128 53.2 467c1.6 25.3 22.6 45 47.9 45l245.8 0c25.3 0 46.3-19.7 47.9-45L416 128z"/></svg>
-                                    </a>
-                                </div>
+                        <template x-if="!$store.abgrid.reportDataFilename">
+                            <div class="h-full flex flex-col justify-center items-center text-center" x-bind="dropzone"
+                                x-cloak>
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-12 mb-4 fill-gray-500"
+                                    viewBox="0 0 576 512"><!--!Font Awesome Free 6.7.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2025 Fonticons, Inc.-->
+                                    <path
+                                        d="M0 64C0 28.7 28.7 0 64 0L224 0l0 128c0 17.7 14.3 32 32 32l128 0 0 38.6C310.1 219.5 256 287.4 256 368c0 59.1 29.1 111.3 73.7 143.3c-3.2 .5-6.4 .7-9.7 .7L64 512c-35.3 0-64-28.7-64-64L0 64zm384 64l-128 0L256 0 384 128zm48 96a144 144 0 1 1 0 288 144 144 0 1 1 0-288zm16 80c0-8.8-7.2-16-16-16s-16 7.2-16 16l0 48-48 0c-8.8 0-16 7.2-16 16s7.2 16 16 16l48 0 0 48c0 8.8 7.2 16 16 16s16-7.2 16-16l0-48 48 0c8.8 0 16-7.2 16-16s-7.2-16-16-16l-48 0 0-48z" />
+                                </svg>
+                                <p class="text-gray-500">
+                                    Trascina qui il file di gruppo compilato
+                                </p>
+                                <p class="mb-6 text-gray-500">
+                                    oppure <kbd
+                                        class="px-2 py-1.5 text-xs font-semibold text-gray-800 bg-gray-300 border border-gray-200 rounded-lg">Alt</kbd>
+                                    + <kbd
+                                        class="px-2 py-1.5 text-xs font-semibold text-gray-800 bg-gray-300 border border-gray-200 rounded-lg">Mouse
+                                        click</kbd> per selezionare il file
+                                </p>
                             </div>
-                            <div 
-                                class="relative w-full h-full bg-slate-800 rounded-md shadow-sm overflow-hidden" 
-                                x-data="componentTextArea($store.abgrid.reportDataYAML)">
-                                <div class="absolute left-0 top-0 h-full w-14 py-2 text-sm font-mono bg-slate-700 text-amber-50 select-none pointer-events-none overflow-hidden"
-                                    x-bind="textareaLineNumbers">
-                                    <template x-for="line in textareaLines" :key="line">
-                                        <div class="h-6 flex items-center justify-end pr-3 text-sm font-mono leading-6" x-text="line"></div>
-                                    </template>
+                        </template>
+                        <template x-if="$store.abgrid.reportDataFilename">
+                            <div class="h-full flex flex-col" x-bind="dropzone" x-cloak>
+                                <p class="mb-4 text-sm">
+                                    Puoi modificare il file direttamente qui o scaricarlo e modificarlo con qualunque
+                                    editor di testi per poi ricaricarlo. Ricorda di rispettare i requisiti dello
+                                    standard <a href="https://it.wikipedia.org/wiki/YAML" target="_blank"
+                                        class="font-semibold text-blue-700">YAML</a>. Puoi cambiare file,
+                                    trascinandone uno nuovo in questa finestra oppure premendo la seguente combinazione
+                                    di tasti:
+                                </p>
+                                <p class="mb-1">
+                                    <kbd
+                                        class="px-2 py-1.5 text-xs font-semibold text-gray-800 bg-gray-300 border border-gray-200 rounded-lg">Alt</kbd>
+                                    + <kbd
+                                        class="px-2 py-1.5 text-xs font-semibold text-gray-800 bg-gray-300 border border-gray-200 rounded-lg">Mouse
+                                        click</kbd>
+                                </p>
+                                <div class="flex gap-1 items-center justify-end mb-2 text-sm">
+                                    <div class="flex items-center">
+                                        <input type="checkbox" x-model="dropzoneWithSociogram"
+                                            class="w-4 h-4 text-blue-700 bg-gray-100 border-gray-300 rounded-sm focus:ring-blue-500">
+                                        <label for="default-checkbox"
+                                            class="ms-2 text-sm font-medium text-gray-700">sociogramma</label>
+                                    </div>
+                                    <div>
+                                        <span class="text-gray-500"> | </span>
+                                        <a x-bind="dropzoneDownloadLink"
+                                            class="inline-flex items-center gap-1 mr-1 text-sm text-blue-700 cursor-pointer">
+                                            scarica
+                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 fill-blue-700"
+                                                viewBox="0 0 448 512"><!--!Font Awesome Free 6.7.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2025 Fonticons, Inc.-->
+                                                <path
+                                                    d="M64 32C28.7 32 0 60.7 0 96L0 416c0 35.3 28.7 64 64 64l320 0c35.3 0 64-28.7 64-64l0-242.7c0-17-6.7-33.3-18.7-45.3L352 50.7C340 38.7 323.7 32 306.7 32L64 32zm0 96c0-17.7 14.3-32 32-32l192 0c17.7 0 32 14.3 32 32l0 64c0 17.7-14.3 32-32 32L96 224c-17.7 0-32-14.3-32-32l0-64zM224 288a64 64 0 1 1 0 128 64 64 0 1 1 0-128z" />
+                                            </svg>
+                                        </a>
+                                        <span class="text-gray-500"> | </span>
+                                        <a x-bind="dropzoneResetLink"
+                                            class="inline-flex items-center gap-1 mr-1 text-sm text-blue-700 cursor-pointer">
+                                            elimina
+                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 fill-blue-700"
+                                                viewBox="0 0 448 512"><!--!Font Awesome Free 6.7.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2025 Fonticons, Inc.-->
+                                                <path
+                                                    d="M135.2 17.7L128 32 32 32C14.3 32 0 46.3 0 64S14.3 96 32 96l384 0c17.7 0 32-14.3 32-32s-14.3-32-32-32l-96 0-7.2-14.3C307.4 6.8 296.3 0 284.2 0L163.8 0c-12.1 0-23.2 6.8-28.6 17.7zM416 128L32 128 53.2 467c1.6 25.3 22.6 45 47.9 45l245.8 0c25.3 0 46.3-19.7 47.9-45L416 128z" />
+                                            </svg>
+                                        </a>
+                                    </div>
                                 </div>
-                                <textarea 
-                                    x-bind="textareaInputField"
-                                    class="w-full h-full pl-16 pr-6 py-2 leading-6 text-sm font-mono text-amber-50 bg-slate-800 rounded-md ring-0 outline-0 resize-none overflow-y-scroll box-border m-0 whitespace-pre"
-                                    spellcheck="false"
-                                    x-cloak>
+                                <div class="relative w-full h-full bg-slate-800 rounded-md shadow-sm overflow-hidden"
+                                    x-data="componentTextArea($store.abgrid.reportDataYAML)">
+                                    <div class="absolute left-0 top-0 h-full w-14 py-2 text-sm font-mono bg-slate-700 text-amber-50 select-none pointer-events-none overflow-hidden"
+                                        x-bind="textareaLineNumbers">
+                                        <template x-for="line in textareaLines" :key="line">
+                                            <div class="h-6 flex items-center justify-end pr-3 text-sm font-mono leading-6"
+                                                x-text="line"></div>
+                                        </template>
+                                    </div>
+                                    <textarea x-bind="textareaInputField"
+                                        class="w-full h-full pl-16 pr-6 py-2 leading-6 text-sm font-mono text-amber-50 bg-slate-800 rounded-md ring-0 outline-0 resize-none overflow-y-scroll box-border m-0 whitespace-pre"
+                                        spellcheck="false" x-cloak>
                                 </textarea>
-                            </div>
+                                </div>
 
-                        </div>
+                            </div>
+                        </template>
+
                     </div>
                 </div>
             </main>
