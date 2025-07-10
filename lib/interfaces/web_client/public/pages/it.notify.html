@@ -48,98 +48,107 @@
 
                             <!-- Report was generated -->
                             <template x-bind="templateReport">
-                                <div class="w-full h-full flex flex-col justify-center items-center p-9">
-                                    <p class="mb-2 text-4xl font-bold text-center text-gray-700">Urrà!</p>
-                                    <p class="text-center">Il report è stato generato correttamente.</p>
-                                    <p class="mb-3 text-center">Puoi scaricarlo in formato HTML o in formato JSON
+                                <div class="w-full h-full flex flex-col justify-start items-start p-9">
+                                    <p class="mb-2 text-4xl font-bold text-center text-gray-800">Urrà!</p>
+                                    <p class="text-center font-semibold">Il report è stato generato correttamente.</p>
+                                    <p class="mb-3 text-center">Clicca sulle icone per scaricarlo in formato HTML o in formato JSON.
                                     </p>
 
-                                    <div class="flex gap-12 mt-6">
+                                    <div class="flex flex-col gap-12 mt-6">
 
-                                        <!-- File PDF -->
-                                        <div class="w-32 h-40 relative cursor-pointer"
-                                            x-bind="notifyDownloadLinkFactory('pdf', 'notifyShowFilePDFSpinner')">
-                                            <!-- Shadow -->
-                                            <div
-                                                class="absolute inset-0 bg-red-200 rounded-lg transform translate-x-2 translate-y-2 opacity-60">
-                                            </div>
-
-                                            <!-- File body -->
-                                            <div
-                                                class="relative w-full h-full bg-gradient-to-br from-red-50 to-red-100 border-2 border-red-300 rounded-lg shadow-lg hover:shadow-xl transition-shadow duration-300">
-                                                <!-- File corner fold -->
+                                        <div class="flex items-center gap-8">
+                                            <!-- File HTML -->
+                                            <div class="w-32 h-40 shrink-0 relative cursor-pointer"
+                                                x-bind="notifyDownloadLinkFactory('pdf', 'notifyShowFilePDFSpinner')">
+                                                <!-- Shadow -->
                                                 <div
-                                                    class="absolute top-0 right-0 w-8 h-8 bg-red-300 clip-path-triangle shadow-inner">
+                                                    class="absolute inset-0 bg-red-200 rounded-lg transform translate-x-2 translate-y-2 opacity-60">
                                                 </div>
 
-                                                <!-- Spinner -->
-                                                <div class="absolute top-2 left-2" x-show="notifyShowFilePDFSpinner">
+                                                <!-- File body -->
+                                                <div
+                                                    class="relative w-full h-full bg-gradient-to-br from-red-50 to-red-100 border-2 border-red-300 rounded-lg shadow-lg hover:shadow-xl transition-shadow duration-300">
+                                                    <!-- File corner fold -->
                                                     <div
-                                                        class="w-4 h-4 border-2 border-red-300 border-t-red-600 rounded-full animate-spin">
+                                                        class="absolute top-0 right-0 w-8 h-8 bg-red-300 clip-path-triangle shadow-inner">
+                                                    </div>
+
+                                                    <!-- Spinner -->
+                                                    <div class="absolute top-2 left-2" x-show="notifyShowFilePDFSpinner">
+                                                        <div
+                                                            class="w-4 h-4 border-2 border-red-300 border-t-red-600 rounded-full animate-spin">
+                                                        </div>
+                                                    </div>
+
+                                                    <!-- PDF text -->
+                                                    <div class="absolute inset-0 flex flex-col items-center justify-center">
+                                                        <span
+                                                            class="text-3xl text-red-700 font-bold tracking-wider drop-shadow-sm">HTML</span>
+                                                        <div
+                                                            class="mt-2 text-xs text-red-600 font-medium uppercase tracking-widest">
+                                                            Report</div>
+                                                    </div>
+
+                                                    <!-- Decorative lines -->
+                                                    <div class="absolute bottom-6 left-4 right-4 space-y-1 opacity-40">
+                                                        <div class="h-0.5 bg-red-400 w-3/4"></div>
+                                                        <div class="h-0.5 bg-red-400 w-1/2"></div>
+                                                        <div class="h-0.5 bg-red-400 w-2/3"></div>
                                                     </div>
                                                 </div>
-
-                                                <!-- PDF text -->
-                                                <div class="absolute inset-0 flex flex-col items-center justify-center">
-                                                    <span
-                                                        class="text-3xl text-red-700 font-bold tracking-wider drop-shadow-sm">HTML</span>
-                                                    <div
-                                                        class="mt-2 text-xs text-red-600 font-medium uppercase tracking-widest">
-                                                        Document</div>
-                                                </div>
-
-                                                <!-- Decorative lines -->
-                                                <div class="absolute bottom-6 left-4 right-4 space-y-1 opacity-40">
-                                                    <div class="h-0.5 bg-red-400 w-3/4"></div>
-                                                    <div class="h-0.5 bg-red-400 w-1/2"></div>
-                                                    <div class="h-0.5 bg-red-400 w-2/3"></div>
-                                                </div>
+                                            </div>
+                                            <div>
+                                                <p class="font-semibold mb-2">Avvertenze</p>
+                                                Il file HTML è visualizzabile con qualsiasi browser standard. Inoltre, è possibile generare un PDF tramite la funzione di stampa del browser stesso. Per ottenere una qualità grafica ottimale del report, consigliamo di utilizzare l'ultima versione di <a href="https://www.google.com/intl/en_uk/chrome/" class="text-blue-700" target="_blank">Chrome</a>.
                                             </div>
                                         </div>
-
-                                        <!-- File JSON -->
-                                        <div class="w-32 h-40 relative cursor-pointer"
-                                            x-bind="notifyDownloadLinkFactory('json', 'notifyShowFileJSONSpinner')">
-                                            <!-- Shadow -->
-                                            <div
-                                                class="absolute inset-0 bg-blue-200 rounded-lg transform translate-x-2 translate-y-2 opacity-60">
-                                            </div>
-
-                                            <!-- File body -->
-                                            <div
-                                                class="relative w-full h-full bg-gradient-to-br from-blue-50 to-blue-100 border-2 border-blue-300 rounded-lg shadow-lg hover:shadow-xl transition-shadow duration-300">
-                                                <!-- File corner fold -->
+                                        <div class="flex items-center gap-8">
+                                            <!-- File JSON -->
+                                            <div class="w-32 h-40 shrink-0 relative cursor-pointer"
+                                                x-bind="notifyDownloadLinkFactory('json', 'notifyShowFileJSONSpinner')">
+                                                <!-- Shadow -->
                                                 <div
-                                                    class="absolute top-0 right-0 w-8 h-8 bg-blue-300 clip-path-triangle shadow-inner">
+                                                    class="absolute inset-0 bg-blue-200 rounded-lg transform translate-x-2 translate-y-2 opacity-60">
                                                 </div>
 
-                                                <!-- Spinner -->
-                                                <div class="absolute top-2 left-2" x-show="notifyShowFilePDFSpinner">
+                                                <!-- File body -->
+                                                <div
+                                                    class="relative w-full h-full bg-gradient-to-br from-blue-50 to-blue-100 border-2 border-blue-300 rounded-lg shadow-lg hover:shadow-xl transition-shadow duration-300">
+                                                    <!-- File corner fold -->
                                                     <div
-                                                        class="w-4 h-4 border-2 border-blue-300 border-t-blue-600 rounded-full animate-spin">
+                                                        class="absolute top-0 right-0 w-8 h-8 bg-blue-300 clip-path-triangle shadow-inner">
+                                                    </div>
+
+                                                    <!-- Spinner -->
+                                                    <div class="absolute top-2 left-2" x-show="notifyShowFilePDFSpinner">
+                                                        <div
+                                                            class="w-4 h-4 border-2 border-blue-300 border-t-blue-600 rounded-full animate-spin">
+                                                        </div>
+                                                    </div>
+
+                                                    <!-- JSON text -->
+                                                    <div class="absolute inset-0 flex flex-col items-center justify-center">
+                                                        <span
+                                                            class="text-3xl text-blue-700 font-bold tracking-wider drop-shadow-sm font-mono">JSON</span>
+                                                        <div
+                                                            class="mt-2 text-xs text-blue-600 font-medium uppercase tracking-widest">
+                                                            File Dati</div>
+                                                    </div>
+
+                                                    <!-- Decorative code-like lines -->
+                                                    <div class="absolute bottom-6 left-4 right-4 space-y-1 opacity-40">
+                                                        <div class="h-0.5 bg-blue-400 w-2/3"></div>
+                                                        <div class="h-0.5 bg-blue-400 w-4/5"></div>
+                                                        <div class="h-0.5 bg-blue-400 w-1/2"></div>
                                                     </div>
                                                 </div>
-
-                                                <!-- JSON text -->
-                                                <div class="absolute inset-0 flex flex-col items-center justify-center">
-                                                    <span
-                                                        class="text-3xl text-blue-700 font-bold tracking-wider drop-shadow-sm font-mono">JSON</span>
-                                                    <div
-                                                        class="mt-2 text-xs text-blue-600 font-medium uppercase tracking-widest">
-                                                        Data File</div>
-                                                </div>
-
-                                                <!-- Decorative code-like lines -->
-                                                <div class="absolute bottom-6 left-4 right-4 space-y-1 opacity-40">
-                                                    <div class="h-0.5 bg-blue-400 w-2/3"></div>
-                                                    <div class="h-0.5 bg-blue-400 w-4/5"></div>
-                                                    <div class="h-0.5 bg-blue-400 w-1/2"></div>
-                                                </div>
+                                            </div>
+                                            <div>
+                                                <p class="font-semibold mb-2">Avvertenze</p>
+                                                Il file JSON include tutti i dati del report, strutturato in modo da essere compatibile per l'analisi con i più diffusi pacchetti statistici. Questo formato agevola l'elaborazione dei dati, garantendo versatilità ed efficienza nell'analisi delle informazioni.
                                             </div>
                                         </div>
-
                                     </div>
-
                                 </div>
                             </template>
 
