@@ -14,7 +14,7 @@
             "choices_exceeds_availability_of_symbols": "le scelte superano la disponibilità dei simboli",
             "fastapi_failed_to_render_jinja_template": "non è stato possibile trovare il template jinja",
             "fastapi_required_jwt_token": "token jwt mancante",
-            "fastapi_requests_exceeded_rate_limit": "hai invito un numero eccessivo di richieste al server; riprova più tardi",
+            "fastapi_requests_exceeded_rate_limit": "hai invito un numero eccessivo di richieste al server; riprova più tardi, tra circa 30 secondi",
             "fastapi_invalid_or_expired_jwt_token": "token jwt non fornito o scaduto",
             "field_cannot_be_empty": "il campo non può essere vuoto",
             "field_contains_invalid_characters": "il campo contiene caratteri non validi",

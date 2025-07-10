@@ -48,17 +48,17 @@
 
                             <!-- Report was generated -->
                             <template x-bind="templateReport">
-                                <div class="w-full h-full flex flex-col justify-start items-start p-9">
+                                <div class="w-full h-full flex flex-col justify-start items-start">
                                     <p class="mb-2 text-4xl font-bold text-center text-gray-800">Urrà!</p>
                                     <p class="text-center font-semibold">Il report è stato generato correttamente.</p>
-                                    <p class="mb-3 text-center">Clicca sulle icone per scaricarlo in formato HTML o in formato JSON.
+                                    <p class="mb-3 text-sm text-center">Clicca sulle icone per scaricarlo in formato HTML o in formato JSON.
                                     </p>
 
                                     <div class="flex flex-col gap-12 mt-6">
 
                                         <div class="flex items-center gap-8">
                                             <!-- File HTML -->
-                                            <div class="w-32 h-40 shrink-0 relative cursor-pointer"
+                                            <div class="w-36 h-48 shrink-0 relative cursor-pointer"
                                                 x-bind="notifyDownloadLinkFactory('pdf', 'notifyShowFilePDFSpinner')">
                                                 <!-- Shadow -->
                                                 <div
@@ -83,7 +83,7 @@
                                                     <!-- PDF text -->
                                                     <div class="absolute inset-0 flex flex-col items-center justify-center">
                                                         <span
-                                                            class="text-3xl text-red-700 font-bold tracking-wider drop-shadow-sm">HTML</span>
+                                                            class="text-4xl text-red-700 font-bold tracking-wider drop-shadow-sm">HTML</span>
                                                         <div
                                                             class="mt-2 text-xs text-red-600 font-medium uppercase tracking-widest">
                                                             Report</div>
@@ -98,13 +98,15 @@
                                                 </div>
                                             </div>
                                             <div>
-                                                <p class="font-semibold mb-2">Avvertenze</p>
-                                                Il file HTML è visualizzabile con qualsiasi browser standard. Inoltre, è possibile generare un PDF tramite la funzione di stampa del browser stesso. Per ottenere una qualità grafica ottimale del report, consigliamo di utilizzare l'ultima versione di <a href="https://www.google.com/intl/en_uk/chrome/" class="text-blue-700" target="_blank">Chrome</a>.
+                                                <p class="text-lg font-semibold mb-2">Avvertenze</p>
+                                                <p>
+                                                    Il file HTML è visualizzabile con qualsiasi browser standard. Inoltre, è possibile generare un PDF tramite la funzione di stampa del browser stesso. Per ottenere una qualità grafica ottimale del report, consigliamo di utilizzare l'ultima versione di <a href="https://www.google.com/intl/en_uk/chrome/" class="text-blue-700" target="_blank">Chrome</a>.
+                                                </p>
                                             </div>
                                         </div>
                                         <div class="flex items-center gap-8">
                                             <!-- File JSON -->
-                                            <div class="w-32 h-40 shrink-0 relative cursor-pointer"
+                                            <div class="w-36 h-48 shrink-0 relative cursor-pointer"
                                                 x-bind="notifyDownloadLinkFactory('json', 'notifyShowFileJSONSpinner')">
                                                 <!-- Shadow -->
                                                 <div
@@ -129,7 +131,7 @@
                                                     <!-- JSON text -->
                                                     <div class="absolute inset-0 flex flex-col items-center justify-center">
                                                         <span
-                                                            class="text-3xl text-blue-700 font-bold tracking-wider drop-shadow-sm font-mono">JSON</span>
+                                                            class="text-4xl text-blue-700 font-bold tracking-wider drop-shadow-sm font-mono">JSON</span>
                                                         <div
                                                             class="mt-2 text-xs text-blue-600 font-medium uppercase tracking-widest">
                                                             File Dati</div>
@@ -144,8 +146,10 @@
                                                 </div>
                                             </div>
                                             <div>
-                                                <p class="font-semibold mb-2">Avvertenze</p>
-                                                Il file JSON include tutti i dati del report, strutturato in modo da essere compatibile per l'analisi con i più diffusi pacchetti statistici. Questo formato agevola l'elaborazione dei dati, garantendo versatilità ed efficienza nell'analisi delle informazioni.
+                                                <p class="text-lg font-semibold mb-2">Avvertenze</p>
+                                                <p>
+                                                    Il file JSON include tutti i dati del report (inclusi i grafici in formato SVG) ed è strutturato in modo da essere compatibile per l'analisi con i più diffusi pacchetti statistici.
+                                                </p>
                                             </div>
                                         </div>
                                     </div>
