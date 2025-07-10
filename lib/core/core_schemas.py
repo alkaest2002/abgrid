@@ -349,11 +349,10 @@ class ABGridReportSchema(BaseModel):
         
         # Validate each choice
         for i, choice_dict in enumerate(choices):
-            choice_location = f"{field_name}[{i}]"
             
             if not isinstance(choice_dict, dict) or len(choice_dict) != 1:
                 errors.append({
-                    "location": choice_location,
+                    "location": f"{field_name}[{i+1}]",
                     "value_to_blame": choice_dict,
                     "error_message": "choice_must_be_a_single_key_value_pair"
                 })
@@ -365,7 +364,7 @@ class ABGridReportSchema(BaseModel):
             # Validate key
             if not isinstance(key, str) or len(key) != 1 or not key.isalpha():
                 errors.append({
-                    "location": f"{choice_location}.{key}",
+                    "location": f"{field_name}.{key}",
                     "value_to_blame": key,
                     "error_message": "key_must_be_a_single_alphabetic_character"
                 })
@@ -380,7 +379,7 @@ class ABGridReportSchema(BaseModel):
                     invalid_parts = [part for part in value_parts if len(part) != 1 or not part.isalpha()]
                     if invalid_parts:
                         errors.append({
-                            "location": f"{choice_location}.{key}",
+                            "location": f"{field_name}.{key}",
                             "value_to_blame": value_str,
                             "error_message": "value_must_contain_only_single_alphabetic_characters"
                         })
@@ -388,7 +387,7 @@ class ABGridReportSchema(BaseModel):
                     # Check key doesn't reference itself
                     if key in value_parts:
                         errors.append({
-                            "location": f"{choice_location}.{key}",
+                            "location": f"{field_name}.{key}",
                             "value_to_blame": value_str,
                             "error_message": "key_cannot_be_present_in_its_own_values"
                         })
@@ -396,7 +395,7 @@ class ABGridReportSchema(BaseModel):
                     # Check for duplicates
                     if len(value_parts) != len(set(value_parts)):
                         errors.append({
-                            "location": f"{choice_location}.{key}",
+                            "location": f"{field_name}.{key}",
                             "value_to_blame": value_str,
                             "error_message": "values_contain_duplicates"
                         })
@@ -405,7 +404,7 @@ class ABGridReportSchema(BaseModel):
                     invalid_values = [v for v in value_parts if v not in expected_keys]
                     if invalid_values:
                         errors.append({
-                            "location": f"{choice_location}.{key}",
+                            "location": f"{field_name}.{key}",
                             "value_to_blame": value_str,
                             "error_message": "values_contain_invalid_keys"
                         })
