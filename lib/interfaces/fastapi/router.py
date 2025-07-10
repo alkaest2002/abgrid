@@ -55,7 +55,7 @@ def get_router() -> APIRouter:
         except Exception as e:
             raise HTTPException(
                 status_code=500,
-                detail="failed_to_render_jinja_template"
+                detail="fastapi_failed_to_render_jinja_template"
             )
         
         # Generate safe filename

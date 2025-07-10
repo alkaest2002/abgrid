@@ -91,7 +91,7 @@ class SimpleRateLimiter:
         async def wrapper(*args: Any, **kwargs: Any) -> Any:
             # Request object is needed
             if not (request := kwargs.get("request")):
-                raise RateLimitException("request_object_required_for_rate_limiting")
+                raise RateLimitException("fastapi_request_object_required_for_rate_limiting")
             
             # Rate limit happens here
             key: str = self._get_cache_key(request)
@@ -119,7 +119,7 @@ class SimpleRateLimiter:
         
         # JWT token validation and extraction
         if not auth_header or not auth_header.startswith("Bearer ") or not (token := auth_header[7:].strip()):
-            raise RateLimitException("required_jwt_token")
+            raise RateLimitException("fastapi_required_jwt_token")
         
         # Use SHA-256 to hash token for privacy and collision prevention
         token_hash: str = hashlib.sha256(token.encode('utf-8')).hexdigest()
@@ -160,7 +160,7 @@ class SimpleRateLimiter:
                     
                     # If user hits limit
                     if count >= self.limit:
-                        raise RateLimitException("requests_exceeded_rate_limit")
+                        raise RateLimitException("fastapi_requests_exceeded_rate_limit")
                     
                     # Update count
                     self._cache[key] = (window_start, count + 1)

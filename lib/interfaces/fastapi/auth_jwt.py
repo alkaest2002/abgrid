@@ -73,5 +73,5 @@ class AnonymousJWT:
         except jwt.InvalidTokenError:
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
-                detail="invalid_or_expired_jwtJ_token"
+                detail="fastapi_invalid_or_expired_jwt_token"
             )
