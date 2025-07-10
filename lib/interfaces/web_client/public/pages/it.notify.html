@@ -15,9 +15,9 @@
     <!-- Toast -->
     <template x-teleport="body">
         <div x-bind="toastContainer"
-            class="fixed top-6 right-6 p-3 bg-white border border-gray-300 rounded-md shadow-lg cursor-pointer">
+            class="fixed top-6 left-1/2 transform -translate-x-1/2 p-3 bg-white border border-gray-300 rounded-md shadow-lg cursor-pointer">
             <div class="flex items-center gap-2">
-                <span x-bind="toastBadge" class="text-xs px-2 py-0.5 text-white rounded-full">
+                <span x-bind="toastBadge" class="text-xs px-2 py-0.5 text-white bg-current rounded-full">
                 </span>
                 <span x-bind="toastMessage" class="text-sm">
                 </span>
@@ -62,16 +62,16 @@
                                 <div x-data>
                                     <p class="mb-6"><span class="font-bold">Attenzione: </span> non è stato possibile caricare il file YAML. Il parser si è fermato alla seguente linea.</p>
                                     <p class="mb-2 font-semibold text-sm">Tabella degli errori</p>
-                                    <table class="w-full mb-3 text-sm text-left border-y-1 border-gray-400" x-data="componentNotifyYaml">
+                                    <table class="w-full mb-6 text-sm text-left border-y-1 border-gray-400" x-data="componentNotifyYaml">
                                         <template x-for="line in notifyYamlUniqueLines">
                                             <tr class="border-b border-dashed border-gray-400 odd:bg-white even:bg-gray-50">
                                                 <td class="py-3 px-2">
-                                                    linea <span x-text="line"></span>
+                                                    <span class="font-semibold">linea numero</span> <span x-text="line"></span>
                                                 </td>
                                             </tr>
                                         </template>
                                     </table>
-                                     <p>Tieni presente che ci potrebbero essere errori successivi eventualmente segnalati dopo la risoluzione del problema corrente.</p>
+                                     <p>Potrebbero esserci errori successivi al presente, che saranno segnalati dopo la risoluzione di quello corrente.</p>
                                 </div>
                             </template>
                             <template x-bind="templateApiError">

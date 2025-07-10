@@ -32,7 +32,8 @@
             "report_generation_failure": "il server non ha generato il report",
             "value_must_contain_only_single_alphabetic_characters": "il valore deve contenere solo singoli caratteri alfabetici",
             "values_contain_duplicates": "i valori contengono duplicati",
-            "values_contain_invalid_keys": "i valori contengono chiavi non valide"
+            "values_contain_invalid_keys": "i valori contengono chiavi non valide",
+            "yaml_parse_failure": "errore nel file YAML"
         },
         "success": {
             "session_was_initialized": "il server AB-Grid è operativo",
