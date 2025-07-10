@@ -34,6 +34,7 @@
             "keys_in_a_and_b_must_be_identical": "le chiavi in A e B devono essere identiche",
             "unknown_issue_occurred": "operazione non riuscita, si è verificato un problema",
             "report_generation_failure": "il server non ha generato il report",
+            "unknown_error": "errore sconosciuto; contatta lo sviluppatore",
             "value_must_contain_only_single_alphabetic_characters": "il valore deve contenere solo singoli caratteri alfabetici",
             "values_contain_duplicates": "i valori contengono duplicati",
             "values_contain_invalid_keys": "i valori contengono chiavi non valide",
