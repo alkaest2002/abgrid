@@ -49,15 +49,16 @@
                             <!-- Report was generated -->
                             <template x-bind="templateReport">
                                 <div class="w-full h-full flex flex-col justify-center items-center p-9">
-                                    <p class="text-4xl font-bold text-center mb-2">Hurray!</p>
-                                    <p class="text-center">Il report è stato generato correttamente</p>
+                                    <p class="mb-2 text-4xl font-bold text-center text-gray-700">Hurray!</p>
+                                    <p class="text-center">Il report è stato generato correttamente.</p>
                                     <p class="mb-3 text-center">Puoi scaricarlo in formato HTML o in formato JSON
                                     </p>
 
                                     <div class="flex gap-12 mt-6">
 
                                         <!-- File PDF -->
-                                        <div class="w-32 h-40 relative cursor-pointer" x-bind="notifyDownloadLinkFactory('pdf', 'notifyShowFilePDFSpinner')">
+                                        <div class="w-32 h-40 relative cursor-pointer"
+                                            x-bind="notifyDownloadLinkFactory('pdf', 'notifyShowFilePDFSpinner')">
                                             <!-- Shadow -->
                                             <div
                                                 class="absolute inset-0 bg-red-200 rounded-lg transform translate-x-2 translate-y-2 opacity-60">
@@ -97,7 +98,8 @@
                                         </div>
 
                                         <!-- File JSON -->
-                                        <div class="w-32 h-40 relative cursor-pointer" x-bind="notifyDownloadLinkFactory('json', 'notifyShowFileJSONSpinner')">
+                                        <div class="w-32 h-40 relative cursor-pointer"
+                                            x-bind="notifyDownloadLinkFactory('json', 'notifyShowFileJSONSpinner')">
                                             <!-- Shadow -->
                                             <div
                                                 class="absolute inset-0 bg-blue-200 rounded-lg transform translate-x-2 translate-y-2 opacity-60">
@@ -138,7 +140,6 @@
 
                                     </div>
 
-
                                 </div>
                             </template>
 
@@ -149,7 +150,7 @@
                                         caricare il file YAML. Il parser si è fermato alla seguente linea.</p>
                                     <p class="mb-2 font-semibold text-sm">Tabella degli errori</p>
                                     <table class="w-full mb-6 text-sm text-left border-y-1 border-gray-400">
-                                        <template x-bind="notifyAppErrorList">
+                                        <template x-for="errorLine in notifyYamlErrors">
                                             <tr
                                                 class="border-b border-dashed border-gray-400 odd:bg-white even:bg-gray-50">
                                                 <td class="py-3 px-2">
@@ -167,21 +168,23 @@
                             <!-- Api error -->
                             <template x-bind="templateApiError">
                                 <div class="w-full mx-auto">
-                                    <p class="mb-6"><span class="font-bold">Attenzione: </span> il server ha riscontrato
-                                        degli errori nei dati che hai inviato per l'elaborazione della tua richiesta.
-                                        Segui le indicazioni riportate nella tabella prima di riprovare l'operazione.</p>
+                                    <p class="mb-6"><span class="font-bold">Attenzione: </span> il server ha resitituito
+                                        un errore durante l'elborazione della tua richiesta. Segui le indicazioni
+                                        riportate nella tabella prima di riprovare l'operazione.</p>
                                     <p class="mb-2 font-semibold text-sm">Tabella degli errori</p>
                                     <table class="w-full text-sm text-left border-y-1 border-gray-400">
                                         <template x-if="Array.isArray(notifyPydanticErrors)">
-                                            <template x-bind="notifyApiErrorList">
-                                                <tr class="border-b border-dashed border-gray-400 odd:bg-white even:bg-gray-50">
+                                            <template x-bind="error in $store.abgrid.apiResponse?.data?.detail">
+                                                <tr
+                                                    class="border-b border-dashed border-gray-400 odd:bg-white even:bg-gray-50">
                                                     <td x-text="error.location" class="p-3 font-bold">
                                                     </td>
                                                     <td x-text="$t('errors.' + error.error_message)" class="p-3"></td>
                                                 </tr>
                                             </template>
                                         </template>
-                                        <tr x-show="typeof notifyPydanticErrors == 'string'" class="border-b border-dashed border-gray-400 odd:bg-white even:bg-gray-50">
+                                        <tr x-show="typeof notifyPydanticErrors == 'string'"
+                                            class="border-b border-dashed border-gray-400 odd:bg-white even:bg-gray-50">
                                             <td x-text="$t('errors.' +notifyPydanticErrors)" class="p-3">
                                             </td>
                                         </tr>
