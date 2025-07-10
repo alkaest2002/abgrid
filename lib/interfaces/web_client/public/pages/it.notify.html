@@ -174,7 +174,7 @@
                                     <p class="mb-2 font-semibold text-sm">Tabella degli errori</p>
                                     <table class="w-full text-sm text-left border-y-1 border-gray-400">
                                         <template x-if="Array.isArray(notifyPydanticErrors)">
-                                            <template x-bind="error in $store.abgrid.apiResponse?.data?.detail">
+                                            <template x-for="error in $store.abgrid.apiResponse?.data?.detail">
                                                 <tr
                                                     class="border-b border-dashed border-gray-400 odd:bg-white even:bg-gray-50">
                                                     <td x-text="error.location" class="p-3 font-bold">
