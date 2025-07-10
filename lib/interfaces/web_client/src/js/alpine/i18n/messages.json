@@ -12,7 +12,6 @@
         "errors": {
             "choice_must_be_a_single_key_value_pair": "la scelta deve essere una singola  coppia chiave: valori",
             "choices_exceeds_availability_of_symbols": "le scelte superano la disponibilità dei simboli",
-            "yaml_load_failure": "si è verificato un problema nel caricamento del file",
             "field_cannot_be_empty": "il campo non può essere vuoto",
             "field_contains_invalid_characters": "il campo contiene caratteri non validi",
             "field_is_out_of_range": "il campo è fuori dal range consentito",
@@ -21,7 +20,10 @@
             "field_is_too_short": "il campo è troppo corto",
             "field_must_be_a_string": "il campo deve essere una stringa",
             "field_must_be_an_integer": "il campo deve essere un intero",
-            "invalid_file_type": "tipo di file non compatibile",
+            "file_invalid_type": "tipo di file non compatibile",
+            "file_invalid_keys": "il file yaml non è corretto",
+            "file_load_failure": "si è verificato un problema nel caricamento del file",
+            "file_exceeds_size_limit": "la dimensione del file suopera i limiti previsti",
             "key_cannot_be_present_in_its_own_values": "la chiave non può essere presente nei propri valori",
             "key_must_be_a_single_alphabetic_character": "la chiave deve essere un singolo carattere alfabetico",
             "keys_are_not_correct": "le chiavi non sono corrette",
@@ -29,8 +31,7 @@
             "unknown_issue_occurred": "operazione non riuscita, si è verificato un problema",
             "value_must_contain_only_single_alphabetic_characters": "il valore deve contenere solo singoli caratteri alfabetici",
             "values_contain_duplicates": "i valori contengono duplicati",
-            "values_contain_invalid_keys": "i valori contengono chiavi non valide",
-            "yaml_invalid": "il file yaml non è corretto"
+            "values_contain_invalid_keys": "i valori contengono chiavi non valide"
         },
         "success": {
             "session_was_initialized": "il server AB-Grid è operativo",
