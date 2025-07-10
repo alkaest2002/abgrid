@@ -10,7 +10,7 @@
 
 <body class="h-screen min-w-4xl max-w-4xl mx-auto overflow-hidden pb-6"
     x-data="{ ...componentToast(), ...componentOnline(), ...componentNavigation(), ...componentApi() }"
-    x-init="() => { initOnline(); initNavigation(); initApi() }">
+    x-init="() => { initToast(); initOnline(); initNavigation(); initApi() }">
 
     <!-- Toast -->
     <template x-teleport="body">
@@ -145,22 +145,27 @@
 
                             <!-- App error -->
                             <template x-bind="templateAppError">
-                                <div x-data>
-                                    <p class="mb-6"><span class="font-bold">Attenzione: </span> non è stato possibile
-                                        caricare il file YAML. Il parser si è fermato alla seguente linea.</p>
+                                <div class="w-full mx-auto">
+                                    <div class="flex items-center gap-x-4 mb-6">
+                                        <div class="grow h-12 flex items-center">
+                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-8 fill-gray-700 " viewBox="0 0 512 512"><!--!Font Awesome Free 6.7.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2025 Fonticons, Inc.--><path d="M256 32c14.2 0 27.3 7.5 34.5 19.8l216 368c7.3 12.4 7.3 27.7 .2 40.1S486.3 480 472 480L40 480c-14.3 0-27.6-7.7-34.7-20.1s-7-27.8 .2-40.1l216-368C228.7 39.5 241.8 32 256 32zm0 128c-13.3 0-24 10.7-24 24l0 112c0 13.3 10.7 24 24 24s24-10.7 24-24l0-112c0-13.3-10.7-24-24-24zm32 224a32 32 0 1 0 -64 0 32 32 0 1 0 64 0z"/></svg>
+                                        </div>
+                                        <div>
+                                            <span><span class="font-semibold">attenzione</span>: si è verificato un errore. L'analizzatore YAML non è stato in grado di completare l'operazione di parsing e si è fermato alla seguente linea.</span>
+                                        </div>
+                                    </div>
                                     <p class="mb-2 font-semibold text-sm">Tabella degli errori</p>
                                     <table class="w-full mb-6 text-sm text-left border-y-1 border-gray-400">
                                         <template x-for="errorLine in notifyYamlErrors">
                                             <tr
                                                 class="border-b border-dashed border-gray-400 odd:bg-white even:bg-gray-50">
                                                 <td class="py-3 px-2">
-                                                    <span class="font-semibold">linea numero</span> <span
-                                                        x-text="errorLine"></span>
+                                                    <span>errore alla linea numero</span> <span x-text="errorLine"></span>
                                                 </td>
                                             </tr>
                                         </template>
                                     </table>
-                                    <p>Potrebbero esserci errori successivi al presente, che saranno segnalati dopo la
+                                    <p class="text-sm">Potrebbero esserci altri errori nel file, che saranno segnalati dopo la
                                         risoluzione di quello corrente.</p>
                                 </div>
                             </template>
@@ -168,9 +173,15 @@
                             <!-- Api error -->
                             <template x-bind="templateApiError">
                                 <div class="w-full mx-auto">
-                                    <p class="mb-6"><span class="font-bold">Attenzione: </span> il server ha resitituito
-                                        un errore durante l'elborazione della tua richiesta. Segui le indicazioni
-                                        riportate nella tabella prima di riprovare l'operazione.</p>
+                                    <div class="flex items-center gap-x-4 mb-6">
+                                        <div class="grow h-12 flex items-center">
+                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-8 fill-gray-700 " viewBox="0 0 512 512"><!--!Font Awesome Free 6.7.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2025 Fonticons, Inc.--><path d="M256 32c14.2 0 27.3 7.5 34.5 19.8l216 368c7.3 12.4 7.3 27.7 .2 40.1S486.3 480 472 480L40 480c-14.3 0-27.6-7.7-34.7-20.1s-7-27.8 .2-40.1l216-368C228.7 39.5 241.8 32 256 32zm0 128c-13.3 0-24 10.7-24 24l0 112c0 13.3 10.7 24 24 24s24-10.7 24-24l0-112c0-13.3-10.7-24-24-24zm32 224a32 32 0 1 0 -64 0 32 32 0 1 0 64 0z"/></svg>
+                                        </div>
+                                        <div>
+                                            <span><span class="font-semibold">attenzione</span>: il server ha resitituito un errore durante l'elborazione della tua richiesta. Segui le indicazioni riportate
+                                            nella tabella prima di riprovare l'operazione.</span>
+                                        </div>
+                                    </div>
                                     <p class="mb-2 font-semibold text-sm">Tabella degli errori</p>
                                     <table class="w-full text-sm text-left border-y-1 border-gray-400">
                                         <template x-if="Array.isArray(notifyPydanticErrors)">
