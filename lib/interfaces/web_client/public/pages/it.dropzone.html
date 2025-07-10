@@ -88,11 +88,22 @@
                                     </a>
                                 </div>
                             </div>
-                            <textarea x-ref="YAMLtextArea" x-show="$store.abgrid.reportDataFilename"
-                                x-text="$store.abgrid.reportDataYAML"
-                                class="w-full h-full overflow-y-scroll p-6 text-sm font-mono text-amber-50 bg-slate-800 rounded-md ring-0 outline-0 shadow-sm"
-                                spellcheck="false" x-cloak>
-                            </textarea>
+                            <div 
+                                class="relative w-full h-full bg-slate-800 rounded-md shadow-sm overflow-hidden" 
+                                x-data="componentTextArea($store.abgrid.reportDataYAML)">
+                                <div class="absolute left-0 top-0 w-14 h-full py-3 bg-slate-700 text-amber-50 text-sm font-mono select-none pointer-events-none overflow-y-scroll hide-scrollbar"
+                                    x-bind="textareaLineNumbers">
+                                    <template x-for="line in textareaLines" :key="line">
+                                        <div class="h-6 flex items-center justify-end pr-3 text-sm font-mono leading-6" x-text="line"></div>
+                                    </template>
+                                </div>
+                                <textarea 
+                                    x-bind="textareaInputField"
+                                    class="w-full h-full overflow-y-scroll pl-16 pr-6 py-3 leading-6 text-sm font-mono text-amber-50 bg-slate-800 rounded-md ring-0 outline-0 resize-none"
+                                    spellcheck="false"
+                                    x-cloak>
+                                </textarea>
+                            </div>
                         </div>
                     </div>
                 </div>
