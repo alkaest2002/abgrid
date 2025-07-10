@@ -59,13 +59,6 @@ class SimpleRateLimiter:
             window_seconds: Duration of rate limit window in seconds (must be > 0).
             max_cache_size: Maximum cache entries to prevent memory leaks (must be > 0).
         """
-        if limit <= 0:
-            raise ValueError("limit must be greater than 0")
-        if window_seconds <= 0:
-            raise ValueError("window_seconds must be greater than 0")
-        if max_cache_size <= 0:
-            raise ValueError("max_cache_size must be greater than 0")
-        
         # Create a unique identifier for this limiter instance
         self.limiter_id = f"{limit}req_{window_seconds}s"
             
@@ -98,7 +91,7 @@ class SimpleRateLimiter:
         async def wrapper(*args: Any, **kwargs: Any) -> Any:
             # Request object is needed
             if not (request := kwargs.get("request")):
-                raise RateLimitException("Request object required for rate limiting")
+                raise RateLimitException("request_object_required_for_rate_limiting")
             
             # Rate limit happens here
             key: str = self._get_cache_key(request)
@@ -126,7 +119,7 @@ class SimpleRateLimiter:
         
         # JWT token validation and extraction
         if not auth_header or not auth_header.startswith("Bearer ") or not (token := auth_header[7:].strip()):
-            raise RateLimitException("JWT token required")
+            raise RateLimitException("required_jwt_token")
         
         # Use SHA-256 to hash token for privacy and collision prevention
         token_hash: str = hashlib.sha256(token.encode('utf-8')).hexdigest()
@@ -167,10 +160,7 @@ class SimpleRateLimiter:
                     
                     # If user hits limit
                     if count >= self.limit:
-                        raise RateLimitException(
-                            f"Rate limit exceeded: {count}/{self.limit} requests "
-                            f"in {self.window_seconds}s window"
-                        )
+                        raise RateLimitException("requests_exceeded_rate_limit")
                     
                     # Update count
                     self._cache[key] = (window_start, count + 1)
