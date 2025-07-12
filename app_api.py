@@ -30,6 +30,9 @@ domains = [ "https://localhost", "https://127.0.0.1", "http://localhost", "http:
 # Define origines that should be allowed to access your server
 origins = [f"{domain}:{port}" for domain, port in product(domains, fancy_port)]
 
+# Add render app origin
+origins.append("https://abgrid-webapp.onrender.com/")
+
 # Add CORSMiddleware with slightly restricted settings
 app.add_middleware(
     CORSMiddleware,
