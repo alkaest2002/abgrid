@@ -1,8 +1,10 @@
-import { resolve } from 'path';
+// @ts-ignore
+import { resolve } from "path";
 import { defineConfig } from "vite";
 import tailwindcss from "@tailwindcss/vite";
 import basicSsl from "@vitejs/plugin-basic-ssl";
-import { fileURLToPath, URL } from 'node:url'
+// @ts-ignore
+import { fileURLToPath, URL } from "node:url"
 
 
 export default defineConfig({
