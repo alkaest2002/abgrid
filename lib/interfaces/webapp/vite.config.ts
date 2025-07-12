@@ -1,9 +1,21 @@
+import { resolve } from 'path';
 import { defineConfig } from "vite";
 import tailwindcss from "@tailwindcss/vite";
 import basicSsl from "@vitejs/plugin-basic-ssl";
+import { fileURLToPath, URL } from 'node:url'
 
 
 export default defineConfig({
+    build: {
+        rollupOptions: {
+            input: {
+                main: resolve(fileURLToPath(new URL('.', import.meta.url)), 'index.html'),
+                about: resolve(fileURLToPath(new URL('.', import.meta.url)), 'pages/it.dropzone.html'),
+                contact: resolve(fileURLToPath(new URL('.', import.meta.url)), 'pages/it.generate.html'),
+                services: resolve(fileURLToPath(new URL('.', import.meta.url)), 'pages/it.notify.html'),
+            }
+        }
+    },
     plugins: [
         tailwindcss(),
         basicSsl({
