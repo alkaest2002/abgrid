@@ -95,3 +95,16 @@ def health_check() -> JSONResponse:
         status_code=status.HTTP_200_OK,
         content={"detail": "AB-Grid server is alive and kicking."}
     )
+
+@app.get("/{path:path}")
+def catchall(path: str) -> JSONResponse:
+    """
+    Catchall endpoint that returns a JSON response for undefined routes.
+    """
+    return JSONResponse(
+        status_code=status.HTTP_404_NOT_FOUND,
+        content={
+            "detail": f"Route '{path}' not found. Try /health for status check.",
+            "redirect_to": "/health"
+        }
+    )
