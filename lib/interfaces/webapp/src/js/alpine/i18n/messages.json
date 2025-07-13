@@ -1,7 +1,5 @@
 {
     "it": {
-        "app_is_online": "connessione internet ripristinata",
-        "app_is_offline": "attenzione: connessione internet assente",
         "fields": {
             "project_title": "titolo progetto",
             "question_a": "domanda A",
@@ -10,7 +8,7 @@
             "members": "membri"
         },
         "errors": {
-            "choice_must_be_a_single_key_value_pair": "la scelta deve essere una singola  coppia chiave: valori",
+            "choice_must_be_a_single_key_value_pair": "la scelta deve essere una singola coppia chiave: valori",
             "choices_exceeds_availability_of_symbols": "le scelte superano la disponibilità dei simboli",
             "fastapi_failed_to_render_jinja_template": "non è stato possibile trovare il template jinja",
             "fastapi_required_jwt_token": "token jwt mancante",
@@ -24,10 +22,6 @@
             "field_is_too_short": "il campo è troppo corto",
             "field_must_be_a_string": "il campo deve essere una stringa",
             "field_must_be_an_integer": "il campo deve essere un intero",
-            "file_invalid_type": "tipo di file non compatibile",
-            "file_invalid_keys": "il file yaml non è corretto",
-            "file_load_failure": "si è verificato un problema nel caricamento del file",
-            "file_exceeds_size_limit": "la dimensione del file suopera i limiti previsti",
             "key_cannot_be_present_in_its_own_values": "la chiave non può essere presente nei propri valori",
             "key_must_be_a_single_alphabetic_character": "la chiave deve essere un singolo carattere alfabetico",
             "keys_are_not_correct": "le chiavi non sono corrette",
@@ -40,10 +34,15 @@
             "values_contain_invalid_keys": "i valori contengono chiavi non valide",
             "yaml_parse_failure": "errore nel file YAML"
         },
-        "success": {
-            "session_was_initialized": "il server AB-Grid è operativo",
-            "report_was_generated": "il report è stato generato",
-            "successful_operation": "l'operazione si è conclusa con successo"
+        "toast": {
+            "online": "ripristinata connessione internet",
+            "offline": "connessione internet assente",
+            "success": "l'operazione si è conclusa con successo",
+            "error": "oops, si è verificato un errore",
+            "file_exceeds_size_limit": "la dimensione del file suopera i limiti previsti",
+            "file_invalid_type": "tipo di file non compatibile",
+            "file_invalid_keys": "il file yaml non è corretto",
+            "file_load_failure": "si è verificato un problema nel caricamento del file"
         }
     }
 }
