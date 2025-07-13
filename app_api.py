@@ -83,8 +83,8 @@ async def rate_limit_exception_handler(
         content={"detail": exc.message}
     )
 
-@app.get("/health")
-def health_check() -> JSONResponse:
+@app.get("/")
+def server_check() -> JSONResponse:
     """
     Public endpoint that can be accessed without authentication.
 
@@ -105,6 +105,6 @@ def catchall(path: str) -> JSONResponse:
         status_code=status.HTTP_404_NOT_FOUND,
         content={
             "detail": f"Route '{path}' not found. Try /health for status check.",
-            "redirect_to": "/health"
+            "redirect_to": "/"
         }
     )
