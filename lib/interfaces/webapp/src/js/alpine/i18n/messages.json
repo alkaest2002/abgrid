@@ -37,8 +37,8 @@
         "toast": {
             "online": "ripristinata connessione internet",
             "offline": "connessione internet assente",
-            "success": "l'operazione si è conclusa con successo",
-            "error": "oops, si è verificato un errore",
+            "success": "operazione conclusa con successo",
+            "error": "si è verificato un errore",
             "file_exceeds_size_limit": "la dimensione del file suopera i limiti previsti",
             "file_invalid_type": "tipo di file non compatibile",
             "file_invalid_keys": "il file yaml non è corretto",
