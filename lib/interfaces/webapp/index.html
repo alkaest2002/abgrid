@@ -42,16 +42,25 @@
                     <div class="h-full relative p-12 text-gray-900 bg-gray-100 rounded-lg">
                         <!-- Main content goes here -->
                         <div class="h-full flex flex-col justify-start items-start">
-                            <p class="mb-3">
-                                Benvenuto in AB-Grid, un'applicazione web per l'analisi delle dinamiche relazionali nei gruppi, basata sulle tecniche sociometriche di J. L. Moreno e sulla social network analysis.
-                            </p>
-                            <p class="mb-3">
-                                Per utilizzare correttamente l'applicazione, assicurati che i dati raccolti siano memorizzati in formato testo/YAML. Prima di iniziare, ti consigliamo vivamente di consultare il manuale d'uso (che puoi <a href="public/manuale.it.pdf" target="_blank" class="text-blue-700"> scaricare qui</a>).
-                            </p>
-                            <p class="mb-3">
-                                L'applicazione è stata sviluppata dal <span class="italic">Dr. Pierpaolo Calanna</span> e dal <span class="italic">Dr. Gaetano Buonaiuto</span> ed è distribuita come software open-source sotto licenza MIT. Il codice sorgente è disponibile all'indirizzo: <a href="https://github.com/alkaest2002/abgrid" target="_blank" class="text-blue-700">https://github.com/alkaest2002/abgrid</a>.
-                            </p>
-                            Buon lavoro.
+                            <div class="mb-6">
+                                <p class="mb-3">
+                                    Benvenuto in AB-Grid, un'applicazione web per l'analisi delle dinamiche relazionali, basata sulle tecniche sociometriche di J. L. Moreno e sulla social network analysis.
+                                </p>
+                                <p class="mb-3">
+                                    Per utilizzare correttamente l'applicazione, assicurati che i dati raccolti siano memorizzati in formato YAML. Prima di iniziare, ti consigliamo di consultare il manuale d'uso (che puoi <a href="public/manuale.it.pdf" target="_blank" class="text-blue-700"> scaricare qui</a>).
+                                </p>
+                                <p class="mb-3">
+                                    L'applicazione è stata sviluppata dal <span class="italic">Dr. Pierpaolo Calanna</span> e dal <span class="italic">Dr. Gaetano Buonaiuto</span> ed è distribuita come software open-source sotto licenza MIT. Il codice sorgente è disponibile all'indirizzo: <a href="https://github.com/alkaest2002/abgrid" target="_blank" class="text-blue-700">https://github.com/alkaest2002/abgrid</a>.
+                                </p>
+                                <p>
+                                    Buon lavoro.
+                                </p>
+                            </div>
+                            <div class="w-full px-6 py-3 bg-gray-200 border border-gray-300 rounded-lg">
+                                <p class="font-semibold">Status abigrid server</p>
+                                <p x-data x-text="$data.apiBase" class="mb-2 text-sm"></p>
+                                <p x-bind="getServerStatus" class="text-sm">checking...</p>
+                            </div>
                         </div>
                     </div>
                 </div>
