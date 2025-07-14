@@ -45,7 +45,7 @@
                 <div class="h-full">
                     <div class="h-full relative p-12 pb-6 text-gray-900 bg-gray-100 rounded-lg">
                         <!-- Main content goes here -->
-                        <template x-if="!$store.data.reportDataFilename">
+                        <template x-if="!$store.data.dataFilename">
                             <div class="h-full flex flex-col justify-center items-center text-center" x-bind="dropzone"
                                 x-cloak>
                                 <svg xmlns="http://www.w3.org/2000/svg" class="h-12 mb-4 fill-gray-500"
@@ -65,7 +65,7 @@
                                 </p>
                             </div>
                         </template>
-                        <template x-if="$store.data.reportDataFilename">
+                        <template x-if="$store.data.dataFilename">
                             <div class="h-full flex flex-col gap-3" x-bind="dropzone" x-cloak>
                                 <div class="mb-4">
                                     <p>
@@ -90,7 +90,7 @@
                                     <div class="flex gap-x-4 py-2 px-4 text-sm bg-gray-300 rounded-lg relative shadow-sm">
                                         <div
                                             x-data
-                                            x-show.transition="$store.app.magicButtonIsLocked"
+                                            x-show.transition="$store.app.appMagicButtonIsLocked"
                                             class="absolute top-0 left-0 h-full w-full bg-gray-300 opacity-75 rounded-lg"
                                         ></div>
                                         <div class="flex items-center">
@@ -120,7 +120,7 @@
                                     </div>
                                 </div>
                                 <div class="relative w-full h-full bg-slate-800 rounded-md shadow-sm overflow-hidden"
-                                    x-data="componentTextArea($store.data.reportDataYAML)">
+                                    x-data="componentTextArea($store.data.dataYAML)">
                                     <div class="absolute left-0 top-0 h-full w-14 py-2 text-sm font-mono bg-slate-700 text-amber-50 select-none pointer-events-none overflow-hidden"
                                         x-bind="textareaLineNumbers">
                                         <template x-for="line in textareaLines" :key="line">
