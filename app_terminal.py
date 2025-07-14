@@ -31,8 +31,7 @@ def setup_argument_parser() -> argparse.ArgumentParser:
     parser.add_argument("-a", "--action", required=True, 
                         choices=["init", "groups", "reports", "batch"], 
                         help="Action to perform: 'init', 'groups', 'reports', or 'batch'.")
-    parser.add_argument("-p", "--project", required=True, 
-                        help="Name of the project.")
+    parser.add_argument("-p", "--project", help="Name of the project.")
     parser.add_argument("-g", "--groups", type=int, choices=range(1, 51), default=1,
                         help="Number of groups (1 to 50).")
     parser.add_argument("-m", "--members_per_group", type=int, choices=range(6, 51), default=8,
@@ -126,17 +125,15 @@ def main() -> None:
     # Parse arguments
     parser = setup_argument_parser()
     args = parser.parse_args()
-    
     try:
-        # Setup the path to the project folder
-        project_folderpath = Path("./data") / args.user / args.project
-        
         if args.action == "init":
+            project_folderpath = Path("./data") / args.user / args.project
             handle_init_action(args.project, project_folderpath)
         elif args.action == "batch":
             data_folder = Path("./data") / args.user
             handle_batch_processing(data_folder, args.with_sociogram, args.language)
         else:
+            project_folderpath = Path("./data") / args.user / args.project
             handle_project_actions(args, project_folderpath)
             
     except Exception as error:
