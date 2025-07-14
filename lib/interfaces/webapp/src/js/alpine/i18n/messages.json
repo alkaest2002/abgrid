@@ -8,12 +8,12 @@
             "members": "membri"
         },
         "errors": {
-            "choice_must_be_a_single_key_value_pair": "la scelta deve essere una singola coppia chiave: valori",
+            "choice_must_be_a_single_key_value_pair": "ogni scelta deve essere una singola coppia 'chiave: valori'",
             "choices_exceeds_availability_of_symbols": "le scelte superano la disponibilità dei simboli",
             "fastapi_failed_to_render_jinja_template": "non è stato possibile trovare il template jinja",
             "fastapi_required_jwt_token": "token jwt mancante",
             "fastapi_requests_exceeded_rate_limit": "hai invito un numero eccessivo di richieste al server; riprova più tardi, tra circa 30 secondi",
-            "fastapi_invalid_or_expired_jwt_token": "token jwt non fornito o scaduto",
+            "fastapi_invalid_or_expired_jwt_token": "token jwt non fornito o scaduto; ritorna alla homepage.",
             "field_cannot_be_empty": "il campo non può essere vuoto",
             "field_contains_invalid_characters": "il campo contiene caratteri non validi",
             "field_is_out_of_range": "il campo è fuori dal range consentito",
@@ -26,8 +26,6 @@
             "key_must_be_a_single_alphabetic_character": "la chiave deve essere un singolo carattere alfabetico",
             "keys_are_not_correct": "le chiavi non sono corrette",
             "keys_in_a_and_b_must_be_identical": "le chiavi in A e B devono essere identiche",
-            "unknown_issue_occurred": "operazione non riuscita, si è verificato un problema",
-            "report_generation_failure": "il server non ha generato il report",
             "unknown_error": "errore sconosciuto; contatta lo sviluppatore",
             "value_must_contain_only_single_alphabetic_characters": "il valore deve contenere solo singoli caratteri alfabetici",
             "values_contain_duplicates": "i valori contengono duplicati",
