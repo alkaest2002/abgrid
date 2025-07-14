@@ -32,6 +32,10 @@
             "values_contain_invalid_keys": "i valori contengono chiavi non valide",
             "yaml_parse_failure": "errore nel file YAML"
         },
+        "server": {
+            "server_alive_and_kicking": "il server è vivo e vegeto",
+            "server_down": "il server non risponde"
+        },
         "toast": {
             "online": "ripristinata connessione internet",
             "offline": "connessione internet assente",

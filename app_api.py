@@ -93,7 +93,9 @@ def server_check() -> JSONResponse:
     """
     return JSONResponse(
         status_code=status.HTTP_200_OK,
-        content={"detail": "AB-Grid server is alive and kicking."}
+        content={
+            "detail": "server_alive_and_kicking"
+        }
     )
 
 @app.get("/{path:path}")
@@ -104,7 +106,7 @@ def catchall(path: str) -> JSONResponse:
     return JSONResponse(
         status_code=status.HTTP_404_NOT_FOUND,
         content={
-            "detail": f"Route '{path}' not found. Try /health for status check.",
+            "detail": "route_not_found",
             "redirect_to": "/"
         }
     )

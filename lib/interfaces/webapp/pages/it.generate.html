@@ -89,7 +89,7 @@
                                     <div class="mb-4">
                                         <label 
                                             for="project_title"
-                                            class="block text-sm font-medium text-gray-900"
+                                            class="block text-sm font-medium text-gray-900 opacity-25"
                                             x-bind="generateFieldLabel"
                                         >Titolo del progetto</label>
                                         <input 
@@ -99,12 +99,13 @@
                                             x-bind="generateStringInputFactory('$store.data.dataGroup.project_title')"
                                             placeholder="es. raccolta dati 2025"
                                             class="mt-2 block w-full p-3 bg-white rounded-md text-sm placeholder:text-sm shadow-sm focus:outline-none"
-                                            required>
+                                            required
+                                            >
                                     </div>
                                     <div class="mb-4">
                                         <label 
                                             for="question_a"
-                                            class="block text-sm font-medium text-gray-900"
+                                            class="block text-sm font-medium text-gray-900 opacity-25"
                                             x-bind="generateFieldLabel">Domanda A</label>
                                         <input 
                                             type="text" 
@@ -118,7 +119,7 @@
                                     <div class="mb-4">
                                         <label
                                             for="question_b"
-                                            class="block text-sm font-medium text-gray-900"
+                                            class="block text-sm font-medium text-gray-900 opacity-25"
                                             x-bind="generateFieldLabel">Domanda B</label>
                                         <input 
                                             type="text" 
@@ -133,7 +134,7 @@
                                         <div>
                                             <label 
                                                 for="group"
-                                                class="block text-sm font-medium text-gray-900"
+                                                class="block text-sm font-medium text-gray-900 opacity-25"
                                                 x-bind="generateFieldLabel">Identificativo gruppo</label>
                                             <input 
                                                 type="number" 
@@ -147,7 +148,7 @@
                                         <div>
                                             <label 
                                                 for="members"
-                                                class="block text-sm font-medium text-gray-900"
+                                                class="block text-sm font-medium text-gray-900 opacity-25"
                                                 x-bind="generateFieldLabel">Numero di membri</label>
                                             <input 
                                                 type="number" 
