@@ -41,7 +41,7 @@
             </header>
 
             <!-- Center area - takes available space with rounded border -->
-            <main class="min-h-[640px] flex-1 relative px-6 overflow-y-auto">
+            <main class="min-h-[640px] flex-1 relative px- overflow-y-auto">
                 <div class="h-full">
                     <div class="h-full relative p-12 pb-6 text-gray-900 bg-gray-100 rounded-lg">
                         <!-- Main content goes here -->
@@ -66,8 +66,8 @@
                             </div>
                         </template>
                         <template x-if="$store.abgrid.reportDataFilename">
-                            <div class="h-full flex flex-col gap-6" x-bind="dropzone" x-cloak>
-                                <div>
+                            <div class="h-full flex flex-col gap-3" x-bind="dropzone" x-cloak>
+                                <div class="mb-4">
                                     <p>
                                         Modifica il file qui o scaricalo, modificalo con un
                                         editor di testi e poi ricaricalo. Rispetta lo
@@ -121,7 +121,7 @@
                                     </div>
                                 </div>
                                 <div class="relative w-full h-full bg-slate-800 rounded-md shadow-sm overflow-hidden"
-                                    x-data="componentTextArea($store.abgrid.reportDataYAML)">
+                                    x-data="componentTextArea($store.abgrid.reportDataYAML, $store.abgrid.apiRequestIsPending)">
                                     <div class="absolute left-0 top-0 h-full w-14 py-2 text-sm font-mono bg-slate-700 text-amber-50 select-none pointer-events-none overflow-hidden"
                                         x-bind="textareaLineNumbers">
                                         <template x-for="line in textareaLines" :key="line">
@@ -129,9 +129,12 @@
                                                 x-text="line"></div>
                                         </template>
                                     </div>
-                                    <textarea x-bind="textareaInputField"
+                                    <textarea 
+                                        x-bind="textareaInputField"
                                         class="w-full h-full pl-16 pr-6 py-2 leading-6 text-sm font-mono text-amber-50 bg-slate-800 rounded-md ring-0 outline-0 resize-none overflow-y-scroll overscroll-y-none box-border m-0 whitespace-pre "
-                                        spellcheck="false" x-cloak>
+                                        spellcheck="false" 
+                                        x-cloak
+                                    >
                                 </textarea>
                                 </div>
 
