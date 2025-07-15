@@ -330,10 +330,11 @@ class ABGridReportSchema(BaseModel):
         This method validates that:
         1. Choices is a non-empty list
         2. Each choice is a dictionary with exactly one key-value pair
-        3. Keys are single alphabetic characters following the SYMBOLS pattern
-        4. Values are either None or comma-separated lists of valid key references
-        5. Keys don't reference themselves
-        6. No duplicate values within a choice
+        3. Keys are single alphabetic characters (no duplicates)
+        4. Keys should not exceed SYMBOLS length
+        5. Values are either None or comma-separated lists of valid key references
+        6. Keys don't reference themselves
+        7. No duplicate values within a choice
         
         Args:
             data: The full data dictionary
@@ -346,9 +347,16 @@ class ABGridReportSchema(BaseModel):
         choices = data.get(field_name)
         extracted_keys = set()
         
+        # Type validation
         if not isinstance(choices, list):
+            errors.append({
+                "location": field_name,
+                "value_to_blame": choices,
+                "error_message": "field_must_be_a_list"
+            })
             return extracted_keys
         
+        # Empty list validation
         if len(choices) == 0:
             errors.append({
                 "location": field_name,
@@ -357,20 +365,20 @@ class ABGridReportSchema(BaseModel):
             })
             return extracted_keys
         
+        # Length validation
         if len(choices) > len(SYMBOLS):
             errors.append({
                 "location": field_name,
                 "value_to_blame": choices,
-                "error_message": f"choices_exceeds_availability_of_symbols"
+                "error_message": "choices_exceeds_availability_of_symbols"
             })
             return extracted_keys
         
         # Validate each choice
         for i, choice_dict in enumerate(choices):
-            
             if not isinstance(choice_dict, dict) or len(choice_dict) != 1:
                 errors.append({
-                    "location": f"{field_name}[{i+1}]",
+                    "location": f"{field_name}[{i}]",
                     "value_to_blame": choice_dict,
                     "error_message": "choice_must_be_a_single_key_value_pair"
                 })
@@ -387,36 +395,62 @@ class ABGridReportSchema(BaseModel):
                     "error_message": "key_must_be_a_single_alphabetic_character"
                 })
             else:
-                # Add key to extracted keys
-                extracted_keys.add(key)
-                
-                # Validate value
-                if value_str is not None and isinstance(value_str, str) and value_str.strip():
-                    value_parts = [part.strip() for part in value_str.split(',')]
+                # Check for duplicate keys
+                if key in extracted_keys:
+                    errors.append({
+                        "location": f"{field_name}.{key}",
+                        "value_to_blame": key,
+                        "error_message": "duplicate_key_found"
+                    })
+                else:
+                    extracted_keys.add(key)
                     
-                    # Check all parts are valid single alphabetic characters
-                    invalid_parts = [part for part in value_parts if len(part) != 1 or not part.isalpha()]
-                    if invalid_parts:
-                        errors.append({
-                            "location": f"{field_name}.{key}",
-                            "value_to_blame": value_str,
-                            "error_message": "value_must_contain_only_single_alphabetic_characters"
-                        })
-                    
-                    # Check key doesn't reference itself
-                    if key in value_parts:
-                        errors.append({
-                            "location": f"{field_name}.{key}",
-                            "value_to_blame": value_str,
-                            "error_message": "key_cannot_be_present_in_its_own_values"
-                        })
-                    
-                    # Check for duplicates
-                    if len(value_parts) != len(set(value_parts)):
-                        errors.append({
-                            "location": f"{field_name}.{key}",
-                            "value_to_blame": value_str,
-                            "error_message": "values_contain_duplicates"
-                        })
-                    
+                    # Validate value
+                    cls._validate_choice_value(field_name, key, value_str, errors)
+        
         return extracted_keys
+
+    @classmethod
+    def _validate_choice_value(cls, field_name: str, key: str, value_str: Any, errors: List[Dict[str, Any]]) -> None:
+        """Helper method to validate choice values."""
+        if value_str is None:
+            return
+            
+        if not isinstance(value_str, str):
+            errors.append({
+                "location": f"{field_name}.{key}",
+                "value_to_blame": value_str,
+                "error_message": "value_must_be_string_or_null"
+            })
+            return
+        
+        if not value_str.strip():
+            return  # Empty string is valid
+        
+        value_parts = [part.strip() for part in value_str.split(',')]
+        
+        # Check all parts are valid single alphabetic characters
+        invalid_parts = [part for part in value_parts if len(part) != 1 or not part.isalpha()]
+        if invalid_parts:
+            errors.append({
+                "location": f"{field_name}.{key}",
+                "value_to_blame": value_str,
+                "error_message": "value_must_contain_only_single_alphabetic_characters"
+            })
+        
+        # Check key doesn't reference itself
+        if key in value_parts:
+            errors.append({
+                "location": f"{field_name}.{key}",
+                "value_to_blame": value_str,
+                "error_message": "key_cannot_be_present_in_its_own_values"
+            })
+        
+        # Check for duplicates
+        if len(value_parts) != len(set(value_parts)):
+            errors.append({
+                "location": f"{field_name}.{key}",
+                "value_to_blame": value_str,
+                "error_message": "values_contain_duplicates"
+            })
+
