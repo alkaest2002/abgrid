@@ -43,9 +43,9 @@ choices_a:
 #########################################
 choices_b:
   - A: M
-  - B: M
-  - C: M
-  - D: M
+  - B: K
+  - C: K
+  - D: K
   - E: M, H
   - F: M, G
   - G: M, F
@@ -54,7 +54,7 @@ choices_b:
   - J: M, K
   - K: M, J
   - L: 
-  - M: J
+  - M: I
 
 # Legend:
 # A: Frodo Baggins
