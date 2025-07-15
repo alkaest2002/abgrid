@@ -11,7 +11,7 @@
             },
             "server": {
                 "status": "Stato AB-Grid server",
-                "message": "controllo in corso"
+                "message": "controllo in corso..."
             },
             "note": {
                 "chrome": "<span class='font-bold mb-1'>NOTA</span>: i report AB-Grid sono in formato HTML. Assicurati di usare l'ultima versione del browser <a href='https://www.google.com/intl/it_it/chrome/' target='_blank' class='text-blue-700 font-semibold'>Google Chrome</a>, al fine di ottenere la migliore resa grafica, sia in fase di stampa che di generazione dei file PDF."
