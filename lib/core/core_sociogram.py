@@ -96,7 +96,6 @@ class CoreSociogram:
         """
         # Store social network analysis data
         self.sna = sna
-
         # Compute all sociogram components in sequence
         self.sociogram["macro_stats"] = self._compute_macro_stats()
         self.sociogram["micro_stats"] = self._compute_micro_stats()
@@ -187,7 +186,6 @@ class CoreSociogram:
         """
         if self.sna is None:
             raise AttributeError("SNA data must be set before computing statistics.")
-            
         # Retrieve network graphs and adjacency matrices
         network_a: nx.DiGraph = self.sna["network_a"]
         network_b: nx.DiGraph = self.sna["network_b"]
@@ -222,7 +220,7 @@ class CoreSociogram:
 
         # Compute status ranking based on social desirability order
         status_order: List[str] = [
-            "popular", "appreciated", "marginal", "isolated", "ambitendent",
+            "popular", "appreciated", "marginal", "-", "isolated", "ambitendent",
             "controversial", "disliked", "rejected"
         ]
         sociogram_micro_stats["st_rank"] = (
@@ -543,7 +541,7 @@ class CoreSociogram:
         # Condition 3: impact level determines ambitendent vs controversial classification
         status.loc[prefs_a.mul(prefs_b).gt(0) & neutral & impact_median] = "ambitendent"
         status.loc[prefs_a.mul(prefs_b).gt(0) & neutral & impact_high] = "controversial"
-
+        
         return status
 
     def _create_graph(self, coefficient: Literal["ai", "ii"]) -> str:

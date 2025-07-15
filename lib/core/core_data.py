@@ -91,10 +91,10 @@ class CoreData:
         
         # Compute SNA results from group choice data
         sna_results: SNADict = abgrid_sna.get(validated_model.choices_a, validated_model.choices_b)
-
+        
         # Compute sociogram results from SNA data
         sociogram_results: SociogramDict = abgrid_sociogram.get(sna_results)
-        
+       
         # Prepare the comprehensive report data structure
         report_data: Dict[str, Any] = {
             "year": datetime.datetime.now(datetime.UTC).year,
@@ -105,7 +105,6 @@ class CoreData:
             "members_per_group": len(validated_model.choices_a),
             "sna": sna_results,
         }
-
         # Add sociogram data to report data, if requested
         report_data["sociogram"] = sociogram_results if with_sociogram else None
 

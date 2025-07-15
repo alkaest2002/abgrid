@@ -243,12 +243,12 @@ class ABGridReportSchema(BaseModel):
         - Choice keys must follow the SYMBOLS pattern (A, B, C, etc.)
     """
     
-    project_title: str
-    question_a: str
-    question_b: str
-    group: int
-    choices_a: List[Dict[str, Any]]
-    choices_b: List[Dict[str, Any]]
+    project_title: Any
+    question_a: Any
+    question_b: Any
+    group: Any
+    choices_a: Any
+    choices_b: Any
     
     model_config = {"extra": "forbid"}
 
@@ -299,8 +299,28 @@ class ABGridReportSchema(BaseModel):
         
         if errors:
             raise PydanticValidationException(errors)
-        
         return data
+    
+    @model_validator(mode="after")
+    def strip_choice_values_after(self) -> "ABGridReportSchema":
+        """
+        Strip spaces from choice values after validation.
+        
+        This method removes spaces around commas in choice values after
+        the model has been validated and the data structure is confirmed valid.
+        
+        Returns:
+            The model instance with stripped choice values
+        """
+        for field_name in ["choices_a", "choices_b"]:
+            choices = getattr(self, field_name)
+            for choice_dict in choices:
+                for key, value in choice_dict.items():
+                    if isinstance(value, str) and value.strip():
+                        stripped_value = ','.join(part.strip() for part in value.split(','))
+                        choice_dict[key] = stripped_value
+        
+        return self
     
     @classmethod
     def _validate_choices(cls, data: Dict[str, Any], field_name: str, errors: List[Dict[str, Any]]) -> Set[str]:
@@ -345,8 +365,6 @@ class ABGridReportSchema(BaseModel):
             })
             return extracted_keys
         
-        expected_keys = set(SYMBOLS[:len(choices)])
-        
         # Validate each choice
         for i, choice_dict in enumerate(choices):
             
@@ -369,6 +387,7 @@ class ABGridReportSchema(BaseModel):
                     "error_message": "key_must_be_a_single_alphabetic_character"
                 })
             else:
+                # Add key to extracted keys
                 extracted_keys.add(key)
                 
                 # Validate value
@@ -400,21 +419,4 @@ class ABGridReportSchema(BaseModel):
                             "error_message": "values_contain_duplicates"
                         })
                     
-                    # Check references are valid (will be validated against expected_keys)
-                    invalid_values = [v for v in value_parts if v not in expected_keys]
-                    if invalid_values:
-                        errors.append({
-                            "location": f"{field_name}.{key}",
-                            "value_to_blame": value_str,
-                            "error_message": "values_contain_invalid_keys"
-                        })
-        
-        # Check keys match expected pattern
-        if extracted_keys != expected_keys:
-            errors.append({
-                "location": f"{field_name}.keys",
-                "value_to_blame": sorted(extracted_keys),
-                "error_message": "keys_are_not_correct"
-            })
-        
         return extracted_keys
