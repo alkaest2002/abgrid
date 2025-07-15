@@ -1,0 +1,72 @@
+#########################################
+# WARNINGS
+# Do not change the keys (for example,
+# project_title, question_a, etc.)
+#########################################
+
+#########################################
+# Project information
+#########################################
+project_title: The Fellowship of the ring
+question_a: Who would you choose as your adventure companion?
+question_b: Who wouldn't you choose as your adventure companion?
+
+#########################################
+# Group ID
+#########################################
+group: 1
+
+#########################################
+# Add type A choices of each participant
+# strictly following this format
+# es. - A: C,E
+#########################################
+choices_a:
+  - A: B, E, I
+  - B: A, E, I
+  - C: D, I, B
+  - D: C, I, B
+  - E: F, A, I
+  - F: E, D, J
+  - G: I, H, E
+  - H: F, E, C
+  - I: A, E, J
+  - J: E, F, I
+  - K: A, D, G
+  - L: 
+  - M: A, D, G
+
+#########################################
+# Add type B choices of each participant
+# strictly following this format
+# es. - A: C,E
+#########################################
+choices_b:
+  - A: M
+  - B: M
+  - C: M
+  - D: M
+  - E: M, H
+  - F: M, G
+  - G: M, F
+  - H: M, G
+  - I: M, H
+  - J: M, K
+  - K: M, J
+  - L: 
+  - M: J
+
+# Legend:
+# A: Frodo Baggins
+# B: Samwise Gamgee
+# C: Meriadoc Brandybuck
+# D: Peregrino Took
+# E: Aragorn
+# F: Legolas
+# G: Gimli
+# H: Boromir
+# I: Gandalf
+# J: Elrond
+# K: Gollum
+# L: Barbalbero
+# M: Sauron
