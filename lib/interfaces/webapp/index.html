@@ -5,13 +5,19 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="stylesheet" href="/src/css/styles.css" />
-    <title>AB-Grid app</title>
+    <title>AB-Grid</title>
 </head>
 
 <body class="h-screen min-w-4xl max-w-4xl mx-auto overflow-hidden pb-6"
     x-data="{ ...componentToast(), ...componentOnline(), ...componentNavigation(), ...componentApi() }"
     x-init="() => { initToast(); initOnline(); initNavigation(); initApi() }">
     
+    <div 
+        x-data x-show="false"
+        class="absolute top-0 left-0 flex items-center justify-center w-full h-full bg-gray-400 opacity-95 z-20">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="#fff" class="animate-spin h-10" viewBox="0 0 512 512"><!--!Font Awesome Free 6.7.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2025 Fonticons, Inc.--><path d="M304 48a48 48 0 1 0 -96 0 48 48 0 1 0 96 0zm0 416a48 48 0 1 0 -96 0 48 48 0 1 0 96 0zM48 304a48 48 0 1 0 0-96 48 48 0 1 0 0 96zm464-48a48 48 0 1 0 -96 0 48 48 0 1 0 96 0zM142.9 437A48 48 0 1 0 75 369.1 48 48 0 1 0 142.9 437zm0-294.2A48 48 0 1 0 75 75a48 48 0 1 0 67.9 67.9zM369.1 437A48 48 0 1 0 437 369.1 48 48 0 1 0 369.1 437z"/></svg>
+    </div>
+
     <!-- Toast -->
     <template x-teleport="body">
         <div x-bind="toastContainer"
@@ -21,18 +27,13 @@
         </div>
     </template>
     
-    <div class="h-full" data-taxi>
-        <div class="h-full flex flex-col" x-data="viewHome" data-taxi-view >
-            
+    <div class="h-full" data-taxi x-cloak>
+        <div class="h-full flex flex-col" x-data="viewHome" data-taxi-view>
             <!-- Top area - fixed height -->
             <header class="h-24 flex items-center justify-start p-9">
                 <div class="w-full">
-                    <p class="text-3xl font-bold">
-                        AB-Grid
-                    </p>
-                    <p class="text-sm text-gray-600">
-                        Software per la generazione di report
-                    </p>
+                    <p class="text-3xl font-bold" x-text="$t('homepage.logo.title')"></p>
+                    <p class="text-sm text-gray-600" x-text="$t('homepage.logo.subtitle')"></p>
                 </div>
             </header>
 
@@ -43,26 +44,20 @@
                         <!-- Main content goes here -->
                         <div class="h-full">
                             <div class="mb-9">
-                                <p class="mb-2">
-                                    Benvenuto in AB-Grid, un'applicazione web per l'analisi delle dinamiche relazionali nei gruppi orizzontali, basata sulle tecniche sociometriche di J. L. Moreno e sulla social network analysis.
-                                </p>
-                                <p>
-                                    Prima di iniziare, ti consigliamo di consultare il <a href="public/manuale.it.pdf" target="_blank" class="text-blue-700 font-semibold">manuale d'uso</a>.
-                                </p>
+                                <p class="mb-2" x-text="$t('homepage.intro.para1')"></p>
+                                <p x-html="$t('homepage.intro.para2')"></p>
                             </div>
                             <div class="w-full flex gap-4 items-center px-6 py-3 mb-9 bg-gray-200 rounded-lg">
                                 <div>
                                     <svg xmlns="http://www.w3.org/2000/svg" class="h-11 fill-gray-600" viewBox="0 0 640 512"><!--!Font Awesome Free 6.7.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2025 Fonticons, Inc.--><path d="M384 96l0 224L64 320 64 96l320 0zM64 32C28.7 32 0 60.7 0 96L0 320c0 35.3 28.7 64 64 64l117.3 0-10.7 32L96 416c-17.7 0-32 14.3-32 32s14.3 32 32 32l256 0c17.7 0 32-14.3 32-32s-14.3-32-32-32l-74.7 0-10.7-32L384 384c35.3 0 64-28.7 64-64l0-224c0-35.3-28.7-64-64-64L64 32zm464 0c-26.5 0-48 21.5-48 48l0 352c0 26.5 21.5 48 48 48l64 0c26.5 0 48-21.5 48-48l0-352c0-26.5-21.5-48-48-48l-64 0zm16 64l32 0c8.8 0 16 7.2 16 16s-7.2 16-16 16l-32 0c-8.8 0-16-7.2-16-16s7.2-16 16-16zm-16 80c0-8.8 7.2-16 16-16l32 0c8.8 0 16 7.2 16 16s-7.2 16-16 16l-32 0c-8.8 0-16-7.2-16-16zm32 160a32 32 0 1 1 0 64 32 32 0 1 1 0-64z"/></svg>
                                 </div>
                                 <div>
-                                    <p class="font-semibold">Stato AB-Grid server</p>
-                                    <p x-bind="serverStatus" class="text-sm">checking...</p>
+                                    <p class="font-semibold" x-text="$t('homepage.server.status')"></p>
+                                    <p x-bind="serverStatus" class="text-sm" x-text="$t('homepage.server.message')"></p>
                                 </div>
                             </div>
                             <div class="text-sm">
-                                <p>
-                                    <span class="font-bold mb-1">NOTA</span>: i report AB-Grid sono in formato HTML. Assicurati di usare l'ultima versione del browser <a href="https://www.google.com/intl/it_it/chrome/" target="_blank" class="text-blue-700 font-semibold">Google Chrome</a>, al fine di ottenere la migliore resa grafica, sia in fase di stampa che di generazione dei file PDF.
-                                </p>
+                                <p x-html="$t('homepage.note.chrome')"></p>
                             </div>
                         </div>
                     </div>
