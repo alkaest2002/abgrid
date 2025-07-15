@@ -2,7 +2,7 @@
 @source inline("bg-green-700", "bg-red-700");
 
 .fade-in {
-    animation: fadeIn .5s;
+    animation: fadeIn .25s;
 }
 
 @keyframes fadeIn {
