@@ -9,7 +9,6 @@ import { fileURLToPath, URL } from "node:url"
 
 export default defineConfig({
     build: {
-        outDir: "../electron/app/dist",
         rollupOptions: {
             input: {
                 main: resolve(fileURLToPath(new URL('.', import.meta.url)), 'index.html'),
