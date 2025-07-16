@@ -23,7 +23,7 @@ from lib.interfaces.fastapi.router import get_router
 app = FastAPI()
 
 # Use a "random" port number within the dynamic range
-fancy_port = [ "53472", "53247", "53274", "53472", "53427", "53724", "53742" ]
+fancy_port = [ "53472", "53247", "53274", "53427", "53724", "53742" ]
 
 # Define domains that should be allowed to access your server
 domains = [ "https://localhost", "https://127.0.0.1", "http://localhost", "http://127.0.0.1" ]
