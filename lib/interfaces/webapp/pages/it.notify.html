@@ -16,7 +16,11 @@
     <template x-teleport="body">
         <div x-bind="toastContainer"
             class="fixed top-6 left-1/2 transform -translate-x-1/2 flex gap-2 items-center p-3 rounded-md shadow-lg cursor-pointer">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-4" fill="currentColor" viewBox="0 0 448 512"><!--!Font Awesome Free 6.7.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2025 Fonticons, Inc.--><path d="M224 0c-17.7 0-32 14.3-32 32l0 19.2C119 66 64 130.6 64 208l0 18.8c0 47-17.3 92.4-48.5 127.6l-7.4 8.3c-8.4 9.4-10.4 22.9-5.3 34.4S19.4 416 32 416l384 0c12.6 0 24-7.4 29.2-18.9s3.1-25-5.3-34.4l-7.4-8.3C401.3 319.2 384 273.9 384 226.8l0-18.8c0-77.4-55-142-128-156.8L256 32c0-17.7-14.3-32-32-32zm45.3 493.3c12-12 18.7-28.3 18.7-45.3l-64 0-64 0c0 17 6.7 33.3 18.7 45.3s28.3 18.7 45.3 18.7s33.3-6.7 45.3-18.7z"/></svg>
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-4" fill="currentColor"
+                viewBox="0 0 448 512"><!--!Font Awesome Free 6.7.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2025 Fonticons, Inc.-->
+                <path
+                    d="M224 0c-17.7 0-32 14.3-32 32l0 19.2C119 66 64 130.6 64 208l0 18.8c0 47-17.3 92.4-48.5 127.6l-7.4 8.3c-8.4 9.4-10.4 22.9-5.3 34.4S19.4 416 32 416l384 0c12.6 0 24-7.4 29.2-18.9s3.1-25-5.3-34.4l-7.4-8.3C401.3 319.2 384 273.9 384 226.8l0-18.8c0-77.4-55-142-128-156.8L256 32c0-17.7-14.3-32-32-32zm45.3 493.3c12-12 18.7-28.3 18.7-45.3l-64 0-64 0c0 17 6.7 33.3 18.7 45.3s28.3 18.7 45.3 18.7s33.3-6.7 45.3-18.7z" />
+            </svg>
             <span x-bind="toastMessage" class="text-sm"></span>
         </div>
     </template>
@@ -47,7 +51,8 @@
                                 <div class="w-full h-full flex flex-col justify-start items-start">
                                     <p class="mb-2 text-3xl font-bold text-center text-gray-800">Urrà!</p>
                                     <p class="text-center font-semibold">Il report è stato generato correttamente.</p>
-                                    <p class="mb-3 text-xs text-center">Clicca sulle icone per scaricarlo in formato HTML o in formato JSON.
+                                    <p class="mb-3 text-xs text-center">Clicca sulle icone per scaricarlo nei formati
+                                        disponibili.
                                     </p>
 
                                     <div class="flex flex-col gap-12 mt-6">
@@ -70,19 +75,30 @@
                                                     </div>
 
                                                     <!-- Spinner -->
-                                                    <div class="absolute top-2 left-2" x-show="notifyShowFilePDFSpinner">
+                                                    <div class="absolute top-2 left-2"
+                                                        x-show="notifyShowFilePDFSpinner">
                                                         <div
                                                             class="w-4 h-4 border-2 border-red-300 border-t-red-600 rounded-full animate-spin">
                                                         </div>
                                                     </div>
 
-                                                    <!-- PDF text -->
-                                                    <div class="absolute inset-0 flex flex-col items-center justify-center">
-                                                        <span
-                                                            class="text-4xl text-red-700 font-bold tracking-wider drop-shadow-sm">HTML</span>
+                                                    <!-- HTML OR PDF text -->
+                                                    <div
+                                                        class="absolute inset-0 flex flex-col items-center justify-center">
+                                                        <template x-if="!$store.app.appIsElectron">
+                                                            <span
+                                                                class="text-4xl text-red-700 font-bold tracking-wider drop-shadow-sm">HTML
+                                                            </span>
+                                                        </template>
+                                                        <template x-if="$store.app.appIsElectron">
+                                                            <span
+                                                                class="text-4xl text-red-700 font-bold tracking-wider drop-shadow-sm">PDF
+                                                            </span>
+                                                        </template>
                                                         <div
                                                             class="mt-2 text-sm text-red-600 font-medium uppercase tracking-widest">
-                                                            Report</div>
+                                                            Report
+                                                        </div>
                                                     </div>
 
                                                     <!-- Decorative lines -->
@@ -95,9 +111,24 @@
                                             </div>
                                             <div>
                                                 <p class="text-xl font-semibold mb-2">Avvertenze</p>
-                                                <p>
-                                                    Il file HTML è visualizzabile con qualsiasi browser standard. Inoltre, è possibile generare un PDF tramite la funzione di stampa del browser stesso. Per ottenere una qualità grafica ottimale del report, consigliamo di utilizzare l'ultima versione di <a href="https://www.google.com/intl/it_it/chrome/" class="text-blue-700 font-semibold" target="_blank">Google Chrome</a>.
-                                                </p>
+                                                <template x-if="!$store.app.appIsElectron">
+                                                    <p>
+                                                        Il file HTML è visualizzabile con qualsiasi browser standard.
+                                                        Inoltre, è possibile generare un PDF tramite la funzione di
+                                                        stampa del browser stesso. Per ottenere una qualità grafica
+                                                        ottimale del report, consigliamo di utilizzare l'ultima versione
+                                                        di <a href="https://www.google.com/intl/it_it/chrome/"
+                                                            class="text-blue-700 font-semibold" target="_blank">Google
+                                                            Chrome</a>.
+                                                    </p>
+                                                </template>
+                                                <template x-if="$store.app.appIsElectron">
+                                                    <p>
+                                                        Il report PDF è pensato per una fruizione visivamente ricca dei
+                                                        dati AB-Grid. Se desideri analizzare i dati AB-Grid da un punto
+                                                        di vista statstico ti consigliamo di usare il formato JSON.
+                                                    </p>
+                                                </template>
                                             </div>
                                         </div>
                                         <div class="flex items-center gap-9">
@@ -118,14 +149,16 @@
                                                     </div>
 
                                                     <!-- Spinner -->
-                                                    <div class="absolute top-2 left-2" x-show="notifyShowFilePDFSpinner">
+                                                    <div class="absolute top-2 left-2"
+                                                        x-show="notifyShowFilePDFSpinner">
                                                         <div
                                                             class="w-4 h-4 border-2 border-blue-300 border-t-blue-600 rounded-full animate-spin">
                                                         </div>
                                                     </div>
 
                                                     <!-- JSON text -->
-                                                    <div class="absolute inset-0 flex flex-col items-center justify-center">
+                                                    <div
+                                                        class="absolute inset-0 flex flex-col items-center justify-center">
                                                         <span
                                                             class="text-4xl text-blue-700 font-bold tracking-wider drop-shadow-sm font-mono">JSON</span>
                                                         <div
@@ -144,7 +177,9 @@
                                             <div>
                                                 <p class="text-xl font-semibold mb-2">Avvertenze</p>
                                                 <p>
-                                                    Il file JSON include tutti i dati del report (inclusi i grafici in formato SVG) ed è strutturato in modo da essere compatibile per l'analisi con i più diffusi pacchetti statistici.
+                                                    Il file JSON include tutti i dati del report (inclusi i grafici in
+                                                    formato SVG) ed è strutturato in modo da essere compatibile per
+                                                    l'analisi con i più diffusi pacchetti statistici.
                                                 </p>
                                             </div>
                                         </div>
@@ -157,10 +192,16 @@
                                 <div class="w-full mx-auto">
                                     <div class="flex items-center gap-x-4 mb-6">
                                         <div class="grow h-12 flex items-center">
-                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-8 fill-gray-700 " viewBox="0 0 512 512"><!--!Font Awesome Free 6.7.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2025 Fonticons, Inc.--><path d="M256 32c14.2 0 27.3 7.5 34.5 19.8l216 368c7.3 12.4 7.3 27.7 .2 40.1S486.3 480 472 480L40 480c-14.3 0-27.6-7.7-34.7-20.1s-7-27.8 .2-40.1l216-368C228.7 39.5 241.8 32 256 32zm0 128c-13.3 0-24 10.7-24 24l0 112c0 13.3 10.7 24 24 24s24-10.7 24-24l0-112c0-13.3-10.7-24-24-24zm32 224a32 32 0 1 0 -64 0 32 32 0 1 0 64 0z"/></svg>
+                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-8 fill-gray-700 "
+                                                viewBox="0 0 512 512"><!--!Font Awesome Free 6.7.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2025 Fonticons, Inc.-->
+                                                <path
+                                                    d="M256 32c14.2 0 27.3 7.5 34.5 19.8l216 368c7.3 12.4 7.3 27.7 .2 40.1S486.3 480 472 480L40 480c-14.3 0-27.6-7.7-34.7-20.1s-7-27.8 .2-40.1l216-368C228.7 39.5 241.8 32 256 32zm0 128c-13.3 0-24 10.7-24 24l0 112c0 13.3 10.7 24 24 24s24-10.7 24-24l0-112c0-13.3-10.7-24-24-24zm32 224a32 32 0 1 0 -64 0 32 32 0 1 0 64 0z" />
+                                            </svg>
                                         </div>
                                         <div>
-                                            <span><span class="font-semibold">attenzione</span>: si è verificato un errore. L'analizzatore YAML non è stato in grado di completare l'operazione di parsing e si è fermato alla seguente linea.</span>
+                                            <span><span class="font-semibold">attenzione</span>: si è verificato un
+                                                errore. L'analizzatore YAML non è stato in grado di completare
+                                                l'operazione di parsing e si è fermato alla seguente linea.</span>
                                         </div>
                                     </div>
                                     <p class="mb-2 font-semibold text-sm">Tabella degli errori</p>
@@ -169,12 +210,14 @@
                                             <tr
                                                 class="border-b border-dashed border-gray-400 odd:bg-white even:bg-gray-50">
                                                 <td class="py-3 px-2">
-                                                    <span>errore alla linea numero</span> <span x-text="errorLine"></span>
+                                                    <span>errore alla linea numero</span> <span
+                                                        x-text="errorLine"></span>
                                                 </td>
                                             </tr>
                                         </template>
                                     </table>
-                                    <p class="text-sm">Potrebbero esserci altri errori nel file, che saranno segnalati dopo la
+                                    <p class="text-sm">Potrebbero esserci altri errori nel file, che saranno segnalati
+                                        dopo la
                                         risoluzione del presente.</p>
                                 </div>
                             </template>
@@ -184,10 +227,17 @@
                                 <div class="w-full mx-auto overflow-y-scroll">
                                     <div class="flex items-center gap-x-4 mb-6">
                                         <div class="grow h-12 flex items-center">
-                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-8 fill-gray-700 " viewBox="0 0 512 512"><!--!Font Awesome Free 6.7.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2025 Fonticons, Inc.--><path d="M256 32c14.2 0 27.3 7.5 34.5 19.8l216 368c7.3 12.4 7.3 27.7 .2 40.1S486.3 480 472 480L40 480c-14.3 0-27.6-7.7-34.7-20.1s-7-27.8 .2-40.1l216-368C228.7 39.5 241.8 32 256 32zm0 128c-13.3 0-24 10.7-24 24l0 112c0 13.3 10.7 24 24 24s24-10.7 24-24l0-112c0-13.3-10.7-24-24-24zm32 224a32 32 0 1 0 -64 0 32 32 0 1 0 64 0z"/></svg>
+                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-8 fill-gray-700 "
+                                                viewBox="0 0 512 512"><!--!Font Awesome Free 6.7.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2025 Fonticons, Inc.-->
+                                                <path
+                                                    d="M256 32c14.2 0 27.3 7.5 34.5 19.8l216 368c7.3 12.4 7.3 27.7 .2 40.1S486.3 480 472 480L40 480c-14.3 0-27.6-7.7-34.7-20.1s-7-27.8 .2-40.1l216-368C228.7 39.5 241.8 32 256 32zm0 128c-13.3 0-24 10.7-24 24l0 112c0 13.3 10.7 24 24 24s24-10.7 24-24l0-112c0-13.3-10.7-24-24-24zm32 224a32 32 0 1 0 -64 0 32 32 0 1 0 64 0z" />
+                                            </svg>
                                         </div>
                                         <div>
-                                            <span><span class="font-semibold">attenzione</span>: il server ha resitituito un errore durante la generazione del report richiesto. Segui le indicazioni riportate nella tabella prima di riprovare l'operazione.</span>
+                                            <span><span class="font-semibold">attenzione</span>: il server ha
+                                                resitituito un errore durante la generazione del report richiesto. Segui
+                                                le indicazioni riportate nella tabella prima di riprovare
+                                                l'operazione.</span>
                                         </div>
                                     </div>
                                     <p class="mb-2 font-semibold text-sm">Tabella degli errori</p>
