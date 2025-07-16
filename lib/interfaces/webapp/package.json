@@ -8,7 +8,7 @@
     "build": "vite build --emptyOutDir",
     "build:electron": "npm run build && npm run copy:dist && npm run copy:app",
     "copy:dist": "rm -rf ../electron-thin/app/dist && cp -r dist ../electron-thin/app/dist",
-    "copy:app": "cp -r ../electron-thin/app ../electron-thin/Electron.app/Contents/Resources/app",
+    "copy:app": "rm -rf ../electron-thin/Electron.app/Contents/Resources/app &&  cp -r ../electron-thin/app ../electron-thin/Electron.app/Contents/Resources/app",
     "preview": "vite preview"
   },
   "devDependencies": {
