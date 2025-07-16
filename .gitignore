@@ -10,3 +10,4 @@ ipython/data
 ipython/analysis
 ipython/*.xlsx
 .devServer/
+lib/interfaces/electron/app/dist
