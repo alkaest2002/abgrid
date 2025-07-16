@@ -14,6 +14,7 @@ from itertools import product
 from fastapi import FastAPI, Request, status
 from fastapi.responses import JSONResponse
 from starlette.middleware.cors import CORSMiddleware
+from fastapi.exceptions import RequestValidationError
 from lib.core.core_schemas import PydanticValidationException
 from lib.interfaces.fastapi.limiter import RateLimitException
 from lib.interfaces.fastapi.router import get_router
@@ -81,6 +82,13 @@ async def rate_limit_exception_handler(
     return JSONResponse(
         status_code=status.HTTP_429_TOO_MANY_REQUESTS,
         content={"detail": exc.message}
+    )
+
+@app.exception_handler(RequestValidationError)
+async def validation_exception_handler(request, exc)-> JSONResponse:
+    return JSONResponse(
+        status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+        content={"detail": str(exc.errors())}
     )
 
 @app.get("/")
