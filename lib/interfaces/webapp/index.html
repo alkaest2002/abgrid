@@ -56,9 +56,11 @@
                                     <p x-bind="serverStatus" class="text-sm" x-text="$t('homepage.server.message')"></p>
                                 </div>
                             </div>
-                            <div class="text-sm">
-                                <p x-html="$t('homepage.note.chrome')"></p>
-                            </div>
+                            <template x-if="!$store.app.appIsElectron">
+                                <div class="text-sm">
+                                    <p x-html="$t('homepage.note.chrome')"></p>
+                                </div>
+                            </template>
                         </div>
                     </div>
                 </div>
