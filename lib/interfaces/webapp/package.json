@@ -6,9 +6,9 @@
   "scripts": {
     "dev": "vite --port 53472",
     "build": "vite build --emptyOutDir",
-    "build:electron": "npm run build && npm run copy:dist && npm run copy:app",
-    "copy:dist": "rm -rf ../electron-thin/app/dist && cp -r dist ../electron-thin/app/dist",
-    "copy:app": "rm -rf ../electron-thin/Electron.app/Contents/Resources/app &&  cp -r ../electron-thin/app ../electron-thin/Electron.app/Contents/Resources/app",
+    "build:electron:thin": "npm run build && npm run copy:dist:electron:thin && npm run copy:app:electron:thin",
+    "copy:dist:electron:thin": "rm -rf ../electron/thin/app/dist && cp -r dist ../electron/thin/app/dist",
+    "copy:app:electron:thin": "rm -rf ../electron/thin/Electron.app/Contents/Resources/app &&  cp -r ../electron/thin/app ../electron/thin/Electron.app/Contents/Resources/app",
     "preview": "vite preview"
   },
   "devDependencies": {
