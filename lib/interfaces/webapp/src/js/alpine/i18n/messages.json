@@ -44,7 +44,6 @@
             "key_cannot_be_present_in_its_own_values": "la chiave non può essere presente nei propri valori",
             "key_must_be_a_single_alphabetic_character": "la chiave deve essere un singolo carattere alfabetico",
             "keys_in_a_and_b_must_be_identical": "le chiavi in A e B devono essere identiche",
-            "unknown_error": "errore sconosciuto; contatta lo sviluppatore",
             "value_must_be_string_or_null": "il valore deve essere una stringa o non deve contenere nulla",
             "value_must_contain_only_single_alphabetic_characters": "il valore deve contenere solo singoli caratteri alfabetici",
             "values_contain_duplicates": "i valori contengono duplicati",
@@ -53,7 +52,9 @@
         },
         "server": {
             "server_alive_and_kicking": "il server è vivo e vegeto",
-            "server_down": "il server non risponde"
+            "server_down": "il server non è raggiungibile",
+            "internal_error": "errore del server",
+            "unknown_error": "errore sconosciuto"
         },
         "toast": {
             "online": "ripristinata connessione internet",
