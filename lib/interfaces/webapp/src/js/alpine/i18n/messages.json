@@ -60,10 +60,11 @@
             "offline": "connessione internet assente",
             "success": "operazione conclusa con successo",
             "error": "si è verificato un errore",
-            "file_exceeds_size_limit": "la dimensione del file suopera i limiti previsti",
-            "file_invalid_type": "tipo di file non compatibile",
-            "file_invalid_keys": "il file yaml non è corretto",
-            "file_load_failure": "si è verificato un problema nel caricamento del file"
+            "file_exceeds_size_limit": "la dimensione del file è eccessiva",
+            "file_invalid_type": "tipo di file non supportato",
+            "file_invalid_yaml": "il file yaml non è corretto",
+            "file_load_failure": "caricamento del file yaml non riuscito",
+            "pdf_generate_failure": "generazione del pdf non riuscita"
         }
     }
 }
