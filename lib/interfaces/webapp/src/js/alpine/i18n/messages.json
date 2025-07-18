@@ -45,15 +45,15 @@
             "values_contain_duplicates": "i valori contengono duplicati",
             "values_contain_invalid_keys": "i valori contengono chiavi non valide"
         },
-        "fastapi": {
-            "alive_and_kicking": "il server è vivo e vegeto",
+        "server": {
             "down": "il server non è raggiungibile",
             "failed_to_render_jinja_template": "non è stato possibile trovare il template jinja",
             "invalid_or_expired_jwt_token": "token jwt non fornito o scaduto; ritorna alla homepage.",
             "internal_error": "errore del server",
             "required_jwt_token": "token jwt mancante",
             "requests_exceeded_rate_limit": "hai inviato troppe richieste al server; riprova tra circa 30 secondi",
-            "request_timeout": "timeout della richiesta"
+            "request_timeout": "timeout della richiesta",
+            "up": "il server è vivo e vegeto"
         },
         "toast": {
             "online": "ripristinata connessione internet",
