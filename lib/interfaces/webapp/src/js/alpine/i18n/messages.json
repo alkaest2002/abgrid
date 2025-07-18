@@ -28,10 +28,6 @@
             "choice_must_be_a_single_key_value_pair": "ogni scelta deve essere una singola coppia 'chiave: valori'",
             "choices_exceeds_availability_of_symbols": "le scelte superano la disponibilità dei simboli",
             "duplicate_key_found": "chiave duplicata trovata",
-            "fastapi_failed_to_render_jinja_template": "non è stato possibile trovare il template jinja",
-            "fastapi_required_jwt_token": "token jwt mancante",
-            "fastapi_requests_exceeded_rate_limit": "hai invito un numero eccessivo di richieste al server; riprova più tardi, tra circa 30 secondi",
-            "fastapi_invalid_or_expired_jwt_token": "token jwt non fornito o scaduto; ritorna alla homepage.",
             "field_cannot_be_empty": "il campo non può essere vuoto",
             "field_contains_invalid_characters": "il campo contiene caratteri non validi",
             "field_is_out_of_range": "il campo è fuori dal range consentito",
@@ -50,11 +46,15 @@
             "values_contain_invalid_keys": "i valori contengono chiavi non valide",
             "yaml_parse_failure": "errore nel file YAML"
         },
-        "server": {
-            "server_alive_and_kicking": "il server è vivo e vegeto",
-            "server_down": "il server non è raggiungibile",
+        "fastapi": {
+            "alive_and_kicking": "il server è vivo e vegeto",
+            "down": "il server non è raggiungibile",
+            "failed_to_render_jinja_template": "non è stato possibile trovare il template jinja",
+            "invalid_or_expired_jwt_token": "token jwt non fornito o scaduto; ritorna alla homepage.",
             "internal_error": "errore del server",
-            "unknown_error": "errore sconosciuto"
+            "required_jwt_token": "token jwt mancante",
+            "requests_exceeded_rate_limit": "numero eccessivo di richieste al server; riprova tra circa 30 secondi",
+            "request_timeout": ""
         },
         "toast": {
             "online": "ripristinata connessione internet",
