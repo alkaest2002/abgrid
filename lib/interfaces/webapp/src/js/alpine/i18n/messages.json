@@ -24,7 +24,7 @@
             "group": "identificativo del gruppo",
             "members": "membri"
         },
-        "errors": {
+        "pydanticErrors": {
             "choice_must_be_a_single_key_value_pair": "ogni scelta deve essere una singola coppia 'chiave: valori'",
             "choices_exceeds_availability_of_symbols": "le scelte superano la disponibilità dei simboli",
             "duplicate_key_found": "chiave duplicata trovata",
@@ -43,8 +43,7 @@
             "value_must_be_string_or_null": "il valore deve essere una stringa o non deve contenere nulla",
             "value_must_contain_only_single_alphabetic_characters": "il valore deve contenere solo singoli caratteri alfabetici",
             "values_contain_duplicates": "i valori contengono duplicati",
-            "values_contain_invalid_keys": "i valori contengono chiavi non valide",
-            "yaml_parse_failure": "errore nel file YAML"
+            "values_contain_invalid_keys": "i valori contengono chiavi non valide"
         },
         "fastapi": {
             "alive_and_kicking": "il server è vivo e vegeto",
@@ -53,8 +52,8 @@
             "invalid_or_expired_jwt_token": "token jwt non fornito o scaduto; ritorna alla homepage.",
             "internal_error": "errore del server",
             "required_jwt_token": "token jwt mancante",
-            "requests_exceeded_rate_limit": "numero eccessivo di richieste al server; riprova tra circa 30 secondi",
-            "request_timeout": ""
+            "requests_exceeded_rate_limit": "hai inviato troppe richieste al server; riprova tra circa 30 secondi",
+            "request_timeout": "timeout della richiesta"
         },
         "toast": {
             "online": "ripristinata connessione internet",
