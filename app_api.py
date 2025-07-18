@@ -102,7 +102,7 @@ def server_check() -> JSONResponse:
     return JSONResponse(
         status_code=status.HTTP_200_OK,
         content={
-            "detail": "server_alive_and_kicking"
+            "detail": "alive_and_kicking"
         }
     )
 
