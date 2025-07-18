@@ -240,7 +240,7 @@
                                             <template x-for="error in notifyApiErrors">
                                                 <tr
                                                     class="border-b border-dashed border-gray-400 odd:bg-white even:bg-gray-50">
-                                                    <td x-text="error.location" class="p-3 font-bold">
+                                                    <td x-text="$t('pydanticErrors.loc.' + error.location)" class="p-3 font-bold">
                                                     </td>
                                                     <td x-text="$t('pydanticErrors.' + error.error_message)" class="p-3"></td>
                                                 </tr>
