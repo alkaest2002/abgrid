@@ -73,13 +73,18 @@
                                             class="absolute top-0 left-0 h-full w-full bg-gray-300 opacity-75 rounded-lg"
                                         ></div>
                                         <div class="flex items-center">
-                                            <input id="sociogram" type="checkbox" x-model="dropzoneWithSociogram"
+                                            <input 
+                                                id="sociogram" type="checkbox" x-model="dropzoneWithSociogram"
+                                                @click.capture.stop=""
                                                 class="w-4 h-4 text-blue-700 bg-gray-100 border-gray-300 rounded-sm focus:ring-blue-500">
                                             <label for="sociogram"
                                                 class="ms-2 font-medium text-gray-700">includi sociogramma</label>
                                         </div>
                                     </div>
-                                    <div class="flex gap-x-4 py-2 px-4 text-sm bg-gray-300 rounded-lg relative shadow-sm">
+                                    <div 
+                                        class="flex gap-x-4 py-2 px-4 text-sm bg-gray-300 rounded-lg relative shadow-sm"
+                                        @click.stop=""
+                                    >
                                         <div
                                             x-data
                                             x-show.transition="$store.app.appMagicButtonIsLocked"
