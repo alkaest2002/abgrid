@@ -46,14 +46,16 @@
             "values_contain_invalid_keys": "i valori contengono chiavi non valide"
         },
         "server": {
-            "down": "il server non è raggiungibile",
+            "down": "server non raggiungibile",
             "failed_to_render_jinja_template": "non è stato possibile trovare il template jinja",
             "invalid_or_expired_jwt_token": "token jwt non fornito o scaduto; ritorna alla homepage.",
             "internal_error": "errore del server",
+            "offline": "offline",
+            "online": "online",
             "required_jwt_token": "token jwt mancante",
             "requests_exceeded_rate_limit": "hai inviato troppe richieste al server; riprova tra circa 30 secondi",
             "request_timeout": "timeout della richiesta",
-            "up": "il server è vivo e vegeto"
+            "up": "server raggiungibile"
         },
         "toast": {
             "online": "ripristinata connessione internet",
