@@ -25,7 +25,6 @@
             "members": "membri"
         },
         "pydanticErrors": {
-            "at_least_3_nodes_must_have_expressed_a_choice": "scelte insufficienti",
             "choice_must_be_a_single_key_value_pair": "ogni scelta deve essere una singola coppia 'chiave: valori'",
             "choices_exceeds_availability_of_symbols": "le scelte superano la disponibilità dei simboli",
             "duplicate_key_found": "chiave duplicata trovata",
@@ -41,6 +40,7 @@
             "key_cannot_be_present_in_its_own_values": "la chiave non può essere presente nei propri valori",
             "key_must_be_a_single_alphabetic_character": "la chiave deve essere un singolo carattere alfabetico",
             "keys_in_a_and_b_must_be_identical": "le chiavi in A e B devono essere identiche",
+            "too_many_nodes_have_empty_values": "scelte insufficienti",
             "value_must_be_string_or_null": "il valore deve essere una stringa o non deve contenere nulla",
             "value_must_contain_only_single_alphabetic_characters": "il valore deve contenere solo singoli caratteri alfabetici",
             "values_contain_duplicates": "i valori contengono duplicati",
