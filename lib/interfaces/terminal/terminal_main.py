@@ -170,9 +170,9 @@ class TerminalMain:
         print(f"{group_number} group(s) succesfully generated.")
             
     @logger_decorator
-    def generate_reports(self, with_sociogram: bool = False) -> None:
+    def generate_report(self, with_sociogram: bool = False) -> None:
         """
-        Generate comprehensive PDF reports for all groups with optional sociograms.
+        Generate comprehensive PDF report with optional sociograms.
         
         Creates detailed reports for each group including social network analysis,
         statistics, and optional sociogram visualizations. Also exports aggregated
@@ -189,6 +189,7 @@ class TerminalMain:
             - JSON export includes filtered data for macro/micro statistics
             - Sociogram generation requires additional computational resources
         """
+        
         # Validate that group files exist
         if not self.groups_filepaths:
             raise ValueError("No group files found.")

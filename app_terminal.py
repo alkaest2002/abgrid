@@ -29,10 +29,10 @@ def setup_argument_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(prog="ABGrid")
     
     parser.add_argument("-a", "--action", required=True, 
-                        choices=["init", "groups", "reports", "batch"], 
-                        help="Action to perform: 'init', 'groups', 'reports', or 'batch'.")
+                        choices=["init", "group", "report", "batch"], 
+                        help="Action to perform: 'init', 'group', 'report', or 'batch'.")
     parser.add_argument("-p", "--project", help="Name of the project.")
-    parser.add_argument("-g", "--groups", type=int, choices=range(1, 51), default=1,
+    parser.add_argument("-g", "--group", type=int, choices=range(1, 51), default=1,
                         help="Number of groups (1 to 50).")
     parser.add_argument("-m", "--members_per_group", type=int, choices=range(6, 51), default=8,
                         help="Number of members per group (6 to 50).")
@@ -95,7 +95,7 @@ def handle_batch_processing(data_folder: Path, with_sociogram: bool, language: s
         project = project_folder_path.name
         groups_filepaths = get_group_filepaths(project_folder_path)
         terminal_main = TerminalMain(project, project_folder_path, groups_filepaths, language)
-        terminal_main.generate_reports(with_sociogram)
+        terminal_main.generate_report(with_sociogram)
 
 def handle_project_actions(args: argparse.Namespace, project_folderpath: Path) -> None:
     """Handle individual project actions.
@@ -106,15 +106,14 @@ def handle_project_actions(args: argparse.Namespace, project_folderpath: Path) -
     """
     groups_filepaths = get_group_filepaths(project_folderpath)
     groups_already_created = len(groups_filepaths)
-    groups_to_create = range(groups_already_created + 1, groups_already_created + args.groups + 1)
-    
+    groups_to_create = range(groups_already_created + 1, groups_already_created + args.group + 1)
     terminal_main = TerminalMain(args.project, project_folderpath, groups_filepaths, args.language)
     
     match args.action:
-        case "groups":
+        case "group":
             terminal_main.generate_group(groups_to_create, args.members_per_group, args.language)
-        case "reports":
-            terminal_main.generate_reports(args.with_sociogram)
+        case "report":
+            terminal_main.generate_report(args.with_sociogram)
 
 def main() -> None:
     """Main application entry point."""
