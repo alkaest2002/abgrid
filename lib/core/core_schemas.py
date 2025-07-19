@@ -517,10 +517,14 @@ class ABGridReportSchema(BaseModel):
     @classmethod
     def _validate_minimum_nodes_with_choices(cls, data: Dict[str, Any], errors: List[Dict[str, Any]]) -> None:
         """
-        Validate that at least 3 nodes have expressed a choice.
+        Validate choice completion requirements for each choice set separately.
+        
+        This method validates that for both choices_a and choices_b:
+        1. At least 3 nodes have expressed a choice
+        2. No more than 30% of nodes have empty values
         
         A node is considered to have expressed a choice if it has a non-null,
-        non-empty value in either choices_a or choices_b.
+        non-empty value in the respective choice set.
         
         Args:
             data: The full data dictionary
@@ -533,36 +537,56 @@ class ABGridReportSchema(BaseModel):
         if not isinstance(choices_a, list) or not isinstance(choices_b, list):
             return
         
+        # Validate choices_a separately
+        cls._validate_single_choice_set(choices_a, "choices_a", errors)
+        
+        # Validate choices_b separately
+        cls._validate_single_choice_set(choices_b, "choices_b", errors)
+
+    @classmethod
+    def _validate_single_choice_set(cls, choices: List[Dict[str, Any]], field_name: str, errors: List[Dict[str, Any]]) -> None:
+        """
+        Validate a single choice set for completion requirements.
+        
+        Args:
+            choices: List of choice dictionaries
+            field_name: Name of the choice field for error reporting
+            errors: List to append errors to
+        """
+        if len(choices) == 0:
+            return  # No choices to validate
+        
+        # Count nodes with and without choices
         nodes_with_choices = set()
+        total_nodes = 0
         
-        # Check choices_a
-        for choice_dict in choices_a:
+        for choice_dict in choices:
             if isinstance(choice_dict, dict) and len(choice_dict) == 1:
                 key = next(iter(choice_dict.keys()))
                 value = choice_dict[key]
+                total_nodes += 1
                 
                 # Check if this node has expressed a choice
                 if value is not None and isinstance(value, str) and value.strip():
                     nodes_with_choices.add(key)
         
-        # Check choices_b
-        for choice_dict in choices_b:
-            if isinstance(choice_dict, dict) and len(choice_dict) == 1:
-                key = next(iter(choice_dict.keys()))
-                value = choice_dict[key]
-                
-                # Check if this node has expressed a choice
-                if value is not None and isinstance(value, str) and value.strip():
-                    nodes_with_choices.add(key)
+        if total_nodes == 0:
+            return  # No valid nodes to validate
         
-        # Validate minimum count
-        if len(nodes_with_choices) < 3:
+        nodes_with_choices_count = len(nodes_with_choices)
+        nodes_without_choices_count = total_nodes - nodes_with_choices_count
+                
+        # Validate that no more than 30% of nodes have empty values
+        empty_percentage = (nodes_without_choices_count / total_nodes) * 100
+        if empty_percentage > 30:
             errors.append({
-                "location": "choices_a and choices_b",
+                "location": field_name,
                 "value_to_blame": {
-                    "nodes_with_choices": sorted(list(nodes_with_choices)),
-                    "count": len(nodes_with_choices)
+                    "nodes_without_choices_count": nodes_without_choices_count,
+                    "total_nodes": total_nodes,
+                    "empty_percentage": round(empty_percentage, 1),
+                    "max_allowed_percentage": 30.0
                 },
-                "error_message": "at_least_3_nodes_must_have_expressed_a_choice"
+                "error_message": "too_many_nodes_have_empty_values"
             })
 
