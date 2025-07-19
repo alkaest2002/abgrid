@@ -66,6 +66,10 @@ def to_json(report_data: ReportDataDict) -> Dict[str, Any]:
         if df.empty:
             return {}
         
+        # Fill missing values
+        df = df.replace([np.inf, -np.inf], np.nan)
+        df = df.fillna("-")
+        
         # Handle DataFrames with duplicate indices by resetting index
         if df.index.has_duplicates:
             return df.reset_index(drop=False, names="index").to_dict("index")
@@ -77,6 +81,10 @@ def to_json(report_data: ReportDataDict) -> Dict[str, Any]:
         """Convert pandas Series to JSON-serializable format."""
         if series.empty:
             return {}
+        
+        # Fill missing values
+        series = series.replace([np.inf, -np.inf], np.nan)
+        series = series.fillna("-")
         
         # If series has a meaningful index, convert to dict
         if not isinstance(series.index, pd.RangeIndex):
@@ -96,7 +104,7 @@ def to_json(report_data: ReportDataDict) -> Dict[str, Any]:
     
     def _convert_numpy_array(arr: np.ndarray) -> List[Any]:
         """Convert numpy array to JSON-serializable list."""
-        return arr.tolist()
+        return _convert_pandas_series(pd.Series(arr))
     
     def _convert_datetime(dt: datetime.datetime) -> str:
         """Convert datetime to ISO format string."""
