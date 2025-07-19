@@ -211,7 +211,7 @@ class ABGridGroupSchema(BaseModel):
                 "value_to_blame": value,
                 "error_message": "field_must_be_an_integer"
             })
-        elif not (6 <= value <= 50):
+        elif not (8 <= value <= 50):
             errors.append({
                 "location": "members",
                 "value_to_blame": value,
