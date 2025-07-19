@@ -241,6 +241,7 @@ class ABGridReportSchema(BaseModel):
         - All values must reference valid keys from either choices_a or choices_b
         - Keys and values must be single alphabetic characters
         - Choice keys must follow the SYMBOLS pattern (A, B, C, etc.)
+        - At least 4 nodes must have expressed a choice (have non-null, non-empty values)
     """
     
     project_title: Any
@@ -264,6 +265,7 @@ class ABGridReportSchema(BaseModel):
         2. Choice structures are correct
         3. Choice keys are consistent between questions
         4. All value references are valid
+        5. At least 4 nodes have expressed a choice
         
         Args:
             data: Raw input data dictionary
@@ -297,9 +299,64 @@ class ABGridReportSchema(BaseModel):
                 "error_message": "keys_in_a_and_b_must_be_identical"
             })
         
+        # Check minimum nodes with choices
+        cls._validate_minimum_nodes_with_choices(data, errors)
+        
         if errors:
             raise PydanticValidationException(errors)
         return data
+    
+    @classmethod
+    def _validate_minimum_nodes_with_choices(cls, data: Dict[str, Any], errors: List[Dict[str, Any]]) -> None:
+        """
+        Validate that at least 4 nodes have expressed a choice.
+        
+        A node is considered to have expressed a choice if it has a non-null,
+        non-empty value in either choices_a or choices_b.
+        
+        Args:
+            data: The full data dictionary
+            errors: List to append errors to
+        """
+        choices_a = data.get("choices_a")
+        choices_b = data.get("choices_b")
+        
+        # Skip validation if choices are not valid lists
+        if not isinstance(choices_a, list) or not isinstance(choices_b, list):
+            return
+        
+        nodes_with_choices = set()
+        
+        # Check choices_a
+        for choice_dict in choices_a:
+            if isinstance(choice_dict, dict) and len(choice_dict) == 1:
+                key = next(iter(choice_dict.keys()))
+                value = choice_dict[key]
+                
+                # Check if this node has expressed a choice
+                if value is not None and isinstance(value, str) and value.strip():
+                    nodes_with_choices.add(key)
+        
+        # Check choices_b
+        for choice_dict in choices_b:
+            if isinstance(choice_dict, dict) and len(choice_dict) == 1:
+                key = next(iter(choice_dict.keys()))
+                value = choice_dict[key]
+                
+                # Check if this node has expressed a choice
+                if value is not None and isinstance(value, str) and value.strip():
+                    nodes_with_choices.add(key)
+        
+        # Validate minimum count
+        if len(nodes_with_choices) < 3:
+            errors.append({
+                "location": "choices_a and choices_b",
+                "value_to_blame": {
+                    "nodes_with_choices": sorted(list(nodes_with_choices)),
+                    "count": len(nodes_with_choices)
+                },
+                "error_message": "at_least_3_nodes_must_have_expressed_a_choice"
+            })
     
     @model_validator(mode="after")
     def strip_choice_values_after(self) -> "ABGridReportSchema":
@@ -453,4 +510,3 @@ class ABGridReportSchema(BaseModel):
                 "value_to_blame": value_str,
                 "error_message": "values_contain_duplicates"
             })
-
