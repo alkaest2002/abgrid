@@ -87,11 +87,12 @@
                                             for="project_title"
                                             class="block text-sm font-medium text-gray-900 opacity-25"
                                             x-bind="generateFieldLabel"
-                                        >Titolo del progetto</label>
+                                        ><span>Titolo del progetto</span> <span class="text-xs text-gray-500">evita caratteri non standard</span></label>
                                         <input 
                                             type="text" 
                                             id="project_title" 
                                             name="project_title"
+                                            x-ref="project_title"
                                             x-bind="generateStringInputFactory('$store.data.dataGroup.project_title')"
                                             placeholder="es. raccolta dati 2025"
                                             class="mt-2 block w-full p-3 bg-white rounded-md text-sm placeholder:text-sm placeholder:text-gray-400 shadow-sm focus:outline-none"
@@ -102,10 +103,11 @@
                                         <label 
                                             for="question_a"
                                             class="block text-sm font-medium text-gray-900 opacity-25"
-                                            x-bind="generateFieldLabel">Domanda A</label>
+                                            x-bind="generateFieldLabel"><span>Domanda A</span> <span class="text-xs text-gray-500">evita caratteri non standard</span></label>
                                         <input 
                                             type="text" 
-                                            id="question_a" 
+                                            id="question_a"
+                                            x-ref="question_a"
                                             x-bind="generateStringInputFactory('$store.data.dataGroup.question_a')"
                                             name="question_a"
                                             placeholder="es. chi vorresti nel tuo gruppo di lavoro ideale?"
@@ -116,10 +118,11 @@
                                         <label
                                             for="question_b"
                                             class="block text-sm font-medium text-gray-900 opacity-25"
-                                            x-bind="generateFieldLabel">Domanda B</label>
+                                            x-bind="generateFieldLabel"><span>Domanda B</span> <span class="text-xs text-gray-500">evita caratteri non standard</span></label>
                                         <input 
                                             type="text" 
                                             id="question_b" 
+                                            x-ref="question_b"
                                             x-bind="generateStringInputFactory('$store.data.dataGroup.question_b')"
                                             name="question_b"
                                             placeholder="es. chi non vorresti nel tuo gruppo di lavoro ideale?"
@@ -131,29 +134,35 @@
                                             <label 
                                                 for="group"
                                                 class="block text-sm font-medium text-gray-900 opacity-25"
-                                                x-bind="generateFieldLabel">Identificativo gruppo</label>
+                                                x-bind="generateFieldLabel"><span>Identificativo gruppo</span> <span class="text-xs text-gray-500">(min 0, max 1000)</span></label>
                                             <input 
                                                 type="number" 
                                                 id="groupp"
+                                                x-ref="group"
                                                 x-bind="generateNumberInputFactory('$store.data.dataGroup.group')"
                                                 name="group"
                                                 placeholder="es. 1"
                                                 class="mt-2 block w-full p-3 bg-white rounded-md text-sm placeholder:text-sm placeholder:text-gray-400 shadow-sm focus:outline-none"
-                                                required>
+                                                required
+                                                step="1"
+                                                >
                                         </div>
                                         <div>
                                             <label 
                                                 for="members"
                                                 class="block text-sm font-medium text-gray-900 opacity-25"
-                                                x-bind="generateFieldLabel">Numero di membri</label>
+                                                x-bind="generateFieldLabel"><span>Numero di membri</span> <span class="text-xs text-gray-500">(min 8, max 50)</span></label>
                                             <input 
                                                 type="number" 
                                                 id="members"
+                                                x-ref="members"
                                                 x-bind="generateNumberInputFactory('$store.data.dataGroup.members')"
                                                 name="members"
                                                 placeholder="es. 8"
                                                 class="mt-2 block w-full p-3 bg-white rounded-md text-sm placeholder:text-sm placeholder:text-gray-400 shadow-sm focus:outline-none"
-                                                required>
+                                                required
+                                                step="1"
+                                                >
                                         </div>
                                     </div>
                                 </div>
