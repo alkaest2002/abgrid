@@ -6,6 +6,7 @@ __pycache__
 *.pyc
 data/am
 data/douhet
+data/demo/hide
 ipython/data
 ipython/analysis
 ipython/*.xlsx
