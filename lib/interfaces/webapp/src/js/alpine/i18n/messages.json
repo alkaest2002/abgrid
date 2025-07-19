@@ -25,13 +25,6 @@
             "members": "membri"
         },
         "pydanticErrors": {
-            "loc": {
-                "project_title": "titolo progetto",
-                "question_a": "domanda A",
-                "question_b": "domanda B",
-                "group": "identificativo del gruppo",
-                "members": "membri"
-            },
             "choice_must_be_a_single_key_value_pair": "ogni scelta deve essere una singola coppia 'chiave: valori'",
             "choices_exceeds_availability_of_symbols": "le scelte superano la disponibilità dei simboli",
             "duplicate_key_found": "chiave duplicata trovata",
