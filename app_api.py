@@ -12,12 +12,13 @@ The code is part of the AB-Grid project and is licensed under the MIT License.
 
 from itertools import product
 from fastapi import FastAPI, Request, status
+from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
 from starlette.middleware.cors import CORSMiddleware
-from fastapi.exceptions import RequestValidationError
 from lib.core.core_schemas import PydanticValidationException
 from lib.interfaces.fastapi.limiter import RateLimitException
 from lib.interfaces.fastapi.router import get_router
+from lib.utils import to_snake_case
 
 # Initialization of FastAPI application
 app = FastAPI()
@@ -60,9 +61,28 @@ async def custom_pydantic_validation_exception_handler(
     Returns:
         JSONResponse: A JSON response with status code 422 and error details.
     """
+    print(exc)
     return JSONResponse(
         status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
         content={"detail": exc.errors}
+    )
+
+@app.exception_handler(RequestValidationError)
+async def validation_exception_handler(request, exc) -> JSONResponse:
+    errors = []
+    for error in exc.errors():
+        # Create a copy of the error dict
+        modified_error = dict()
+        # Convert the msg to snake_case
+        if "msg" in error:
+            modified_error["error_message"] = to_snake_case(error["msg"])
+        if "loc" in error:
+            modified_error["location"] = error["loc"]
+        errors.append(modified_error)
+    
+    return JSONResponse(
+        status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+        content={"detail": errors}
     )
 
 @app.exception_handler(RateLimitException)
@@ -82,13 +102,6 @@ async def rate_limit_exception_handler(
     return JSONResponse(
         status_code=status.HTTP_429_TOO_MANY_REQUESTS,
         content={"detail": exc.message}
-    )
-
-@app.exception_handler(RequestValidationError)
-async def validation_exception_handler(request, exc)-> JSONResponse:
-    return JSONResponse(
-        status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
-        content={"detail": str(exc.errors())}
     )
 
 @app.get("/")
