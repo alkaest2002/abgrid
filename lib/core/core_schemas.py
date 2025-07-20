@@ -247,8 +247,8 @@ class ABGridReportSchema(BaseModel):
     question_a: str
     question_b: str
     group: int
-    choices_a: List[dict[str, str]]
-    choices_b: List[dict[str, str]]
+    choices_a: List[dict[str, str | None]]
+    choices_b: List[dict[str, str | None]]
     
     model_config = {"extra": "forbid"}
 
