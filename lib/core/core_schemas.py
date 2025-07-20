@@ -243,12 +243,12 @@ class ABGridReportSchema(BaseModel):
         - At least 3 nodes must have expressed a choice (have non-null, non-empty values)
     """
     
-    project_title: Any
-    question_a: Any
-    question_b: Any
-    group: Any
-    choices_a: Any
-    choices_b: Any
+    project_title: str
+    question_a: str
+    question_b: str
+    group: int
+    choices_a: List[dict[str, str]]
+    choices_b: List[dict[str, str]]
     
     model_config = {"extra": "forbid"}
 
