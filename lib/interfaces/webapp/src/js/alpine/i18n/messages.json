@@ -53,6 +53,7 @@
             "internal_error": "errore del server",
             "offline": "offline",
             "online": "online",
+            "only_json_body_data_accepted": "dati inviati non corretti",
             "required_jwt_token": "token jwt mancante",
             "requests_exceeded_rate_limit": "hai inviato troppe richieste al server; riprova tra circa 30 secondi",
             "request_timeout": "timeout della richiesta",
