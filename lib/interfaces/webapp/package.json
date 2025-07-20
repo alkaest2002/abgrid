@@ -13,7 +13,7 @@
   },
   "devDependencies": {
     "@vitejs/plugin-basic-ssl": "^2.1.0",
-    "vite": "^6.3.5"
+    "vite": "^7.0.5"
   },
   "dependencies": {
     "@alpinejs/persist": "^3.14.9",
