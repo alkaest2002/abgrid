@@ -10,6 +10,7 @@ Date Created: May 3, 2025
 The code is part of the AB-Grid project and is licensed under the MIT License.
 """
 
+import re
 import sys
 import datetime
 import pandas as pd
@@ -170,3 +171,13 @@ def to_json(report_data: ReportDataDict) -> Dict[str, Any]:
     }
     
     return json_data
+
+def to_snake_case(text: str) -> str:
+    # Replace spaces and other separators with underscores
+    text = re.sub(r'[\s\-\.]+', '_', text)
+    # Insert underscore before uppercase letters (except at the start)
+    text = re.sub(r'(?<!^)(?=[A-Z])', '_', text)
+    # Convert to lowercase and clean up multiple underscores
+    text = re.sub(r'_+', '_', text.lower())
+    # Remove leading/trailing underscores
+    return text.strip('_')
