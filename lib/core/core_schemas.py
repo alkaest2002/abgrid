@@ -384,10 +384,10 @@ class ABGridReportSchema(BaseModel):
             return extracted_keys
         
         # Validate each choice
-        for i, choice_dict in enumerate(choices):
+        for index, choice_dict in enumerate(choices):
             if not isinstance(choice_dict, dict) or len(choice_dict) != 1:
                 errors.append({
-                    "location": f"{field_name}[{i}]",
+                    "location": f"{field_name}, 0-based index: {index}",
                     "value_to_blame": choice_dict,
                     "error_message": "choice_must_be_a_single_key_value_pair"
                 })
@@ -399,7 +399,7 @@ class ABGridReportSchema(BaseModel):
             # Validate key
             if not isinstance(key, str) or len(key) != 1 or not key.isalpha():
                 errors.append({
-                    "location": f"{field_name}.{key}",
+                    "location": f"{field_name}, {key}",
                     "value_to_blame": key,
                     "error_message": "key_must_be_a_single_alphabetic_character"
                 })
@@ -407,7 +407,7 @@ class ABGridReportSchema(BaseModel):
                 # Check for duplicate keys
                 if key in extracted_keys:
                     errors.append({
-                        "location": f"{field_name}.{key}",
+                        "location": f"{field_name}, {key}",
                         "value_to_blame": key,
                         "error_message": "duplicate_key_found"
                     })
@@ -415,12 +415,12 @@ class ABGridReportSchema(BaseModel):
                     extracted_keys.add(key)
                     
                     # Validate value format
-                    cls._validate_value_format(field_name, key, value_str, errors)
+                    cls._validate_value_format(field_name, index, key, value_str, errors)
         
         return extracted_keys
     
     @classmethod
-    def _validate_value_format(cls, field_name: str, key: str, value_str: Any, errors: List[Dict[str, Any]]) -> None:
+    def _validate_value_format(cls, field_name: str, index: int, key: str, value_str: Any, errors: List[Dict[str, Any]]) -> None:
         """
         Validate the format of a choice value.
         
@@ -430,6 +430,7 @@ class ABGridReportSchema(BaseModel):
         
         Args:
             field_name: Name of the choices field
+            index: the choice zero-based index
             key: The choice key
             value_str: The value to validate
             errors: List to append errors to
@@ -439,7 +440,7 @@ class ABGridReportSchema(BaseModel):
             
         if not isinstance(value_str, str):
             errors.append({
-                "location": f"{field_name}.{key}",
+                "location": f"{field_name}, {key}",
                 "value_to_blame": value_str,
                 "error_message": "value_must_be_string_or_null"
             })
@@ -454,7 +455,7 @@ class ABGridReportSchema(BaseModel):
         invalid_parts = [part for part in value_parts if len(part) != 1 or not part.isalpha()]
         if invalid_parts:
             errors.append({
-                "location": f"{field_name}.{key}",
+                "location": f"{field_name}, {key}",
                 "value_to_blame": value_str,
                 "error_message": "value_must_contain_only_single_alphabetic_characters"
             })
@@ -462,7 +463,7 @@ class ABGridReportSchema(BaseModel):
         # Check key doesn't reference itself
         if key in value_parts:
             errors.append({
-                "location": f"{field_name}.{key}",
+                "location": f"{field_name}, {key}",
                 "value_to_blame": value_str,
                 "error_message": "key_cannot_be_present_in_its_own_values"
             })
@@ -470,7 +471,7 @@ class ABGridReportSchema(BaseModel):
         # Check for duplicates
         if len(value_parts) != len(set(value_parts)):
             errors.append({
-                "location": f"{field_name}.{key}",
+                "location": f"{field_name}, {key}",
                 "value_to_blame": value_str,
                 "error_message": "values_contain_duplicates"
             })
@@ -494,7 +495,7 @@ class ABGridReportSchema(BaseModel):
             if not isinstance(choices, list):
                 continue
                 
-            for choice_dict in choices:
+            for index, choice_dict in enumerate(choices):
                 if not isinstance(choice_dict, dict) or len(choice_dict) != 1:
                     continue
                     
@@ -505,11 +506,11 @@ class ABGridReportSchema(BaseModel):
                     continue
                     
                 value_parts = [part.strip() for part in value_str.split(',')]
-                invalid_references = [part for part in value_parts if part not in all_valid_keys]
+                invalid_references = [part for part in value_parts if part and part not in all_valid_keys]
                 
                 if invalid_references:
                     errors.append({
-                        "location": f"{field_name}.{key}",
+                        "location": f"{field_name}, {key}",
                         "value_to_blame": value_str,
                         "error_message": "values_reference_invalid_keys"
                     })
