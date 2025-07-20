@@ -522,7 +522,7 @@ class ABGridReportSchema(BaseModel):
         
         This method validates that for both choices_a and choices_b:
         1. At least 3 nodes have expressed a choice
-        2. No more than 30% of nodes have empty values
+        2. No more than 60% of nodes have empty values (i.e., no choices)
         
         A node is considered to have expressed a choice if it has a non-null,
         non-empty value in the respective choice set.
@@ -579,14 +579,14 @@ class ABGridReportSchema(BaseModel):
                 
         # Validate that no more than 30% of nodes have empty values
         empty_percentage = (nodes_without_choices_count / total_nodes) * 100
-        if empty_percentage > 30:
+        if empty_percentage > 60:
             errors.append({
                 "location": field_name,
                 "value_to_blame": {
                     "nodes_without_choices_count": nodes_without_choices_count,
                     "total_nodes": total_nodes,
                     "empty_percentage": round(empty_percentage, 1),
-                    "max_allowed_percentage": 30.0
+                    "max_allowed_percentage": 60.0
                 },
                 "error_message": "too_many_nodes_have_empty_values"
             })
