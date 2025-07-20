@@ -72,10 +72,11 @@ async def validation_exception_handler(request, exc) -> JSONResponse:
     errors = []
     for error in exc.errors():
         # Create a copy of the error dict
-        modified_error = dict()
-        # Convert the msg to snake_case
+        modified_error = error.copy()
+        # Convert msg (if any) to snake_case
         if "msg" in error:
             modified_error["error_message"] = to_snake_case(error["msg"])
+        # Convert loc (if any) to snake_case
         if "loc" in error:
             modified_error["location"] = error["loc"]
         errors.append(modified_error)

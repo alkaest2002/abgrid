@@ -141,15 +141,15 @@ class ABGridGroupSchema(BaseModel):
         project_title: The project title (1-80 characters)
         question_a: First question text (1-300 characters)
         question_b: Second question text (1-300 characters)
-        group: Group identifier (1-50)
-        members: Number of members per group
+        group: Group identifier (must be an integer)
+        members: Number of members per group (intergr betwenn 8 and 50)
     """
     
-    project_title: str
-    question_a: str
-    question_b: str
-    group: int
-    members: int
+    project_title: Any
+    question_a: Any
+    question_b: Any
+    group: Any
+    members: Any
     
     model_config = {"extra": "forbid"}
 
@@ -243,12 +243,12 @@ class ABGridReportSchema(BaseModel):
         - At least 3 nodes must have expressed a choice (have non-null, non-empty values)
     """
     
-    project_title: str
-    question_a: str
-    question_b: str
-    group: int
-    choices_a: List[dict[str, str | None]]
-    choices_b: List[dict[str, str | None]]
+    project_title: Any
+    question_a: Any
+    question_b: Any
+    group: Any
+    choices_a: Any
+    choices_b: Any
     
     model_config = {"extra": "forbid"}
 
@@ -264,7 +264,7 @@ class ABGridReportSchema(BaseModel):
         2. Choice structures are correct
         3. Choice keys are consistent between questions
         4. All value references point to valid keys
-        5. At least 3 nodes have expressed a choice
+        5. No more than 30% of nodes have expressed no choice
         
         Args:
             data: Raw input data dictionary
@@ -290,7 +290,7 @@ class ABGridReportSchema(BaseModel):
         # Check keys equality
         if choices_a_keys != choices_b_keys:
             errors.append({
-                "location": "choices_a.keys vs choices_b.keys",
+                "location": "choices_a vs choices_b",
                 "value_to_blame": {
                     "choices_a_keys": sorted(choices_a_keys),
                     "choices_b_keys": sorted(choices_b_keys)
