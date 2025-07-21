@@ -12,9 +12,11 @@ export default defineConfig({
         rollupOptions: {
             input: {
                 main: resolve(fileURLToPath(new URL('.', import.meta.url)), 'index.html'),
-                about: resolve(fileURLToPath(new URL('.', import.meta.url)), 'pages/it.dropzone.html'),
-                contact: resolve(fileURLToPath(new URL('.', import.meta.url)), 'pages/it.generate.html'),
-                services: resolve(fileURLToPath(new URL('.', import.meta.url)), 'pages/it.notify.html'),
+                group: resolve(fileURLToPath(new URL('.', import.meta.url)), 'pages/it.group.html'),
+                dropzone: resolve(fileURLToPath(new URL('.', import.meta.url)), 'pages/it.dropzone.html'),
+                notifyReport: resolve(fileURLToPath(new URL('.', import.meta.url)), 'pages/it.notify.report.html'),
+                notifyErrorYaml: resolve(fileURLToPath(new URL('.', import.meta.url)), 'pages/it.notify.error.yaml.html'),
+                notifyErrorApi: resolve(fileURLToPath(new URL('.', import.meta.url)), 'pages/it.notify.error.api.html'),
             }
         }
     },
