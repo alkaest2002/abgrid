@@ -11,7 +11,7 @@ The code is part of the AB-Grid project and is licensed under the MIT License.
 """
 
 from itertools import product
-from fastapi import FastAPI, Request, status
+from fastapi import FastAPI, HTTPException, Request, status
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
 from starlette.middleware.cors import CORSMiddleware
@@ -46,6 +46,52 @@ app.add_middleware(
 
 # Include application router
 app.include_router(get_router())
+
+@app.get("/")
+def server_check() -> JSONResponse:
+    """
+    Public endpoint that can be accessed without authentication.
+
+    Returns:
+        JSONResponse: A message indicating the endpoint is publicly accessible.
+    """
+    return JSONResponse(
+        status_code=status.HTTP_200_OK,
+        content={
+            "detail": "up"
+        }
+    )
+
+@app.get("/{path:path}")
+def catchall(path: str) -> JSONResponse:
+    """
+    Catchall endpoint that returns a JSON response for undefined routes.
+    """
+    return JSONResponse(
+        status_code=status.HTTP_404_NOT_FOUND,
+        content={
+            "detail": "route_not_found",
+            "redirect_to": "/"
+        }
+    )
+
+#######################################################################################
+# Custom error handlers
+#######################################################################################
+
+@app.exception_handler(status.HTTP_401_UNAUTHORIZED)
+async def custom_401_handler(request: Request, exc: HTTPException):
+    return JSONResponse(
+        status_code=status.HTTP_401_UNAUTHORIZED,
+        content={"detail": "not_authenticated"}
+    )
+
+@app.exception_handler(status.HTTP_403_FORBIDDEN)
+async def custom_403_handler(request: Request, exc: HTTPException):
+    return JSONResponse(
+        status_code=status.HTTP_403_FORBIDDEN,
+        content={"detail": "not_authorized"}
+    )
 
 @app.exception_handler(PydanticValidationException)
 async def custom_pydantic_validation_exception_handler(
@@ -103,32 +149,4 @@ async def rate_limit_exception_handler(
     return JSONResponse(
         status_code=status.HTTP_429_TOO_MANY_REQUESTS,
         content={"detail": exc.message}
-    )
-
-@app.get("/")
-def server_check() -> JSONResponse:
-    """
-    Public endpoint that can be accessed without authentication.
-
-    Returns:
-        JSONResponse: A message indicating the endpoint is publicly accessible.
-    """
-    return JSONResponse(
-        status_code=status.HTTP_200_OK,
-        content={
-            "detail": "up"
-        }
-    )
-
-@app.get("/{path:path}")
-def catchall(path: str) -> JSONResponse:
-    """
-    Catchall endpoint that returns a JSON response for undefined routes.
-    """
-    return JSONResponse(
-        status_code=status.HTTP_404_NOT_FOUND,
-        content={
-            "detail": "route_not_found",
-            "redirect_to": "/"
-        }
     )

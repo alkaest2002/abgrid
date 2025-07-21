@@ -12,11 +12,12 @@ export default defineConfig({
         rollupOptions: {
             input: {
                 main: resolve(fileURLToPath(new URL('.', import.meta.url)), 'index.html'),
-                group: resolve(fileURLToPath(new URL('.', import.meta.url)), 'pages/it.group.html'),
-                dropzone: resolve(fileURLToPath(new URL('.', import.meta.url)), 'pages/it.dropzone.html'),
-                notifyReport: resolve(fileURLToPath(new URL('.', import.meta.url)), 'pages/it.notify.report.html'),
-                notifyErrorYaml: resolve(fileURLToPath(new URL('.', import.meta.url)), 'pages/it.notify.error.yaml.html'),
-                notifyErrorApi: resolve(fileURLToPath(new URL('.', import.meta.url)), 'pages/it.notify.error.api.html'),
+                itGroup: resolve(fileURLToPath(new URL('.', import.meta.url)), 'pages/it.group.html'),
+                itDropzoneEmpty: resolve(fileURLToPath(new URL('.', import.meta.url)), 'pages/it.dropzone.empty.html'),
+                itDropzoneData: resolve(fileURLToPath(new URL('.', import.meta.url)), 'pages/it.dropzone.data.html'),
+                itNotifyReport: resolve(fileURLToPath(new URL('.', import.meta.url)), 'pages/it.notify.report.html'),
+                itNotifyErrorYaml: resolve(fileURLToPath(new URL('.', import.meta.url)), 'pages/it.notify.error.yaml.html'),
+                itNotifyErrorApi: resolve(fileURLToPath(new URL('.', import.meta.url)), 'pages/it.notify.error.api.html'),
             }
         }
     },

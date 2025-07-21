@@ -1,0 +1,77 @@
+<!doctype html>
+<html x-data :lang="$store.app.appLanguage">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="/src/css/styles.css" />
+    <title>AB-Grid app</title>
+</head>
+
+<body class="h-screen min-w-4xl max-w-4xl mx-auto overflow-hidden"
+    x-data="{ ...componentToast(), ...componentOnline(), ...componentNavigation(), ...componentApi() }"
+    x-init="() => { initToast(); initOnline(); initNavigation(); initApi() }">
+
+    <!-- Toast -->
+    <template x-teleport="body">
+        <div x-bind="toastContainer"
+            class="fixed top-6 left-1/2 transform -translate-x-1/2 flex gap-2 items-center p-3 rounded-md shadow-lg cursor-pointer">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-4" fill="currentColor"
+                viewBox="0 0 448 512"><!--!Font Awesome Free 6.7.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2025 Fonticons, Inc.-->
+                <path
+                    d="M224 0c-17.7 0-32 14.3-32 32l0 19.2C119 66 64 130.6 64 208l0 18.8c0 47-17.3 92.4-48.5 127.6l-7.4 8.3c-8.4 9.4-10.4 22.9-5.3 34.4S19.4 416 32 416l384 0c12.6 0 24-7.4 29.2-18.9s3.1-25-5.3-34.4l-7.4-8.3C401.3 319.2 384 273.9 384 226.8l0-18.8c0-77.4-55-142-128-156.8L256 32c0-17.7-14.3-32-32-32zm45.3 493.3c12-12 18.7-28.3 18.7-45.3l-64 0-64 0c0 17 6.7 33.3 18.7 45.3s28.3 18.7 45.3 18.7s33.3-6.7 45.3-18.7z" />
+            </svg>
+            <span x-bind="toastMessage" class="text-sm"></span>
+        </div>
+    </template>
+
+    <div class="h-full" data-taxi>
+        <div class="h-full flex flex-col" x-data="viewDropzoneEmpty" data-taxi-view>
+
+            <!-- Top area - fixed height -->
+            <header class="h-24 flex items-center justify-start p-9">
+                <div class="w-full">
+                    <p class="text-3xl font-bold" x-text="$t('homepage.logo.title')"></p>
+                    <p class="text-sm text-gray-600" x-text="$t('homepage.logo.subtitle')"></p>
+                </div>
+            </header>
+
+            <!-- Center area - takes available space with rounded border -->
+            <main class="min-h-[640px] flex-1 relative px-6 overflow-y-auto">
+                <div class="h-full">
+                    <div class="h-full relative p-12 text-gray-900 bg-gray-100 rounded-lg">
+                        <!-- Main content goes here -->
+                            <div class="h-full flex flex-col justify-center items-center text-center cursor-pointer" x-bind="dropzone"
+                                x-cloak>
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-12 mb-4 fill-gray-500"
+                                    viewBox="0 0 576 512"><!--!Font Awesome Free 6.7.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2025 Fonticons, Inc.-->
+                                    <path
+                                        d="M0 64C0 28.7 28.7 0 64 0L224 0l0 128c0 17.7 14.3 32 32 32l128 0 0 38.6C310.1 219.5 256 287.4 256 368c0 59.1 29.1 111.3 73.7 143.3c-3.2 .5-6.4 .7-9.7 .7L64 512c-35.3 0-64-28.7-64-64L0 64zm384 64l-128 0L256 0 384 128zm48 96a144 144 0 1 1 0 288 144 144 0 1 1 0-288zm16 80c0-8.8-7.2-16-16-16s-16 7.2-16 16l0 48-48 0c-8.8 0-16 7.2-16 16s7.2 16 16 16l48 0 0 48c0 8.8 7.2 16 16 16s16-7.2 16-16l0-48 48 0c8.8 0 16-7.2 16-16s-7.2-16-16-16l-48 0 0-48z" />
+                                </svg>
+                                <p class="text-gray-500">
+                                    Trascina qui il file di gruppo compilato
+                                </p>
+                                <p class="mb-6 text-gray-500">
+                                    oppure <kbd
+                                        class="px-2 py-1.5 text-xs font-semibold text-gray-800 bg-gray-300 border border-gray-200 rounded-lg">Mouse
+                                        click</kbd> per selezionare il file
+                                </p>
+                            </div>
+                    </div>
+                </div>
+            </main>
+
+            <!-- Bottom area - fixed height -->
+            <footer class="h-10 flex justify-center items-center">
+                <div class="relative top-[-100%] p-3 bg-gray-100 rounded-full">
+                    <button x-data="componentMagicButton(magicButton.label, magicButton.action)" x-bind="magicButton">
+                    </button>
+                </div>
+            </footer>
+        </div>
+    </div>
+
+    <script type="module" defer src="/src/js/main.js"></script>
+</body>
+
+</html>
