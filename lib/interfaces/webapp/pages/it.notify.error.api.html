@@ -68,11 +68,11 @@
                                             </tr>
                                         </template>
                                     </template>
-                                    <tr x-show="typeof notifyApiErrors == 'string'"
-                                        class="border-b border-dashed border-gray-400 odd:bg-white even:bg-gray-50">
-                                        <td x-text="$t('server.' +notifyApiErrors)" class="p-3">
-                                        </td>
-                                    </tr>
+                                    <template x-if="typeof notifyApiErrors == 'string'">
+                                        <tr class="border-b border-dashed border-gray-400 odd:bg-white even:bg-gray-50">
+                                            <td x-text="$t('server.' +notifyApiErrors)" class="p-3"></td>
+                                        </tr>
+                                    </template>
                                 </table>
                             </div>
                         </div>
