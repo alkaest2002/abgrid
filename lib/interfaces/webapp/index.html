@@ -8,8 +8,8 @@
     <title>AB-Grid</title>
 </head>
 
-<body class="h-screen min-w-4xl max-w-4xl mx-auto overflow-hidden pb-6"
-    x-data="{ ...componentToast(), ...componentOnline(), ...componentNavigation(), ...componentApi() }"
+<body class="h-screen min-w-4xl max-w-4xl mx-auto overflow-hidden"
+    x-data="{ ...componentToast(), ...componentOnline(), ...componentNavigation(), ...componentApi(), ...componentManual() }"
     x-init="() => { initToast(); initOnline(); initNavigation(); initApi() }">
     
     <div 
@@ -75,7 +75,7 @@
 
             <!-- Bottom area - fixed height -->
             <footer class="h-10 flex justify-center items-center">
-                <div class="relative top-[-50%] p-3 bg-gray-100 rounded-full">
+                <div class="relative top-[-100%] p-3 bg-gray-100 rounded-full">
                     <button x-data="componentMagicButton(magicButton.label, magicButton.action)" x-bind="magicButton">
                     </button>
                 </div>

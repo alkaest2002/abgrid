@@ -8,7 +8,7 @@
     <title>AB-Grid app</title>
 </head>
 
-<body class="h-screen min-w-4xl max-w-4xl mx-auto overflow-hidden pb-6"
+<body class="h-screen min-w-4xl max-w-4xl mx-auto overflow-hidden"
     x-data="{ ...componentToast(), ...componentOnline(), ...componentNavigation(), ...componentApi() }"
     x-init="() => { initToast(); initOnline(); initNavigation(); initApi() }">
 
@@ -70,7 +70,7 @@
                                 </div>
                                 <div class="flex items-center justify-between">
                                     <div class="flex gap-1 items-center pl-1 text-gray-500 text-sm">
-                                        <span>&rarr;</span><span class="inline-block w-72 overflow-hidden text-ellipsis"
+                                        <span>&rsaquo;</span><span class="inline-block w-72 overflow-hidden text-ellipsis"
                                             x-text="$store.data.dataFilename"></span>
                                     </div>
                                     <div class="flex items-end justify-end gap-1">
@@ -150,7 +150,7 @@
 
             <!-- Bottom area - fixed height -->
             <footer class="h-10 flex justify-center items-center">
-                <div class="relative top-[-50%] p-3 bg-gray-100 rounded-full">
+                <div class="relative top-[-100%] p-3 bg-gray-100 rounded-full">
                     <button x-data="componentMagicButton(magicButton.label, magicButton.action)" x-bind="magicButton">
                     </button>
                 </div>
