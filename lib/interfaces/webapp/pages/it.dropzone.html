@@ -43,7 +43,7 @@
 
                         <!-- Main content goes here -->
                         <template x-if="!$store.data.dataFilename">
-                            <div class="h-full flex flex-col justify-center items-center text-center" x-bind="dropzone"
+                            <div class="h-full flex flex-col justify-center items-center text-center cursor-pointer" x-bind="dropzone"
                                 x-cloak>
                                 <svg xmlns="http://www.w3.org/2000/svg" class="h-12 mb-4 fill-gray-500"
                                     viewBox="0 0 576 512"><!--!Font Awesome Free 6.7.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2025 Fonticons, Inc.-->
@@ -62,39 +62,41 @@
                         </template>
                         <template x-if="$store.data.dataFilename">
                             <div class="h-full flex flex-col gap-3" x-bind="dropzone" x-cloak>
-                                <div class="mb-4">
+                                <div>
                                     <p>
                                         Aggiorna il file direttamente qui oppure scaricalo, modificalo con un
                                         editor di testi e ricaricalo. Ricordati di rispettare lo standard YAML.
                                     </p>
                                 </div>
                                 <div class="flex items-center justify-between">
-                                    <div class="flex gap-1 items-center pl-1 text-gray-700 text-sm">
+                                    <div class="flex gap-1 items-center pl-1 text-gray-500 text-sm">
                                         <span>&rarr;</span><span class="inline-block w-72 overflow-hidden text-ellipsis"
                                             x-text="$store.data.dataFilename"></span>
                                     </div>
                                     <div class="flex items-end justify-end gap-1">
-                                        <div class="flex gap-x-4 py-2 px-4 text-sm bg-gray-300 rounded-lg relative">
-                                            <div x-data x-show="$store.api.apiRequestIsPending"
-                                                class="absolute top-0 left-0 h-full w-full bg-gray-300 opacity-75 rounded-lg">
+                                        <!-- sociogram -->
+                                        <div class="h-8 flex p-3 text-sm bg-gray-300 rounded-lg relative select-none cursor-pointer">
+                                            <div 
+                                                x-data x-show="$store.api.apiRequestIsPending"
+                                                class="absolute top-0 left-0 h-full w-full bg-gray-300 opacity-75 rounded-lg cursor-not-allowed">
                                             </div>
-                                            <div class="flex items-center">
+                                            <div class="flex items-center cursor-pointer">
                                                 <input id="sociogram" type="checkbox" x-model="dropzoneWithSociogram"
-                                                    @click.capture.stop.prevent=""
                                                     class="w-4 h-4 text-blue-700 bg-gray-100 border-gray-300 rounded-sm focus:ring-blue-500">
-                                                <label for="sociogram" class="ms-2 font-medium text-gray-700">includi
+                                                <label for="sociogram" class="ms-2 font-medium text-gray-500 cursor-pointer">includi
                                                     sociogramma</label>
                                             </div>
                                         </div>
-                                        <div class="flex gap-x-4 py-2 px-4 text-sm bg-gray-300 rounded-lg relative"
-                                            @click.stop="">
-                                            <div x-data x-show="$store.api.apiRequestIsPending"
-                                                class="absolute top-0 left-0 h-full w-full bg-gray-300 opacity-75 rounded-lg">
+                                        <!-- download -->
+                                        <div class="h-8 flex p-3 text-sm bg-gray-300 rounded-lg relative">
+                                            <div 
+                                                x-data
+                                                x-show="$store.api.apiRequestIsPending"
+                                                class="absolute top-0 left-0 h-full w-full bg-gray-300 opacity-75 rounded-lg cursor-not-allowed">
                                             </div>
-                                            <div>
+                                            <div class="flex items-center justify-center">
                                                 <a x-bind="dropzoneDownloadLink"
                                                     class="inline-flex gap-1 items-center text-blue-700 font-semibold cursor-pointer">
-                                                    scarica
                                                     <svg xmlns="http://www.w3.org/2000/svg" class="h-4 fill-blue-700"
                                                         viewBox="0 0 640 512"><!--!Font Awesome Free 6.7.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2025 Fonticons, Inc.-->
                                                         <path
@@ -102,10 +104,18 @@
                                                     </svg>
                                                 </a>
                                             </div>
-                                            <div>
+                                        </div>
+                                        <!-- trash -->
+                                        <div class="h-8 flex p-3 text-sm bg-gray-300 rounded-lg relative">
+                                            <div 
+                                                x-data 
+                                                x-show="$store.api.apiRequestIsPending" 
+                                                class="absolute top-0 left-0 h-full w-full bg-gray-300 opacity-75 rounded-lg cursor-not-allowed"
+                                            >
+                                            </div>
+                                            <div class="flex items-center justify-center">
                                                 <a x-bind="dropzoneResetLink"
                                                     class="inline-flex gap-1 items-center text-blue-700 font-semibold cursor-pointer">
-                                                    elimina
                                                     <svg xmlns="http://www.w3.org/2000/svg" class="h-4 fill-blue-700"
                                                         viewBox="0 0 448 512"><!--!Font Awesome Free 6.7.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2025 Fonticons, Inc.-->
                                                         <path
