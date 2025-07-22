@@ -181,7 +181,7 @@
                             {{ letter }}
                         </td>
                         <td>
-                            {{ ranks.iloc[0] - ranks.iloc[1] }}
+                            {{ (ranks.iloc[0] - ranks.iloc[1]) | int }}
                         </td>
                     </tr>
                 {% endfor %}

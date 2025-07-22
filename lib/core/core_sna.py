@@ -359,7 +359,7 @@ class CoreSna:
         micro_stats_df: pd.DataFrame = self.sna[f"micro_stats_{network_type}"]
         
         # Filter columns that end with '_rank' to get ranking data
-        rank_columns: pd.DataFrame = micro_stats_df.filter(regex=r"_rank$").astype(int)
+        rank_columns: pd.DataFrame = micro_stats_df.filter(regex=r"_rank$")
         
         # Convert to dictionary with metric names as keys and Series as values
         rankings: Dict[str, pd.Series] = {}

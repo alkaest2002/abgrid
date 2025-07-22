@@ -215,7 +215,11 @@ class CoreSociogram:
         sociogram_micro_stats["st"] = self._compute_status(sociogram_micro_stats)
 
         # Compute dense rankings for all numeric columns (lower rank = better performance)
-        numeric_ranks: pd.DataFrame = sociogram_micro_stats.rank(method="dense", ascending=False).add_suffix("_rank")
+        numeric_ranks: pd.DataFrame = (
+            sociogram_micro_stats
+                .rank(method="dense", ascending=False)
+                .add_suffix("_rank")
+            )
         sociogram_micro_stats = pd.concat([sociogram_micro_stats, numeric_ranks], axis=1)
 
         # Compute status ranking based on social desirability order
@@ -290,7 +294,7 @@ class CoreSociogram:
         rank_metrics: List[str] = [f"{m}_rank" for m in ["bl", "im", "ai", "ii", "st"]]
         for metric in rank_metrics:
             rankings[metric] = sociogram_micro_stats[metric].sort_values()
-        
+
         return rankings
     
     def _compute_relevant_nodes_ab(self, threshold: float = 0.05) -> Dict[str, pd.DataFrame]:
