@@ -105,8 +105,15 @@ class CoreData:
             "members_per_group": len(validated_model.choices_a),
             "sna": sna_results,
         }
+        
         # Add sociogram data to report data, if requested
         report_data["sociogram"] = sociogram_results if with_sociogram else None
+
+        # Add isolated nodes to report data
+        report_data["isolated_nodes_ab"] = {
+            "a": sna_results["micro_stats_a"].loc[sna_results["micro_stats_a"]["nd"].eq(3)].index,
+            "b": sna_results["micro_stats_b"].loc[sna_results["micro_stats_b"]["nd"].eq(3)].index
+        }
 
         # Get relevant nodes from both SNA and sociogram analyses
         relevant_nodes_ab_sna: Dict[str, pd.DataFrame] = sna_results["relevant_nodes_ab"].copy()
@@ -120,7 +127,11 @@ class CoreData:
 
         # Loop through relevant_nodes_ab keys
         for valence_type in ("a", "b"):
-            # Group nodes with same id and consolidate their values
+
+            # Get isolated nodes
+            isolated_nodes = report_data["isolated_nodes_ab"][valence_type]
+
+            # Concat relevant nodes from sna and sociogram
             nodes: pd.DataFrame = (
                 pd.concat(
                     [
@@ -128,6 +139,12 @@ class CoreData:
                         relevant_nodes_ab_sociogram[valence_type]
                     ]
                 )
+            )
+
+            # Group nodes with same id and consolidate their values
+            nodes = (
+                # Omit isolated nodes first
+                nodes.loc[~nodes["node_id"].isin(isolated_nodes.values), :]
                 .groupby(by="node_id")
                     .aggregate({
                         "metric": list,
@@ -138,6 +155,8 @@ class CoreData:
                         "evidence_type": lambda x: list(set(x)),
                     })
             )
+            
+            # Do some other calculation with nodes
             nodes = (
                 nodes
                     # Keep nodes with multiple metrics only
@@ -153,11 +172,5 @@ class CoreData:
             
         # Add relevant_nodes_ab to report data
         report_data["relevant_nodes_ab"] = relevant_nodes_ab
-
-        # Add isolated nodes to report data
-        report_data["isolated_nodes_ab"] = {
-            "a": sna_results["micro_stats_a"].loc[sna_results["micro_stats_a"]["nd"].eq(3)].index,
-            "b": sna_results["micro_stats_b"].loc[sna_results["micro_stats_b"]["nd"].eq(3)].index
-        }
         
         return report_data
