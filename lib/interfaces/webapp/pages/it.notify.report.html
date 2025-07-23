@@ -50,7 +50,7 @@
                                     <div class="flex items-center gap-9">
                                         <!-- Report HTML or PDF -->
                                         <div class="w-36 h-48 shrink-0 relative cursor-pointer"
-                                            x-bind="notifyReportDownloadLinkFactory('pdf', 'notifyShowFilePDFSpinner')">
+                                            x-bind="notifyReportDownloadLinkFactory('pdf', 'notifyReportPDFSpinner')">
                                             <!-- Shadow -->
                                             <div
                                                 class="absolute inset-0 bg-red-200 rounded-lg transform translate-x-2 translate-y-2 opacity-60">
@@ -64,7 +64,7 @@
                                                 </div>
                                                 <!-- Spinner -->
                                                 <div class="absolute top-2 left-2"
-                                                    x-show="notifyShowFilePDFSpinner">
+                                                    x-show="notifyReportPDFSpinner">
                                                     <div
                                                         class="w-4 h-4 border-2 border-red-300 border-t-red-600 rounded-full animate-spin">
                                                     </div>
@@ -120,7 +120,7 @@
                                     <div class="flex items-center gap-9">
                                         <!-- File JSON -->
                                         <div class="w-36 h-48 shrink-0 relative cursor-pointer"
-                                            x-bind="notifyReportDownloadLinkFactory('json', 'notifyShowFileJSONSpinner')">
+                                            x-bind="notifyReportDownloadLinkFactory('json', 'notifyReportJSONSpinner')">
                                             <!-- Shadow -->
                                             <div
                                                 class="absolute inset-0 bg-blue-200 rounded-lg transform translate-x-2 translate-y-2 opacity-60">
@@ -134,7 +134,7 @@
                                                 </div>
                                                 <!-- Spinner -->
                                                 <div class="absolute top-2 left-2"
-                                                    x-show="notifyShowFilePDFSpinner">
+                                                    x-show="notifyReportPDFSpinner">
                                                     <div
                                                         class="w-4 h-4 border-2 border-blue-300 border-t-blue-600 rounded-full animate-spin">
                                                     </div>
