@@ -1,10 +1,12 @@
 {
     "it": {
-        "homepage": {
-            "logo": {
+        "common": {
+             "logo": {
                 "title": "AB-Grid",
                 "subtitle": "software per la generazione di report"
-            },
+            }
+        },
+        "homepage": {
             "intro": {
                 "para1": "Benvenuto in AB-Grid, un'applicazione web per l'analisi delle dinamiche relazionali nei gruppi orizzontali, basata sulle tecniche sociometriche di J. L. Moreno e sulla social network analysis.",
                 "para2": "Prima di iniziare, ti consigliamo di consultare il <span x-bind='downloadManualLink' class='text-blue-700 font-semibold cursor-pointer'>manuale d'uso</span>."
