@@ -6,16 +6,16 @@ choices_a:
   - A: B, E, I # Frodo trusts Sam completely, sees Aragorn as protector despite initial wariness, relies on Gandalf's wisdom
   - B: A, C, D # Sam is devoted to Frodo, comfortable with fellow hobbits Merry and Pippin
   - C: A, D, I # Merry trusts Frodo as cousin, inseparable from Pippin, respects Gandalf from Shire visits
-  - D: C, E, I # Pippin is closest to Merry, fascinated by Aragorn's ranger skills, knows Gandalf from fireworks
-  - E: A, F, I # Aragorn feels duty to protect Frodo, has worked with Legolas before, deeply respects Gandalf
+  - D: C, I    # Pippin is closest to Merry, knows Gandalf from fireworks
+  - E: A, F, I # Aragorn feels duty to protect Frodo,has worked with Legolas before, deeply respects Gandalf
   - F: E, I, J # Legolas trusts Aragorn from past dealings, respects Gandalf, honors his father's ally Elrond
-  - G: H, I, J # Gimli respects Boromir's warrior spirit, trusts Gandalf who is friend to dwarves, grudgingly respects Elrond's wisdom
-  - H: E, G, I # Boromir sees Aragorn's tactical value, appreciates Gimli's martial prowess, knows Gandalf's reputation
-  - I: A, E, J # Gandalf must guide Frodo, trusts Aragorn completely, values Elrond's counsel
+  - G: H, I    # Gimli respects Boromir's warrior spirit, trusts Gandalf who is friend to dwarves
+  - H: G, I    # Boromir appreciates Gimli's martial prowess, knows Gandalf's reputation
+  - I: A, J, M # Gandalf must guide Frodo, relies on Saruman's wisdom, values Elrond's counsel
   - J: E, F, I # Elrond believes in Aragorn's destiny, trusts Legolas as kinsman, respects Gandalf's wisdom
-  - K: A # Gollum is obsessed only with the Ring-bearer
-  - L:  # Treebeard knows none of these beings at this time
-  - M: H # Saruman sees Boromir as potentially corruptible and useful for Gondor intelligence
+  - K:         # No choices
+  - L:         # No choices
+  - M: H       # Saruman would manipulate Boromir's ambitions
 choices_b:
   - A: K, M # Frodo instinctively fears Gollum, would sense wrongness about Saruman
   - B: K, M # Sam deeply distrusts "sneaking" Gollum, would be wary of any wizard besides Gandalf
@@ -24,12 +24,12 @@ choices_b:
   - E: K, M # Aragorn knows Gollum's treachery, has growing suspicions about Saruman
   - F: G, K # Legolas has ancestral prejudice against dwarves, sees Gollum as abomination
   - G: F, K # Gimli holds ancient grudge against elves, despises corrupted creatures
-  - H: A, K # Boromir doubts a halfling can bear such burden, repulsed by Gollum
-  - I: K, M # Gandalf pities but doesn't trust Gollum, has discovered Saruman's betrayal
+  - H: A, E # Boromir doubts a halfling can bear such burden, is envious of Aragorn
+  - I: C, D # Gandalf sees Merry and Pippin as not fit for a serious quest
   - J: K, M # Elrond sees Gollum as corrupted beyond redemption, senses Saruman's fall
-  - K: B, E # Gollum hates Sam who protects "master", fears and despises Aragorn
-  - L:  # Treebeard has no knowledge of or opinion about these individuals
-  - M: E, I # Saruman sees Aragorn as threat to his plans, knows Gandalf suspects him
+  - K: A, B # Gollum hates both Sam and Frodo
+  - L:      # No choices
+  - M: A, I # Saruman sees Frodo as threat to his plans, knows Gandalf suspects him
 
 # Legend:
 # A: Frodo Baggins
