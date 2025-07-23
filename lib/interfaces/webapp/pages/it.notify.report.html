@@ -47,8 +47,8 @@
                                 <p class="text-center font-semibold">Il report è stato generato correttamente.</p>
                                 <p class="mb-3 text-xs text-center">Clicca sulle icone per scaricarlo nei formati disponibili.</p>
                                 <div class="flex flex-col gap-12 mt-6">
+                                    <!-- Report HTML or PDF -->
                                     <div class="flex items-center gap-9">
-                                        <!-- Report HTML or PDF -->
                                         <div class="w-36 h-48 shrink-0 relative cursor-pointer"
                                             x-bind="notifyReportDownloadLinkFactory('pdf', 'notifyReportPDFSpinner')">
                                             <!-- Shadow -->
@@ -117,8 +117,8 @@
                                             </template>
                                         </div>
                                     </div>
+                                    <!-- File JSON -->
                                     <div class="flex items-center gap-9">
-                                        <!-- File JSON -->
                                         <div class="w-36 h-48 shrink-0 relative cursor-pointer"
                                             x-bind="notifyReportDownloadLinkFactory('json', 'notifyReportJSONSpinner')">
                                             <!-- Shadow -->
