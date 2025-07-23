@@ -144,7 +144,7 @@ class CoreData:
             # Group nodes with same id and consolidate their values
             nodes = (
                 # Omit isolated nodes first
-                nodes.loc[~nodes["node_id"].isin(isolated_nodes.values), :]
+                nodes.loc[~nodes["node_id"].isin(isolated_nodes), :]
                 .groupby(by="node_id")
                     .aggregate({
                         "metric": list,
