@@ -57,16 +57,16 @@ def get_group_filepaths(project_folderpath: Path) -> List[Path]:
     return [path for path in project_folderpath.glob("*_g*.*") 
             if re.search(r"_g\d+\.\w+$", path.name)]
 
-def get_folders_to_process(data_folder: Path) -> Iterator[Path]:
+def get_project_folderpaths(data_folderpath: Path) -> Iterator[Path]:
     """Get folders to process in batch mode.
     
     Args:
-        data_folder: Path to the user data folder
+        data_folderpath: Path to the user data folder
         
     Yields:
         Directory paths to process
     """
-    return (path for path in data_folder.glob("*") if path.is_dir())
+    return (path for path in data_folderpath.glob("*") if path.is_dir())
 
 def handle_init_action(project: str, project_folderpath: Path) -> None:
     """Handle project initialization.
@@ -83,18 +83,18 @@ def handle_init_action(project: str, project_folderpath: Path) -> None:
         raise FileExistsError(f"{project} already exists.")
     TerminalMain.init_project(project, project_folderpath)
 
-def handle_batch_processing(data_folder: Path, with_sociogram: bool, language: str) -> None:
+def handle_batch_processing(data_folderpath: Path, with_sociogram: bool, language: str) -> None:
     """Handle batch processing of projects.
     
     Args:
-        data_folder: Path to the user data folder
+        data_folderpath: Path to the user data folder
         with_sociogram: Whether to include sociogram in reports
         language: Language for document generation
     """
-    for project_folder_path in get_folders_to_process(data_folder):
-        project = project_folder_path.name
-        groups_filepaths = get_group_filepaths(project_folder_path)
-        terminal_main = TerminalMain(project, project_folder_path, groups_filepaths, language)
+    for project_folderpath in get_project_folderpaths(data_folderpath):
+        project = project_folderpath.name
+        group_filepaths = get_group_filepaths(project_folderpath)
+        terminal_main = TerminalMain(project, project_folderpath, group_filepaths, language)
         terminal_main.generate_report(with_sociogram)
 
 def handle_project_actions(args: argparse.Namespace, project_folderpath: Path) -> None:
@@ -104,10 +104,10 @@ def handle_project_actions(args: argparse.Namespace, project_folderpath: Path) -
         args: Parsed command line arguments
         project_folderpath: Path to the project folder
     """
-    groups_filepaths = get_group_filepaths(project_folderpath)
-    groups_already_created = len(groups_filepaths)
+    group_filepaths = get_group_filepaths(project_folderpath)
+    groups_already_created = len(group_filepaths)
     groups_to_create = range(groups_already_created + 1, groups_already_created + args.group + 1)
-    terminal_main = TerminalMain(args.project, project_folderpath, groups_filepaths, args.language)
+    terminal_main = TerminalMain(args.project, project_folderpath, group_filepaths, args.language)
     
     match args.action:
         case "group":
@@ -129,14 +129,14 @@ def main() -> None:
             project_folderpath = Path("./data") / args.user / args.project
             handle_init_action(args.project, project_folderpath)
         elif args.action == "batch":
-            data_folder = Path("./data") / args.user
-            handle_batch_processing(data_folder, args.with_sociogram, args.language)
+            data_folderpath = Path("./data") / args.user
+            handle_batch_processing(data_folderpath, args.with_sociogram, args.language)
         else:
             project_folderpath = Path("./data") / args.user / args.project
             handle_project_actions(args, project_folderpath)
             
     except Exception as error:
-        pass
+        print(error)
 
 if __name__ == "__main__":
     main()
