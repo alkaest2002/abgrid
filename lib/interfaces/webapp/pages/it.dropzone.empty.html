@@ -10,7 +10,8 @@
 
 <body class="h-screen min-w-4xl max-w-4xl mx-auto overflow-hidden"
     x-data="{ ...componentToast(), ...componentOnline(), ...componentNavigation(), ...componentApi(), ...componentDownloadManual() }"
-    x-init="() => { initToast(); initOnline(); initNavigation(); initApi() }">
+    x-init="initToast(); initOnline(); initNavigation(); initApi()">
+
 
     <!-- Toast -->
     <template x-teleport="body">
@@ -39,9 +40,16 @@
             <!-- Center area - takes available space with rounded border -->
             <main class="min-h-[640px] flex-1 relative px-6 overflow-y-auto">
                 <div class="h-full">
-                    <div class="h-full relative p-12 text-gray-900 bg-gray-100 rounded-lg">
+                    <div 
+                        x-bind="dropzoneEmptyContainer"
+                        tabindex="0"
+                        class="h-full relative p-12 text-gray-900 bg-gray-100 rounded-lg"
+                    >
                         <!-- Main content goes here -->
-                            <div class="h-full flex flex-col justify-center items-center text-center cursor-pointer" x-bind="dropzoneEmptyContainer"
+                            <div 
+                                role="button"
+                                class="h-full flex flex-col justify-center items-center text-center cursor-pointer focus:outline-none" 
+                                aria-label="area di caricamento file - trascina qui il file o clicca per selezionare"
                                 x-cloak>
                                 <svg xmlns="http://www.w3.org/2000/svg" class="h-12 mb-4 fill-gray-500"
                                     viewBox="0 0 576 512"><!--!Font Awesome Free 6.7.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2025 Fonticons, Inc.-->
@@ -64,7 +72,11 @@
             <!-- Bottom area - fixed height -->
             <footer class="h-10 flex justify-center items-center">
                 <div class="relative top-[-100%] p-3 bg-gray-100 rounded-full">
-                    <button x-data="componentMagicButton(magicButton.label, magicButton.action)" x-bind="magicButton">
+                    <button 
+                        x-data="componentMagicButton(magicButton.label, magicButton.action)" 
+                        x-bind="magicButton"
+                        aria-label="main action button"
+                    >
                     </button>
                 </div>
             </footer>
