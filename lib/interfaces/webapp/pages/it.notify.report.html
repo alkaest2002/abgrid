@@ -10,7 +10,7 @@
 
 <body class="h-screen min-w-4xl max-w-4xl mx-auto overflow-hidden"
     x-data="{ ...componentToast(), ...componentOnline(), ...componentNavigation(), ...componentApi(), ...componentDownloadManual() }"
-    x-init="() => { initToast(); initOnline(); initNavigation(); initApi() }">
+    x-init="initToast(); initOnline(); initNavigation(); initApi()">
 
     <!-- Toast -->
     <template x-teleport="body">
@@ -175,7 +175,11 @@
             <!-- Bottom area - fixed height -->
             <footer class="h-10 flex justify-center items-center">
                 <div class="relative top-[-100%] p-3 bg-gray-100 rounded-full">
-                    <button x-data="componentMagicButton(magicButton.label, magicButton.action)" x-bind="magicButton">
+                    <button 
+                        x-data="componentMagicButton(magicButton.label, magicButton.action)" 
+                        x-bind="magicButton"
+                        aria-label="main action button"
+                    >
                     </button>
                 </div>
             </footer>
