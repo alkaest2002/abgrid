@@ -175,7 +175,7 @@ class ABGridGroupSchema(BaseModel):
         errors = []
         
         # Validate fields
-        errors.extend(validate_text_field("project_title", data.get("project_title"), 1, 80))
+        errors.extend(validate_text_field("project_title", data.get("project_title"), 1, 100))
         errors.extend(validate_text_field("question_a", data.get("question_a"), 1, 300))
         errors.extend(validate_text_field("question_b", data.get("question_b"), 1, 300))        
         errors.extend(validate_group_field(data.get("group")))
