@@ -9,25 +9,23 @@ from lib.core.core_schemas import ABGridGroupSchema, ABGridReportSchema
 from lib.core.core_templates import CoreRenderer
 from lib.utils import to_json
 
+# Initialize once at module level
+_auth = Auth()
+_abgrid_data = CoreData()
+_abgrid_renderer = CoreRenderer()
+
 def get_router() -> APIRouter:
     """
     Create and configure the FastAPI router.
     """
     router = APIRouter(prefix="/api")
-    
-    # Init components
-    auth = Auth()
-    abgrid_data = CoreData()
-    abgrid_renderer = CoreRenderer()
 
     @router.get("/token")
     async def get_token() -> JSONResponse:
         """
         Get a new anonymous JWT token.
         """
-        # Generate token
-        token = auth.jwt_handler.generate_token()
-
+        token = _auth.jwt_handler.generate_token()
         return JSONResponse(
             status_code=status.HTTP_200_OK,
             content={"detail": token}
@@ -39,26 +37,22 @@ def get_router() -> APIRouter:
         request: Request,
         model: ABGridGroupSchema, 
         language: str = Query(..., description="Language of the group template"),
-        user_data: Dict[str, Any] = Depends(auth.verify_token)
+        user_data: Dict[str, Any] = Depends(_auth.verify_token)
     ) -> JSONResponse:
         """
         Generate group configuration file.
         """
-        # Get report data
-        group_data = abgrid_data.get_group_data(model)
+        group_data = _abgrid_data.get_group_data(model)
 
-        # Render the template with group-specific data
         try:
             template_path = f"/{language}/group.html"
-            rendered_group = abgrid_renderer.render_html(template_path, group_data)
-        
+            rendered_group = _abgrid_renderer.render_html(template_path, group_data)
         except Exception as e:
             raise HTTPException(
                 status_code=500,
                 detail="failed_to_render_jinja_template"
             )
         
-        # Generate safe filename
         safe_title = "".join(c for c in model.project_title if c.isalnum() or c in (' ', '-', '_')).rstrip()
         safe_title = safe_title.replace(' ', '_')[:30]
         filename = f"{safe_title}_g{model.group}.yaml"
@@ -83,18 +77,15 @@ def get_router() -> APIRouter:
         model: ABGridReportSchema, 
         language: str = Query(..., description="Language of the report"),
         with_sociogram: bool = Query(..., description="Include sociogram"),
-        user_data: Dict[str, Any] = Depends(auth.verify_token)
+        user_data: Dict[str, Any] = Depends(_auth.verify_token)
     ) -> JSONResponse:
         """
         Generate a report.
         """
         try:
-            # Get report data
-            report_data = abgrid_data.get_report_data(model, with_sociogram)
-
-            # Render report
+            report_data = _abgrid_data.get_report_data(model, with_sociogram)
             template_path = f"./{language}/report.html"
-            rendered_report = abgrid_renderer.render_html(template_path, report_data)
+            rendered_report = _abgrid_renderer.render_html(template_path, report_data)
 
             return JSONResponse(
                 status_code=status.HTTP_200_OK,
@@ -105,7 +96,6 @@ def get_router() -> APIRouter:
                     }
                 }
             )
-
         except Exception as e:
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
