@@ -18,7 +18,7 @@ import yaml
 import json
 
 from pathlib import Path
-from typing import Dict, Any, List, Tuple, Union
+from typing import Dict, Any, List, Union
 from lib.utils import to_json
 from lib.core import SYMBOLS
 from lib.core.core_schemas import ABGridReportSchema
@@ -26,11 +26,6 @@ from lib.core.core_data import CoreData
 from lib.core.core_templates import abgrid_jinja_env, CoreRenderer
 from lib.interfaces.terminal.terminal_logger import logger_decorator
 
-ProjectData = Dict[str, Any]
-GroupData = Dict[str, Any]
-ReportData = Dict[str, Any]
-ValidationErrors = List[str]
-DataWithErrors = Tuple[Dict[str, Any], ValidationErrors]
 
 class TerminalMain:
     """
