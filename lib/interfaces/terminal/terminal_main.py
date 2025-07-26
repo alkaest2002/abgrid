@@ -1,5 +1,5 @@
 """
-Filename: abgrid_main.py
+Filename: terminal_main.py
 
 Description: Terminal main module for managing project initialization, file generation, and report rendering.
 
@@ -11,6 +11,8 @@ The code is part of the AB-Grid project and is licensed under the MIT License.
 """
 
 import os
+import re
+import argparse
 from weasyprint import HTML
 import yaml
 import json
@@ -39,55 +41,47 @@ class TerminalMain:
     report generation with optional sociogram support.
     """
     
-    def __init__(
-        self,
-        project: str,
-        project_folderpath: Path, 
-        groups_filepaths: List[Path],
-        language: str,
-    ) -> None:
+    def __init__(self, args: argparse.Namespace) -> None:
         """
-        Initialize TerminalMain instance with project configuration.
+        Initialize TerminalMain instance with project configuration from args.
         
         Args:
-            project: Name of the project
-            project_folderpath: Path to the project directory
-            groups_filepaths: List of paths to group configuration files
-            language: language used in templates
+            args: Parsed command line arguments containing project configuration
+                 Must have: user, project, language, action
+                 May have: members_per_group, with_sociogram
 
         Returns:
             None
         """
-        # Populate props
-        self.project = project
-        self.project_folderpath = project_folderpath
-        self.groups_filepaths = groups_filepaths
-        self.reports_path = project_folderpath / "reports"
-        self.language = language
+        # Store args and extract properties
+        self.args = args
+        self.project = args.project
+        self.language = args.language
         
-        # Ensure rerport directory exists
-        if not self.reports_path.exists():
+        # Build paths from args
+        data_path = Path("./data")
+        self.user_folderpath = data_path / args.user
+        self.project_folderpath = self.user_folderpath / args.project
+        self.groups_filepaths = self._get_group_filepaths()
+        self.reports_path = self.project_folderpath / "reports"
+        
+        # Ensure report directory exists for report actions
+        if args.action in ["report"] and not self.reports_path.exists():
             raise OSError(f"Output directory {self.reports_path} does not exist.")
         
-        # Initialize core data
+        # Initialize core components
         self.core_data = CoreData()
-
-        # Initialze core renderer
         self.renderer = CoreRenderer()
 
     @staticmethod
     @logger_decorator
-    def init_project(
-        project: str, 
-        project_folderpath: Path, 
-    ) -> None:
+    def init_project(project_folderpath: Path) -> None:
         """
         Initialize a new AB-Grid project with directory structure.
         
         Creates the project directory structure including subdirectories for reports.
         
         Args:
-            project: Name of the project to initialize
             project_folderpath: Path where the project directory will be created
         
         Returns:
@@ -98,30 +92,16 @@ class TerminalMain:
             - Creates 'reports' subdirectory
         """
         # Create the main project directory structure
-        # os.makedirs will create intermediate directories if they don't exist
-        os.makedirs(project_folderpath, exist_ok=False)  # Fail if project already exists
+        os.makedirs(project_folderpath, exist_ok=False) # Fail if project already exists
         os.makedirs(project_folderpath / "reports")
-        
-        # Notify user
-        print(f"Project {project} correctly initialized.")
 
     @logger_decorator
-    def generate_group(
-        self, 
-        groups: range, 
-        members_per_group: int, 
-        language: str
-    ) -> None:
+    def generate_group(self) -> None:
         """
-        Generate group configuration files for specified groups.
+        Generate group configuration files for the next available group.
         
-        Creates individual YAML configuration files for each group using the
+        Creates a YAML configuration file for the next group using the
         language-specific template.
-        
-        Args:
-            groups: Range object specifying which group numbers to generate
-            members_per_group: Number of members in each group
-            language: Language code for template selection
         
         Returns:
             None
@@ -131,55 +111,49 @@ class TerminalMain:
             - Generated files follow naming pattern: {project}_g{group_number}.yaml
             - Uses Jinja2 templates for HTML rendering within YAML structure
         """
-        # Validate input parameters
-        if not groups:
-            raise ValueError("Groups range cannot be empty.")
+        # Calculate next group number
+        groups_already_created = len(self.groups_filepaths)
+        next_group = groups_already_created + 1
         
-        if members_per_group <= 0:
-            raise ValueError(f"members_per_group must be positive, got {members_per_group}.")
+        # Get members_per_group from args
+        members_per_group = self.args.members_per_group
         
-        if members_per_group > len(SYMBOLS):
-            raise ValueError(
-                f"members_per_group ({members_per_group}) exceeds available symbols ({len(SYMBOLS)})."
-                f"Maximum supported group size is {len(SYMBOLS)} members."
-            )
-
-        # template for the language-specific group template
-        template_path = f"/{language}/group.html"
+        # Template for the language-specific group template
+        template_path = f"/{self.language}/group.html"
         
         # Load template for the language-specific group template
         group_template = abgrid_jinja_env.get_template(template_path)
         
-        # Generate a configuration file for each group
-        for group_number in groups:
-            
-            # Prepare template data for the current group
-            template_data = { "group": group_number, "members": SYMBOLS[:members_per_group] }
-            
-            # Render the template with group-specific data
-            rendered_group_template = group_template.render(template_data)
-            
-            # Generate the group file path
-            group_file_path = self.project_folderpath / f"{self.project}_g{group_number}.yaml"
-            
-            # Write the rendered template to disk
-            with open(group_file_path, "w", encoding='utf-8') as file:
-                file.write(rendered_group_template)
+        # Prepare template data for the current group
+        template_data = { 
+            "project_title": self.project,
+            "question_a": "",
+            "question_b": "",
+            "group": next_group, 
+            "members": SYMBOLS[:members_per_group] 
+        }
+        
+        # Render the template with group-specific data
+        rendered_group_template = group_template.render(template_data)
+        
+        # Generate the group file path
+        group_file_path = self.project_folderpath / f"{self.project}_g{next_group}.yaml"
+        
+        # Write the rendered template to disk
+        with open(group_file_path, "w", encoding='utf-8') as file:
+            file.write(rendered_group_template)
 
-        # Notify user
-        print(f"{group_number} group(s) succesfully generated.")
-            
+        # Update internal state
+        self.groups_filepaths = self._get_group_filepaths()
+        
     @logger_decorator
-    def generate_report(self, with_sociogram: bool = False) -> None:
+    def generate_report(self) -> None:
         """
         Generate comprehensive PDF report with optional sociograms.
         
         Creates detailed reports for each group including social network analysis,
         statistics, and optional sociogram visualizations. Also exports aggregated
         data in JSON format for further analysis.
-        
-        Args:
-            with_sociogram: Whether to include sociogram visualizations in reports
         
         Returns:
             None
@@ -192,7 +166,11 @@ class TerminalMain:
         
         # Validate that group files exist
         if not self.groups_filepaths:
-            raise ValueError("No group files found.")
+            from app_terminal import ABGridError
+            raise ABGridError(f"No group files found in project '{self.project}'")
+        
+        # Get with_sociogram from args
+        with_sociogram = self.args.with_sociogram
         
         # Initialize storage for aggregated data from all groups
         all_groups_data = {}
@@ -200,7 +178,6 @@ class TerminalMain:
         # Process each group file to generate individual reports
         for group_file in self.groups_filepaths:
 
-            # Notify user
             print(f"Generating report for {group_file.stem}. Please, wait...")
             
             # Load current group data
@@ -209,7 +186,7 @@ class TerminalMain:
             # Validate current group data
             validated_data = ABGridReportSchema.model_validate(group_data)
             
-            # Get report Data
+            # Get report data
             report_data = self.core_data.get_report_data(validated_data, with_sociogram)
             
             # Render report html template
@@ -218,8 +195,7 @@ class TerminalMain:
             # Generate PDF report
             self._generate_pdf("report", rendered_report, group_file.stem, self.reports_path)
 
-            # Notify user
-            print(f"Report for {group_file.stem} succesfully generated.")
+            print(f"Report for {group_file.stem} successfully generated.")
             
             # Convert report data to json
             filtered_data = to_json(report_data)
@@ -227,12 +203,20 @@ class TerminalMain:
             # Add the filtered data to the collection
             all_groups_data[group_file.stem] = filtered_data
         
-            # Define json export file path
-            json_export_path = self.project_folderpath / f"{self.project}_data.json"
+        # Define json export file path
+        json_export_path = self.project_folderpath / f"{self.project}_data.json"
 
-            # Persist json file to disk
-            with open(json_export_path, "w", encoding='utf-8') as fout:
-                json.dump(all_groups_data, fout, indent=4, ensure_ascii=False)
+        # Persist json file to disk
+        with open(json_export_path, "w", encoding='utf-8') as fout:
+            json.dump(all_groups_data, fout, indent=4, ensure_ascii=False)
+
+    @logger_decorator
+    def _get_group_filepaths(self) -> List[Path]:
+        """Get list of group file paths matching the pattern."""
+        if not self.project_folderpath.exists():
+            return []
+        return [path for path in self.project_folderpath.glob("*_g*.*") 
+                if re.search(r"_g\d+\.\w+$", path.name)]
         
     @logger_decorator
     def _load_yaml_data(self, yaml_file_path: Path) -> Union[Dict[str, Any], None]:
@@ -284,4 +268,3 @@ class TerminalMain:
         
         except Exception as e:
             raise OSError(f"PDF generation failed for {file_path}: {e}.") from e
-
