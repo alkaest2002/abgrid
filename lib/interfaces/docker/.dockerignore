@@ -1,0 +1,44 @@
+# Git
+.git
+.gitignore
+
+# Docker
+lib/interfaces/docker/Dockerfile
+lib/interfaces/docker/docker-compose.yml
+lib/interfaces/docker/.dockerignore
+
+# Python
+__pycache__
+*.pyc
+*.pyo
+*.pyd
+.Python
+env/
+venv/
+.venv/
+pip-log.txt
+pip-delete-this-directory.txt
+.pytest_cache/
+
+# IDEs
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+logs/
+
+# Documentation
+*.md
+!README.md
+
+# Development
+.env.local
+.env.development
