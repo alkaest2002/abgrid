@@ -19,6 +19,11 @@ from abc import ABC, abstractmethod
 from lib.interfaces.terminal.terminal_main import TerminalMain
 from lib.utils import check_python_version
 
+EXIT_SUCCESS = 0
+EXIT_APP_ERROR = 1
+EXIT_SYSTEM_ERROR = 2
+EXIT_USER_INTERRUPT = 130
+
 @dataclass
 class Config:
     """
@@ -225,7 +230,7 @@ class BatchCommand(Command):
         data_folderpath = _get_user_folderpath(self.args)
         _ensure_folder_exists(data_folderpath)
         
-        project_folders = list(_get_projects_folderpaths(data_folderpath))
+        project_folders = [path for path in data_folderpath.glob("*") if path.is_dir()]
         if not project_folders:
             print(f"No projects found in {data_folderpath}")
             return
@@ -298,17 +303,20 @@ def main() -> int:
         command = _create_command(args)
         command.execute()
 
-        return 0
-        
+        return EXIT_SUCCESS
+
+    # Interrupt   
     except KeyboardInterrupt:
         print("\nOperation cancelled by user")
-        return 130
+        return EXIT_USER_INTERRUPT
+    # App error
     except ABGridError as error:
         print(f"Error: {error}")
-        return 1
+        return EXIT_APP_ERROR
+    # System error
     except Exception as error:
         print(f"Unexpected error: {error}")
-        return 2
+        return EXIT_SYSTEM_ERROR
 
 def _setup_argument_parser() -> argparse.ArgumentParser:
     """
@@ -367,6 +375,10 @@ def _validate_args(args: argparse.Namespace) -> None:
     """
     if args.action in ["init", "group", "report"] and not args.project:
         raise InvalidArgumentError(f"Project name is required for {args.action} action")
+    
+    if args.user and not args.user.replace('_', '').replace('-', '').isalnum():
+        raise InvalidArgumentError("User name should contain only alphanumeric characters, hyphens, and underscores")
+
 
 
 def _create_command(args: argparse.Namespace) -> Command:
@@ -425,26 +437,6 @@ def _get_project_folderpath(args: argparse.Namespace) -> Path:
         Path to the project folder
     """
     return _get_user_folderpath(args) / args.project
-
-
-def _get_projects_folderpaths(data_folderpath: Path) -> Iterator[Path]:
-    """
-    Get folders to process in batch mode.
-    
-    Returns an iterator over all directory paths within the specified
-    data folder, filtering out non-directory entries.
-    
-    Args:
-        data_folderpath: Path to the data folder to scan
-        
-    Yields:
-        Path objects for each project directory found
-        
-    Notes:
-        - Only returns directories, ignoring files
-        - Uses generator for memory efficiency with large numbers of projects
-    """
-    return (path for path in data_folderpath.glob("*") if path.is_dir())
 
 
 def _ensure_folder_exists(folderpath: Path) -> None:
