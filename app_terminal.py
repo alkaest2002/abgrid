@@ -29,8 +29,6 @@ class Config:
     """
     data_path: Path = Path("./data")
     languages: List[str] = field(default_factory=lambda: ["en", "it"])
-    min_groups: int = 1
-    max_groups: int = 50
     min_members: int = 8
     max_members: int = 50
 
