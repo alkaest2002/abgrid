@@ -68,16 +68,12 @@ class TerminalMain:
         self.core_data = CoreData()
         self.renderer = CoreRenderer()
 
-    @staticmethod
     @logger_decorator
-    def init_project(project_folderpath: Path) -> None:
+    def init_project(self) -> None:
         """
         Initialize a new AB-Grid project with directory structure.
         
         Creates the project directory structure including subdirectories for reports.
-        
-        Args:
-            project_folderpath: Path where the project directory will be created
         
         Returns:
             None
@@ -87,8 +83,8 @@ class TerminalMain:
             - Creates 'reports' subdirectory
         """
         # Create the main project directory structure
-        os.makedirs(project_folderpath, exist_ok=False) # Fail if project already exists
-        os.makedirs(project_folderpath / "reports")
+        os.makedirs(self.project_folderpath, exist_ok=False) # Fail if project already exists
+        os.makedirs(self.project_folderpath / "reports")
 
     @logger_decorator
     def generate_group(self) -> None:
