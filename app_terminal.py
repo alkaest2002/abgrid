@@ -43,9 +43,9 @@ class ABGridError(Exception):
     pass
 
 
-class ProjectNotFoundError(ABGridError):
+class FolderNotFoundError(ABGridError):
     """
-    Raised when project doesn't exist.
+    Raised when folder doesn't exist.
     
     Thrown when attempting to perform operations on non-existent projects,
     typically during group, report, or batch operations.
@@ -53,7 +53,7 @@ class ProjectNotFoundError(ABGridError):
     pass
 
 
-class ProjectAlreadyExistsError(ABGridError):
+class FolderAlreadyExistsError(ABGridError):
     """
     Raised when trying to create existing project.
     
@@ -71,44 +71,6 @@ class InvalidArgumentError(ABGridError):
     such as missing required parameters or conflicting options.
     """
     pass
-
-
-config = Config()
-
-
-def setup_argument_parser() -> argparse.ArgumentParser:
-    """
-    Set up and configure the argument parser.
-    
-    Creates and configures an ArgumentParser instance with all required
-    and optional command-line arguments for the AB-Grid application.
-    
-    Returns:
-        Configured ArgumentParser instance ready for parsing command-line arguments
-        
-    Notes:
-        - Uses configuration values for validation ranges and choices
-        - Arguments are organized by frequency of use and logical grouping
-    """
-    parser = argparse.ArgumentParser(prog="ABGrid")
-
-    parser.add_argument("-u", "--user", type=str, required=True, 
-                        help="Base folder where data is stored.")
-    parser.add_argument("-p", "--project", 
-                        help="Name of the project.")
-    parser.add_argument("-a", "--action", required=True, 
-                        choices=["init", "group", "report", "batch"], 
-                        help="Action to perform: 'init', 'group', 'report', or 'batch'.")
-    parser.add_argument("-m", "--members_per_group", type=int, 
-                        choices=range(config.min_members, config.max_members + 1), 
-                        default=8, 
-                        help=f"Number of members per group ({config.min_members} to {config.max_members}).")
-    parser.add_argument("-l", "--language", choices=config.languages, default="it", 
-                        help="Language used for generating documents.")
-    parser.add_argument("-s", "--with-sociogram", action='store_true', 
-                        help="Output sociogram")
-    
-    return parser
 
 
 class Command(ABC):
@@ -169,10 +131,10 @@ class InitCommand(Command):
             None
             
         Raises:
-            ProjectAlreadyExistsError: If project already exists
+            FolderAlreadyExistsError: If project already exists
         """
         project_folderpath = _get_project_folderpath(self.args)
-        _validate_project_not_exists(project_folderpath)
+        _ensure_folder_not_exists(project_folderpath)
         TerminalMain.init_project(project_folderpath)
         print(f"Project '{self.args.project}' initialized successfully")
 
@@ -196,10 +158,10 @@ class GroupCommand(Command):
             None
             
         Raises:
-            ProjectNotFoundError: If project doesn't exist
+            FolderNotFoundError: If project doesn't exist
         """
         project_folderpath = _get_project_folderpath(self.args)
-        _validate_project_exists(project_folderpath)
+        _ensure_folder_exists(project_folderpath)
         terminal_main = TerminalMain(self.args)
         terminal_main.generate_group()
         print(f"Generated group for project '{self.args.project}'")
@@ -224,11 +186,11 @@ class ReportCommand(Command):
             None
             
         Raises:
-            ProjectNotFoundError: If project doesn't exist
+            FolderNotFoundError: If project doesn't exist
             ABGridError: If no group files found
         """
         project_folderpath = _get_project_folderpath(self.args)
-        _validate_project_exists(project_folderpath)
+        _ensure_folder_exists(project_folderpath)
         terminal_main = TerminalMain(self.args)
         terminal_main.generate_report()
         sociogram_text = " with sociogram" if self.args.with_sociogram else ""
@@ -261,8 +223,7 @@ class BatchCommand(Command):
             - Provides summary of successful and failed processing
         """
         data_folderpath = _get_user_folderpath(self.args)
-        if not data_folderpath.exists():
-            raise ABGridError(f"Data folder not found: {data_folderpath}")
+        _ensure_folder_exists(data_folderpath)
         
         project_folders = list(_get_projects_folderpaths(data_folderpath))
         if not project_folders:
@@ -295,12 +256,14 @@ class BatchCommand(Command):
         
         # Summary report
         sociogram_text = " with sociograms" if self.args.with_sociogram else ""
-        total_projects = len(project_folders)
         
-        print(f"Batch processing complete. Processed {processed_count}/{total_projects} project(s){sociogram_text}")
+        print(f"Batch processing complete. Processed {processed_count} project(s){sociogram_text}")
         
         if failed_count > 0:
             print(f"Failed to process {failed_count} project(s)")
+
+# Init config
+config = Config()
 
 
 def main() -> int:
@@ -311,8 +274,11 @@ def main() -> int:
     through command execution, with comprehensive error handling.
     
     Returns:
-        Exit code: 0 for success, 1 for application errors, 2 for unexpected errors,
-                  130 for user interruption
+        Exit code: 
+            0 for success, 
+            1 for application errors, 
+            2 for unexpected errors,
+            130 for user interruption
                   
     Notes:
         - Handles KeyboardInterrupt gracefully
@@ -320,12 +286,18 @@ def main() -> int:
         - Provides appropriate exit codes for shell integration
     """
     try:
+        # Ensure python compatibility
         check_python_version()
-        parser = setup_argument_parser()
+
+        # Parse and validate user argumets
+        parser = _setup_argument_parser()
         args = parser.parse_args()
         _validate_args(args)
+
+        # Create and execute command
         command = _create_command(args)
         command.execute()
+
         return 0
         
     except KeyboardInterrupt:
@@ -337,6 +309,40 @@ def main() -> int:
     except Exception as error:
         print(f"Unexpected error: {error}")
         return 2
+
+def _setup_argument_parser() -> argparse.ArgumentParser:
+    """
+    Set up and configure the argument parser.
+    
+    Creates and configures an ArgumentParser instance with all required
+    and optional command-line arguments for the AB-Grid application.
+    
+    Returns:
+        Configured ArgumentParser instance ready for parsing command-line arguments
+        
+    Notes:
+        - Uses configuration values for validation ranges and choices
+        - Arguments are organized by frequency of use and logical grouping
+    """
+    parser = argparse.ArgumentParser(prog="ABGrid")
+
+    parser.add_argument("-u", "--user", type=str, required=True, 
+                        help="Base folder where data is stored.")
+    parser.add_argument("-p", "--project", 
+                        help="Name of the project.")
+    parser.add_argument("-a", "--action", required=True, 
+                        choices=["init", "group", "report", "batch"], 
+                        help="Action to perform: 'init', 'group', 'report', or 'batch'.")
+    parser.add_argument("-m", "--members_per_group", type=int, 
+                        choices=range(config.min_members, config.max_members + 1), 
+                        default=8, 
+                        help=f"Number of members per group ({config.min_members} to {config.max_members}).")
+    parser.add_argument("-l", "--language", choices=config.languages, default="it", 
+                        help="Language used for generating documents.")
+    parser.add_argument("-s", "--with-sociogram", action='store_true', 
+                        help="Output sociogram")
+    
+    return parser
 
 
 # Private helper functions
@@ -358,7 +364,6 @@ def _validate_args(args: argparse.Namespace) -> None:
         
     Notes:
         - init, group, report actions require project name
-        - batch action should not specify project name
     """
     if args.action in ["init", "group", "report"] and not args.project:
         raise InvalidArgumentError(f"Project name is required for {args.action} action")
@@ -442,7 +447,7 @@ def _get_projects_folderpaths(data_folderpath: Path) -> Iterator[Path]:
     return (path for path in data_folderpath.glob("*") if path.is_dir())
 
 
-def _validate_project_exists(project_folderpath: Path) -> None:
+def _ensure_folder_exists(folderpath: Path) -> None:
     """
     Validate that project exists for non-init actions.
     
@@ -450,19 +455,19 @@ def _validate_project_exists(project_folderpath: Path) -> None:
     appropriate error if not found.
     
     Args:
-        project_folderpath: Path to the project directory to validate
+        folderpath: Path to the directory to validate
         
     Returns:
         None
         
     Raises:
-        ProjectNotFoundError: If the project directory doesn't exist
+        FolderNotFoundError: If the project directory doesn't exist
     """
-    if not project_folderpath.exists():
-        raise ProjectNotFoundError(f"Project '{project_folderpath.name}' not found at {project_folderpath}")
+    if not folderpath.exists():
+        raise FolderNotFoundError(f"Project '{folderpath.name}' not found at {folderpath}")
 
 
-def _validate_project_not_exists(project_folderpath: Path) -> None:
+def _ensure_folder_not_exists(project_folderpath: Path) -> None:
     """
     Validate that project doesn't exist for init action.
     
@@ -476,10 +481,10 @@ def _validate_project_not_exists(project_folderpath: Path) -> None:
         None
         
     Raises:
-        ProjectAlreadyExistsError: If the project directory already exists
+        FolderAlreadyExistsError: If the project directory already exists
     """
     if project_folderpath.exists():
-        raise ProjectAlreadyExistsError(f"Project '{project_folderpath.name}' already exists at {project_folderpath}")
+        raise FolderAlreadyExistsError(f"Project '{project_folderpath.name}' already exists at {project_folderpath}")
 
 
 if __name__ == "__main__":
