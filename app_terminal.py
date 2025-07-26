@@ -13,7 +13,7 @@ The code is part of the AB-Grid project and is licensed under the MIT License.
 import sys
 import argparse
 from pathlib import Path
-from typing import List, Iterator
+from typing import List
 from dataclasses import dataclass, field
 from abc import ABC, abstractmethod
 from lib.interfaces.terminal.terminal_main import TerminalMain
@@ -140,7 +140,8 @@ class InitCommand(Command):
         """
         project_folderpath = _get_project_folderpath(self.args)
         _ensure_folder_not_exists(project_folderpath)
-        TerminalMain.init_project(project_folderpath)
+        terminal_main = TerminalMain(self.args)
+        terminal_main.init_project()
         print(f"Project '{self.args.project}' initialized successfully")
 
 
