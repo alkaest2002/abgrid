@@ -48,6 +48,7 @@ app.add_middleware(
 app.include_router(get_router())
 
 @app.get("/")
+@app.get("/health")
 def server_check() -> JSONResponse:
     """
     Public endpoint that can be accessed without authentication.
