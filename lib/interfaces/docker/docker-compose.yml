@@ -1,42 +1,18 @@
 version: '3.8'
 
 services:
-  # Development service
-  app-dev:
+  abgrid-fastapi:
     build:
       context: ../../../
       dockerfile: lib/interfaces/docker/Dockerfile
-      target: development
-    container_name: abgrid-fastapi-dev
+    container_name: abgrid-fastapi
     ports:
       - "8000:8000"
     environment:
-      - PYTHONPATH=/app
-      - ENV=development
-    volumes:
-      - ../../../:/app
-      - /app/__pycache__
-    restart: unless-stopped
-    profiles:
-      - dev
-
-  # Production service
-  app-prod:
-    build:
-      context: ../../../
-      dockerfile: lib/interfaces/docker/Dockerfile
-      target: production
-    container_name: abgrid-fastapi-prod
-    ports:
-      - "8000:8000"
-    environment:
-      - PYTHONPATH=/app
-      - ENV=production
       - WORKERS=4
       - LOG_LEVEL=info
     volumes:
       - ../../../logs:/app/logs
-      # Mount tmpfs for better performance
       - type: tmpfs
         target: /dev/shm
         tmpfs:
@@ -47,32 +23,3 @@ services:
         limits:
           memory: 1G
           cpus: '1.0'
-        reservations:
-          memory: 512M
-          cpus: '0.5'
-    profiles:
-      - prod
-
-  # Debug service
-  app-debug:
-    build:
-      context: ../../../
-      dockerfile: lib/interfaces/docker/Dockerfile
-      target: debug
-    container_name: abgrid-fastapi-debug
-    ports:
-      - "8000:8000"
-    environment:
-      - PYTHONPATH=/app
-      - ENV=production
-      - WORKERS=1
-      - LOG_LEVEL=debug
-    volumes:
-      - ../../../logs:/app/logs
-    restart: unless-stopped
-    profiles:
-      - debug
-
-networks:
-  default:
-    name: abgrid-network

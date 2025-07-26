@@ -1,40 +1,19 @@
 {
   "name": "abgrid-fastapi-docker",
   "version": "1.0.0",
-  "description": "Docker management scripts for SNA FastAPI application",
+  "description": "Docker production deployment for ABGrid FastAPI",
   "scripts": {
-    "build:dev": "docker build --target development -t abgrid-fastapi:dev -f Dockerfile ../../..",
-    "build:prod": "docker build --target production -t abgrid-fastapi:prod -f Dockerfile ../../..",
-    "build:debug": "docker build --target debug -t abgrid-fastapi:debug -f Dockerfile ../../..",
-    "build:all": "npm run build:dev && npm run build:prod && npm run build:debug",
-    
-    "up:dev": "docker-compose --profile dev up -d",
-    "up:prod": "docker-compose --profile prod up -d",
-    "up:debug": "docker-compose --profile debug up -d",
-    
+    "build": "docker build -t abgrid-fastapi -f Dockerfile ../../..",
+    "up": "docker-compose up -d",
     "down": "docker-compose down",
-    "down:clean": "docker-compose down -v --remove-orphans",
-    
-    "logs:dev": "docker-compose --profile dev logs -f",
-    "logs:prod": "docker-compose --profile prod logs -f",
-    "logs:debug": "docker-compose --profile debug logs -f",
-    
-    "restart:dev": "npm run down && npm run up:dev",
-    "restart:prod": "npm run down && npm run up:prod",
-    
-    "clean": "docker system prune -f",
-    "clean:all": "docker system prune -af && docker volume prune -f",
-    
-    "shell:dev": "docker exec -it abgrid-fastapi-dev sh",
-    "shell:prod": "docker exec -it abgrid-fastapi-prod sh",
-    "shell:debug": "docker exec -it abgrid-fastapi-debug sh",
-    
-    "health:dev": "docker exec abgrid-fastapi-dev wget --no-verbose --tries=1 --spider http://localhost:8000/health",
-    "health:prod": "docker exec abgrid-fastapi-prod wget --no-verbose --tries=1 --spider http://localhost:8000/health"
+    "logs": "docker-compose logs -f",
+    "restart": "npm run down && npm run up",
+    "deploy": "npm run build && npm run restart && npm run logs",
+    "shell": "docker exec -it abgrid-fastapi sh",
+    "health": "curl -f http://localhost:8000/health || echo 'Service unavailable'",
+    "clean": "docker system prune -f"
   },
-  "keywords": ["docker", "fastapi", "abgrid", "social-network-analysis"],
   "author": "Pierpaolo Calann",
   "license": "MIT",
-  "devDependencies": {},
   "private": true
 }
