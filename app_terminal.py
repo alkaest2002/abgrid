@@ -13,7 +13,7 @@ The code is part of the AB-Grid project and is licensed under the MIT License.
 import sys
 import argparse
 from pathlib import Path
-from typing import List, Dict, Type, Optional, Any
+from typing import List, Dict, Type, Optional
 from dataclasses import dataclass, field
 from abc import ABC, abstractmethod
 from lib.interfaces.terminal.terminal_main import TerminalMain
