@@ -1,4 +1,4 @@
-
+<!-- Macro: render_question -->
 {% macro render_question(network_type, question) %}
 <div class="question-container mt-xl">
     <div class="question-main">
@@ -7,6 +7,7 @@
 </div>
 {% endmacro %}
 
+<!-- Macro: render_graph -->
 {% macro render_graph(graph) %}
 <div class="graph-container mt-xl">
     <div classì="graph-main">
@@ -15,6 +16,19 @@
 </div>
 {% endmacro %}
 
+<!-- Macro: render_sociogram_graphs -->
+{% macro render_sociogram_graphs(graph, graph_label) %}
+<div class="sociogram-graphs-container mt-xl">
+    <div class="sociogram-graphs-main">
+        <div class="sociogram-graphs-header">
+            <b>{{ graph_label }}</b>
+        </div>
+        {{ render_graph(graph) }}
+    </div>
+</div>
+{% endmacro %}
+
+<!-- Macro: render_relevant_nodes -->
 {% macro render_relevant_nodes(valence_type, relevant_nodes) %}
 <div class="relevant-nodes-container mt-xl">
     <div class="relevant-nodes-main">
@@ -46,6 +60,7 @@
 </div>
 {% endmacro %}
 
+<!-- Macro: render_isolated_nodes -->
 {% macro render_isolated_nodes(isolated_nodes) %}
 <div class="isolated-nodes-container mb-xl">
     <div class="isolated-nodes-main">
@@ -67,17 +82,7 @@
 </div>
 {% endmacro %}
 
-{% macro render_sociogram_graphs(graph, graph_label) %}
-<div class="sociogram-graphs-container mt-xl">
-    <div class="sociogram-graphs-main">
-        <div class="sociogram-graphs-header">
-            <b>{{ graph_label }}</b>
-        </div>
-        {{ render_graph(graph) }}
-    </div>
-</div>
-{% endmacro %}
-
+<!-- Macro: render_sna_macro_statistics -->
 {% macro render_sna_macro_statistics(data) %}
 <div class="sna-macro-stats-container">
     <div class="sna-macro-stats-main">
@@ -88,6 +93,7 @@
 </div>
 {% endmacro %}
 
+<!-- Macro: render_sna_micro_statistics -->
 {% macro render_sna_micro_statistics(network_type, score_type, data, render_choices_label) %}
 <div class="sna-micro-stats-container mt-lg">
     <div class="sna-micro-stats-main">
@@ -135,6 +141,7 @@
 </div>
 {% endmacro %}
 
+<!-- Macro: render_rankings -->
 {% macro render_rankings(rankings, network_type, render_rank_label, render_sociogram_status_label) %}
 <div class="rankings-container mt-lg">
     {% for metric_label, data in rankings.items() %}
@@ -166,6 +173,7 @@
 </div>
 {% endmacro %}
 
+<!-- Macro: render_rankings_comparison -->
 {% macro render_rankings_comparison(rankings_ab, render_node_label) %}
 <div class="rankings-comparison-container mt-lg">
     {% for metric_label, data in rankings_ab.items() %}
@@ -191,6 +199,7 @@
 </div>
 {% endmacro %}
 
+<!-- Macro: render_sna_edges_types -->
 {% macro render_sna_edges_types(network_type, edges_types, render_edges_types_label, render_edges_type_empty_list) %}
 <div class="sna-edges-types-container mt-lg">
     {% for edges_type, edges in edges_types.items() %}
@@ -217,6 +226,7 @@
 </div>
 {% endmacro %}
 
+<!-- Macro: render_sna_components -->
 {% macro render_sna_components(network_type, all_components, render_components_label, render_components_empty_list) %}
 <div class="sna-components-container mt-lg">
     {% for type, components in all_components.items() %}
@@ -252,6 +262,7 @@
 </div>
 {% endmacro %}
 
+<!-- Macro: render_sociogram_micro_statistics -->
 {% macro render_sociogram_micro_statistics(data, render_sociogram_status_label) %}
 <div class="sociogram-micro-stats-container mt-lg">
     <div class="sociogram-micro-stats-main">
@@ -305,6 +316,7 @@
 </div>
 {% endmacro %}
 
+<!-- Macro: render_sociogram_macro_statistics -->
 {% macro render_sociogram_macro_statistics(macro_stats, render_sociogram_measures_label) %}
 <div class="sociogram-macro-stats-container mt-lg">
     <div class="sociogram-macro-stats-container-main">
@@ -334,6 +346,7 @@
 </div>
 {% endmacro %}
 
+<!-- Macro: render_descriptives -->
 {% macro render_descriptives(descriptives, render_measures_label) %}
 <div class="descriptives-container mt-lg">
     <div class="descriptives-container-main">
