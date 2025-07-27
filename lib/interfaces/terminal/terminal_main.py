@@ -181,7 +181,7 @@ class TerminalMain:
             report_data = self.core_data.get_report_data(validated_data, with_sociogram)
             
             # Render report html template
-            rendered_report = self.renderer.render_html(f"./{self.language}/report.html", report_data)
+            rendered_report = self.renderer.render(f"./{self.language}/report.html", report_data)
 
             # Generate PDF report
             self._generate_pdf("report", rendered_report, group_file.stem, self.reports_path)

@@ -46,7 +46,7 @@ def get_router() -> APIRouter:
 
         try:
             template_path = f"/{language}/group.html"
-            rendered_group = _abgrid_renderer.render_html(template_path, group_data)
+            rendered_group = _abgrid_renderer.render(template_path, group_data)
         except Exception as e:
             raise HTTPException(
                 status_code=500,
@@ -85,7 +85,7 @@ def get_router() -> APIRouter:
         try:
             report_data = _abgrid_data.get_report_data(model, with_sociogram)
             template_path = f"./{language}/report.html"
-            rendered_report = _abgrid_renderer.render_html(template_path, report_data)
+            rendered_report = _abgrid_renderer.render(template_path, report_data)
 
             return JSONResponse(
                 status_code=status.HTTP_200_OK,

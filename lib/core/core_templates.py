@@ -39,9 +39,9 @@ class TemplateRenderError(Exception):
 
 
 class CoreRenderer:
-    """Renders templates to PDF documents using Jinja2 and WeasyPrint."""
+    """Renders jinja templates."""
 
-    def render_html(self, template_path: Path, template_data: Dict[str, Any]) -> str:
+    def render(self, template_path: Path, template_data: Dict[str, Any]) -> str:
         """Render Jinja2 template with provided template_data.
         
         Args:
@@ -49,7 +49,7 @@ class CoreRenderer:
             template_data: Template context data
             
         Returns:
-            Rendered HTML string
+            Rendered template
             
         Raises:
             FileNotFoundError: If template file is not found
