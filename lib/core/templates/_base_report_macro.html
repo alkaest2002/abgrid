@@ -1,14 +1,14 @@
 
 {% macro render_question(network_type, question) %}
 <div class="question-container mt-xl">
-<div class="question-main">
-    <p><b>{{ network_type }}. {{ question }}</b></p> 
-</div>
+    <div class="question-main">
+        <p><b>{{ network_type }}. {{ question }}</b></p> 
+    </div>
 </div>
 {% endmacro %}
 
 {% macro render_graph(graph) %}
-<div class="graph-container mt-xxl">
+<div class="graph-container mt-xl">
     <div classì="graph-main">
         <img src="{{ graph }}" />
     </div>
@@ -68,7 +68,7 @@
 {% endmacro %}
 
 {% macro render_sociogram_graphs(graph, graph_label) %}
-<div class="sociogram-graphs-container">
+<div class="sociogram-graphs-container mt-xl">
     <div class="sociogram-graphs-main">
         <div class="sociogram-graphs-header">
             <b>{{ graph_label }}</b>
