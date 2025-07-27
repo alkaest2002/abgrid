@@ -13,24 +13,26 @@ The code is part of the AB-Grid project and is licensed under the MIT License.
 import sys
 import argparse
 from pathlib import Path
-from typing import List
+from typing import List, Dict, Type, Optional, Any
 from dataclasses import dataclass, field
 from abc import ABC, abstractmethod
 from lib.interfaces.terminal.terminal_main import TerminalMain
 from lib.utils import check_python_version
 
-EXIT_SUCCESS = 0
-EXIT_APP_ERROR = 1
-EXIT_SYSTEM_ERROR = 2
-EXIT_USER_INTERRUPT = 130
+# Exit codes
+EXIT_SUCCESS: int = 0
+EXIT_APP_ERROR: int = 1
+EXIT_SYSTEM_ERROR: int = 2
+EXIT_USER_INTERRUPT: int = 130
+
 
 @dataclass
 class Config:
     """
-    Application configuration settings.
+    Application configuration settings container.
     
-    Contains default paths, supported languages, and validation ranges
-    for command-line arguments.
+    Defines default values and constraints for AB-Grid application settings
+    including supported languages, group size limits, and file system paths.
     """
     data_path: Path = Path("./data")
     languages: List[str] = field(default_factory=lambda: ["en", "it"])
@@ -40,97 +42,162 @@ class Config:
 
 class ABGridError(Exception):
     """
-    Base exception for AB-Grid application.
+    Base exception class for AB-Grid application errors.
     
-    All custom exceptions in the application inherit from this base class
-    to provide consistent error handling and categorization.
+    Serves as the parent class for all application-specific exceptions,
+    providing a common interface for error handling throughout the application.
     """
     pass
 
 
 class FolderNotFoundError(ABGridError):
     """
-    Raised when folder doesn't exist.
+    Exception raised when a required directory doesn't exist.
     
-    Thrown when attempting to perform operations on non-existent projects,
-    typically during group, report, or batch operations.
+    Used specifically for cases where the application expects to find
+    an existing folder but it's missing from the file system.
     """
     pass
 
 
 class FolderAlreadyExistsError(ABGridError):
     """
-    Raised when trying to create existing project.
+    Exception raised when attempting to create a project that already exists.
     
-    Thrown during project initialization when a project with the same
-    name already exists in the specified location.
+    Prevents accidental overwriting of existing project data by failing
+    early when duplicate project names are detected.
     """
     pass
 
 
 class InvalidArgumentError(ABGridError):
     """
-    Raised when arguments are invalid.
+    Exception raised when command-line arguments are invalid or malformed.
     
-    Thrown when command-line arguments fail validation rules,
-    such as missing required parameters or conflicting options.
+    Handles validation errors for user input including missing required
+    arguments, invalid character sets, and constraint violations.
     """
     pass
 
 
 class Command(ABC):
     """
-    Abstract base class for commands.
+    Abstract base class for all AB-Grid commands with shared functionality.
     
-    Implements the Command pattern to encapsulate different actions
-    (init, group, report, batch) as discrete command objects with
-    consistent execution interface.
+    Provides common utilities for path management, folder validation,
+    and configuration access. All concrete command classes must inherit
+    from this base class and implement the execute method.
     """
     
-    def __init__(self, args: argparse.Namespace) -> None:
+    def __init__(self, args: argparse.Namespace, config: Config) -> None:
         """
-        Initialize command with parsed arguments.
+        Initialize command with parsed arguments and configuration.
         
         Args:
-            args: Parsed command-line arguments containing all configuration
-        
+            args: Parsed command line arguments containing user input
+            config: Application configuration with settings and constraints
+            
         Returns:
             None
         """
         self.args = args
+        self.config = config
     
     @abstractmethod
     def execute(self) -> None:
         """
-        Execute the command.
+        Execute the command with specific implementation logic.
         
-        Abstract method that must be implemented by concrete command classes
-        to perform their specific operations.
+        Abstract method that must be implemented by all concrete command
+        classes to define their specific behavior and operations.
         
         Returns:
             None
             
         Raises:
-            ABGridError: For application-specific errors
-            Exception: For unexpected system errors
+            NotImplementedError: If called on abstract base class
         """
         pass
+    
+    def get_user_path(self) -> Path:
+        """
+        Get the file system path for the current user's data folder.
+        
+        Constructs the path by combining the configured data directory
+        with the user name from command line arguments.
+        
+        Returns:
+            Path object pointing to the user's data directory
+        """
+        return self.config.data_path / self.args.user
+    
+    def get_project_path(self) -> Path:
+        """
+        Get the file system path for the current project folder.
+        
+        Constructs the full project path by combining user path
+        with the project name from command line arguments.
+        
+        Returns:
+            Path object pointing to the specific project directory
+        """
+        return self.get_user_path() / self.args.project
+    
+    def ensure_folder_exists(self, path: Path) -> None:
+        """
+        Validate that the specified folder exists on the file system.
+        
+        Performs existence check and raises appropriate exception if
+        the folder is not found, providing clear error messaging.
+        
+        Args:
+            path: Path object to validate for existence
+            
+        Returns:
+            None
+            
+        Raises:
+            FolderNotFoundError: If the specified folder doesn't exist
+        """
+        if not path.exists():
+            raise FolderNotFoundError(f"Folder '{path.name}' not found at {path}")
+    
+    def ensure_folder_not_exists(self, path: Path) -> None:
+        """
+        Validate that the specified folder doesn't exist on the file system.
+        
+        Prevents accidental overwriting by checking for existing folders
+        and raising an exception if a conflict is detected.
+        
+        Args:
+            path: Path object to validate for non-existence
+            
+        Returns:
+            None
+            
+        Raises:
+            FolderAlreadyExistsError: If the specified folder already exists
+        """
+        if path.exists():
+            raise FolderAlreadyExistsError(f"Project '{path.name}' already exists at {path}")
 
 
 class InitCommand(Command):
     """
-    Command to initialize a new project.
+    Command for initializing new AB-Grid projects.
     
-    Creates a new AB-Grid project with the required directory structure
-    and initializes it for group creation and report generation.
+    Creates the directory structure and initial configuration files
+    required for a new AB-Grid project, ensuring no conflicts with
+    existing projects.
     """
     
     def execute(self) -> None:
         """
-        Execute project initialization.
+        Execute project initialization with directory structure creation.
         
-        Creates project directory structure and validates that the project
-        doesn't already exist.
+        Validates that the project doesn't already exist, then creates
+        the necessary folder structure and configuration files for a
+        new AB-Grid project.
         
         Returns:
             None
@@ -138,8 +205,9 @@ class InitCommand(Command):
         Raises:
             FolderAlreadyExistsError: If project already exists
         """
-        project_folderpath = _get_project_folderpath(self.args)
-        _ensure_folder_not_exists(project_folderpath)
+        project_path = self.get_project_path()
+        self.ensure_folder_not_exists(project_path)
+        
         terminal_main = TerminalMain(self.args)
         terminal_main.init_project()
         print(f"Project '{self.args.project}' initialized successfully")
@@ -147,27 +215,30 @@ class InitCommand(Command):
 
 class GroupCommand(Command):
     """
-    Command to generate groups for a project.
+    Command for generating group configuration files.
     
-    Creates new group configuration files for an existing project,
-    allowing users to define group members and settings.
+    Creates YAML configuration files for new groups within an existing
+    AB-Grid project, using language-specific templates and ensuring
+    proper group numbering.
     """
     
     def execute(self) -> None:
         """
-        Execute group generation.
+        Execute group generation for the specified project.
         
-        Validates project exists and creates a new group configuration
-        file with the specified number of members.
+        Validates that the target project exists, then generates
+        a new group configuration file with appropriate numbering
+        and template data.
         
         Returns:
             None
             
         Raises:
-            FolderNotFoundError: If project doesn't exist
+            FolderNotFoundError: If the target project doesn't exist
         """
-        project_folderpath = _get_project_folderpath(self.args)
-        _ensure_folder_exists(project_folderpath)
+        project_path = self.get_project_path()
+        self.ensure_folder_exists(project_path)
+        
         terminal_main = TerminalMain(self.args)
         terminal_main.generate_group()
         print(f"Generated group for project '{self.args.project}'")
@@ -175,309 +246,252 @@ class GroupCommand(Command):
 
 class ReportCommand(Command):
     """
-    Command to generate reports for a project.
+    Command for generating comprehensive project reports.
     
-    Processes all group files in a project and generates comprehensive
-    PDF reports with optional sociogram visualizations.
+    Processes group data files to create detailed PDF reports with
+    statistical analysis, social network metrics, and optional
+    sociogram visualizations.
     """
     
     def execute(self) -> None:
         """
-        Execute report generation.
+        Execute report generation for the specified project.
         
-        Validates project exists and generates reports for all groups
-        within the project, with optional sociogram inclusion.
+        Validates project existence, processes all group files,
+        and generates comprehensive reports with optional sociograms
+        and JSON data exports.
         
         Returns:
             None
             
         Raises:
-            FolderNotFoundError: If project doesn't exist
-            ABGridError: If no group files found
+            FolderNotFoundError: If the target project doesn't exist
+            ABGridError: If no group files are found in the project
         """
-        project_folderpath = _get_project_folderpath(self.args)
-        _ensure_folder_exists(project_folderpath)
+        project_path = self.get_project_path()
+        self.ensure_folder_exists(project_path)
+        
         terminal_main = TerminalMain(self.args)
         terminal_main.generate_report()
+        
         sociogram_text = " with sociogram" if self.args.with_sociogram else ""
         print(f"Generated report{sociogram_text} for project '{self.args.project}'")
 
 
 class BatchCommand(Command):
     """
-    Command to process multiple projects in batch.
+    Command for processing multiple projects in batch mode.
     
-    Iterates through all projects in the user's data folder and generates
-    reports for each project that contains group files.
+    Automatically discovers and processes all projects within a user's
+    directory, generating reports for each project with error handling
+    and progress reporting.
     """
     
     def execute(self) -> None:
         """
-        Execute batch processing.
+        Execute batch processing for all projects in the user directory.
         
-        Processes all projects in the user's data folder, generating reports
-        for each project. Continues processing even if individual projects fail.
+        Discovers all project folders, processes each one individually
+        with error handling, and provides summary statistics of the
+        batch operation results.
         
         Returns:
             None
             
-        Raises:
-            ABGridError: If user data folder doesn't exist
-            
         Notes:
-            - Individual project failures don't stop batch processing
-            - Provides summary of successful and failed processing
+            - Continues processing remaining projects if individual failures occur
+            - Provides detailed progress feedback and error reporting
+            - Summarizes total processed and failed project counts
+            
+        Raises:
+            FolderNotFoundError: If the user directory doesn't exist
         """
-        data_folderpath = _get_user_folderpath(self.args)
-        _ensure_folder_exists(data_folderpath)
+        user_path = self.get_user_path()
+        self.ensure_folder_exists(user_path)
         
-        project_folders = [path for path in data_folderpath.glob("*") if path.is_dir()]
+        project_folders = [path for path in user_path.glob("*") if path.is_dir()]
         if not project_folders:
-            print(f"No projects found in {data_folderpath}")
+            print(f"No projects found in {user_path}")
             return
         
         processed_count = 0
         failed_count = 0
         
-        for project_folderpath in project_folders:
+        for project_folder in project_folders:
             try:
-                # Create a modified args object for each project
+                # Create args for this project
                 project_args = argparse.Namespace(**vars(self.args))
-                project_args.project = project_folderpath.name
-                # Treat each batch item as a report action
-                project_args.action = "report"  
+                project_args.project = project_folder.name
+                project_args.action = "report"
                 
-                # Create TerminalMain instance with project-specific args
                 terminal_main = TerminalMain(project_args)
                 terminal_main.generate_report()
-                
                 processed_count += 1
-                print(f"Processed project '{project_folderpath.name}'")
+                print(f"Processed project '{project_folder.name}'")
                 
             except Exception as e:
                 failed_count += 1
-                print(f"Error processing project '{project_folderpath.name}': {e}")
-                # Continue with the next project instead of stopping
-                continue
+                print(f"Error processing project '{project_folder.name}': {e}")
         
-        # Summary report
+        # Print summary
         sociogram_text = " with sociograms" if self.args.with_sociogram else ""
-        
         print(f"Batch processing complete. Processed {processed_count} project(s){sociogram_text}")
-        
         if failed_count > 0:
             print(f"Failed to process {failed_count} project(s)")
 
-# Init config
-config = Config()
+
+class ABGridTerminalApp:
+    """
+    Main application class for AB-Grid terminal interface.
+    
+    Orchestrates the entire command-line application workflow including
+    argument parsing, validation, command dispatch, and comprehensive
+    error handling with appropriate exit codes.
+    """
+    
+    def __init__(self, config: Optional[Config] = None) -> None:
+        """
+        Initialize the AB-Grid terminal application.
+        
+        Sets up the application configuration and command registry,
+        mapping action names to their corresponding command classes.
+        
+        Args:
+            config: Optional custom configuration. If None, uses default Config()
+            
+        Returns:
+            None
+        """
+        self.config = config or Config()
+        self.commands: Dict[str, Type[Command]] = {
+            "init": InitCommand,
+            "group": GroupCommand,
+            "report": ReportCommand,
+            "batch": BatchCommand
+        }
+    
+    def run(self) -> int:
+        """
+        Main application entry point with comprehensive error handling.
+        
+        Executes the complete application workflow including Python version
+        checking, argument parsing and validation, command execution, and
+        error handling with appropriate exit codes.
+        
+        Returns:
+            Integer exit code:
+            - EXIT_SUCCESS (0): Successful execution
+            - EXIT_APP_ERROR (1): Application-specific error
+            - EXIT_SYSTEM_ERROR (2): Unexpected system error
+            - EXIT_USER_INTERRUPT (130): User cancelled operation
+            
+        Notes:
+            - Handles all exception types with appropriate user feedback
+            - Provides clean exit codes for shell script integration
+            - Supports keyboard interrupt (Ctrl+C) handling
+        """
+        try:
+            check_python_version()
+            args = self.parse_args()
+            self.validate_args(args)
+            
+            command = self.commands[args.action](args, self.config)
+            command.execute()
+            return EXIT_SUCCESS
+            
+        except KeyboardInterrupt:
+            print("\nOperation cancelled by user")
+            return EXIT_USER_INTERRUPT
+        except ABGridError as error:
+            print(f"Error: {error}")
+            return EXIT_APP_ERROR
+        except Exception as error:
+            print(f"Unexpected error: {error}")
+            return EXIT_SYSTEM_ERROR
+    
+    def parse_args(self) -> argparse.Namespace:
+        """
+        Parse and structure command line arguments.
+        
+        Defines the complete command-line interface including all arguments,
+        their types, constraints, and help documentation. Handles argument
+        parsing with built-in validation and help generation.
+        
+        Returns:
+            Namespace object containing parsed command line arguments
+            
+        Notes:
+            - Includes comprehensive help text for each argument
+            - Enforces type checking and value constraints
+            - Supports both short and long argument forms where appropriate
+        """
+        parser = argparse.ArgumentParser(prog="ABGrid")
+        
+        parser.add_argument("-u", "--user", type=str, required=True,
+                          help="Base folder where data is stored.")
+        parser.add_argument("-p", "--project", type=str,
+                          help="Name of the project.")
+        parser.add_argument("-a", "--action", required=True,
+                          choices=["init", "group", "report", "batch"],
+                          help="Action to perform.")
+        parser.add_argument("-m", "--members_per_group", type=int,
+                          choices=range(self.config.min_members, self.config.max_members + 1),
+                          default=8,
+                          help=f"Number of members per group ({self.config.min_members}-{self.config.max_members}).")
+        parser.add_argument("-l", "--language", choices=self.config.languages, default="it",
+                          help="Language for documents.")
+        parser.add_argument("-s", "--with-sociogram", action='store_true',
+                          help="Include sociogram in output.")
+        
+        return parser.parse_args()
+    
+    def validate_args(self, args: argparse.Namespace) -> None:
+        """
+        Validate parsed command line arguments for consistency and requirements.
+        
+        Performs additional validation beyond basic argument parsing,
+        checking for required argument combinations, character constraints,
+        and logical consistency between different arguments.
+        
+        Args:
+            args: Parsed command line arguments to validate
+            
+        Returns:
+            None
+            
+        Raises:
+            InvalidArgumentError: If arguments fail validation checks
+            
+        Notes:
+            - Ensures project name is provided for actions that require it
+            - Validates user name character constraints for file system safety
+            - Can be extended for additional business logic validation
+        """
+        if args.action in ["init", "group", "report"] and not args.project:
+            raise InvalidArgumentError(f"Project name required for {args.action} action")
+        
+        if not args.user.replace('_', '').replace('-', '').isalnum():
+            raise InvalidArgumentError("User name must be alphanumeric with hyphens/underscores only")
 
 
 def main() -> int:
     """
-    Main application entry point.
+    Entry point for the AB-Grid terminal application.
     
-    Orchestrates the complete application flow from argument parsing
-    through command execution, with comprehensive error handling.
-    
-    Returns:
-        Exit code: 
-            0 for success, 
-            1 for application errors, 
-            2 for unexpected errors,
-            130 for user interruption
-                  
-    Notes:
-        - Handles KeyboardInterrupt gracefully
-        - Distinguishes between application and system errors
-        - Provides appropriate exit codes for shell integration
-    """
-    try:
-        # Ensure python compatibility
-        check_python_version()
-
-        # Parse and validate user argumets
-        parser = _setup_argument_parser()
-        args = parser.parse_args()
-        _validate_args(args)
-
-        # Create and execute command
-        command = _create_command(args)
-        command.execute()
-
-        return EXIT_SUCCESS
-
-    # Interrupt   
-    except KeyboardInterrupt:
-        print("\nOperation cancelled by user")
-        return EXIT_USER_INTERRUPT
-    # App error
-    except ABGridError as error:
-        print(f"Error: {error}")
-        return EXIT_APP_ERROR
-    # System error
-    except Exception as error:
-        print(f"Unexpected error: {error}")
-        return EXIT_SYSTEM_ERROR
-
-def _setup_argument_parser() -> argparse.ArgumentParser:
-    """
-    Set up and configure the argument parser.
-    
-    Creates and configures an ArgumentParser instance with all required
-    and optional command-line arguments for the AB-Grid application.
+    Creates and runs the main application instance, providing the
+    standard entry point for command-line execution with proper
+    exit code handling.
     
     Returns:
-        Configured ArgumentParser instance ready for parsing command-line arguments
+        Integer exit code from application execution
         
     Notes:
-        - Uses configuration values for validation ranges and choices
-        - Arguments are organized by frequency of use and logical grouping
+        - Designed to be called from command line or shell scripts
+        - Exit codes follow standard Unix conventions
+        - Can be imported and called programmatically if needed
     """
-    parser = argparse.ArgumentParser(prog="ABGrid")
-
-    parser.add_argument("-u", "--user", type=str, required=True, 
-                        help="Base folder where data is stored.")
-    parser.add_argument("-p", "--project", 
-                        help="Name of the project.")
-    parser.add_argument("-a", "--action", required=True, 
-                        choices=["init", "group", "report", "batch"], 
-                        help="Action to perform: 'init', 'group', 'report', or 'batch'.")
-    parser.add_argument("-m", "--members_per_group", type=int, 
-                        choices=range(config.min_members, config.max_members + 1), 
-                        default=8, 
-                        help=f"Number of members per group ({config.min_members} to {config.max_members}).")
-    parser.add_argument("-l", "--language", choices=config.languages, default="it", 
-                        help="Language used for generating documents.")
-    parser.add_argument("-s", "--with-sociogram", action='store_true', 
-                        help="Output sociogram")
-    
-    return parser
-
-
-# Private helper functions
-def _validate_args(args: argparse.Namespace) -> None:
-    """
-    Validate command line arguments.
-    
-    Performs cross-argument validation to ensure argument combinations
-    are valid for the specified action.
-    
-    Args:
-        args: Parsed command-line arguments to validate
-        
-    Returns:
-        None
-        
-    Raises:
-        InvalidArgumentError: If argument validation fails
-        
-    Notes:
-        - init, group, report actions require project name
-    """
-    if args.action in ["init", "group", "report"] and not args.project:
-        raise InvalidArgumentError(f"Project name is required for {args.action} action")
-    
-    if args.user and not args.user.replace('_', '').replace('-', '').isalnum():
-        raise InvalidArgumentError("User name should contain only alphanumeric characters, hyphens, and underscores")
-
-
-
-def _create_command(args: argparse.Namespace) -> Command:
-    """
-    Factory function to create commands.
-    
-    Creates and returns the appropriate command instance based on the
-    action specified in the arguments.
-    
-    Args:
-        args: Parsed command-line arguments containing action type
-        
-    Returns:
-        Command instance corresponding to the specified action
-        
-    Notes:
-        - Uses dictionary mapping for efficient command selection
-        - All commands follow the same Command interface
-    """
-    command_map = {
-        "init": InitCommand,
-        "group": GroupCommand,
-        "report": ReportCommand,
-        "batch": BatchCommand
-    }
-    return command_map[args.action](args)
-
-
-def _get_user_folderpath(args: argparse.Namespace) -> Path:
-    """
-    Get user data folder path.
-    
-    Constructs the path to the user's data folder based on the
-    configured data path and user argument.
-    
-    Args:
-        args: Parsed command-line arguments containing user identifier
-        
-    Returns:
-        Path to the user's data folder
-    """
-    return config.data_path / args.user
-
-
-def _get_project_folderpath(args: argparse.Namespace) -> Path:
-    """
-    Get project folder path.
-    
-    Constructs the full path to a specific project folder within
-    the user's data directory.
-    
-    Args:
-        args: Parsed command-line arguments containing user and project identifiers
-        
-    Returns:
-        Path to the project folder
-    """
-    return _get_user_folderpath(args) / args.project
-
-
-def _ensure_folder_exists(folderpath: Path) -> None:
-    """
-    Validate that project exists for non-init actions.
-    
-    Checks if the specified project directory exists and raises an
-    appropriate error if not found.
-    
-    Args:
-        folderpath: Path to the directory to validate
-        
-    Returns:
-        None
-        
-    Raises:
-        FolderNotFoundError: If the project directory doesn't exist
-    """
-    if not folderpath.exists():
-        raise FolderNotFoundError(f"Project '{folderpath.name}' not found at {folderpath}")
-
-
-def _ensure_folder_not_exists(project_folderpath: Path) -> None:
-    """
-    Validate that project doesn't exist for init action.
-    
-    Checks if the specified project directory already exists and raises
-    an error if found, preventing accidental overwrites.
-    
-    Args:
-        project_folderpath: Path to the project directory to validate
-        
-    Returns:
-        None
-        
-    Raises:
-        FolderAlreadyExistsError: If the project directory already exists
-    """
-    if project_folderpath.exists():
-        raise FolderAlreadyExistsError(f"Project '{project_folderpath.name}' already exists at {project_folderpath}")
+    app = ABGridTerminalApp()
+    return app.run()
 
 
 if __name__ == "__main__":
