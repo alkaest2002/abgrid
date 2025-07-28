@@ -110,7 +110,7 @@ class TerminalMain:
         members_per_group = self.args.members_per_group
         
         # Template for the language-specific group template
-        template_path = f"/{self.language}/group.html"
+        template_path = f"/{self.language}/group.yaml"
         
         # Load template for the language-specific group template
         group_template = abgrid_jinja_env.get_template(template_path)

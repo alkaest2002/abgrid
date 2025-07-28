@@ -45,7 +45,7 @@ def get_router() -> APIRouter:
         group_data = _abgrid_data.get_group_data(model)
 
         try:
-            template_path = f"/{language}/group.html"
+            template_path = f"/{language}/group.yaml"
             rendered_group = _abgrid_renderer.render(template_path, group_data)
         except Exception as e:
             raise HTTPException(
