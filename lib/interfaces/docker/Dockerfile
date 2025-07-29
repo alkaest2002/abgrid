@@ -6,10 +6,25 @@ WORKDIR /app
 ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1 \
     PYTHONPATH=/app \
-    ENV=production
+    ENV=production \
+    FONTCONFIG_PATH=/etc/fonts
 
-# Install dependencies
-RUN apk add --no-cache gcc g++ musl-dev linux-headers libffi-dev openssl-dev wget && \
+# Install build dependencies and fonts
+RUN apk add --no-cache \
+    # Build dependencies
+    gcc g++ musl-dev linux-headers libffi-dev openssl-dev \
+    build-base \
+    # Font dependencies
+    fontconfig \
+    ttf-dejavu \
+    ttf-liberation \
+    msttcorefonts-installer \
+    # Runtime utilities
+    wget && \
+    # Install Microsoft core fonts
+    update-ms-fonts && \
+    fc-cache -f && \
+    # Add non-root user
     adduser -D -s /bin/sh appuser
 
 # Install Python packages
@@ -27,8 +42,8 @@ RUN find . -name "__pycache__" -exec rm -rf {} + 2>/dev/null || true && \
     rm -rf .git tests .vscode lib/interfaces/docker 2>/dev/null || true && \
     mkdir -p logs && chown appuser:appuser logs
 
-# Runtime dependencies only
-RUN apk del gcc musl-dev linux-headers && \
+# Remove build dependencies but keep runtime font dependencies
+RUN apk del gcc musl-dev linux-headers build-base && \
     rm -rf /var/cache/apk/*
 
 USER appuser
