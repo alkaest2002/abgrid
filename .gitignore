@@ -4,6 +4,7 @@ __pycache__
 .DS_Store
 .env
 *.pyc
+test_api.paw
 data/am
 data/douhet
 data/demo/hide
