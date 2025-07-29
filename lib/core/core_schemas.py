@@ -40,7 +40,7 @@ class PydanticValidationException(Exception):
         """
         self.errors = errors
         error_messages = [f"{error['location']}: {error['error_message']}" for error in errors]
-        super().__init__(f"{'\n'.join(error_messages)}")
+        super().__init__("\n".join(error_messages))
 
 def validate_text_field(field_name: str, value: Any, min_len: int, max_len: int) -> List[Dict[str, Any]]:
     """
