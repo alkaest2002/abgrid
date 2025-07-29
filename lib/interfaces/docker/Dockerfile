@@ -9,7 +9,7 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
     ENV=production
 
 # Install dependencies
-RUN apk add --no-cache gcc musl-dev linux-headers libffi-dev openssl-dev wget && \
+RUN apk add --no-cache gcc g++ musl-dev linux-headers libffi-dev openssl-dev wget && \
     adduser -D -s /bin/sh appuser
 
 # Install Python packages
