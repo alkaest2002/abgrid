@@ -151,14 +151,12 @@ class SimpleRateLimiter:
             self._cleanup_expired(current_time)
             
             # User identified by key is found in cache
-            print(key)
             if key in self._cache:
                 # Get time and count of found user key
                 window_start, count = self._cache[key]
                 
                 # If we're still in the same time window
                 if (current_time - window_start) < self.window_seconds:
-                    print(count >= self.limit)
                     # If user hits limit
                     if count >= self.limit:
                         raise RateLimitException("requests_exceeded_rate_limit")
