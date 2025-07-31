@@ -11,7 +11,8 @@
     "deploy": "npm run build && npm run restart && npm run logs",
     "shell": "docker exec -it abgrid-fastapi sh",
     "health": "curl -f http://localhost:8000/health || echo 'Service unavailable'",
-    "clean": "docker system prune -f"
+    "clean": "docker system prune -f",
+    "export": "docker save abgrid-fastapi > abgrid-fastapi.tar"
   },
   "author": "Pierpaolo Calann",
   "license": "MIT",
