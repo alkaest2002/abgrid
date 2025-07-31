@@ -3,32 +3,16 @@ import uuid
 from datetime import datetime, timedelta, timezone
 from typing import Dict, Any
 from fastapi import HTTPException, status
-from functools import lru_cache
-from pydantic import Field
-from pydantic_settings import BaseSettings
+from lib.interfaces.fastapi.settings import Settings
 
-class Settings(BaseSettings):
-    auth_secret: str = Field(..., env='AUTH_SECRET')
-    token_lifetime_hours: int = Field(default=12, env='TOKEN_LIFETIME_HOURS')
-
-    class Config:
-        env_file = '.env'
-        case_sensitive = False
-
-    @classmethod
-    @lru_cache()
-    def load(cls):
-        return cls()
+settings = Settings.load()
 
 class AnonymousJWT:
     """Simple JWT handler for anonymous user tracking."""
 
-    def __init__(self, settings: Settings = Settings.load()) -> None:
+    def __init__(self) -> None:
         """
         Initializes an AnonymousJWT instance.
-
-        Args:
-            settings: An instance of Settings for configuration.
         """
         self.secret_key = settings.auth_secret
         self.algorithm = "HS256"
