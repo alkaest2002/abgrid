@@ -1,8 +1,4 @@
 """
-Filename: limiter.py
-
-Description: Simple rate limiter system.
-
 Author: Pierpaolo Calanna
 
 Date Created: Jul 1, 2025
