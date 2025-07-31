@@ -1,8 +1,4 @@
 """
-Filename: app_terminal.py
-
-Description: Command-line interface for AB-Grid project management, providing initialization, data processing, and batch report generation capabilities.
-
 Author: Pierpaolo Calanna
 
 Date Created: May 3, 2025

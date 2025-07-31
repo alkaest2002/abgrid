@@ -1,8 +1,4 @@
 """
-Filename: app_api.py
-
-Description: FastAPI application entry point for AB-Grid REST API server with health monitoring and custom exception handling.
-
 Author: Pierpaolo Calanna
 
 Date Created: Jul 1, 2025
