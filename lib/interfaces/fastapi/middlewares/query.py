@@ -1,5 +1,6 @@
 from starlette.middleware.base import BaseHTTPMiddleware
-from fastapi import HTTPException, Request
+from fastapi import Request
+from fastapi.responses import JSONResponse
 from urllib.parse import parse_qs
 
 class QueryParamLimitMiddleware(BaseHTTPMiddleware):
@@ -24,7 +25,10 @@ class QueryParamLimitMiddleware(BaseHTTPMiddleware):
         
         # Check total query string length
         if len(query_string) > self.max_query_string_length:
-            raise HTTPException(status_code=413, detail="query_string_too_large")
+            return JSONResponse(
+                status_code=413,
+                content={"detail": "query_string_too_large"}
+            )
         
         # Parse and validate parameters
         if query_string:
@@ -34,30 +38,30 @@ class QueryParamLimitMiddleware(BaseHTTPMiddleware):
                 # Count total parameters (including multiple values for same key)
                 total_params = sum(len(values) for values in query_params.values())
                 if total_params > self.max_query_params_count:
-                    raise HTTPException(
-                        status_code=413, 
-                        detail="too_many_query_parameters"
+                    return JSONResponse(
+                        status_code=413,
+                        content={"detail": "too_many_query_parameters"}
                     )
                 
                 # Check individual parameter and value sizes
                 for key, values in query_params.items():
                     if len(key) > self.max_query_param_length:
-                        raise HTTPException(
-                            status_code=413, 
-                            detail="query_parameter_key_too_large"
+                        return JSONResponse(
+                            status_code=413,
+                            content={"detail": "query_parameter_key_too_large"}
                         )
                     
                     for value in values:
                         if len(value) > self.max_query_param_length:
-                            raise HTTPException(
-                                status_code=413, 
-                                detail="query_parameter_value_too_large"
+                            return JSONResponse(
+                                status_code=413,
+                                content={"detail": "query_parameter_value_too_large"}
                             )
                             
             except ValueError:
-                raise HTTPException(
-                    status_code=400, 
-                    detail="malformed_query_string"
+                return JSONResponse(
+                    status_code=400,
+                    content={"detail": "malformed_query_string"}
                 )
         
         response = await call_next(request)

@@ -1,7 +1,7 @@
 import asyncio
 import time
 from starlette.middleware.base import BaseHTTPMiddleware
-from fastapi import HTTPException, Request
+from fastapi import Request
 from starlette.responses import JSONResponse
 from lib.interfaces.fastapi.settings import Settings
 
@@ -44,9 +44,9 @@ class TimeoutProtectionMiddleware(BaseHTTPMiddleware):
             return response
             
         except asyncio.TimeoutError:
-            raise HTTPException(
-                status_code=408, 
-                detail="request_timeout"
+            return JSONResponse(
+                status_code=408,
+                content={"detail": "request_timeout"}
             )
         finally:
             # Always decrement active requests counter
