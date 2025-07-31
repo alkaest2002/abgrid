@@ -1,3 +1,11 @@
+"""
+Author: Pierpaolo Calanna
+
+Date Created: Jul 1, 2025
+
+The code is part of the AB-Grid project and is licensed under the MIT License.
+"""
+
 from typing import Any, Dict
 from fastapi import APIRouter, HTTPException, Query, Depends, status, Request
 from fastapi.responses import JSONResponse
