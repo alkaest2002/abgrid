@@ -1,8 +1,6 @@
 """
 Author: Pierpaolo Calanna
 
-Date Created: Wed Jun 25 2025
-
 The code is part of the AB-Grid project and is licensed under the MIT License.
 """
 
