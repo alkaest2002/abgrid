@@ -1,52 +1,60 @@
-FROM python:3.11-alpine
+# Build stage - install fonts
+FROM python:3.13-alpine as font-builder
+
+RUN apk add --no-cache \
+    fontconfig \
+    ttf-dejavu \
+    ttf-liberation \
+    msttcorefonts-installer \
+    wget && \
+    update-ms-fonts && \
+    fc-cache -f
+
+# Build stage - install Python deps
+FROM python:3.13-alpine as python-builder
+
+RUN apk add --no-cache gcc g++ musl-dev linux-headers libffi-dev openssl-dev build-base
+
+COPY requirements.txt .
+RUN pip install --user --no-cache-dir -r requirements.txt
+
+# Runtime stage
+FROM python:3.13-alpine
 
 WORKDIR /app
 
-# Environment variables
 ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1 \
     PYTHONPATH=/app \
     ENV=production \
     FONTCONFIG_PATH=/etc/fonts
 
-# Install build dependencies and fonts
-RUN apk add --no-cache \
-    # Build dependencies
-    gcc g++ musl-dev linux-headers libffi-dev openssl-dev \
-    build-base \
-    # Font dependencies
-    fontconfig \
-    ttf-dejavu \
-    ttf-liberation \
-    msttcorefonts-installer \
-    # Runtime utilities
-    wget && \
-    # Install Microsoft core fonts
-    update-ms-fonts && \
-    fc-cache -f && \
-    # Add non-root user
-    adduser -D -s /bin/sh appuser
-
-# Install Python packages
-COPY requirements.txt .
-RUN pip install --no-cache-dir --upgrade pip && \
-    pip install --no-cache-dir -r requirements.txt gunicorn
-
-# Copy application
-COPY --chown=appuser:appuser . .
-COPY lib/interfaces/docker/gunicorn.conf.py .
-
-# Cleanup
-RUN find . -name "__pycache__" -exec rm -rf {} + 2>/dev/null || true && \
-    find . -name "*.pyc" -delete && \
-    rm -rf .git tests .vscode lib/interfaces/docker 2>/dev/null || true && \
-    mkdir -p logs && chown appuser:appuser logs
-
-# Remove build dependencies but keep runtime font dependencies
-RUN apk del gcc musl-dev linux-headers build-base && \
+# Install minimal runtime dependencies
+RUN apk add --no-cache fontconfig wget && \
+    adduser -D -s /bin/sh appuser && \
     rm -rf /var/cache/apk/*
 
+# Copy fonts from font-builder (only the actual font files)
+COPY --from=font-builder /usr/share/fonts/ /usr/share/fonts/
+COPY --from=font-builder /etc/fonts/ /etc/fonts/
+
+# Copy Python packages from python-builder
+COPY --from=python-builder /root/.local /home/appuser/.local
+
+# Rebuild font cache and cleanup
+RUN fc-cache -f && \
+    rm -rf /var/cache/fontconfig/*
+
+# Copy application
+COPY --chown=appuser:appuser app_api.py .
+COPY --chown=appuser:appuser lib/ ./lib/
+COPY --chown=appuser:appuser lib/interfaces/docker/gunicorn.conf.py .
+
+RUN mkdir -p logs && chown appuser:appuser logs
+
 USER appuser
+ENV PATH=/home/appuser/.local/bin:$PATH
+
 EXPOSE 8000
 
 HEALTHCHECK --interval=30s --timeout=10s --start-period=10s --retries=3 \

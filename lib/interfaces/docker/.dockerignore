@@ -1,44 +1,54 @@
 # Git
-.git
+.git/
 .gitignore
 
-# Docker
-lib/interfaces/docker/Dockerfile
-lib/interfaces/docker/docker-compose.yml
-lib/interfaces/docker/.dockerignore
-
 # Python
-__pycache__
+__pycache__/
 *.pyc
 *.pyo
 *.pyd
 .Python
-env/
-venv/
-.venv/
-pip-log.txt
-pip-delete-this-directory.txt
+*.so
 .pytest_cache/
+.coverage
+htmlcov/
 
-# IDEs
+# Development
 .vscode/
 .idea/
-*.swp
-*.swo
-*~
+*.log
+tests/
+docs/
+README.md
+*.md
+
+# Node.js (if any)
+node_modules/
+package*.json
+
+# Docker
+Dockerfile*
+docker-compose*.yml
+.dockerignore
+
+# Environment
+.env*
+.venv/
+venv/
 
 # OS
 .DS_Store
 Thumbs.db
 
-# Logs
-*.log
-logs/
+# Temporary
+*.tmp
+*.temp
+/logs/*
+!logs/.gitkeep
 
-# Documentation
-*.md
-!README.md
-
-# Development
-.env.local
-.env.development
+# Any large data files
+data/
+uploads/
+*.zip
+*.tar
+*.gz
