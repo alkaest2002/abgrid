@@ -19,7 +19,7 @@ from lib.core.core_schemas import PydanticValidationException
 from lib.interfaces.fastapi.limiter import RateLimitException
 from lib.interfaces.fastapi.middlewares.body import BodySizeLimitMiddleware
 from lib.interfaces.fastapi.middlewares.query import QueryParamLimitMiddleware
-from lib.interfaces.fastapi.middlewares.timeout import TimeoutProtectionMiddleware
+from lib.interfaces.fastapi.middlewares.request import RequestProtectionMiddleware
 from lib.interfaces.fastapi.router import get_router
 from lib.interfaces.fastapi.middlewares.header import HeaderSizeLimitMiddleware
 from lib.utils import to_snake_case
@@ -43,42 +43,26 @@ origins.append("https://abgrid-webapp.onrender.com")
 # Middlewares
 #######################################################################################
 
-# 1. CORS - Should be first to handle preflight requests properly
+# 1. CORS
 app.add_middleware(
     CORSMiddleware,
     allow_origins=origins,  # Restrict to the specific local port your app will use
     allow_credentials=True,  # Allow credentials for authentication
-    allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],  # Methods your app might use
+    allow_methods=["HEAD", "GET", "POST", "PUT", "DELETE", "OPTIONS"],  # Methods your app might use
     allow_headers=["Authorization", "Content-Type"],  # Common headers used in requests
 )
 
-# 2. Dynamic Timeout Protection - Early rejection based on system resources
-app.add_middleware(
-    TimeoutProtectionMiddleware,
-    request_timeout=30,
-    max_concurrent_requests=10,
-    slow_request_threshold=10
-)
+# 2. Request limits protection
+app.add_middleware(RequestProtectionMiddleware)
 
-# 3. Header Size Limit - Check headers before processing request further
-app.add_middleware(
-    HeaderSizeLimitMiddleware, # Restrict size of headers
-    max_header_size=4096 # Max 4KB for headers
-)
+# 3. Header limits protection
+app.add_middleware(HeaderSizeLimitMiddleware)
 
-# 4. Query Parameter Limits - Validate query params early
-app.add_middleware(
-    QueryParamLimitMiddleware, 
-    max_query_string_length=8192, # 8KB
-    max_query_params_count=10,    # 10 params max
-    max_query_param_length=1024   # 1KB
-) 
+# 4. Query parameters limits protection
+app.add_middleware(QueryParamLimitMiddleware) 
 
-# 5. Body Size Limit - Check body size last (most expensive validation)
-app.add_middleware(
-    BodySizeLimitMiddleware, # Restrict size of body
-    max_body_size=.5 * 1024 * 1024  # Max 500KB for request bodies
-)
+# 5. Body limits protection
+app.add_middleware(BodySizeLimitMiddleware)
 
 #######################################################################################
 # Routes
