@@ -1,8 +1,4 @@
 """
-Filename: core_data.py
-
-Description: Manages and processes data related to AB-Grid networks.
-
 Author: Pierpaolo Calanna
 
 Date Created: May 3, 2025

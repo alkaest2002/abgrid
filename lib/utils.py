@@ -1,8 +1,4 @@
 """
-Filename: utils.py
-
-Description: Implements a decorator to print notifications for function execution and utility functions for AB-Grid project.
-
 Author: Pierpaolo Calanna
 
 Date Created: May 3, 2025
@@ -18,7 +14,7 @@ import numpy as np
 import networkx as nx
 import json
 
-from typing import Any, Dict, List, Optional, Union
+from typing import Any, Dict, List, Union
 
 from lib.core.core_data import ReportDataDict
 

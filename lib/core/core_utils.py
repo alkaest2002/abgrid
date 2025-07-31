@@ -1,8 +1,4 @@
 """
-Filename: core_utils.py
-
-Description: utility functions for data processing, visualization, and statistical analysis.
-
 Author: Pierpaolo Calanna
 
 Date Created: May 3, 2025

@@ -1,8 +1,4 @@
 """
-Filename: terminal_main.py
-
-Description: Terminal main module for managing project initialization, file generation, and report rendering.
-
 Author: Pierpaolo Calanna
 
 Date Created: Wed Jun 25 2025

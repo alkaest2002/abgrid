@@ -1,9 +1,4 @@
 """
-Filename: terminal_logger.py
-
-Description: This module provides logging functionality with decorators for function execution tracking,
-error handling, and formatted output. 
-
 Author: Pierpaolo Calanna
 
 Date Created:May 3, 2025
