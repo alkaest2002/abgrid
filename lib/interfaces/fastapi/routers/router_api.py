@@ -21,7 +21,7 @@ _abgrid_data = CoreData()
 _abgrid_renderer = CoreRenderer()
 
 
-def get_router() -> APIRouter:
+def get_router_api() -> APIRouter:
     """
     Create and configure the FastAPI router with API endpoints.
     
@@ -132,8 +132,8 @@ def get_router() -> APIRouter:
             
         except FileNotFoundError:
             return JSONResponse(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                content={"detail": "template_not_found_for_language"}
+                status_code=status.HTTP_404_NOT_FOUND,
+                content={"detail": "group_template_not_found_for_language"}
             )
         except Exception as e:
             return JSONResponse(
@@ -202,7 +202,7 @@ def get_router() -> APIRouter:
             
         except FileNotFoundError:
             return JSONResponse(
-                status_code=status.HTTP_400_BAD_REQUEST,
+                status_code=status.HTTP_404_NOT_FOUND,
                 content={"detail": "report_template_not_found_for_language"}
             )
         except ValueError as e:

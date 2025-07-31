@@ -15,7 +15,8 @@ from lib.interfaces.fastapi.middlewares.body import BodySizeLimitMiddleware
 from lib.interfaces.fastapi.middlewares.query import QueryParamLimitMiddleware
 from lib.interfaces.fastapi.middlewares.request import RequestProtectionMiddleware
 from lib.interfaces.fastapi.middlewares.header import HeaderSizeLimitMiddleware
-from lib.interfaces.fastapi.routers.api_router import get_router
+from lib.interfaces.fastapi.routers.router_fake import get_router_fake
+from lib.interfaces.fastapi.routers.router_api import get_router_api
 from lib.utils import to_snake_case
 
 # Initialization of FastAPI application
@@ -62,8 +63,11 @@ app.add_middleware(BodySizeLimitMiddleware)
 # Routes
 #######################################################################################
 
-# Include application router
-app.include_router(get_router())
+# Include api router
+app.include_router(get_router_api())
+
+# Include api router
+app.include_router(get_router_fake())
 
 # Add other routes
 @app.get("/")
