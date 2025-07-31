@@ -61,6 +61,7 @@
             "required_jwt_token": "token jwt mancante",
             "requests_exceeded_rate_limit": "hai inviato troppe richieste al server; riprova tra circa 30 secondi",
             "request_timeout": "timeout della richiesta",
+            "too_many_concurrent_requests": "troppi utenti collegati; riprova tra circa 30 secondi",
             "up": "server raggiungibile"
         },
         "toast": {
