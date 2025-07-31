@@ -14,3 +14,4 @@ ipython/*.xlsx
 .devServer/
 lib/interfaces/electron/thin/Electron.app
 lib/interfaces/electron/thin/app/dist
+lib/interfaces/docker/abgrid-fastapi.tar
