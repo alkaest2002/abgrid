@@ -9,8 +9,8 @@ The code is part of the AB-Grid project and is licensed under the MIT License.
 import asyncio
 import time
 from typing import Callable, List, Optional
-from starlette.middleware.base import BaseHTTPMiddleware
 from fastapi import Request
+from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.responses import JSONResponse, Response
 from lib.interfaces.fastapi.settings import Settings
 
@@ -125,8 +125,6 @@ class RequestProtectionMiddleware(BaseHTTPMiddleware):
                     )
                 self.active_requests += 1
 
-        start_time: float = time.time()
-        
         try:
             # Create timeout for the request (applies to all requests)
             response: Response = await asyncio.wait_for(
