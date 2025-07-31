@@ -1,8 +1,4 @@
 """
-Filename: auth.py
-
-Description: Auth class to verify JWT tokens.
-
 Author: Pierpaolo Calanna
 
 Date Created: Jul 1, 2025
