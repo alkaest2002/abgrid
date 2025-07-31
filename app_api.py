@@ -21,7 +21,7 @@ from lib.interfaces.fastapi.middlewares.body import BodySizeLimitMiddleware
 from lib.interfaces.fastapi.middlewares.query import QueryParamLimitMiddleware
 from lib.interfaces.fastapi.middlewares.timeout import TimeoutProtectionMiddleware
 from lib.interfaces.fastapi.router import get_router
-from lib.interfaces.fastapi.middlewares.headers import HeaderSizeLimitMiddleware
+from lib.interfaces.fastapi.middlewares.header import HeaderSizeLimitMiddleware
 from lib.utils import to_snake_case
 
 # Initialization of FastAPI application
@@ -70,7 +70,7 @@ app.add_middleware(
 app.add_middleware(
     QueryParamLimitMiddleware, 
     max_query_string_length=8192, # 8KB
-    max_query_params_count=100,   # 100 params max
+    max_query_params_count=10,    # 10 params max
     max_query_param_length=1024   # 1KB
 ) 
 

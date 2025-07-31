@@ -34,19 +34,31 @@ class QueryParamLimitMiddleware(BaseHTTPMiddleware):
                 # Count total parameters (including multiple values for same key)
                 total_params = sum(len(values) for values in query_params.values())
                 if total_params > self.max_query_params_count:
-                    raise HTTPException(status_code=413, detail="too_many_query_parameters")
+                    raise HTTPException(
+                        status_code=413, 
+                        detail="too_many_query_parameters"
+                    )
                 
                 # Check individual parameter and value sizes
                 for key, values in query_params.items():
                     if len(key) > self.max_query_param_length:
-                        raise HTTPException(status_code=413, detail="query_parameter_key_too_large")
+                        raise HTTPException(
+                            status_code=413, 
+                            detail="query_parameter_key_too_large"
+                        )
                     
                     for value in values:
                         if len(value) > self.max_query_param_length:
-                            raise HTTPException(status_code=413, detail="query_parameter_value_too_large")
+                            raise HTTPException(
+                                status_code=413, 
+                                detail="query_parameter_value_too_large"
+                            )
                             
             except ValueError:
-                raise HTTPException(status_code=400, detail="malformed_query_string")
+                raise HTTPException(
+                    status_code=400, 
+                    detail="malformed_query_string"
+                )
         
         response = await call_next(request)
         return response
