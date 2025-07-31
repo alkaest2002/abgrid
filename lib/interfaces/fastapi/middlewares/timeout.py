@@ -13,7 +13,7 @@ class TimeoutProtectionMiddleware(BaseHTTPMiddleware):
         app, 
         request_timeout: int = 60,  # seconds
         slow_request_threshold: int = 30,  # seconds
-        max_concurrent_requests: int = settings.max_concurrent_connections,
+        max_concurrent_requests: int = settings.max_concurrent_requests,
     ):
         super().__init__(app)
         self.request_timeout = request_timeout
