@@ -10,9 +10,9 @@ Date Created: Jul 1, 2025
 The code is part of the AB-Grid project and is licensed under the MIT License.
 """
 
+import asyncio
 import time
 import hashlib
-import threading
 from collections import OrderedDict
 from functools import wraps
 from typing import Tuple, Callable, Any, Awaitable
@@ -34,7 +34,7 @@ class SimpleRateLimiter:
     JWT-based rate limiter using a sliding window approach with LRU cache.
 
     This rate limiter extracts JWT tokens from Authorization headers and
-    applies rate limiting per token per endpoint.
+    applies rate limiting per token per endpoint using asyncio for FastAPI compatibility.
     
     Args:
         limit: Maximum number of requests allowed per window.
@@ -52,7 +52,7 @@ class SimpleRateLimiter:
         max_cache_size: int = 10000
     ) -> None:
         """
-        Initialize the rate limiter.
+        Initialize the rate limiter with asyncio lock for FastAPI compatibility.
 
         Args:
             limit: Maximum requests allowed per window.
@@ -71,8 +71,9 @@ class SimpleRateLimiter:
         self.max_cache_size = max_cache_size
         
         # Cache stores: key -> (window_start_time, request_count)
-        self._cache: OrderedDict[str, Tuple[float, int]]  = OrderedDict()
-        self._lock: threading.RLock = threading.RLock()
+        self._cache: OrderedDict[str, Tuple[float, int]] = OrderedDict()
+        # Use asyncio.Lock for FastAPI async compatibility
+        self._lock: asyncio.Lock = asyncio.Lock()
 
     def __call__(self, func: Callable[..., Awaitable[Any]]) -> Callable[..., Awaitable[Any]]:
         """
@@ -95,7 +96,8 @@ class SimpleRateLimiter:
             if not (request := kwargs.get("request")):
                 raise RateLimitException("request_object_required_for_rate_limiting")
             key: str = self._get_cache_key(request)
-            self._check_rate_limit(key)
+            # Await the async rate limit check
+            await self._check_rate_limit(key)
             
             return await func(*args, **kwargs)
         return wrapper
@@ -144,11 +146,12 @@ class SimpleRateLimiter:
         return f"rate_limit:{self.limiter_id}:{token_hash}:{path}"
         
 
-    def _check_rate_limit(self, key: str) -> None:
+    async def _check_rate_limit(self, key: str) -> None:
         """
-        Check if request exceeds rate limit and update counters.
+        Asynchronously check if request exceeds rate limit and update counters.
 
-        Implements the sliding window algorithm.
+        Implements the sliding window algorithm with asyncio lock for thread safety
+        in FastAPI's async environment.
         
         Args:
             key: Unique cache key for the request.
@@ -156,11 +159,11 @@ class SimpleRateLimiter:
         Raises:
             RateLimitException: When the rate limit is exceeded.
         """
-        # Get time
+        # Get current time
         current_time: float = time.time()
         
-        # Thread safe operation
-        with self._lock:
+        # Async lock operation - non-blocking for FastAPI
+        async with self._lock:
             
             # User identified by key is found in cache
             if key in self._cache:
@@ -173,18 +176,17 @@ class SimpleRateLimiter:
                     if count >= self.limit:
                         raise RateLimitException("requests_exceeded_rate_limit")
                     
-                    # Update count
+                    # Increment request count for current window
                     self._cache[key] = (window_start, count + 1)
                 else:
-                    # New time window + reset counter
+                    # New time window - reset counter
                     self._cache[key] = (current_time, 1)
                 
-                # Move user to end (LRU)
+                # Move user to end for LRU cache behavior
                 self._cache.move_to_end(key)
             else:
                 # If cache hits maximum capacity
                 if len(self._cache) >= self.max_cache_size:
-                    
                     # Evict oldest entry (LRU eviction)
                     self._cache.popitem(last=False)
                 
