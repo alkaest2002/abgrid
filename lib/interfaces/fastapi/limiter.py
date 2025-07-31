@@ -125,6 +125,15 @@ class SimpleRateLimiter:
         if not (token := auth_header[7:].strip()):
             raise RateLimitException("required_jwt_token")
         
+        # SECURITY: Validate token size
+        if len(token) > 2048:
+            raise RateLimitException("jwt_token_too_large")
+        
+        # SECURITY: Basic format validation
+        if token.count('.') != 2:
+            raise RateLimitException("invalid_jwt_format")
+        
+        # Token is safe to hash
         token_hash = hashlib.sha256(token.encode('utf-8')).hexdigest()
         
         try:

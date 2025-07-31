@@ -17,23 +17,30 @@ from fastapi.responses import JSONResponse
 from starlette.middleware.cors import CORSMiddleware
 from lib.core.core_schemas import PydanticValidationException
 from lib.interfaces.fastapi.limiter import RateLimitException
+from lib.interfaces.fastapi.middlewares.body import BodySizeLimitMiddleware
+from lib.interfaces.fastapi.middlewares.query import QueryParamLimitMiddleware
 from lib.interfaces.fastapi.router import get_router
+from lib.interfaces.fastapi.middlewares.headers import HeaderSizeLimitMiddleware
 from lib.utils import to_snake_case
 
 # Initialization of FastAPI application
 app = FastAPI()
 
 # Use a "random" port number within the dynamic range
-fancy_port = [ "53472", "53247", "53274", "53427", "53724", "53742" ]
+fancy_ports = [ "53472", "53247", "53274", "53427", "53724", "53742" ]
 
 # Define domains that should be allowed to access your server
 domains = [ "https://localhost", "https://127.0.0.1", "http://localhost", "http://127.0.0.1" ]
 
 # Define origines that should be allowed to access your server
-origins = [f"{domain}:{port}" for domain, port in product(domains, fancy_port)]
+origins = [f"{domain}:{port}" for domain, port in product(domains, fancy_ports)]
 
 # Add render app origin
 origins.append("https://abgrid-webapp.onrender.com")
+
+#######################################################################################
+# Middlewares
+#######################################################################################
 
 # Add CORSMiddleware with slightly restricted settings
 app.add_middleware(
@@ -44,9 +51,31 @@ app.add_middleware(
     allow_headers=["Authorization", "Content-Type"],  # Common headers used in requests
 )
 
+app.add_middleware(
+    HeaderSizeLimitMiddleware, # Restrict size of headers
+    max_header_size=4096 # Max 4KB for headers
+)
+
+app.add_middleware(
+    QueryParamLimitMiddleware, 
+    max_query_string_length=8192, # 8KB
+    max_query_params_count=100,   # 100 params max
+    max_query_param_length=1024   # 1KB
+) 
+
+app.add_middleware(
+    BodySizeLimitMiddleware, # Restrict size of body
+    max_body_size=.5 * 1024 * 1024  # Max 500KB for request bodies
+)
+
+#######################################################################################
+# Routes
+#######################################################################################
+
 # Include application router
 app.include_router(get_router())
 
+# Add other routes
 @app.get("/")
 @app.get("/health")
 def server_check() -> JSONResponse:
