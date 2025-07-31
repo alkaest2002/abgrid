@@ -4,7 +4,7 @@ Author: Pierpaolo Calanna
 The code is part of the AB-Grid project and is licensed under the MIT License.
 """
 from typing import Callable, Dict, Any
-from fastapi import Request
+from fastapi import Request, status
 from starlette.middleware.base import BaseHTTPMiddleware
 from fastapi.responses import JSONResponse
 from starlette.responses import Response
@@ -65,13 +65,13 @@ class BodySizeLimitMiddleware(BaseHTTPMiddleware):
                 body_size = int(content_length)
                 if body_size > self.max_body_size:
                     return JSONResponse(
-                        status_code=413,
+                        status_code=status.HTTP_413_REQUEST_ENTITY_TOO_LARGE,
                         content={"detail": "request_body_too_large"}
                     )
             except ValueError:
                 # Invalid content-length header
                 return JSONResponse(
-                    status_code=400,
+                    status_code=status.HTTP_400_BAD_REQUEST,
                     content={"detail": "invalid_content_length_header"}
                 )
 
@@ -141,7 +141,7 @@ class BodySizeLimitMiddleware(BaseHTTPMiddleware):
 
                     if self.current_size > self.max_size:
                         return JSONResponse(
-                            status_code=413,
+                            status_code=status.HTTP_413_REQUEST_ENTITY_TOO_LARGE,
                             content={"detail": "request_body_too_large"}
                         )
 

@@ -6,7 +6,7 @@ The code is part of the AB-Grid project and is licensed under the MIT License.
 
 from typing import Callable, Dict, List
 from starlette.middleware.base import BaseHTTPMiddleware
-from fastapi import Request
+from fastapi import Request, status
 from fastapi.responses import JSONResponse
 from starlette.responses import Response
 from urllib.parse import parse_qs
@@ -97,7 +97,7 @@ class QueryParamLimitMiddleware(BaseHTTPMiddleware):
         # Check total query string length
         if len(query_string) > self.max_query_string_length:
             return JSONResponse(
-                status_code=413,
+                status_code=status.HTTP_413_REQUEST_ENTITY_TOO_LARGE,
                 content={"detail": "query_string_too_large"}
             )
         
@@ -110,7 +110,7 @@ class QueryParamLimitMiddleware(BaseHTTPMiddleware):
                 total_params = sum(len(values) for values in query_params.values())
                 if total_params > self.max_query_params_count:
                     return JSONResponse(
-                        status_code=413,
+                        status_code=status.HTTP_413_REQUEST_ENTITY_TOO_LARGE,
                         content={"detail": "too_many_query_parameters"}
                     )
                 
@@ -118,20 +118,20 @@ class QueryParamLimitMiddleware(BaseHTTPMiddleware):
                 for key, values in query_params.items():
                     if len(key) > self.max_query_param_length:
                         return JSONResponse(
-                            status_code=413,
+                            status_code=status.HTTP_413_REQUEST_ENTITY_TOO_LARGE,
                             content={"detail": "query_parameter_key_too_large"}
                         )
                     
                     for value in values:
                         if len(value) > self.max_query_param_length:
                             return JSONResponse(
-                                status_code=413,
+                                status_code=status.HTTP_413_REQUEST_ENTITY_TOO_LARGE,
                                 content={"detail": "query_parameter_value_too_large"}
                             )
                             
             except ValueError:
                 return JSONResponse(
-                    status_code=400,
+                    status_code=status.HTTP_400_BAD_REQUEST,
                     content={"detail": "malformed_query_string"}
                 )
         

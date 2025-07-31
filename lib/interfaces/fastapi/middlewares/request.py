@@ -7,7 +7,7 @@ The code is part of the AB-Grid project and is licensed under the MIT License.
 import asyncio
 import time
 from typing import Callable, List, Optional
-from fastapi import Request
+from fastapi import Request, status
 from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.responses import JSONResponse, Response
 from lib.interfaces.fastapi.settings import Settings
@@ -118,7 +118,7 @@ class RequestProtectionMiddleware(BaseHTTPMiddleware):
             async with self._lock:
                 if self.active_requests >= self.max_concurrent_requests:
                     return JSONResponse(
-                        status_code=429,
+                        status_code=status.HTTP_429_TOO_MANY_REQUESTS,
                         content={"detail": "too_many_concurrent_requests"}
                     )
                 self.active_requests += 1
@@ -134,7 +134,7 @@ class RequestProtectionMiddleware(BaseHTTPMiddleware):
             
         except asyncio.TimeoutError:
             return JSONResponse(
-                status_code=408,
+                status_code=status.HTTP_408_REQUEST_TIMEOUT,
                 content={"detail": "request_timeout"}
             )
         finally:

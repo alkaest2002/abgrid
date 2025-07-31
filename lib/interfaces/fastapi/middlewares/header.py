@@ -6,7 +6,7 @@ The code is part of the AB-Grid project and is licensed under the MIT License.
 
 from typing import Callable
 from starlette.middleware.base import BaseHTTPMiddleware
-from fastapi import Request
+from fastapi import Request, status
 from fastapi.responses import JSONResponse
 from starlette.responses import Response
 
@@ -67,7 +67,7 @@ class HeaderSizeLimitMiddleware(BaseHTTPMiddleware):
         for header_name, header_value in request.headers.items():
             if len(header_value) > self.max_header_size:
                 return JSONResponse(
-                    status_code=413,
+                    status_code=status.HTTP_413_REQUEST_ENTITY_TOO_LARGE,
                     content={"detail": f"header_is_too_large"}
                 )
         
