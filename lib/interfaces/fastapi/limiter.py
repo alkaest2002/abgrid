@@ -15,7 +15,7 @@ import hashlib
 import threading
 from collections import OrderedDict
 from functools import wraps
-from typing import Tuple, Callable, Any, Awaitable, List
+from typing import Tuple, Callable, Any, Awaitable
 
 class RateLimitException(Exception):
     """
@@ -55,20 +55,23 @@ class SimpleRateLimiter:
         Initialize the rate limiter.
 
         Args:
-            limit: Maximum requests allowed per window (must be > 0).
-            window_seconds: Duration of rate limit window in seconds (must be > 0).
-            max_cache_size: Maximum cache entries to prevent memory leaks (must be > 0).
+            limit: Maximum requests allowed per window.
+            window_seconds: Duration of rate limit window in seconds.
+            max_cache_size: Maximum cache entries to prevent memory leaks.
         """
+        if limit <= 0 or window_seconds <= 0 or max_cache_size <= 0:
+            raise ValueError("rate_limiter_all_parameters_must_be_positive_integers")
+        
         # Create a unique identifier for this limiter instance
         self.limiter_id = f"{limit}req_{window_seconds}s"
             
         # Store values
-        self.limit: int = limit
-        self.window_seconds: int = window_seconds
-        self.max_cache_size: int = max_cache_size
+        self.limit = limit
+        self.window_seconds = window_seconds
+        self.max_cache_size = max_cache_size
         
         # Cache stores: key -> (window_start_time, request_count)
-        self._cache: OrderedDict[str, Tuple[float, int]] = OrderedDict()
+        self._cache: OrderedDict[str, Tuple[float, int]]  = OrderedDict()
         self._lock: threading.RLock = threading.RLock()
 
     def __call__(self, func: Callable[..., Awaitable[Any]]) -> Callable[..., Awaitable[Any]]:
@@ -89,11 +92,8 @@ class SimpleRateLimiter:
         """
         @wraps(func)
         async def wrapper(*args: Any, **kwargs: Any) -> Any:
-            # Request object is needed
             if not (request := kwargs.get("request")):
                 raise RateLimitException("request_object_required_for_rate_limiting")
-            
-            # Rate limit happens here
             key: str = self._get_cache_key(request)
             self._check_rate_limit(key)
             
@@ -114,19 +114,24 @@ class SimpleRateLimiter:
             RateLimitException: If Authorization header is missing, malformed,
                                 or doesn't contain a Bearer token.
         """
-        # Get Authorization header
-        auth_header: str = getattr(request.headers, 'get', lambda k, d: '')("Authorization", "")
-        
-        # JWT token validation and extraction
-        if not auth_header or not auth_header.startswith("Bearer ") or not (token := auth_header[7:].strip()):
+        try:
+            auth_header = request.headers.get("Authorization", "")
+        except (AttributeError, TypeError):
             raise RateLimitException("required_jwt_token")
         
-        # Use SHA-256 to hash token for privacy and collision prevention
-        token_hash: str = hashlib.sha256(token.encode('utf-8')).hexdigest()
+        if not auth_header.startswith("Bearer "):
+            raise RateLimitException("required_jwt_token")
+            
+        if not (token := auth_header[7:].strip()):
+            raise RateLimitException("required_jwt_token")
         
-        # Get request path, fallback to empty string if not available
-        path: str = getattr(getattr(request, 'url', None), 'path', '') or ''
+        token_hash = hashlib.sha256(token.encode('utf-8')).hexdigest()
         
+        try:
+            path = getattr(getattr(request, 'url', None), 'path', '')
+        except (AttributeError, TypeError):
+            path = ''
+            
         return f"rate_limit:{self.limiter_id}:{token_hash}:{path}"
         
 
@@ -147,8 +152,6 @@ class SimpleRateLimiter:
         
         # Thread safe operation
         with self._lock:
-            # Auto-cleanup: remove entries older than 2x window to prevent memory leaks
-            self._cleanup_expired(current_time)
             
             # User identified by key is found in cache
             if key in self._cache:
@@ -178,23 +181,3 @@ class SimpleRateLimiter:
                 
                 # First request for user identified by this key
                 self._cache[key] = (current_time, 1)
-
-    def _cleanup_expired(self, current_time: float) -> None:
-        """
-        Remove cache entries older than 2x window_seconds to prevent memory leaks.
-
-        Args:
-            current_time: Current timestamp for comparison.
-        """
-        # Define cutoff time
-        cutoff_time: float = current_time - (2 * self.window_seconds)
-        
-        # Get expired keys
-        expired_keys: List[str] = [
-            k for k, (window_start, _) in self._cache.items() 
-            if window_start < cutoff_time
-        ]
-        
-        # Delete expired keys
-        for key in expired_keys:
-            del self._cache[key]
