@@ -1,3 +1,11 @@
+"""
+Author: Pierpaolo Calanna
+
+Date Created: Jul 1, 2025
+
+The code is part of the AB-Grid project and is licensed under the MIT License.
+"""
+
 import jwt
 import uuid
 from datetime import datetime, timedelta, timezone
