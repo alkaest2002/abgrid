@@ -10,12 +10,12 @@ from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
 from starlette.middleware.cors import CORSMiddleware
 from lib.core.core_schemas import PydanticValidationException
-from lib.interfaces.fastapi.limiter import RateLimitException
+from lib.interfaces.fastapi.security.limiter import RateLimitException
 from lib.interfaces.fastapi.middlewares.body import BodySizeLimitMiddleware
 from lib.interfaces.fastapi.middlewares.query import QueryParamLimitMiddleware
 from lib.interfaces.fastapi.middlewares.request import RequestProtectionMiddleware
-from lib.interfaces.fastapi.router import get_router
 from lib.interfaces.fastapi.middlewares.header import HeaderSizeLimitMiddleware
+from lib.interfaces.fastapi.routers.api_router import get_router
 from lib.utils import to_snake_case
 
 # Initialization of FastAPI application
