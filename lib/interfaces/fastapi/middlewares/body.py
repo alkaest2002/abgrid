@@ -22,20 +22,20 @@ class BodySizeLimitMiddleware(BaseHTTPMiddleware):
     
     Args:
         app: The ASGI application instance
-        max_body_size: Maximum allowed body size in bytes (default: 250KB)
+        max_body_size: Maximum allowed body size in bytes (default: 100KB)
         
     Raises:
         JSONResponse: Returns 413 status for bodies exceeding the limit
         JSONResponse: Returns 400 status for invalid Content-Length headers
     """
 
-    def __init__(self, app, max_body_size: int = 250 * 1024) -> None:
+    def __init__(self, app, max_body_size: int = 100 * 1024) -> None:
         """
         Initialize the middleware with size limit configuration.
         
         Args:
             app: The ASGI application instance
-            max_body_size: Maximum allowed body size in bytes (default: 250KB)
+            max_body_size: Maximum allowed body size in bytes (default: 100KB)
         """
         super().__init__(app)
         self.max_body_size = max_body_size
