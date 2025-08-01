@@ -18,6 +18,7 @@ export default defineConfig({
                 itNotifyReport: resolve(fileURLToPath(new URL('.', import.meta.url)), 'pages/it.notify.report.html'),
                 itNotifyErrorYaml: resolve(fileURLToPath(new URL('.', import.meta.url)), 'pages/it.notify.error.yaml.html'),
                 itNotifyErrorApi: resolve(fileURLToPath(new URL('.', import.meta.url)), 'pages/it.notify.error.api.html'),
+                itNotifyQueue: resolve(fileURLToPath(new URL('.', import.meta.url)), 'pages/it.notify.queue.html'),
             }
         }
     },
