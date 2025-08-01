@@ -27,7 +27,7 @@
 
     <div class="h-full" data-taxi>
         <div class="h-full flex flex-col" x-data="viewNotifyQueue" data-taxi-view>
-            
+
             <!-- Top area - fixed height -->
             <header class="h-24 flex items-center justify-start p-9">
                 <div class="w-full">
@@ -51,25 +51,45 @@
                                                 d="M256 32c14.2 0 27.3 7.5 34.5 19.8l216 368c7.3 12.4 7.3 27.7 .2 40.1S486.3 480 472 480L40 480c-14.3 0-27.6-7.7-34.7-20.1s-7-27.8 .2-40.1l216-368C228.7 39.5 241.8 32 256 32zm0 128c-13.3 0-24 10.7-24 24l0 112c0 13.3 10.7 24 24 24s24-10.7 24-24l0-112c0-13.3-10.7-24-24-24zm32 224a32 32 0 1 0 -64 0 32 32 0 1 0 64 0z" />
                                         </svg>
                                     </div>
-                                    <div class="text-center uppercase font-bold mb-6">
+                                    <div class="text-center uppercase font-bold">
                                         <span>La tua richiesta è in coda</span>
                                     </div>
+                                </div>
+                                <section aria-labelledby="error-heading">
                                     <div>
                                         <p class="mb-3">
-                                            La tua richiesta è attualmente in coda a causa dell'elevato traffico verso il server. Il sistema sta automaticamente gestendo la situazione e riproverà ad eseguire la tua richiesta fino a 10 volte per garantire che venga processata correttamente.
+                                            La tua richiesta è attualmente in coda a causa dell'elevato traffico verso
+                                            il server. Il software riproverà ad eseguire la tua richiesta fino a 10
+                                            volte per garantire che venga processata correttamente.
                                         </p>
                                         <p class="mb-3">
-                                            <span class="font-bold">Non è necessaria alcuna azione da parte tua</span>. Ti preghiamo di rimanere su questa pagina e attendere il completamento dell'operazione. Se abbandoni la pagina o chiudi l'app, la richiesta verrà automaticamente annullata e dovrai ripetere l'operazione dall'inizio.
+                                            <span class="font-bold">Non è necessaria alcuna azione da parte tua</span>.
+                                            Ti preghiamo di rimanere su questa pagina e attendere il completamento
+                                            dell'operazione. Se abbandoni la pagina o chiudi l'app, la richiesta verrà
+                                            automaticamente annullata e dovrai ripetere l'operazione dall'inizio.
                                         </p>
                                         <p class="mb-3">
-                                            Raramente accade che la richiesta non venga completata dopo 10 tentativi. Qualora si verificasse questa eventualità, il sistema annullerà automaticamente la richiesta. Potrai quindi riprovare  quando il traffico verso il server sarà diminuito.
+                                            Raramente accade che la richiesta non venga completata dopo 10 tentativi.
+                                            Qualora si verificasse questa eventualità, il sistema annullerà
+                                            automaticamente la richiesta. Potrai quindi riprovare quando il traffico
+                                            verso il server sarà diminuito.
                                         </p>
                                         <p class="mb-3">
                                             Grazie per la pazienza e la comprensione.
                                         </p>
                                     </div>
-                                </div>
-                                <section aria-labelledby="error-heading">
+                                    <div>
+                                        <div
+                                            class="w-full flex gap-4 items-center px-6 py-3 mb-9 bg-gray-200 rounded-lg">
+                                            <div class="flex gap-2 cursor-pointer">
+                                                <div clas="text-[6em]" x-text="currentTry">
+                                                </div>
+                                                <div>
+
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
                                 </section>
                             </div>
                         </div>
@@ -80,11 +100,8 @@
             <!-- Bottom area - fixed height -->
             <footer class="h-10 flex justify-center items-center">
                 <div class="relative top-[-100%] p-3 bg-gray-100 rounded-full">
-                    <button 
-                        x-data="componentMagicButton(magicButton.label, magicButton.action)" 
-                        x-bind="magicButton"
-                        aria-label="main action button"
-                    >
+                    <button x-data="componentMagicButton(magicButton.label, magicButton.action)" x-bind="magicButton"
+                        aria-label="main action button">
                     </button>
                 </div>
             </footer>
