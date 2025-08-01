@@ -43,13 +43,13 @@ class Settings(BaseSettings):
     
     auth_secret: str = Field(
         ..., 
-        env='AUTH_SECRET',
+        env="AUTH_SECRET",
         description="Secret key for authentication token generation and validation"
     )
     
     token_lifetime_hours: int = Field(
         default=12, 
-        env='TOKEN_LIFETIME_HOURS',
+        env="TOKEN_LIFETIME_HOURS",
         description="Authentication token lifetime in hours",
         ge=1,  # Must be at least 1 hour
         le=168  # Maximum 1 week (168 hours)
@@ -57,7 +57,7 @@ class Settings(BaseSettings):
     
     max_concurrent_requests: int = Field(
         default=10, 
-        env='MAX_CONCURRENT_REQUESTS',
+        env="MAX_CONCURRENT_REQUESTS",
         description="Maximum number of concurrent requests allowed",
         ge=1,  # Must allow at least 1 request
         le=1000  # Reasonable upper limit
@@ -71,12 +71,12 @@ class Settings(BaseSettings):
             env_file: Path to the environment file to load (.env)
             case_sensitive: Whether environment variable names are case sensitive
         """
-        env_file = '.env'
+        env_file = ".env"
         case_sensitive = False
 
     @classmethod
     @lru_cache()
-    def load(cls) -> 'Settings':
+    def load(cls) -> "Settings":
         """
         Load and cache application settings.
         
