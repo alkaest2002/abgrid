@@ -78,14 +78,14 @@
                                             Grazie per la pazienza e la comprensione.
                                         </p>
                                     </div>
-                                    <div>
+                                    <div class="mt-6">
                                         <div
                                             class="w-full flex gap-4 items-center px-6 py-3 mb-9 bg-gray-200 rounded-lg">
-                                            <div class="flex gap-2 cursor-pointer">
-                                                <div clas="text-[6em]" x-text="currentTry">
+                                            <div class="flex gap-2 items-center">
+                                                <div class="text-5xl w-24 text-center animate-pulse" x-text="queueTimerTry">
                                                 </div>
                                                 <div>
-
+                                                    Tentativi disponibili. Prossimo tentativo tra <span x-text="queueTimerDurationInSeconds"></span> secondi.
                                                 </div>
                                             </div>
                                         </div>
