@@ -58,19 +58,13 @@
                                 <section aria-labelledby="error-heading">
                                     <div>
                                         <p class="mb-3">
-                                            La tua richiesta è attualmente in coda a causa dell'elevato traffico verso
-                                            il server. Il software riproverà ad eseguire la tua richiesta fino a 10
-                                            volte per garantire che venga processata correttamente.
+                                            A causa dell'elevato traffico verso i server AB-Grid, la tua richiesta è stata messa in coda.
+                                            Il software eseguirà ripetutamente la tua richiesta per garantire che venga processata correttamente.
                                         </p>
                                         <p class="mb-3">
                                             <span class="font-bold">Non è necessaria alcuna azione da parte tua</span>. Ti preghiamo di rimanere su questa pagina e attendere il completamento
                                             dell'operazione. Se abbandoni la pagina o chiudi l'app, la richiesta verrà
                                             automaticamente annullata e dovrai ripetere l'operazione dall'inizio.
-                                        </p>
-                                        <p class="mb-3">
-                                            Se non venisse onorata dopo 10 tentativi, il sistema annullerà
-                                            automaticamente la richiesta. Potrai quindi riprovare quando il traffico
-                                            verso il server sarà diminuito.
                                         </p>
                                         <p class="mb-3">
                                             Grazie per la pazienza e la comprensione.
@@ -85,8 +79,7 @@
                                                     <div
                                                         class="relative w-16 h-16 bg-gradient-to-br from-gray-400 to-gray-500 rounded-xl flex items-center justify-center shadow-lg transform hover:scale-105 transition-transform duration-200">
                                                         <span class="text-2xl font-bold text-white"
-                                                            x-text="queueTimerTry"></span>
-                                                        <!-- Subtle glow effect -->
+                                                            x-text="queueAttemptsCount"></span>
                                                         <div
                                                             class="absolute inset-0 bg-gradient-to-br from-gray-400 to-gray-500 rounded-2xl opacity-20 blur-md">
                                                         </div>
@@ -95,12 +88,14 @@
 
                                                 <!-- Text content -->
                                                 <div class="flex-1">
-                                                    <h3 class="text-lg font-semibold text-gray-800">Tentativi
-                                                        disponibili</h3>
+                                                    <h3 class="text-lg font-semibold text-gray-800" x-show="queueAttemptsCount != 1">Tentativi
+                                                        effettuati</h3>
+                                                    <h3 class="text-lg font-semibold text-gray-800" x-show="queueAttemptsCount == 1" x-cloak>Tentativo
+                                                        effettuato</h3>
                                                     <p class="text-sm text-gray-600">
                                                         Prossimo tentativo tra
                                                         <span
-                                                            class="inline-flex justify-center w-16 items-center px-2 py-1 rounded-full text-xs font-medium bg-gray-300 text-gray-700"
+                                                            class="inline-flex justify-center w-16 items-center px-2 py-1 rounded-full text-xs font-bold bg-gray-300 text-gray-700"
                                                             x-text="queueVisualTimeRemaining + ' sec'"></span>
                                                     </p>
                                                 </div>
