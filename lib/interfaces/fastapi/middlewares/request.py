@@ -5,7 +5,6 @@ The code is part of the AB-Grid project and is licensed under the MIT License.
 """
 
 import asyncio
-import time
 from typing import Callable, List, Optional
 from fastapi import Request, status
 from starlette.middleware.base import BaseHTTPMiddleware
