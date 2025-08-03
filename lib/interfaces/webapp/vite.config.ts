@@ -8,6 +8,7 @@ import { fileURLToPath, URL } from "node:url"
 
 
 export default defineConfig({
+    envDir: '../../../', 
     build: {
         rollupOptions: {
             input: {
