@@ -51,10 +51,10 @@
         "server": {
             "down": "server non raggiungibile",
             "failed_to_render_jinja_template": "non è stato possibile trovare il template jinja",
-            "invalid_or_expired_jwt_token": "token jwt non fornito o scaduto; ritorna alla homepage.",
+            "invalid_or_expired_jwt_token": "token jwt non fornito o scaduto.",
             "internal_error": "errore del server",
-            "not_authenticated": "jwt token non presente: ritorna alla homepage",
-            "not_authorized": "jwt token non presente: ritorna alla homepage",
+            "not_authenticated": "token jwt non fornito o scaduto.",
+            "not_authorized": "token jwt non fornito o scaduto.",
             "offline": "offline",
             "online": "online",
             "only_json_body_data_accepted": "dati inviati non corretti",
