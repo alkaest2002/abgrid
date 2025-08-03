@@ -28,6 +28,8 @@ error_codes = {
     "requests_exceeded_rate_limit": status.HTTP_429_TOO_MANY_REQUESTS,
     "too_many_concurrent_requests": status.HTTP_429_TOO_MANY_REQUESTS,
     "too_many_query_parameters": status.HTTP_413_REQUEST_ENTITY_TOO_LARGE,
+    "not_authenticated": status.HTTP_401_UNAUTHORIZED,
+    "not_authorized": status.HTTP_403_FORBIDDEN
 }
 
 def get_router_fake() -> APIRouter:
