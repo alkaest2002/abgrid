@@ -26,15 +26,15 @@ class Settings(BaseSettings):
         auth_secret: Secret key used for authentication token generation and validation.
                     This is a required field that must be provided via AUTH_SECRET 
                     environment variable.
-        token_lifetime_hours: Duration in hours for authentication token validity.
-                            Defaults to 12 hours if not specified.
-        max_concurrent_requests: Maximum number of concurrent requests allowed by
-                               the request protection middleware. Defaults to 10.
+        max_concurrent_requests_for_group: Maximum number of concurrent requests allowed 
+                                         for /api/group endpoint. Defaults to 15.
+        max_concurrent_requests_for_report: Maximum number of concurrent requests allowed 
+                                          for /api/report endpoint. Defaults to 5.
                                
     Environment Variables:
         AUTH_SECRET: Required secret key for authentication
-        TOKEN_LIFETIME_HOURS: Optional token lifetime in hours (default: 12)
-        MAX_CONCURRENT_REQUESTS: Optional concurrent request limit (default: 10)
+        MAX_CONCURRENT_REQUESTS_FOR_GROUP: Optional concurrent request limit for group endpoint (default: 15)
+        MAX_CONCURRENT_REQUESTS: Optional concurrent request limit for report endpoints (default: 5)
         
     Note:
         Settings are cached using @lru_cache() for performance. The same instance
@@ -47,26 +47,18 @@ class Settings(BaseSettings):
         description="Secret key for authentication token generation and validation"
     )
     
-    token_lifetime_hours: int = Field(
-        default=12, 
-        env="TOKEN_LIFETIME_HOURS",
-        description="Authentication token lifetime in hours",
-        ge=1,  # Must be at least 1 hour
-        le=168  # Maximum 1 week (168 hours)
-    )
-    
     max_concurrent_requests_for_group: int = Field(
-        default=10, 
+        default=15, 
         env="MAX_CONCURRENT_REQUESTS_FOR_GROUP",
-        description="Maximum number of concurrent requests allowed for api/group endpoint",
+        description="Maximum number of concurrent requests allowed for /api/group endpoint",
         ge=1,  # Must allow at least 1 request
         le=1000  # Reasonable upper limit
     )
 
     max_concurrent_requests_for_report: int = Field(
-        default=10, 
+        default=5, 
         env="MAX_CONCURRENT_REQUESTS",
-        description="Maximum number of concurrent requests allowed for api/report endpoint",
+        description="Maximum number of concurrent requests allowed for /api/report endpoint",
         ge=1,  # Must allow at least 1 request
         le=1000  # Reasonable upper limit
     )
@@ -78,6 +70,7 @@ class Settings(BaseSettings):
         Attributes:
             env_file: Path to the environment file to load (.env)
             case_sensitive: Whether environment variable names are case sensitive
+            extra: Allow extra fields not defined in the model
         """
         env_file = ".env"
         case_sensitive = False

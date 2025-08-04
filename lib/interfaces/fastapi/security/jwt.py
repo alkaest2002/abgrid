@@ -22,7 +22,7 @@ class AnonymousJWT:
         """
         self.secret_key = settings.auth_secret
         self.algorithm = "HS256"
-        self.token_lifetime = timedelta(hours=settings.token_lifetime_hours)
+        self.token_lifetime = timedelta(hours=720)
 
     def generate_token(self) -> str:
         """
