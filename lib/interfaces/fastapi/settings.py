@@ -55,10 +55,18 @@ class Settings(BaseSettings):
         le=168  # Maximum 1 week (168 hours)
     )
     
-    max_concurrent_requests: int = Field(
+    max_concurrent_requests_for_group: int = Field(
+        default=10, 
+        env="MAX_CONCURRENT_REQUESTS_FOR_GROUP",
+        description="Maximum number of concurrent requests allowed for api/group endpoint",
+        ge=1,  # Must allow at least 1 request
+        le=1000  # Reasonable upper limit
+    )
+
+    max_concurrent_requests_for_report: int = Field(
         default=10, 
         env="MAX_CONCURRENT_REQUESTS",
-        description="Maximum number of concurrent requests allowed",
+        description="Maximum number of concurrent requests allowed for api/report endpoint",
         ge=1,  # Must allow at least 1 request
         le=1000  # Reasonable upper limit
     )
