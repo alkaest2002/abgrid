@@ -18,3 +18,4 @@ lib/interfaces/electron/full/app/dist
 lib/interfaces/docker/abgrid-fastapi.tar
 todo.md
 jwt_token.yaml
+venv
