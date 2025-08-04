@@ -33,7 +33,6 @@ def get_router_api() -> APIRouter:
         APIRouter: Configured router instance with all endpoints registered
         
     Endpoints:
-        GET /api/token: Generate anonymous JWT token
         POST /api/group: Generate group configuration file
         POST /api/report: Generate analysis report
         
@@ -43,33 +42,7 @@ def get_router_api() -> APIRouter:
     """
     router = APIRouter(prefix="/api")
 
-    @router.get("/token")
-    async def get_token() -> JSONResponse:
-        """
-        Generate a new anonymous JWT token for API authentication.
-        
-        This endpoint provides anonymous authentication tokens that can be used
-        to access protected endpoints. No credentials are required.
-        
-        Returns:
-            JSONResponse: Success response containing the JWT token in the "detail" field
-            
-        Status Codes:
-            200: Token generated successfully
-            500: Internal server error during token generation
-        """
-        try:
-            token = _auth.jwt_handler.generate_token()
-            return JSONResponse(
-                status_code=status.HTTP_200_OK,
-                content={"detail": token}
-            )
-        except Exception as e:
-            return JSONResponse(
-                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                content={"detail": "failed_to_generate_token"}
-            )
-    
+  
     @router.post("/group")
     @SimpleRateLimiter(limit=1, window_seconds=5)
     async def create_group(
