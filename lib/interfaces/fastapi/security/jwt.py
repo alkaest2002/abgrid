@@ -34,7 +34,6 @@ class AnonymousJWT:
         """
         now = datetime.now(timezone.utc)
         expires = now + self.token_lifetime
-
         payload = {
             "sub": str(uuid.uuid4()),
             "iat": now,                
