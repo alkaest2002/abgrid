@@ -53,19 +53,19 @@
                             <div class="w-full flex gap-4 items-center pl-6 pr-3 py-3 mb-3 bg-gray-200 rounded-lg">
                                 <label
                                     for="apiToken"
-                                    class="shrink-0 block text-sm font-medium text-gray-900">
+                                    class="shrink-0 block font-medium text-gray-900">
                                         
                                         <p 
                                             x-show="!$store.api.apiTokenIsStructurallyValid"
                                             class="flex flex-col"
                                             >
-                                            <span x-text="$t('homepage.apikey.license')"></span>
+                                            <span x-text="$t('homepage.apikey.license')" class="font-semibold"></span>
                                             <span x-text="$t('homepage.apikey.copyPast')" class="text-xs text-gray-500"></span>
                                         </p>
                                         <p 
                                             class="flex flex-col"
                                             x-show="$store.api.apiTokenIsStructurallyValid">
-                                            <span x-text="$t('homepage.apikey.license')"></span>
+                                            <span x-text="$t('homepage.apikey.license')" class="font-semibold"></span>
                                             <span class="text-xs text-gray-500">
                                                 <span x-text="$t('homepage.apikey.expiresAt')"></span>
                                                 <span x-text="$store.api.apiTokenExpirationDate"></span>
@@ -81,8 +81,12 @@
                                     class="block w-full p-3 truncate text-sm placeholder:text-sm text-gray-400 placeholder:text-gray-400 bg-white rounded-md shadow-sm focus:outline-none"
                                 >
                             </div>
-                            <div class="w-full flex gap-4 items-center px-6 py-3 mb-9 bg-gray-200 rounded-lg">
-                                <div class="flex gap-2 cursor-pointer" @click="apiPokeServer">
+                            <div class="w-full flex gap-4 justify-between items-center px-6 py-3 mb-9 bg-gray-200 rounded-lg">
+                                <div>
+                                    <p class="font-semibold" x-text="$t('homepage.server.status')"></p>
+                                    <p x-bind="serverStatusMessage" class="text-sm"></p>
+                                </div>
+                                <div class="flex gap-3 cursor-pointer" @click="apiPokeServer">
                                     <div class="flex flex-col justify-center items-center">
                                         <svg xmlns="http://www.w3.org/2000/svg" class="h-8" :class="{ 'fill-gray-400': !$store.app.appIsOnline, 'fill-blue-700': $store.app.appIsOnline }" viewBox="0 0 640 512"><!--!Font Awesome Free 6.7.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2025 Fonticons, Inc.--><path d="M54.2 202.9C123.2 136.7 216.8 96 320 96s196.8 40.7 265.8 106.9c12.8 12.2 33 11.8 45.2-.9s11.8-33-.9-45.2C549.7 79.5 440.4 32 320 32S90.3 79.5 9.8 156.7C-2.9 169-3.3 189.2 8.9 202s32.5 13.2 45.2 .9zM320 256c56.8 0 108.6 21.1 148.2 56c13.3 11.7 33.5 10.4 45.2-2.8s10.4-33.5-2.8-45.2C459.8 219.2 393 192 320 192s-139.8 27.2-190.5 72c-13.3 11.7-14.5 31.9-2.8 45.2s31.9 14.5 45.2 2.8c39.5-34.9 91.3-56 148.2-56zm64 160a64 64 0 1 0 -128 0 64 64 0 1 0 128 0z"/></svg>
                                     </div>
@@ -90,10 +94,7 @@
                                         <svg xmlns="http://www.w3.org/2000/svg" class="h-8" :class="{ 'fill-gray-400': !$store.api.apiServerIsReachable, 'fill-blue-700': $store.api.apiServerIsReachable }" viewBox="0 0 512 512"><!--!Font Awesome Free 6.7.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2025 Fonticons, Inc.--><path d="M64 32C28.7 32 0 60.7 0 96l0 64c0 35.3 28.7 64 64 64l384 0c35.3 0 64-28.7 64-64l0-64c0-35.3-28.7-64-64-64L64 32zm280 72a24 24 0 1 1 0 48 24 24 0 1 1 0-48zm48 24a24 24 0 1 1 48 0 24 24 0 1 1 -48 0zM64 288c-35.3 0-64 28.7-64 64l0 64c0 35.3 28.7 64 64 64l384 0c35.3 0 64-28.7 64-64l0-64c0-35.3-28.7-64-64-64L64 288zm280 72a24 24 0 1 1 0 48 24 24 0 1 1 0-48zm56 24a24 24 0 1 1 48 0 24 24 0 1 1 -48 0z"/></svg>
                                     </div>
                                 </div>
-                                <div>
-                                    <p class="font-semibold" x-text="$t('homepage.server.status')"></p>
-                                    <p x-bind="serverStatusMessage" class="text-sm"></p>
-                                </div>
+                                
                             </div>
                             <template x-if="!$store.app.appIsElectron">
                                 <div class="text-sm">
