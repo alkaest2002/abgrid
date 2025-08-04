@@ -22,17 +22,13 @@ class RequestProtectionMiddleware(BaseHTTPMiddleware):
     - Request timeout enforcement to prevent slow HTTP attacks
     - Concurrent request limiting for specific routes to prevent resource exhaustion
     - Separate concurrent limits for different endpoint types
-    - Selective application of limits based on URL path patterns
-    
-    The middleware can be configured to apply different protection levels to different
-    routes, allowing fine-grained control over resource protection.
     
     Args:
         app: The ASGI application instance
         request_timeout: Maximum time in seconds a request can take before timing out
                         (default: 60 seconds)
-        max_concurrent_requests_for_group: Maximum concurrent requests for /api/group endpoints
-        max_concurrent_requests_for_report: Maximum concurrent requests for /api/report endpoints
+        max_concurrent_requests_for_group: Maximum concurrent requests for /api/group endpoint
+        max_concurrent_requests_for_report: Maximum concurrent requests for /api/report endpoint
                                
     Raises:
         JSONResponse: Returns 429 status when concurrent request limit is exceeded
