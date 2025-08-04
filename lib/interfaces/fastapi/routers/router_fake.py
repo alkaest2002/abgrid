@@ -10,26 +10,31 @@ from fastapi.responses import JSONResponse
 from fastapi import status
 
 error_codes = {
+    "duplicate_query_parameter_key": status.HTTP_400_BAD_REQUEST,
     "failed_to_generate_report": status.HTTP_500_INTERNAL_SERVER_ERROR,
     "failed_to_generate_token": status.HTTP_500_INTERNAL_SERVER_ERROR,
     "failed_to_render_group_template": status.HTTP_500_INTERNAL_SERVER_ERROR,
     "group_template_not_found_for_language": status.HTTP_404_NOT_FOUND,
     "header_is_too_large": status.HTTP_413_REQUEST_ENTITY_TOO_LARGE,
     "invalid_content_length_header": status.HTTP_400_BAD_REQUEST,
+    "invalid_language_code": status.HTTP_400_BAD_REQUEST,
     "invalid_or_expired_jwt_token": status.HTTP_401_UNAUTHORIZED,
     "invalid_report_data": status.HTTP_400_BAD_REQUEST,
+    "invalid_with_sociogram_value": status.HTTP_400_BAD_REQUEST,
     "malformed_query_string": status.HTTP_400_BAD_REQUEST,
-    "query_parameter_key_too_large": status.HTTP_413_REQUEST_ENTITY_TOO_LARGE,
-    "query_parameter_value_too_large": status.HTTP_413_REQUEST_ENTITY_TOO_LARGE,
-    "query_string_too_large": status.HTTP_413_REQUEST_ENTITY_TOO_LARGE,
+    "missing_required_language_parameter": status.HTTP_400_BAD_REQUEST,
+    "not_authenticated": status.HTTP_401_UNAUTHORIZED,
+    "not_authorized": status.HTTP_403_FORBIDDEN,
+    "query_parameter_key_too_long": status.HTTP_400_BAD_REQUEST,
+    "query_parameter_value_too_long": status.HTTP_400_BAD_REQUEST,
+    "query_string_too_long": status.HTTP_400_BAD_REQUEST,
     "report_template_not_found_for_language": status.HTTP_404_NOT_FOUND,
     "request_body_too_large": status.HTTP_413_REQUEST_ENTITY_TOO_LARGE,
     "request_timeout": status.HTTP_408_REQUEST_TIMEOUT,
     "requests_exceeded_rate_limit": status.HTTP_429_TOO_MANY_REQUESTS,
     "too_many_concurrent_requests": status.HTTP_429_TOO_MANY_REQUESTS,
-    "too_many_query_parameters": status.HTTP_413_REQUEST_ENTITY_TOO_LARGE,
-    "not_authenticated": status.HTTP_401_UNAUTHORIZED,
-    "not_authorized": status.HTTP_403_FORBIDDEN
+    "too_many_query_parameters": status.HTTP_400_BAD_REQUEST,
+    "unknown_query_parameter_key": status.HTTP_400_BAD_REQUEST,
 }
 
 def get_router_fake() -> APIRouter:
