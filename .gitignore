@@ -12,8 +12,9 @@ ipython/data
 ipython/analysis
 ipython/*.xlsx
 .devServer/
-lib/interfaces/electron/thin/Electron.app
+lib/interfaces/electron/Electron.app
 lib/interfaces/electron/thin/app/dist
+lib/interfaces/electron/full/app/dist
 lib/interfaces/docker/abgrid-fastapi.tar
 todo.md
 jwt_token.yaml
