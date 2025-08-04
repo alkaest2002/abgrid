@@ -98,7 +98,7 @@ def validate_group_field(value: Any) -> List[Dict[str, Any]]:
     """
     Validate the group field.
     
-    The group field must be an integer between 1 and 50 inclusive.
+    The group field must be an integer.
     
     Args:
         value: The value to validate

@@ -5,7 +5,7 @@ The code is part of the AB-Grid project and is licensed under the MIT License.
 """
 import datetime
 import pandas as pd
-from typing import Any, Dict, Optional, TypedDict
+from typing import Any, Dict, List, Optional, TypedDict
 
 from lib.core import SYMBOLS
 from lib.core.core_schemas import ABGridGroupSchema, ABGridReportSchema
@@ -16,6 +16,7 @@ class RelevantNodesDict(TypedDict):
     """Dictionary structure for relevant nodes analysis results."""
     a: pd.DataFrame  # Positive relevance nodes DataFrame
     b: pd.DataFrame  # Negative relevance nodes DataFrame
+
 
 class IsolatedNodesDict(TypedDict):
     """Dictionary structure for isolated nodes by network type."""
@@ -34,7 +35,7 @@ class ReportDataDict(TypedDict):
     project_title: str  # Title of the AB-Grid project
     question_a: str  # Text of question A from the survey
     question_b: str  # Text of question B from the survey
-    group: int  # Group identifier (1-50)
+    group: int  # Group identifier
     members_per_group: int  # Number of participants in the group
     sna: SNADict  # Complete social network analysis results
     sociogram: Optional[SociogramDict]  # Sociogram analysis results (None if not requested)
@@ -42,11 +43,25 @@ class ReportDataDict(TypedDict):
     isolated_nodes_ab: IsolatedNodesDict  # Nodes with no connections in each network
 
 
+class GroupDataDict(TypedDict):
+    """
+    Type definition for group data structure returned by get_group_data().
+    
+    Contains basic group information extracted from ABGridGroupSchema with
+    processed member symbols for display and validation purposes.
+    """
+    project_title: str  # Title of the AB-Grid project
+    question_a: str  # Text of question A from the survey
+    question_b: str  # Text of question B from the survey
+    group: int  # Group identifier
+    members: List[str]  # List of member symbols (A, B, C, etc.) based on group size
+
+
 class CoreData:
     """Processes AB-Grid data for report generation."""
 
 
-    def get_group_data(self, validated_model: ABGridGroupSchema) -> Dict[str, Any]:
+    def get_group_data(self, validated_model: ABGridGroupSchema) -> GroupDataDict:
         """Extracts and processes group data from a validated ABGridGroupSchema model.
 
         Args:
@@ -63,7 +78,7 @@ class CoreData:
         return group_data
 
           
-    def get_report_data(self, validated_model: ABGridReportSchema, with_sociogram: bool = False) -> Dict[str, Any]:
+    def get_report_data(self, validated_model: ABGridReportSchema, with_sociogram: bool = False) -> ReportDataDict:
         """Generate comprehensive report data with SNA and optional sociogram analysis.
         
         Args:
@@ -71,7 +86,7 @@ class CoreData:
             with_sociogram: Whether to include sociogram analysis
             
         Returns:
-            Dictionary containing complete report data with analysis results
+            ReportDataDict containing complete report data with analysis results
             
         Notes:
             Combines SNA results with optional sociogram analysis and identifies
