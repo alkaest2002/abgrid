@@ -4,17 +4,16 @@ Author: Pierpaolo Calanna
 The code is part of the AB-Grid project and is licensed under the MIT License.
 """
 
-from itertools import product
 from fastapi import FastAPI, HTTPException, Request, status
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
-from starlette.middleware.cors import CORSMiddleware
 from lib.core.core_schemas import PydanticValidationException
 from lib.interfaces.fastapi.security.limiter import RateLimitException
 from lib.interfaces.fastapi.middlewares.body import BodySizeLimitMiddleware
 from lib.interfaces.fastapi.middlewares.query import QueryParamLimitMiddleware
 from lib.interfaces.fastapi.middlewares.request import RequestProtectionMiddleware
 from lib.interfaces.fastapi.middlewares.header import HeaderSizeLimitMiddleware
+from lib.interfaces.fastapi.middlewares.coors import add_cors_middleware  # Import the CORS function
 from lib.interfaces.fastapi.routers.router_fake import get_router_fake
 from lib.interfaces.fastapi.routers.router_api import get_router_api
 from lib.utils import to_snake_case
@@ -22,30 +21,12 @@ from lib.utils import to_snake_case
 # Initialization of FastAPI application
 app = FastAPI()
 
-# List of ports
-fancy_ports = [ "53472", "53247", "53274", "53427", "53724", "53742" ]
-
-# Define domains that should be allowed to access your server
-domains = [ "https://localhost", "https://127.0.0.1", "http://localhost", "http://127.0.0.1" ]
-
-# Define origines that should be allowed to access your server
-origins = [f"{domain}:{port}" for domain, port in product(domains, fancy_ports)]
-
-# Add render app origin
-origins.append("https://abgrid-webapp.onrender.com")
-
 #######################################################################################
 # Middlewares
 #######################################################################################
 
 # 1. CORS
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=origins,  # Restrict to the specific local port your app will use
-    allow_credentials=True,  # Allow credentials for authentication
-    allow_methods=["HEAD", "GET", "POST", "PUT", "DELETE", "OPTIONS"],  # Methods your app might use
-    allow_headers=["Authorization", "Content-Type"],  # Common headers used in requests
-)
+add_cors_middleware(app)
 
 # 2. Request limits protection
 app.add_middleware(RequestProtectionMiddleware)
