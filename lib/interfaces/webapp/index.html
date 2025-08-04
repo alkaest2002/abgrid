@@ -59,15 +59,15 @@
                                             x-show="!$store.api.apiTokenIsStructurallyValid"
                                             class="flex flex-col"
                                             >
-                                            <span>Licenza AB-Grid</span>
-                                            <span class="text-xs text-gray-500">Copia e incolla qui</span>
+                                            <span x-text="$t('homepage.apikey.license')"></span>
+                                            <span x-text="$t('homepage.apikey.copyPast')" class="text-xs text-gray-500"></span>
                                         </p>
                                         <p 
                                             class="flex flex-col"
                                             x-show="$store.api.apiTokenIsStructurallyValid">
-                                            <span>Licenza AB-Grid</span>
+                                            <span x-text="$t('homepage.apikey.license')"></span>
                                             <span class="text-xs text-gray-500">
-                                                <span>fino al</span>
+                                                <span x-text="$t('homepage.apikey.expiresAt')"></span>
                                                 <span x-text="$store.api.apiTokenExpirationDate"></span>
                                             </span>
                                         </p>
