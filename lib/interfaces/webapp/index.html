@@ -56,7 +56,7 @@
                                     class="shrink-0 block text-sm font-medium text-gray-900">
                                         
                                         <p 
-                                            x-show="!$store.api.apiTokenIsValid"
+                                            x-show="!$store.api.apiTokenIsStructurallyValid"
                                             class="flex flex-col"
                                             >
                                             <span>Licenza AB-Grid</span>
@@ -64,7 +64,7 @@
                                         </p>
                                         <p 
                                             class="flex flex-col"
-                                            x-show="$store.api.apiTokenIsValid">
+                                            x-show="$store.api.apiTokenIsStructurallyValid">
                                             <span>Licenza AB-Grid</span>
                                             <span class="text-xs text-gray-500">
                                                 <span>fino al</span>
