@@ -144,7 +144,7 @@ def to_json(report_data: ReportDataDict) -> Dict[str, Any]:
     json_data["question_a"] = report_data["question_a"]
     json_data["question_b"] = report_data["question_b"]
     json_data["group"] = report_data["group"]
-    json_data["members_per_group"] = report_data["members_per_group"]
+    json_data["group_size"] = report_data["group_size"]
     
     # Handle SNA data (complex nested structure)
     json_data["sna"] = _convert_value(report_data["sna"])

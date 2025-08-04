@@ -36,7 +36,7 @@ class ReportDataDict(TypedDict):
     question_a: str  # Text of question A from the survey
     question_b: str  # Text of question B from the survey
     group: int  # Group identifier
-    members_per_group: int  # Number of participants in the group
+    group_size: int  # Number of participants in the group
     sna: SNADict  # Complete social network analysis results
     sociogram: Optional[SociogramDict]  # Sociogram analysis results (None if not requested)
     relevant_nodes_ab: RelevantNodesDict  # Most/least relevant nodes for positive/negative outcomes
@@ -111,7 +111,7 @@ class CoreData:
             "question_a": validated_model.question_a,
             "question_b": validated_model.question_b,
             "group": validated_model.group,
-            "members_per_group": len(validated_model.choices_a),
+            "group_size": len(validated_model.choices_a),
             "sna": sna_results,
         }
         

@@ -101,7 +101,7 @@ class TerminalMain:
         next_group = groups_already_created + 1
         
         # Get members_per_group from args
-        members_per_group = self.args.members_per_group
+        group_size = self.args.members_per_group
         
         # Template for the language-specific group template
         template_path = f"/{self.language}/group.yaml"
@@ -115,7 +115,7 @@ class TerminalMain:
             "question_a": "",
             "question_b": "",
             "group": next_group, 
-            "members": SYMBOLS[:members_per_group] 
+            "members": SYMBOLS[:group_size] 
         }
         
         # Render the template with group-specific data
@@ -178,7 +178,7 @@ class TerminalMain:
             rendered_report = self.renderer.render(f"./{self.language}/report.html", report_data)
 
             # Generate PDF report
-            self._generate_pdf("report", rendered_report, group_file.stem, self.reports_path)
+            self._generate_pdf(rendered_report, group_file.stem, self.reports_path)
 
             print(f"Report for {group_file.stem} successfully generated.")
             
@@ -230,11 +230,10 @@ class TerminalMain:
         except yaml.YAMLError:
             raise ValueError(f"{yaml_file_path.name} could not be parsed.")
         
-    def _generate_pdf(self, template_type: str, rendered_template: str, suffix: str, output_directory: Path) -> None:
+    def _generate_pdf(self, rendered_template: str, suffix: str, output_directory: Path) -> None:
         """Convert HTML template to PDF and save to output directory.
         
         Args:
-            template_type: Type of document for filename prefix
             rendered_template: HTML content as string
             suffix: Suffix used in filename
             output_directory: Directory to save the PDF file
@@ -245,7 +244,7 @@ class TerminalMain:
         """
         
         # Build file path
-        file_path = output_directory / f"{template_type}_{suffix}.pdf"
+        file_path = output_directory / f"report_{suffix}.pdf"
         
         # Convert HTML to PDF and save to disk
         try:
