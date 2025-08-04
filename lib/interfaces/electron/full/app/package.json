@@ -1,0 +1,16 @@
+{
+  "name": "abgrid-app",
+  "version": "1.0.0",
+  "description": "AB-Grid electron app",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "dev": "electron . --inspect=5858"
+  },
+  "keywords": ["electron", "abgrid"],
+  "author": "Pierpaolo Calanna",
+  "license": "MIT",
+  "devDependencies": {
+    "electron": "^latest"
+  }
+}
