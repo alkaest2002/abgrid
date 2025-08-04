@@ -4,7 +4,7 @@ Author: Pierpaolo Calanna
 The code is part of the AB-Grid project and is licensed under the MIT License.
 """
 
-from typing import Callable, Dict, List
+from typing import Callable, Dict, List, Set
 from starlette.middleware.base import BaseHTTPMiddleware
 from fastapi import Request, status
 from fastapi.responses import JSONResponse
@@ -14,126 +14,161 @@ from urllib.parse import parse_qs
 
 class QueryParamLimitMiddleware(BaseHTTPMiddleware):
     """
-    Middleware to limit query parameter size and count to prevent query-based attacks.
+    Aggressive middleware for closed API server query parameter validation.
     
-    This middleware provides comprehensive protection against query parameter abuse by
-    enforcing limits on:
-    - Total query string length
-    - Number of query parameters
-    - Individual parameter key and value sizes
+    This middleware provides strict validation for a closed API that only accepts:
+    - language: Always required (e.g., 'it' for Italian)
+    - with_sociogram: Optional boolean ('true' or 'false')
     
-    This helps prevent denial of service attacks through oversized or excessive
-    query parameters that could cause memory exhaustion or processing delays.
+    Any deviation from these exact requirements results in immediate rejection.
+    Empty query strings are allowed to pass through without validation.
+    
+    Early rejection criteria:
+    - Unusually long query strings (>200 chars)
+    - Unknown query parameters
+    - Missing required 'language' parameter (when params are present)
+    - Invalid boolean values for 'with_sociogram'
+    - Malformed query strings
+    - Excessive parameter counts
     
     Args:
         app: The ASGI application instance
-        max_query_string_length: Maximum allowed total query string length in bytes 
-                               (default: ~8KB)
-        max_query_params_count: Maximum number of query parameters allowed 
-                              (default: 100)
-        max_query_param_length: Maximum length for individual parameter keys and 
-                              values in bytes (default: 1KB)
                               
     Raises:
-        JSONResponse: Returns 413 status for various size/count limit violations
-        JSONResponse: Returns 400 status for malformed query strings
+        JSONResponse: Returns 400 status for various validation failures
         
     Note:
-        The middleware counts parameters with multiple values (e.g., ?tags=a&tags=b)
-        as separate parameters for the total count limit.
+        This middleware is designed for maximum efficiency and security in a
+        controlled API environment where parameter specifications are strict.
+        Empty query strings bypass all validation.
     """
     
-    def __init__(
-        self, 
-        app,
-        max_query_string_length: int = 8 * 1024,  # Fixed typo: was 1014
-        max_query_params_count: int = 100, 
-        max_query_param_length: int = 1 * 1024
-    ) -> None:
-        """
-        Initialize the middleware with query parameter limit configuration.
-        
-        Args:
-            app: The ASGI application instance
-            max_query_string_length: Maximum allowed total query string length 
-                                   in bytes (default: 8KB)
-            max_query_params_count: Maximum number of query parameters allowed
-                                  (default: 100)
-            max_query_param_length: Maximum length for individual parameter keys
-                                  and values in bytes (default: 1KB)
-        """
+    # Valid parameter names for this closed API
+    ALLOWED_PARAMS: Set[str] = {"language", "with_sociogram"}
+    VALID_SOCIOGRAM_VALUES: Set[str] = {"true", "false"}
+    
+    # Aggressive limits for closed API
+    MAX_QUERY_STRING_LENGTH: int = 200  # Very conservative for closed API
+    MAX_PARAM_KEY_LENGTH: int = 20      # "with_sociogram" is 14 chars
+    MAX_PARAM_VALUE_LENGTH: int = 10    # Language codes are typically 2-5 chars
+    MAX_PARAMS_COUNT: int = 2           # Only 2 possible parameters
+    
+    def __init__(self, app) -> None:
+        """Initialize the aggressive query parameter validation middleware."""
         super().__init__(app)
-        self.max_query_string_length = max_query_string_length
-        self.max_query_params_count = max_query_params_count
-        self.max_query_param_length = max_query_param_length
 
     async def dispatch(self, request: Request, call_next: Callable[[Request], Response]) -> Response:
         """
-        Process incoming request and enforce query parameter limits.
+        Aggressively validate query parameters with early rejection.
         
-        Validates the request's query string against all configured limits:
-        1. Total query string length
-        2. Number of query parameters
-        3. Individual parameter key and value sizes
+        Empty query strings are allowed to pass through without any validation.
+        
+        Performs validation in order of computational efficiency:
+        1. Empty query string check (bypass all validation)
+        2. Query string length check (fastest)
+        3. Basic parsing validation  
+        4. Parameter count validation
+        5. Parameter name/value validation
+        6. Business logic validation (required params, valid values)
         
         Args:
-            request: The incoming HTTP request with query parameters to validate
-            call_next: The next middleware or route handler in the chain
+            request: The incoming HTTP request
+            call_next: The next middleware or route handler
             
         Returns:
-            Response: Either an error response for limit violations or the result
-                     from the next handler in the chain
-                     
-        Raises:
-            JSONResponse: Various 413 responses for different limit violations:
-                - "query_string_too_large": Total query string exceeds length limit
-                - "too_many_query_parameters": Parameter count exceeds limit
-                - "query_parameter_key_too_large": Parameter key exceeds length limit
-                - "query_parameter_value_too_large": Parameter value exceeds length limit
-            JSONResponse: 400 response for malformed query strings that cannot be parsed
+            Response: Error response for violations or result from next handler
         """
         query_string = str(request.url.query)
         
-        # Check total query string length
-        if len(query_string) > self.max_query_string_length:
+        # Allow empty query strings to pass through without validation
+        if not query_string:
+            response = await call_next(request)
+            return response
+        
+        # Early rejection: Check total query string length first (most efficient)
+        if len(query_string) > self.MAX_QUERY_STRING_LENGTH:
             return JSONResponse(
-                status_code=status.HTTP_413_REQUEST_ENTITY_TOO_LARGE,
-                content={"detail": "query_string_too_large"}
+                status_code=status.HTTP_400_BAD_REQUEST,
+                content={"detail": "query_string_too_long"}
+            )
+            
+        # Parse and validate query parameters
+        try:
+            query_params: Dict[str, List[str]] = parse_qs(
+                query_string, 
+                keep_blank_values=False,  # Reject empty values
+                strict_parsing=True       # Strict parsing mode
+            )
+        except (ValueError, UnicodeDecodeError):
+            return JSONResponse(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                content={"detail": "malformed_query_string"}
             )
         
-        # Parse and validate parameters
-        if query_string:
-            try:
-                query_params: Dict[str, List[str]] = parse_qs(query_string, keep_blank_values=True)
-                
-                # Count total parameters (including multiple values for same key)
-                total_params = sum(len(values) for values in query_params.values())
-                if total_params > self.max_query_params_count:
-                    return JSONResponse(
-                        status_code=status.HTTP_413_REQUEST_ENTITY_TOO_LARGE,
-                        content={"detail": "too_many_query_parameters"}
-                    )
-                
-                # Check individual parameter and value sizes
-                for key, values in query_params.items():
-                    if len(key) > self.max_query_param_length:
-                        return JSONResponse(
-                            status_code=status.HTTP_413_REQUEST_ENTITY_TOO_LARGE,
-                            content={"detail": "query_parameter_key_too_large"}
-                        )
-                    
-                    for value in values:
-                        if len(value) > self.max_query_param_length:
-                            return JSONResponse(
-                                status_code=status.HTTP_413_REQUEST_ENTITY_TOO_LARGE,
-                                content={"detail": "query_parameter_value_too_large"}
-                            )
-                            
-            except ValueError:
+        # Early rejection: Check parameter count
+        if len(query_params) > self.MAX_PARAMS_COUNT:
+            return JSONResponse(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                content={"detail": "too_many_parameters"}
+            )
+        
+        # Validate each parameter
+        for param_key, param_values in query_params.items():
+            
+            # Check parameter key length
+            if len(param_key) > self.MAX_PARAM_KEY_LENGTH:
                 return JSONResponse(
                     status_code=status.HTTP_400_BAD_REQUEST,
-                    content={"detail": "malformed_query_string"}
+                    content={"detail": "query_parameter_key_too_long"}
                 )
+            
+            # Check if parameter is allowed
+            if param_key not in self.ALLOWED_PARAMS:
+                return JSONResponse(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    content={"detail": "unknown_query_parameter_key"}
+                )
+            
+            # Check for duplicate parameters (same key multiple times)
+            if len(param_values) > 1:
+                return JSONResponse(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    content={"detail": "duplicate_query_parameter_key"}
+                )
+            
+            # Validate parameter value
+            param_value = param_values[0]  # We know there's exactly one value
+            
+            # Check parameter value length
+            if len(param_value) > self.MAX_PARAM_VALUE_LENGTH:
+                return JSONResponse(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    content={"detail": "query_parameter_value_too_long"}
+                )
+            
+            # Validate specific parameter business logic
+            if param_key == "with_sociogram":
+                if param_value not in self.VALID_SOCIOGRAM_VALUES:
+                    return JSONResponse(
+                        status_code=status.HTTP_400_BAD_REQUEST,
+                        content={"detail": "invalid_with_sociogram_value"}
+                    )
+            
+            elif param_key == "language":
+                # Basic language code validation (2-5 alphanumeric chars)
+                if not (2 <= len(param_value) <= 5 and param_value.isalnum()):
+                    return JSONResponse(
+                        status_code=status.HTTP_400_BAD_REQUEST,
+                        content={"detail": "invalid_language_code"}
+                    )
         
+        # Check required parameters (only when query parameters are present)
+        if "language" not in query_params:
+            return JSONResponse(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                content={"detail": "missing_required_language_parameter"}
+            )
+        
+        # All validations passed, proceed to next handler
         response = await call_next(request)
         return response
