@@ -7,7 +7,7 @@ The code is part of the AB-Grid project and is licensed under the MIT License.
 import os
 import re
 import argparse
-from weasyprint import HTML
+from weasyprint import HTML # type: ignore
 import yaml
 import json
 
@@ -173,9 +173,12 @@ class TerminalMain:
             
             # Get report data
             report_data = self.core_data.get_report_data(validated_data, with_sociogram)
-            
+
             # Render report html template
-            rendered_report = self.renderer.render(f"./{self.language}/report.html", report_data)
+            rendered_report = self.renderer.render(
+                f"./{self.language}/report.html",
+                dict(report_data)
+            )
 
             # Generate PDF report
             self._generate_pdf(rendered_report, group_file.stem, self.reports_path)
@@ -195,7 +198,6 @@ class TerminalMain:
         with open(json_export_path, "w", encoding='utf-8') as fout:
             json.dump(all_groups_data, fout, indent=4, ensure_ascii=False)
 
-    @logger_decorator
     def _get_group_filepaths(self) -> List[Path]:
         """Get list of group file paths matching the pattern."""
         if not self.project_folderpath.exists():
@@ -203,7 +205,6 @@ class TerminalMain:
         return [path for path in self.project_folderpath.glob("*_g*.*") 
                 if re.search(r"_g\d+\.\w+$", path.name)]
         
-    @logger_decorator
     def _load_yaml_data(self, yaml_file_path: Path) -> Union[Dict[str, Any], None]:
         """
         Load and parse YAML data from file with error handling.
