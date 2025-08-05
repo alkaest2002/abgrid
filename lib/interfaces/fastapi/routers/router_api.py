@@ -83,7 +83,7 @@ def get_router_api() -> APIRouter:
 
             # Render the group template
             template_path = f"/{language}/group.yaml"
-            rendered_group = _abgrid_renderer.render(template_path, group_data)
+            rendered_group = _abgrid_renderer.render(template_path, dict(group_data))
             
             # Generate safe filename
             safe_title = "".join(c for c in model.project_title if c.isalnum() or c in (' ', '-', '_')).rstrip()
@@ -161,7 +161,7 @@ def get_router_api() -> APIRouter:
             
             # Render report template
             template_path = f"./{language}/report.html"
-            rendered_report = _abgrid_renderer.render(template_path, report_data)
+            rendered_report = _abgrid_renderer.render(template_path, dict(report_data))
 
             return JSONResponse(
                 status_code=status.HTTP_200_OK,
