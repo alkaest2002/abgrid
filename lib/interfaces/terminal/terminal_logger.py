@@ -6,25 +6,32 @@ The code is part of the AB-Grid project and is licensed under the MIT License.
 
 from functools import wraps
 from pathlib import Path
-from typing import Any, Callable, Optional, Set, TypeVar, Union, cast
+from typing import Any, Callable, Optional, Set, TypeVar, Union, overload
 from lib.core.core_schemas import PydanticValidationException
 from lib.core.core_templates import TemplateRenderError
 
-# Type variable for preserving function signatures
+# Type variable for any callable
 F = TypeVar('F', bound=Callable[..., Any])
 
-def logger_decorator(func: Optional[F] = None) -> Union[Callable[[F], F], F]:
+
+@overload
+def logger_decorator() -> Callable[[F], F]:
+    """Overload for @logger_decorator() usage."""
+    ...
+
+
+@overload
+def logger_decorator(func: F) -> F:
+    """Overload for @logger_decorator usage."""
+    ...
+
+
+def logger_decorator(func: Optional[F] = None) -> Union[F, Callable[[F], F]]:
     """
     Create a logging decorator that wraps functions with error handling.
     
     This decorator provides comprehensive error handling for function execution,
     catching common exceptions and formatting them for user-friendly display.
-    
-    Args:
-        func: Optional function to decorate (when used without parentheses)
-    
-    Returns:
-        Decorator function or the decorated function itself
     
     Usage:
         @logger_decorator
@@ -40,18 +47,12 @@ def logger_decorator(func: Optional[F] = None) -> Union[Callable[[F], F], F]:
         - Uses print for consistent message formatting
         - Handles different exception types with appropriate formatting
     """
-    def decorator(function: F) -> F:
-        """
-        Decorator function that wraps the target function with error handling.
+    
+    def _decorator(function: F) -> F:
+        """Internal decorator function that applies the error handling wrapper."""
         
-        Args:
-            function: The function to be decorated
-        
-        Returns:
-            Wrapper function with error handling
-        """
         @wraps(function)
-        def wrapper(*args: Any, **kwargs: Any) -> Any:
+        def _wrapper(*args: Any, **kwargs: Any) -> Any:
             """
             Wrapper function that executes the decorated function with error handling.
             
@@ -60,39 +61,53 @@ def logger_decorator(func: Optional[F] = None) -> Union[Callable[[F], F], F]:
             """
             try:
                 return function(*args, **kwargs)
+            
             except ValueError as error:
                 print(str(error))
                 return None
+            
             except AttributeError as error:
                 print(str(error))
                 return None
+            
             except TypeError as error:
                 print(str(error))
                 return None
+            
             except FileNotFoundError as error:
                 print(str(error))
                 return None
+            
             except OSError as error:
                 print(str(error))
                 return None
+            
             except RuntimeError as error:
                 print(str(error))
+                return None
+            
             except TemplateRenderError as error:
                 print(str(error))
                 return None
+            
             except PydanticValidationException as error:
                 print(extract_pydantic_errors(error))
                 return None
+            
             except Exception as error:
                 print(extract_traceback_info(error))
                 return None
-        return cast(F, wrapper)
+        
+        # Cast the wrapper to the original function type
+        return _wrapper  # type: ignore[return-value]
     
-    # Handle both @logger_decorator and @logger_decorator() usage
+    # Handle both @logger_decorator and @logger_decorator() usage patterns
     if func is None:
-        return decorator
+        # Called as @logger_decorator()
+        return _decorator
     else:
-        return decorator(func)
+        # Called as @logger_decorator
+        return _decorator(func)
 
 
 def extract_traceback_info(error: Exception, exclude_files: Optional[Set[str]] = None) -> str:
