@@ -5,7 +5,7 @@ The code is part of the AB-Grid project and is licensed under the MIT License.
 """
 
 from typing import Optional, Any, Dict
-from fastapi import Depends
+from fastapi import Depends, HTTPException , status
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 
 from .jwt import AnonymousJWT
@@ -19,7 +19,7 @@ class Auth:
 
     async def verify_token(
         self,
-        token: Optional[HTTPAuthorizationCredentials] = Depends(HTTPBearer(auto_error=True))
+        token: Optional[HTTPAuthorizationCredentials] = Depends(HTTPBearer(auto_error=False))
     ) -> Dict[str, Any]:
         """"
         Verify JWT token.
@@ -33,4 +33,9 @@ class Auth:
         Raises:
             HTTPException: If the token is invalid or expired (HTTP 401).
         """
+        if token is None:
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="required_jwt_token"
+            )
         return self.jwt_handler.verify_token(token.credentials)
