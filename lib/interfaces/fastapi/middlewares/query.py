@@ -4,7 +4,7 @@ Author: Pierpaolo Calanna
 The code is part of the AB-Grid project and is licensed under the MIT License.
 """
 
-from typing import Callable, Dict, List, Set
+from typing import Awaitable, Callable, Dict, List, Set
 from starlette.middleware.base import BaseHTTPMiddleware
 from fastapi import Request, status
 from fastapi.responses import JSONResponse
@@ -57,7 +57,7 @@ class QueryParamLimitMiddleware(BaseHTTPMiddleware):
         """Initialize the aggressive query parameter validation middleware."""
         super().__init__(app)
 
-    async def dispatch(self, request: Request, call_next: Callable[[Request], Response]) -> Response:
+    async def dispatch(self, request: Request, call_next: Callable[[Request], 'Awaitable[Response]']) -> Response:
         """
         Aggressively validate query parameters with early rejection.
         

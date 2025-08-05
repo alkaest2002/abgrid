@@ -4,6 +4,7 @@ Author: Pierpaolo Calanna
 The code is part of the AB-Grid project and is licensed under the MIT License.
 """
 
+from collections.abc import Awaitable
 from typing import Callable
 from starlette.middleware.base import BaseHTTPMiddleware
 from fastapi import Request, status
@@ -44,7 +45,7 @@ class HeaderSizeLimitMiddleware(BaseHTTPMiddleware):
         super().__init__(app)
         self.max_header_size = max_header_size
 
-    async def dispatch(self, request: Request, call_next: Callable[[Request], Response]) -> Response:
+    async def dispatch(self, request: Request, call_next: Callable[[Request], 'Awaitable[Response]']) -> Response:
         """
         Process incoming request and enforce header size limits.
         
