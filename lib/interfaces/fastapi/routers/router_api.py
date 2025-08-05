@@ -10,7 +10,7 @@ from fastapi.responses import JSONResponse
 
 from ..security.auth import Auth
 from ..security.limiter import SimpleRateLimiter
-from lib.core.core_data import CoreData
+from lib.core.core_data import CoreData, GroupDataDict, ReportDataDict
 from lib.core.core_schemas import ABGridGroupSchema, ABGridReportSchema
 from lib.core.core_templates import CoreRenderer
 from lib.utils import to_json
@@ -79,7 +79,7 @@ def get_router_api() -> APIRouter:
             Limited to 1 request per 5 seconds per client
         """
         try:
-            group_data = _abgrid_data.get_group_data(model)
+            group_data: GroupDataDict = _abgrid_data.get_group_data(model)
 
             # Render the group template
             template_path = f"/{language}/group.yaml"
@@ -157,7 +157,7 @@ def get_router_api() -> APIRouter:
         """
         try:
             # Generate report data
-            report_data = _abgrid_data.get_report_data(model, with_sociogram)
+            report_data: ReportDataDict = _abgrid_data.get_report_data(model, with_sociogram)
             
             # Render report template
             template_path = f"./{language}/report.html"
