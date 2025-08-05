@@ -71,10 +71,16 @@ class CoreData:
             A dictionary containing the group data with associated member symbols
             from the validated ABGridGroupSchema model.
         """
-        group_data = validated_model.model_dump()
-
-        group_data["members"] = SYMBOLS[:group_data["members"]]
-
+        raw_data = validated_model.model_dump()
+    
+        group_data: GroupDataDict = {
+            "project_title": raw_data["project_title"],
+            "question_a": raw_data["question_a"], 
+            "question_b": raw_data["question_b"],
+            "group": raw_data["group"],
+            "members": SYMBOLS[:raw_data["members"]]
+        }
+        
         return group_data
 
           
