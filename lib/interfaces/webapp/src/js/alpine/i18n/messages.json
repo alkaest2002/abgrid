@@ -70,6 +70,7 @@
             "up": "server raggiungibile"
         },
         "toast": {
+            "download_aborted": "download annullato",
             "download_failure": "download non riuscito",
             "error": "si è verificato un errore",
             "file_exceeds_size_limit": "la dimensione del file è eccessiva",
