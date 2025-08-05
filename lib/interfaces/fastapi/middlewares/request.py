@@ -68,7 +68,7 @@ class RequestProtectionMiddleware(BaseHTTPMiddleware):
         self.active_report_requests: int = 0
         self._lock: asyncio.Lock = asyncio.Lock()
 
-    async def dispatch(self, request: Request, call_next: Callable[[Request], 'Awaitable[Response]']) -> Response:
+    async def dispatch(self, request: Request, call_next: Callable[[Request], Awaitable[Response]]) -> Response:
         """
         Process incoming request with timeout and concurrent request protection.
         
