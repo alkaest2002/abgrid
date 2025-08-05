@@ -42,10 +42,10 @@ class Settings(BaseSettings):
     """
     
     auth_secret: str = Field(
-        ..., 
+        ...,  # Indicates this is a required field
         env="AUTH_SECRET",
         description="Secret key for authentication token generation and validation"
-    )
+    ) # type: ignore
     
     max_concurrent_requests_for_group: int = Field(
         default=15, 
@@ -53,15 +53,15 @@ class Settings(BaseSettings):
         description="Maximum number of concurrent requests allowed for /api/group endpoint",
         ge=1,  # Must allow at least 1 request
         le=1000  # Reasonable upper limit
-    )
+    ) # type: ignore
 
     max_concurrent_requests_for_report: int = Field(
         default=5, 
-        env="MAX_CONCURRENT_REQUESTS",
+        env="MAX_CONCURRENT_REQUESTS_FOR_REPORT",
         description="Maximum number of concurrent requests allowed for /api/report endpoint",
         ge=1,  # Must allow at least 1 request
         le=1000  # Reasonable upper limit
-    )
+    ) # type: ignore
 
     class Config:
         """
