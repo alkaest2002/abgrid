@@ -359,7 +359,7 @@ class CoreSociogram:
                     threshold_value = ranks_series.quantile(1 - threshold)
                     
                     # Filter nodes with ranks at or above threshold (worst performers)
-                    relevant_ranks = ranks_series[ranks_series.ge(threshold_value)]
+                    relevant_ranks: pd.Series = ranks_series[ranks_series.ge(threshold_value)]
 
                     # Set ascending so that higher ranks are considered more important
                     ascending = False
