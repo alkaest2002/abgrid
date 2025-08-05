@@ -3,13 +3,12 @@ Author: Pierpaolo Calanna
 
 The code is part of the AB-Grid project and is licensed under the MIT License.
 """
-from pathlib import Path
 from typing import Any, Dict
 from jinja2 import Environment, FileSystemLoader, StrictUndefined, FileSystemBytecodeCache, select_autoescape
 from jinja2.exceptions import TemplateNotFound, TemplateSyntaxError, TemplateRuntimeError, UndefinedError
 
 # Define cache directory
-TEMPLATE_CACHE_DIR = Path("./lib/core/templates/.cache")
+TEMPLATE_CACHE_DIR = "./lib/core/templates/.cache"
 
 # Initialize Jinja2 environment with a file system loader for templates
 try:
@@ -35,11 +34,11 @@ class TemplateRenderError(Exception):
 class CoreRenderer:
     """Renders jinja templates."""
 
-    def render(self, template_path: Path, template_data: Dict[str, Any]) -> str:
+    def render(self, template_path_str: str, template_data: Dict[str, Any]) -> str:
         """Render Jinja2 template with provided template_data.
         
         Args:
-            template_path: Path to the Jinja2 template file
+            template_path_str: Path (as string) to the Jinja2 template file
             template_data: Template context data
             
         Returns:
@@ -51,15 +50,12 @@ class CoreRenderer:
             ValueError: If input parameters are invalid
         """
         # Ensure template_path
-        if not template_path:
+        if not template_path_str:
             raise ValueError("Template path cannot be empty or None.")
         
         # Ensure template_data
         if not isinstance(template_data, dict):
             raise ValueError("Template data must be a dictionary.")
-        
-        # Convert Path object to string for Jinja2
-        template_path_str = str(template_path)
         
         try:
             # Try to load template
