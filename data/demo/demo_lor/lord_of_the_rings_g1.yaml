@@ -3,34 +3,34 @@ question_a: Who would you choose as your quest companion?
 question_b: Who wouldn't you choose as your quest companion?
 group: 1
 choices_a:
-  - A: B, E, I
-  - B: A, C, D
-  - C: A, D, I
-  - D: C, I    
-  - E: A, F, I
-  - F: E, I, J
-  - G: H, I    
-  - H: G, I    
-  - I: A, J, M 
-  - J: E, F, I 
-  - K:         
-  - L:         
-  - M: H       
+- A: B, E, I
+- B: A, C, D
+- C: A, D, I
+- D: C, I
+- E: A, F, I
+- F: E, I, J
+- G: H, I
+- H: G, I
+- I: A, J, M 
+- J: E, F, I 
+- K: 
+- L: 
+- M: H 
 choices_b:
-  - A: K, M 
-  - B: K, M 
-  - C: K, M 
-  - D: G, K 
-  - E: K, M 
-  - F: G, K 
-  - G: F, K 
-  - H: A, E 
-  - I: C, D 
-  - J: K, M 
-  - K: A, B 
-  - L:      
-  - M: A, I 
-  
+- A: K, M 
+- B: K, M 
+- C: K, M 
+- D: G, K 
+- E: K, M 
+- F: G, K 
+- G: F, K 
+- H: A, E 
+- I: C, D 
+- J: K, M 
+- K: A, B 
+- L:
+- M: A, I 
+
 # Legend:
 # A: Frodo Baggins
 # B: Samwise Gamgee
