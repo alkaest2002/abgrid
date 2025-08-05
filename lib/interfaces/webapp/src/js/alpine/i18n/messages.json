@@ -70,15 +70,16 @@
             "up": "server raggiungibile"
         },
         "toast": {
-            "online": "ripristinata connessione internet",
-            "offline": "connessione internet assente",
-            "success": "operazione conclusa con successo",
+            "download_failure": "download non riuscito",
             "error": "si è verificato un errore",
             "file_exceeds_size_limit": "la dimensione del file è eccessiva",
             "file_invalid_type": "tipo di file non supportato",
             "file_invalid_yaml": "il file yaml non è corretto",
             "file_load_failure": "caricamento del file yaml non riuscito",
-            "pdf_generate_failure": "generazione del pdf non riuscita"
+            "offline": "connessione internet assente",
+            "online": "ripristinata connessione internet",
+            "pdf_generate_failure": "generazione del pdf non riuscita",
+            "success": "operazione conclusa con successo"
         }
     }
 }
