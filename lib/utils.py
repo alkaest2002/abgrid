@@ -67,10 +67,12 @@ def to_json(report_data: ReportDataDict) -> Dict[str, Any]:
         
         # Handle DataFrames with duplicate indices by resetting index
         if df.index.has_duplicates:
-            return df.reset_index(drop=False, names="index").to_dict("index")
+            df = df.reset_index(drop=False, names="index")
+            return {str(k): v for k, v in df.to_dict("index").items()}
         else:
             # Convert to dict with index as keys for better readability
-            return df.to_dict("index")
+            # Convert index keys to strings for JSON compatibility
+            return {str(k): v for k, v in df.to_dict("index").items()}
     
     def _convert_pandas_series(series: pd.Series) -> Union[Dict[str, Any], List[Any]]:
         """Convert pandas Series to JSON-serializable format."""
@@ -99,7 +101,10 @@ def to_json(report_data: ReportDataDict) -> Dict[str, Any]:
     
     def _convert_numpy_array(arr: np.ndarray) -> List[Any]:
         """Convert numpy array to JSON-serializable list."""
-        return _convert_pandas_series(pd.Series(arr))
+        result = _convert_pandas_series(pd.Series(arr))
+        if isinstance(result, dict):
+            return list(result.values())
+        return result
     
     def _convert_datetime(dt: datetime.datetime) -> str:
         """Convert datetime to ISO format string."""
@@ -121,8 +126,11 @@ def to_json(report_data: ReportDataDict) -> Dict[str, Any]:
             return _convert_networkx(value)
         elif isinstance(value, np.ndarray):
             return _convert_numpy_array(value)
-        elif isinstance(value, (datetime.date, datetime.datetime)):
+        elif isinstance(value, datetime.datetime):
             return _convert_datetime(value)
+        elif isinstance(value, datetime.date):
+            # Convert date to datetime before formatting
+            return _convert_datetime(datetime.datetime.combine(value, datetime.time()))
         elif isinstance(value, dict):
             return {k: _convert_value(v) for k, v in value.items()}
         elif isinstance(value, (list, tuple)):
