@@ -225,10 +225,10 @@ class ABGridReportSchema(BaseModel):
         project_title: The project title (1-80 characters)
         question_a: First question text (1-300 characters)
         question_b: Second question text (1-300 characters)
-        group: Group identifier (1-50)
-        choices_a: List of choice dictionaries for question A
-        choices_b: List of choice dictionaries for question B
-        
+        group: Group identifier (must be an integer)
+        choices_a: List of choice dictionaries for question A (must be non-empty)
+        choices_b: List of choice dictionaries for question B (must be non-empty)
+
     Notes:
         - Keys in choices_a and choices_b must be identical
         - All values must reference valid keys from either choices_a or choices_b
@@ -348,7 +348,7 @@ class ABGridReportSchema(BaseModel):
             Set of extracted keys from the choices
         """
         choices = data.get(field_name)
-        extracted_keys = set()
+        extracted_keys: Set[str] = set()
         
         # Type validation
         if not isinstance(choices, list):
