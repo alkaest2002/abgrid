@@ -57,7 +57,7 @@ class QueryParamLimitMiddleware(BaseHTTPMiddleware):
         """Initialize the aggressive query parameter validation middleware."""
         super().__init__(app)
 
-    async def dispatch(self, request: Request, call_next: Callable[[Request], 'Awaitable[Response]']) -> Response:
+    async def dispatch(self, request: Request, call_next: Callable[[Request], Awaitable[Response]]) -> Response:
         """
         Aggressively validate query parameters with early rejection.
         

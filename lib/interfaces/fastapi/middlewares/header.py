@@ -45,7 +45,7 @@ class HeaderSizeLimitMiddleware(BaseHTTPMiddleware):
         super().__init__(app)
         self.max_header_size = max_header_size
 
-    async def dispatch(self, request: Request, call_next: Callable[[Request], 'Awaitable[Response]']) -> Response:
+    async def dispatch(self, request: Request, call_next: Callable[[Request], Awaitable[Response]]) -> Response:
         """
         Process incoming request and enforce header size limits.
         
