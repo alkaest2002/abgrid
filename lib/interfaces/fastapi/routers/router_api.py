@@ -10,8 +10,8 @@ from fastapi.responses import JSONResponse
 
 from ..security.auth import Auth
 from ..security.limiter import SimpleRateLimiter
-from lib.core.core_data import CoreData, GroupDataDict, ReportDataDict
-from lib.core.core_schemas import ABGridGroupSchema, ABGridReportSchema
+from lib.core.core_data import CoreData
+from lib.core.core_schemas import ABGridGroupSchemaIn, ABGridReportSchemaIn
 from lib.core.core_templates import CoreRenderer
 from lib.utils import to_json
 
@@ -47,7 +47,7 @@ def get_router_api() -> APIRouter:
     @SimpleRateLimiter(limit=1, window_seconds=5)
     async def create_group(
         request: Request,
-        model: ABGridGroupSchema, 
+        model: ABGridGroupSchemaIn, 
         language: str = Query(..., description="Language of the group template"),
         user_data: Dict[str, Any] = Depends(_auth.verify_token)
     ) -> JSONResponse:
@@ -79,11 +79,11 @@ def get_router_api() -> APIRouter:
             Limited to 1 request per 5 seconds per client
         """
         try:
-            group_data: GroupDataDict = _abgrid_data.get_group_data(model)
+            group_data = _abgrid_data.get_group_data(model)
 
             # Render the group template
             template_path = f"/{language}/group.yaml"
-            rendered_group = _abgrid_renderer.render(template_path, dict(group_data))
+            rendered_group = _abgrid_renderer.render(template_path, group_data)
             
             # Generate safe filename
             safe_title = "".join(c for c in model.project_title if c.isalnum() or c in (' ', '-', '_')).rstrip()
@@ -118,7 +118,7 @@ def get_router_api() -> APIRouter:
     @SimpleRateLimiter(limit=1, window_seconds=15)
     async def get_report(
         request: Request,
-        model: ABGridReportSchema, 
+        model: ABGridReportSchemaIn, 
         language: str = Query(..., description="Language of the report"),
         with_sociogram: bool = Query(..., description="Include sociogram visualization"),
         user_data: Dict[str, Any] = Depends(_auth.verify_token)
@@ -157,11 +157,11 @@ def get_router_api() -> APIRouter:
         """
         try:
             # Generate report data
-            report_data: ReportDataDict = _abgrid_data.get_report_data(model, with_sociogram)
+            report_data = _abgrid_data.get_report_data(model, with_sociogram)
             
             # Render report template
             template_path = f"./{language}/report.html"
-            rendered_report = _abgrid_renderer.render(template_path, dict(report_data))
+            rendered_report = _abgrid_renderer.render(template_path, report_data)
 
             return JSONResponse(
                 status_code=status.HTTP_200_OK,
