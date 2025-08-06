@@ -5,10 +5,10 @@ The code is part of the AB-Grid project and is licensed under the MIT License.
 """
 
 import re
-from typing import Dict, List, Any, Optional, Set
 import pandas as pd
-from pydantic import BaseModel, model_validator
 
+from typing import Dict, List, Any, Optional, Set
+from pydantic import BaseModel, model_validator
 from lib.core import SYMBOLS
 from lib.core.core_sna import SNADict
 from lib.core.core_sociogram import SociogramDict
