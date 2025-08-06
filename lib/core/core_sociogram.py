@@ -10,7 +10,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import networkx as nx
 
-from typing import Any, Literal, Dict, Optional, TypedDict, Tuple, List, cast
+from typing import Any, Literal, Dict, TypedDict, Tuple, List, cast
 from matplotlib.figure import Figure
 
 from lib.core import CM_TO_INCHES
