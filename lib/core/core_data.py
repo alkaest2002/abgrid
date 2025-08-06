@@ -45,7 +45,7 @@ class CoreData:
         return validated_group_data_out.model_dump()
 
           
-    def get_report_data(self, validated_report_data_in: ABGridReportSchemaIn, with_sociogram: bool = False) -> Dict:
+    def get_report_data(self, validated_report_data_in: ABGridReportSchemaIn, with_sociogram: bool = False) -> Dict[str, Any]:
         """Generate comprehensive report data with SNA and optional sociogram analysis.
         
         Args:
