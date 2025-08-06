@@ -72,19 +72,15 @@ class CoreData:
             from the validated ABGridGroupSchema model.
         """
         # Extract raw data from the validated model
-        raw_data = validated_model.model_dump()
-    
-        # Prepare group data dictionary with processed member symbols
-        # Use SYMBOLS to map the number of members to their corresponding symbols
-        group_data: GroupDataDict = {
-            "project_title": raw_data["project_title"],
-            "question_a": raw_data["question_a"], 
-            "question_b": raw_data["question_b"],
-            "group": raw_data["group"],
-            "members": SYMBOLS[:raw_data["members"]]
-        }
+        group_data = validated_model.model_dump()
         
-        return group_data
+        # Add members list
+        group_data["members"] = SYMBOLS[:group_data["members"]]
+
+        # Cast group_data to GroupDataDict type for type safety
+        casted_group_data: GroupDataDict = cast(GroupDataDict, group_data)
+    
+        return casted_group_data
 
           
     def get_report_data(self, validated_model: ABGridReportSchema, with_sociogram: bool = False) -> ReportDataDict:
