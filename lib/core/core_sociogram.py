@@ -50,7 +50,7 @@ class CoreSociogram:
         Sets up internal data structures for storing social network analysis data
         and computed sociogram results.
         """
-        # Initialize social network analysis data storage
+        # Initialize social network analysis dictionary
         self.sna: Dict[str, Any] = dict()
 
         # Initialize sociogram results dictionary
