@@ -13,7 +13,7 @@ from lib.core import SYMBOLS
 from lib.core.core_sna import SNADict
 from lib.core.core_sociogram import SociogramDict
 
-forbidden_chars = re.compile(r'[^A-Za-zÀ-ÖØ-öø-ÿĀ-ſƀ-ɏḀ-ỿЀ-ӿͰ-Ͽ\d\s\'\.,\-\?\!]')
+FORBIDDEN_CHARS = re.compile(r'[^A-Za-zÀ-ÖØ-öø-ÿĀ-ſƀ-ɏḀ-ỿЀ-ӿͰ-Ͽ\d\s\'\.,\-\?\!]')
 
 class PydanticValidationException(Exception):
     """
@@ -40,7 +40,7 @@ class PydanticValidationException(Exception):
         super().__init__("\n".join(error_messages))
 
 
-class RelevantNodesSchema(BaseModel):
+class ABGridRelevantNodesSchema(BaseModel):
     """Pydantic model for relevant nodes analysis results."""
     a: pd.DataFrame  # Positive relevance nodes DataFrame
     b: pd.DataFrame  # Negative relevance nodes DataFrame
@@ -50,7 +50,7 @@ class RelevantNodesSchema(BaseModel):
     }
 
 
-class IsolatedNodesSchema(BaseModel):
+class ABGridIsolatedNodesSchema(BaseModel):
     """Pydantic model for isolated nodes by network type."""
     a: pd.Index  # Isolated nodes from network A
     b: pd.Index  # Isolated nodes from network B
@@ -93,8 +93,8 @@ class ABGridReportSchemaOut(BaseModel):
     group_size: int  # Number of participants in the group
     sna: SNADict  # Complete social network analysis results (SNADict)
     sociogram: Optional[SociogramDict]  # Sociogram analysis results (None if not requested)
-    relevant_nodes_ab: RelevantNodesSchema  # Most/least relevant nodes for positive/negative outcomes
-    isolated_nodes_ab: IsolatedNodesSchema  # Nodes with no connections in each network
+    relevant_nodes_ab: ABGridRelevantNodesSchema  # Most/least relevant nodes for positive/negative outcomes
+    isolated_nodes_ab: ABGridIsolatedNodesSchema  # Nodes with no connections in each network
     
     model_config = {
         "arbitrary_types_allowed": True,  # Allow complex types like DataFrames
@@ -640,7 +640,7 @@ def _validate_text_field(field_name: str, value: Any, min_len: int, max_len: int
         })
 
     # Check for forbidden characters
-    if forbidden_chars.findall(value):
+    if FORBIDDEN_CHARS.findall(value):
         errors.append({
             "location": field_name,
             "value_to_blame": value,

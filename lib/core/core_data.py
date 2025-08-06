@@ -13,8 +13,8 @@ from lib.core.core_schemas import (
     ABGridReportSchemaIn,
     ABGridGroupSchemaOut,
     ABGridReportSchemaOut,
-    RelevantNodesSchema,
-    IsolatedNodesSchema
+    ABGridRelevantNodesSchema,
+    ABGridIsolatedNodesSchema
 )
 from lib.core.core_sna import CoreSna, SNADict
 from lib.core.core_sociogram import CoreSociogram, SociogramDict
@@ -72,7 +72,7 @@ class CoreData:
         sociogram_results: SociogramDict = abgrid_sociogram.get(dict(sna_results))
        
         # Prepare isolated nodes
-        isolated_nodes_ab = IsolatedNodesSchema(
+        isolated_nodes_ab = ABGridIsolatedNodesSchema(
             a=sna_results["micro_stats_a"].loc[sna_results["micro_stats_a"]["nd"].eq(3)].index,
             b=sna_results["micro_stats_b"].loc[sna_results["micro_stats_b"]["nd"].eq(3)].index
         )
@@ -133,7 +133,7 @@ class CoreData:
             relevant_nodes_ab[valence_type] = nodes
         
         # Create RelevantNodesSchema
-        relevant_nodes_model = RelevantNodesSchema(**relevant_nodes_ab)
+        relevant_nodes_model = ABGridRelevantNodesSchema(**relevant_nodes_ab)
         
         # Prepare the comprehensive report data structure
         report_data = {
