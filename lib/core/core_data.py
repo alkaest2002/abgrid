@@ -33,14 +33,14 @@ class CoreData:
             Dict containing the group data with associated member symbols
             from the validated ABGridGroupSchemaIn model.
         """
-        # Extract raw data from the validated model
-        group_data = validated_group_data_in.model_dump()
+        # Extract group data from the validated model
+        group_data: Dict[str, Any] = validated_group_data_in.model_dump()
         
         # Add members list
         group_data["members"] = SYMBOLS[:group_data["members"]]
 
         # Validate and convert group data to ABGridGroupSchemaOut
-        validated_group_data_out = ABGridGroupSchemaOut(**group_data)
+        validated_group_data_out: ABGridGroupSchemaOut = ABGridGroupSchemaOut(**group_data)
         
         return validated_group_data_out.model_dump()
 
@@ -150,6 +150,6 @@ class CoreData:
         }
         
         # Validate and convert report data to ABGridReportSchemaOut
-        validated_report_data_out = ABGridReportSchemaOut(**report_data)
+        validated_report_data_out: ABGridReportSchemaOut = ABGridReportSchemaOut(**report_data)
         
         return validated_report_data_out.model_dump()
