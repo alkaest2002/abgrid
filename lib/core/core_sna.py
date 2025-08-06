@@ -767,7 +767,7 @@ class CoreSna:
                     isolate: str = next(isolate_iter)
                     
                     # Create direction vector from coordinates centroid to current hull vertex
-                    direction: np.ndarray = vertex - coordinates_centroid
+                    direction: np.ndarray = (vertex - coordinates_centroid).to_numpy()
                     direction /= np.linalg.norm(direction)
                     
                     # Set distance multiplier (increases with each round)
@@ -778,7 +778,7 @@ class CoreSna:
                     
                     # Compute final position
                     candidate_pos: np.ndarray = vertex + direction * distance_multiplier + random_offset
-                    
+
                     # Update isolated node position
                     loc[isolate] = candidate_pos
                 
