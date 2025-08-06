@@ -191,7 +191,6 @@ class CoreData:
         report_data["relevant_nodes_ab"] = relevant_nodes_ab
 
         # Cast report_data to ReportDataDict type for type safety
-        # This ensures that the returned data structure matches the expected type definition
         casted_report_data: ReportDataDict = cast(ReportDataDict, report_data)
         
         return casted_report_data
