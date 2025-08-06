@@ -81,7 +81,6 @@ class CoreSociogram:
         """
         # Store social network analysis data
         self.sna = sna
-        
         # Compute all sociogram components in sequence
         self.sociogram["macro_stats"] = self._compute_macro_stats()
         self.sociogram["micro_stats"] = self._compute_micro_stats()
@@ -612,7 +611,7 @@ class CoreSociogram:
             
             # Apply jitter with bounds checking to keep points in valid range
             theta_jittered: pd.Series = theta + theta_jitter
-            r_jittered: pd.Series = r.sum(r_jitter.tolist()).clip(0, 1.1)
+            r_jittered: pd.Series = (r + r_jitter).clip(0, 1.1)
             
             # Plot data points as scatter plot with consistent styling
             ax.scatter(theta_jittered, r_jittered, c="#bbb", s=20)
