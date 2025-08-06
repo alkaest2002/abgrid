@@ -103,7 +103,6 @@ class CoreData:
         """
         # Initialize SNA analysis class
         abgrid_sna: CoreSna = CoreSna()
-
         # Initialize sociogram analysis class
         abgrid_sociogram: CoreSociogram = CoreSociogram()
         
