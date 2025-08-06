@@ -132,7 +132,7 @@ class ABGridGroupSchema(BaseModel):
     choice configuration.
     
     Attributes:
-        project_title: The project title (1-80 characters)
+        project_title: The project title (1-100 characters)
         question_a: First question text (1-300 characters)
         question_b: Second question text (1-300 characters)
         group: Group identifier (must be an integer)
@@ -223,7 +223,7 @@ class ABGridReportSchema(BaseModel):
     references are valid.
     
     Attributes:
-        project_title: The project title (1-80 characters)
+        project_title: The project title (1-100 characters)
         question_a: First question text (1-300 characters)
         question_b: Second question text (1-300 characters)
         group: Group identifier (must be an integer)
@@ -275,7 +275,7 @@ class ABGridReportSchema(BaseModel):
         errors = []
         
         # Validate basic fields
-        errors.extend(validate_text_field("project_title", data.get("project_title"), 1, 80))
+        errors.extend(validate_text_field("project_title", data.get("project_title"), 1, 100))
         errors.extend(validate_text_field("question_a", data.get("question_a"), 1, 300))
         errors.extend(validate_text_field("question_b", data.get("question_b"), 1, 300))
         errors.extend(validate_group_field(data.get("group")))
