@@ -226,7 +226,7 @@ class BodySizeLimitMiddleware(BaseHTTPMiddleware):
                     self.current_size += len(body)
 
                     if self.current_size > self.max_size:
-                        raise ValueError("Request body too large")
+                        raise ValueError("request_body_too_large")
 
                 return message
 
