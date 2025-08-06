@@ -10,7 +10,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import networkx as nx
 
-from typing import Any, Literal, Dict, Optional, TypedDict, Tuple, List
+from typing import Any, Literal, Dict, Optional, TypedDict, Tuple, List, cast
 from matplotlib.figure import Figure
 
 from lib.core import CM_TO_INCHES
@@ -18,13 +18,13 @@ from lib.core.core_utils import compute_descriptives, figure_to_base64_svg
 
 class SociogramDict(TypedDict):
     """Dictionary structure for storing sociogram analysis results."""
-    macro_stats: Optional[pd.Series]
-    micro_stats: Optional[pd.DataFrame]
-    descriptives: Optional[pd.DataFrame]
-    rankings: Optional[Dict[str, pd.Series]]
-    graph_ii: Optional[str]
-    graph_ai: Optional[str]
-    relevant_nodes_ab: Optional[Dict[str, pd.DataFrame]]
+    macro_stats: pd.Series
+    micro_stats: pd.DataFrame
+    descriptives: pd.DataFrame
+    rankings: Dict[str, pd.Series]
+    graph_ii: str
+    graph_ai: str
+    relevant_nodes_ab: Dict[str, pd.DataFrame]
 
 class CoreSociogram:
     """
@@ -51,18 +51,10 @@ class CoreSociogram:
         and computed sociogram results.
         """
         # Initialize social network analysis data storage
-        self.sna: Optional[Dict[str, Any]] = None
+        self.sna: Dict[str, Any] = dict()
 
         # Initialize sociogram results dictionary
-        self.sociogram: SociogramDict = {
-            "macro_stats": None,
-            "micro_stats": None,
-            "descriptives": None,
-            "rankings": None,
-            "graph_ii": None,
-            "graph_ai": None,
-            "relevant_nodes_ab": None
-        }
+        self.sociogram: Dict[str, Any] = dict()
 
     def get(self, sna: Dict[str, Any]) -> SociogramDict:
         """
@@ -89,6 +81,7 @@ class CoreSociogram:
         """
         # Store social network analysis data
         self.sna = sna
+        
         # Compute all sociogram components in sequence
         self.sociogram["macro_stats"] = self._compute_macro_stats()
         self.sociogram["micro_stats"] = self._compute_micro_stats()
@@ -98,7 +91,7 @@ class CoreSociogram:
         self.sociogram["graph_ai"] = self._create_graph("ai")
         self.sociogram["graph_ii"] = self._create_graph("ii")
 
-        return self.sociogram
+        return cast(SociogramDict, self.sociogram)
 
     def _compute_macro_stats(self) -> pd.Series:
         """
@@ -186,12 +179,12 @@ class CoreSociogram:
         adjacency_b: pd.DataFrame = self.sna["adjacency_b"]
         
         # Initialize DataFrame with basic degree measures
-        sociogram_micro_stats: pd.DataFrame = pd.concat([
-            pd.Series(dict(network_a.in_degree()), name="rp"), 
-            pd.Series(dict(network_b.in_degree()), name="rr"),
-            pd.Series(dict(network_a.out_degree()), name="gp"), 
-            pd.Series(dict(network_b.out_degree()), name="gr"), 
-        ], axis=1)
+        sociogram_micro_stats = pd.DataFrame({
+            "rp": dict(network_a.in_degree()), # type: ignore
+            "rr": dict(network_b.in_degree()), # type: ignore
+            "gp": dict(network_a.out_degree()), # type: ignore
+            "gr": dict(network_b.out_degree()), # type: ignore
+        })
 
         # Compute mutual connections using matrix multiplication
         sociogram_micro_stats["mp"] = (adjacency_a * adjacency_a.T).sum(axis=1).astype(int)
@@ -340,29 +333,34 @@ class CoreSociogram:
             # Loop through metrics and associated ranks
             for metric_rank_name, ranks_series in rankings.items():
 
+                # Init vars
+                relevant_ranks: pd.Series
+                threshold_value: float
+                ascending: bool
+
                 # Clean metric name
                 metric_name: str = re.sub("_rank", "", metric_rank_name)
 
                 # Select strategy: a = best performers, b = worst performers
                 if valence_type == "a":
                     # Get threshold for top performers (lower quantile = better ranks)
-                    threshold_value: float = ranks_series.quantile(threshold)
+                    threshold_value = ranks_series.quantile(threshold)
                     
                     # Filter nodes with ranks at or below threshold (best performers)
-                    relevant_ranks: pd.Series = ranks_series[ranks_series.le(threshold_value)]
+                    relevant_ranks = ranks_series[ranks_series.le(threshold_value)]
 
                     # Set ascending so that smaller ranks are considered more important
-                    ascending: bool = True
+                    ascending = True
 
                 else:
                     # Get threshold for bottom performers (higher quantile = worse ranks)
-                    threshold_value: float = ranks_series.quantile(1 - threshold)
+                    threshold_value = ranks_series.quantile(1 - threshold)
                     
                     # Filter nodes with ranks at or above threshold (worst performers)
-                    relevant_ranks: pd.Series = ranks_series[ranks_series.ge(threshold_value)]
+                    relevant_ranks = ranks_series[ranks_series.ge(threshold_value)]
 
                     # Set ascending so that higher ranks are considered more important
-                    ascending: bool = False
+                    ascending = False
                 
                 # Compute relevant nodes data
                 relevant_nodes: pd.DataFrame = (
@@ -614,7 +612,7 @@ class CoreSociogram:
             
             # Apply jitter with bounds checking to keep points in valid range
             theta_jittered: pd.Series = theta + theta_jitter
-            r_jittered: np.ndarray = np.clip(r + r_jitter, 0, 1.1)
+            r_jittered: pd.Series = r.sum(r_jitter.tolist()).clip(0, 1.1)
             
             # Plot data points as scatter plot with consistent styling
             ax.scatter(theta_jittered, r_jittered, c="#bbb", s=20)
