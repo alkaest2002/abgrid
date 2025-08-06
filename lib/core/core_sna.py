@@ -498,33 +498,36 @@ class CoreSna:
             adj_df = self.sna["adjacency_b"]
             adj_ref_df = self.sna["adjacency_a"]
 
+        # Define a function for filtering edges
+        fn = lambda x: x == 1
+
         # Compute type I edges, non-reciprocal
         # i.e. same network: A -> B and not B -> A
-        type_i_df: pd.DataFrame = adj_df - (adj_df * adj_df.T)
-        type_i: pd.Index = type_i_df.stack().loc[lambda x: x == 1].index  # type: ignore
+        type_i_df = adj_df - (adj_df * adj_df.T)
+        type_i = type_i_df.stack().loc[fn].index
 
         # Compute type II edges, reciprocal
         # i.e. same network: A -> B and B -> A
-        type_ii_df: pd.DataFrame = pd.DataFrame(np.triu(adj_df) * np.tril(adj_df).T, index=adj_df.index, columns=adj_df.columns)
-        type_ii: pd.Index = type_ii_df.stack().loc[lambda x: x == 1].index  # type: ignore
+        type_ii_df = pd.DataFrame(np.triu(adj_df) * np.tril(adj_df).T, index=adj_df.index, columns=adj_df.columns)
+        type_ii = type_ii_df.stack().loc[fn].index
 
         # Compute type V edges, fully symmetrical
         # i.e. A -> B, B -> A in network and A -> B, B -> A in reference network
-        type_v_df: pd.DataFrame = type_ii_df * pd.DataFrame(np.triu(adj_ref_df) * np.tril(adj_ref_df).T, index=adj_df.index, columns=adj_df.columns)
-        type_v: pd.Index = type_v_df.stack().loc[lambda x: x == 1].index  # type: ignore
+        type_v_df = type_ii_df * pd.DataFrame(np.triu(adj_ref_df) * np.tril(adj_ref_df).T, index=adj_df.index, columns=adj_df.columns)
+        type_v = type_v_df.stack().loc[fn].index
         
         # Compute type III edges, half symmetrical
         # i.e. A -> B in network and A -> B in reference network
-        type_iii_df: pd.DataFrame = pd.DataFrame(np.triu(adj_df) * np.triu(adj_ref_df), index=adj_df.index, columns=adj_df.columns)
-        type_iii: pd.Index = type_iii_df.sub(type_v_df).stack().loc[lambda x: x == 1].index  # type: ignore
+        type_iii_df = pd.DataFrame(np.triu(adj_df) * np.triu(adj_ref_df), index=adj_df.index, columns=adj_df.columns)
+        type_iii = type_iii_df.sub(type_v_df).stack().loc[fn].index
         
         # Compute type IV edges, half reversed symmetrical
         # i.e. A -> B in network and B -> A in reference network
-        type_iv_df: pd.DataFrame = (
+        type_iv_df = (
             pd.DataFrame(np.triu(adj_df) * np.tril(adj_ref_df).T, index=adj_df.index, columns=adj_df.columns)
             + pd.DataFrame(np.tril(adj_df) * np.triu(adj_ref_df).T, index=adj_df.index, columns=adj_df.columns)
         )
-        type_iv: pd.Index = type_iv_df.sub(type_v_df).stack().loc[lambda x: x == 1].index  # type: ignore
+        type_iv = type_iv_df.sub(type_v_df).stack().loc[fn].index
         
         return {
             "type_i": type_i,
