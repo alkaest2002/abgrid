@@ -97,11 +97,11 @@ class TerminalMain:
             - Uses Jinja2 templates for HTML rendering within YAML structure
         """
         # Calculate next group number
-        groups_already_created = len(self.groups_filepaths)
-        next_group = groups_already_created + 1
+        groups_already_created: int = len(self.groups_filepaths)
+        next_group: int = groups_already_created + 1
         
         # Get members_per_group from args
-        group_size = self.args.members_per_group
+        group_size: int = self.args.members_per_group
         
         # Template for the language-specific group template
         template_path = f"/{self.language}/group.yaml"
@@ -166,13 +166,13 @@ class TerminalMain:
             print(f"Generating report for {group_file.stem}. Please, wait...")
             
             # Load current group data
-            group_data = self._load_yaml_data(group_file)
+            group_data: Dict[str, Any] = self._load_yaml_data(group_file)
             
             # Validate current group data
-            validated_data = ABGridReportSchemaIn.model_validate(group_data)
+            validated_data: ABGridReportSchemaIn = ABGridReportSchemaIn.model_validate(group_data)
             
             # Get report data
-            report_data = self.core_data.get_report_data(validated_data, with_sociogram)
+            report_data: Dict[str, Any] = self.core_data.get_report_data(validated_data, with_sociogram)
 
             # Render report html template
             rendered_report = self.renderer.render(
@@ -205,7 +205,7 @@ class TerminalMain:
         return [path for path in self.project_folderpath.glob("*_g*.*") 
                 if re.search(r"_g\d+\.\w+$", path.name)]
         
-    def _load_yaml_data(self, yaml_file_path: Path) -> Union[Dict[str, Any], None]:
+    def _load_yaml_data(self, yaml_file_path: Path) -> Dict[str, Any]:
         """
         Load and parse YAML data from file with error handling.
         
