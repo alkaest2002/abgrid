@@ -14,8 +14,6 @@ import json
 
 from typing import Any, Dict, List, Union
 
-from lib.core.core_data import ReportDataDict
-
 def check_python_version():
     """Check if Python version meets minimum requirements."""
     required_version = (3, 10)
@@ -35,7 +33,7 @@ def check_python_version():
         print("=" * 60)
         sys.exit(1)
 
-def to_json(report_data: ReportDataDict) -> Dict[str, Any]:
+def to_json(report_data: Dict[str, Any]) -> Dict[str, Any]:
     """
     Convert ReportDataDict to a JSON-serializable format.
     
