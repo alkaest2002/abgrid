@@ -179,8 +179,8 @@ class CoreSociogram:
         
         # Initialize DataFrame with basic degree measures
         sociogram_micro_stats = pd.DataFrame({
-            "rp": dict(network_a.in_degree()), # type: ignore
-            "rr": dict(network_b.in_degree()), # type: ignore
+            "rp": dict(network_a.in_degree()),  # type: ignore
+            "rr": dict(network_b.in_degree()),  # type: ignore
             "gp": dict(network_a.out_degree()), # type: ignore
             "gr": dict(network_b.out_degree()), # type: ignore
         })

@@ -7,12 +7,12 @@ The code is part of the AB-Grid project and is licensed under the MIT License.
 import os
 import re
 import argparse
-from weasyprint import HTML # type: ignore
 import yaml
 import json
 
 from pathlib import Path
 from typing import Dict, Any, List, Union
+from weasyprint import HTML # type: ignore
 from lib.utils import to_json
 from lib.core import SYMBOLS
 from lib.core.core_schemas import ABGridReportSchema
