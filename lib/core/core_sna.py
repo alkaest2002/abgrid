@@ -10,7 +10,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import networkx as nx
 
-from typing import Literal, List, Dict, Optional, Tuple, TypedDict, Set
+from typing import Literal, List, Dict, Optional, Tuple, TypedDict, Set, Any, cast
 from functools import reduce
 from scipy.spatial import ConvexHull
 
@@ -19,32 +19,32 @@ from lib.core.core_utils import compute_descriptives, figure_to_base64_svg
 
 class SNADict(TypedDict):
     """Type definition for the SNA dictionary containing network analysis results."""
-    nodes_a: Optional[List[str]]
-    nodes_b: Optional[List[str]]
-    edges_a: Optional[List[Tuple[str, str]]]
-    edges_b: Optional[List[Tuple[str, str]]]
-    adjacency_a: Optional[pd.DataFrame]
-    adjacency_b: Optional[pd.DataFrame]
-    network_a: Optional[nx.DiGraph]
-    network_b: Optional[nx.DiGraph]
-    loc_a: Optional[Dict[str, np.ndarray]]
-    loc_b: Optional[Dict[str, np.ndarray]]
-    macro_stats_a: Optional[pd.Series]
-    macro_stats_b: Optional[pd.Series]
-    micro_stats_a: Optional[pd.DataFrame]
-    micro_stats_b: Optional[pd.DataFrame]
-    descriptives_a: Optional[pd.DataFrame]
-    descriptives_b: Optional[pd.DataFrame]
-    rankings_a: Optional[Dict[str, pd.Series]]
-    rankings_b: Optional[Dict[str, pd.Series]]
-    edges_types_a: Optional[Dict[str, pd.Index]]
-    edges_types_b: Optional[Dict[str, pd.Index]]
-    components_a: Optional[Dict[str, pd.Series]]
-    components_b: Optional[Dict[str, pd.Series]]
-    graph_a: Optional[str]
-    graph_b: Optional[str]
-    rankings_ab: Optional[Dict[str, pd.DataFrame]]
-    relevant_nodes_ab: Optional[Dict[str, pd.DataFrame]]
+    nodes_a: List[str]
+    nodes_b: List[str]
+    edges_a: List[Tuple[str, str]]
+    edges_b: List[Tuple[str, str]]
+    adjacency_a: pd.DataFrame
+    adjacency_b: pd.DataFrame
+    network_a: nx.DiGraph
+    network_b: nx.DiGraph
+    loc_a: Dict[str, np.ndarray]
+    loc_b: Dict[str, np.ndarray]
+    macro_stats_a: pd.Series
+    macro_stats_b: pd.Series
+    micro_stats_a: pd.DataFrame
+    micro_stats_b: pd.DataFrame
+    descriptives_a: pd.DataFrame
+    descriptives_b: pd.DataFrame
+    rankings_a: Dict[str, pd.Series]
+    rankings_b: Dict[str, pd.Series]
+    edges_types_a: Dict[str, pd.Index]
+    edges_types_b: Dict[str, pd.Index]
+    components_a: Dict[str, pd.Series]
+    components_b: Dict[str, pd.Series]
+    graph_a: str
+    graph_b: str
+    rankings_ab: Dict[str, pd.DataFrame]
+    relevant_nodes_ab: Dict[str, pd.DataFrame]
 
 class CoreSna:
     """
@@ -68,34 +68,7 @@ class CoreSna:
         """
         
         # Initialize SNA dict with all possible keys
-        self.sna: SNADict = {
-            "nodes_a": None,
-            "nodes_b": None,
-            "edges_a": None,
-            "edges_b": None,
-            "edges_types_a": None,
-            "edges_types_b": None,
-            "adjacency_a": None,
-            "adjacency_b": None,
-            "network_a": None,
-            "network_b": None,
-            "loc_a": None,
-            "loc_b": None,
-            "macro_stats_a": None,
-            "macro_stats_b": None,
-            "micro_stats_a": None,
-            "micro_stats_b": None,
-            "descriptives_a": None,
-            "descriptives_b": None,
-            "rankings_a": None,
-            "rankings_b": None,
-            "components_a": None,
-            "components_b": None,
-            "graph_a": None,
-            "graph_b": None,
-            "rankings_ab": None,
-            "relevant_nodes_ab": None
-        }
+        self.sna: Dict[str, Any] = dict()
 
     def get(self, 
             packed_edges_a: List[Dict[str, Optional[str]]], 
@@ -118,19 +91,27 @@ class CoreSna:
             adjacency matrices, statistics, rankings, components, and visualization data 
             for both networks.
         """
+
+        # Set network data
+        networks_edges: list[tuple[Literal["a", "b"], Any]] = [
+            ("a", packed_edges_a), 
+            ("b", packed_edges_b)
+        ]
         
         # Store network A and B nodes and edges
-        for network_type, packed_edges in [("a", packed_edges_a), ("b", packed_edges_b)]:
+        for network_type, packed_edges in networks_edges:
             self.sna[f"nodes_{network_type}"] = self._unpack_network_nodes(packed_edges)
             self.sna[f"edges_{network_type}"] = self._unpack_network_edges(packed_edges)
             self.sna[f"network_{network_type}"] = nx.DiGraph(self.sna[f"edges_{network_type}"])
 
         # Add isolated nodes to networks A and B, and 
         # store nodes layout locations
-        for network_type, network, nodes in [
+        network_data: list[tuple[Literal["a", "b"], Any, Any]] = [
             ("a", self.sna["network_a"], self.sna["nodes_a"]), 
             ("b", self.sna["network_b"], self.sna["nodes_b"])
-        ]:  
+        ]
+
+        for network_type, network, nodes in network_data:  
             # Add isolated nodes to current network
             isolated_nodes: Set[str] = set(list(network)).symmetric_difference(set(nodes))
             network.add_nodes_from(isolated_nodes)
@@ -163,7 +144,7 @@ class CoreSna:
         # Store relevant nodes analysis
         self.sna["relevant_nodes_ab"] = self._compute_relevant_nodes_ab()
 
-        return self.sna
+        return cast(SNADict, self.sna)
     
     def _compute_macro_stats(self, network_type: Literal["a", "b"]) -> pd.Series:
         """
@@ -390,10 +371,10 @@ class CoreSna:
         # Combine them into side-by-side DataFrames
         rankings_ab: Dict[str, pd.DataFrame] = {}
         for k in rankings_a.keys():
-            series_a: pd.Series = rankings_a[k].copy() # Make a copy
-            series_a.name = series_a.name + "_a" # Rename to include network identifier
-            series_b: pd.Series = rankings_b[k].copy()  # Make a copy
-            series_b.name = series_b.name + "_b" # Rename to include network identifier
+            series_a = rankings_a[k].copy()
+            series_b = rankings_b[k].copy()
+            series_a.name = str(series_a.name) + "_a"
+            series_b.name = str(series_b.name) + "_b"
             rankings_ab[k] = pd.concat([series_a, series_b], axis=1) 
         
         return rankings_ab
@@ -520,22 +501,22 @@ class CoreSna:
         # Compute type I edges, non-reciprocal
         # i.e. same network: A -> B and not B -> A
         type_i_df: pd.DataFrame = adj_df - (adj_df * adj_df.T)
-        type_i: pd.Index = type_i_df.stack().loc[lambda x: x == 1].index
+        type_i: pd.Index = type_i_df.stack().loc[lambda x: x == 1].index  # type: ignore
 
         # Compute type II edges, reciprocal
         # i.e. same network: A -> B and B -> A
         type_ii_df: pd.DataFrame = pd.DataFrame(np.triu(adj_df) * np.tril(adj_df).T, index=adj_df.index, columns=adj_df.columns)
-        type_ii: pd.Index = type_ii_df.stack().loc[lambda x: x == 1].index
+        type_ii: pd.Index = type_ii_df.stack().loc[lambda x: x == 1].index  # type: ignore
 
         # Compute type V edges, fully symmetrical
         # i.e. A -> B, B -> A in network and A -> B, B -> A in reference network
         type_v_df: pd.DataFrame = type_ii_df * pd.DataFrame(np.triu(adj_ref_df) * np.tril(adj_ref_df).T, index=adj_df.index, columns=adj_df.columns)
-        type_v: pd.Index = type_v_df.stack().loc[lambda x: x == 1].index
+        type_v: pd.Index = type_v_df.stack().loc[lambda x: x == 1].index  # type: ignore
         
         # Compute type III edges, half symmetrical
         # i.e. A -> B in network and A -> B in reference network
         type_iii_df: pd.DataFrame = pd.DataFrame(np.triu(adj_df) * np.triu(adj_ref_df), index=adj_df.index, columns=adj_df.columns)
-        type_iii: pd.Index = type_iii_df.sub(type_v_df).stack().loc[lambda x: x == 1].index
+        type_iii: pd.Index = type_iii_df.sub(type_v_df).stack().loc[lambda x: x == 1].index  # type: ignore
         
         # Compute type IV edges, half reversed symmetrical
         # i.e. A -> B in network and B -> A in reference network
@@ -543,7 +524,7 @@ class CoreSna:
             pd.DataFrame(np.triu(adj_df) * np.tril(adj_ref_df).T, index=adj_df.index, columns=adj_df.columns)
             + pd.DataFrame(np.tril(adj_df) * np.triu(adj_ref_df).T, index=adj_df.index, columns=adj_df.columns)
         )
-        type_iv: pd.Index = type_iv_df.sub(type_v_df).stack().loc[lambda x: x == 1].index
+        type_iv: pd.Index = type_iv_df.sub(type_v_df).stack().loc[lambda x: x == 1].index  # type: ignore
         
         return {
             "type_i": type_i,
