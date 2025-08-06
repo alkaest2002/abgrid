@@ -6,7 +6,7 @@ The code is part of the AB-Grid project and is licensed under the MIT License.
 
 from functools import wraps
 from pathlib import Path
-from typing import Any, Callable, Optional, Set, TypeVar, Union, overload
+from typing import Any, Callable, Optional, Set, TypeVar, Union, cast, overload
 from lib.core.core_schemas import PydanticValidationException
 from lib.core.core_templates import TemplateRenderError
 
@@ -99,7 +99,7 @@ def logger_decorator(func: Optional[F] = None) -> Union[F, Callable[[F], F]]:
                 return None
         
         # Cast the wrapper to the original function type
-        return _wrapper  # type: ignore[return-value]
+        return cast(F, _wrapper)
     
     # Handle both @logger_decorator and @logger_decorator() usage patterns
     if func is None:
