@@ -67,10 +67,11 @@ def to_json(report_data: ReportDataDict) -> Dict[str, Any]:
         
         # Handle DataFrames with duplicate indices by resetting index
         if df.index.has_duplicates:
+            # Reset index to ensure no duplicates
             df = df.reset_index(drop=False, names="index")
+            # Convert index keys to strings for JSON compatibility
             return {str(k): v for k, v in df.to_dict("index").items()}
         else:
-            # Convert to dict with index as keys for better readability
             # Convert index keys to strings for JSON compatibility
             return {str(k): v for k, v in df.to_dict("index").items()}
     
