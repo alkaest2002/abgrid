@@ -5,7 +5,7 @@ The code is part of the AB-Grid project and is licensed under the MIT License.
 """
 import datetime
 import pandas as pd
-from typing import Any, Dict, List, Optional, TypedDict
+from typing import Any, Dict, List, Optional, TypedDict, cast
 
 from lib.core import SYMBOLS
 from lib.core.core_schemas import ABGridGroupSchema, ABGridReportSchema
@@ -71,8 +71,11 @@ class CoreData:
             A dictionary containing the group data with associated member symbols
             from the validated ABGridGroupSchema model.
         """
+        # Extract raw data from the validated model
         raw_data = validated_model.model_dump()
     
+        # Prepare group data dictionary with processed member symbols
+        # Use SYMBOLS to map the number of members to their corresponding symbols
         group_data: GroupDataDict = {
             "project_title": raw_data["project_title"],
             "question_a": raw_data["question_a"], 
@@ -108,7 +111,7 @@ class CoreData:
         sna_results: SNADict = abgrid_sna.get(validated_model.choices_a, validated_model.choices_b)
         
         # Compute sociogram results from SNA data
-        sociogram_results: SociogramDict = abgrid_sociogram.get(sna_results)
+        sociogram_results: SociogramDict = abgrid_sociogram.get(dict(sna_results))
        
         # Prepare the comprehensive report data structure
         report_data: Dict[str, Any] = {
@@ -187,5 +190,9 @@ class CoreData:
             
         # Add relevant_nodes_ab to report data
         report_data["relevant_nodes_ab"] = relevant_nodes_ab
+
+        # Cast report_data to ReportDataDict type for type safety
+        # This ensures that the returned data structure matches the expected type definition
+        casted_report_data: ReportDataDict = cast(ReportDataDict, report_data)
         
-        return report_data
+        return casted_report_data
