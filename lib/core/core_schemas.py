@@ -136,7 +136,7 @@ class ABGridGroupSchema(BaseModel):
         question_a: First question text (1-300 characters)
         question_b: Second question text (1-300 characters)
         group: Group identifier (must be an integer)
-        members: Number of members per group (intergr betwenn 8 and 50)
+        members: Number of members per group (integer between 8 and 50)
     """
     
     project_title: Any
@@ -185,10 +185,11 @@ class ABGridGroupSchema(BaseModel):
         """
         Validate the members field.
         
-        The members field must be an integer between 6 and 50 inclusive.
+        The members field must be an integer between 8 and 50 inclusive.
         
         Args:
             value: The value to validate
+            errors: List to append errors to
             
         Returns:
             None.
@@ -235,6 +236,7 @@ class ABGridReportSchema(BaseModel):
         - Keys and values must be single alphabetic characters
         - Choice keys must follow the SYMBOLS pattern (A, B, C, etc.)
         - At least 3 nodes must have expressed a choice (have non-null, non-empty values)
+        - Length of values in each key-value pair must be less than the total number of keys
     """
     
     project_title: Any
@@ -258,7 +260,8 @@ class ABGridReportSchema(BaseModel):
         2. Choice structures are correct
         3. Choice keys are consistent between questions
         4. All value references point to valid keys
-        5. No more than 30% of nodes have expressed no choice
+        5. No more than 60% of nodes have expressed no choice
+        6. Length of values is less than the number of keys
         
         Args:
             data: Raw input data dictionary
@@ -338,6 +341,7 @@ class ABGridReportSchema(BaseModel):
         5. Values have correct format (comma-separated single alphabetic characters)
         6. Keys don't reference themselves in values
         7. No duplicate values within a choice
+        8. Length of values must be less than the total number of keys
         
         Args:
             data: The full data dictionary
@@ -377,7 +381,17 @@ class ABGridReportSchema(BaseModel):
             })
             return extracted_keys
         
-        # Validate each choice
+        # First pass: extract all keys to determine total count
+        temp_keys = set()
+        for choice_dict in choices:
+            if isinstance(choice_dict, dict) and len(choice_dict) == 1:
+                key = next(iter(choice_dict.keys()))
+                if isinstance(key, str) and len(key) == 1 and key.isalpha():
+                    temp_keys.add(key)
+        
+        total_keys = len(temp_keys)
+        
+        # Second pass: validate each choice with the total key count
         for index, choice_dict in enumerate(choices):
             if not isinstance(choice_dict, dict) or len(choice_dict) != 1:
                 errors.append({
@@ -408,19 +422,21 @@ class ABGridReportSchema(BaseModel):
                 else:
                     extracted_keys.add(key)
                     
-                    # Validate value format
-                    cls._validate_value_format(field_name, index, key, value_str, errors)
+                    # Validate value format with total_keys constraint
+                    cls._validate_value_format(field_name, index, key, value_str, errors, total_keys)
         
         return extracted_keys
     
     @classmethod
-    def _validate_value_format(cls, field_name: str, index: int, key: str, value_str: Any, errors: List[Dict[str, Any]]) -> None:
+    def _validate_value_format(cls, field_name: str, index: int, key: str, value_str: Any, 
+                               errors: List[Dict[str, Any]], total_keys: int) -> None:
         """
         Validate the format of a choice value.
         
         This method validates that values are either None, empty strings, or
         comma-separated lists of single alphabetic characters. It also ensures
-        that keys don't reference themselves and there are no duplicates.
+        that keys don't reference themselves, there are no duplicates, and
+        the number of values is less than the total number of keys.
         
         Args:
             field_name: Name of the choices field
@@ -428,6 +444,7 @@ class ABGridReportSchema(BaseModel):
             key: The choice key
             value_str: The value to validate
             errors: List to append errors to
+            total_keys: Total number of keys in the choice set
         """
         if value_str is None:
             return
@@ -444,6 +461,14 @@ class ABGridReportSchema(BaseModel):
             return  # Empty string is valid
         
         value_parts = [part.strip() for part in value_str.split(',')]
+        
+        # Check that the number of values is less than the total number of keys
+        if len(value_parts) >= total_keys:
+            errors.append({
+                "location": f"{field_name}, {key}",
+                "value_to_blame": value_str,
+                "error_message": f"values_list_too_long"
+            })
         
         # Check all parts are valid single alphabetic characters
         invalid_parts = [part for part in value_parts if len(part) != 1 or not part.isalpha()]
@@ -571,7 +596,7 @@ class ABGridReportSchema(BaseModel):
         nodes_with_choices_count = len(nodes_with_choices)
         nodes_without_choices_count = total_nodes - nodes_with_choices_count
                 
-        # Validate that no more than 30% of nodes have empty values
+        # Validate that no more than 60% of nodes have empty values
         empty_percentage = (nodes_without_choices_count / total_nodes) * 100
         if empty_percentage > 60:
             errors.append({
@@ -584,4 +609,3 @@ class ABGridReportSchema(BaseModel):
                 },
                 "error_message": "too_many_nodes_have_empty_values"
             })
-

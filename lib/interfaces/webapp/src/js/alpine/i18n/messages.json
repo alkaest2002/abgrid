@@ -51,6 +51,7 @@
             "value_must_be_string_or_null": "il valore deve essere una stringa o non deve contenere nulla",
             "value_must_contain_only_single_alphabetic_characters": "il valore deve contenere solo singoli caratteri alfabetici",
             "values_contain_duplicates": "i valori contengono duplicati",
+            "values_list_too_long": "la lista dei valori è troppo lunga",
             "values_reference_invalid_keys": "i valori contengono chiavi non valide"
         },
         "server": {
