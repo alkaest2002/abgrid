@@ -1,4 +1,4 @@
-# ABGrid - Aviation Psychology Peer Group Analysis Software
+# ABGrid - Peer Group Analysis Software
 
 A comprehensive open-source software for sociometric analysis and Social Network Analysis (SNA) designed to optimize peer group dynamics.
 
