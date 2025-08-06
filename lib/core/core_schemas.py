@@ -5,10 +5,13 @@ The code is part of the AB-Grid project and is licensed under the MIT License.
 """
 
 import re
-from typing import Dict, List, Any, Set
+from typing import Dict, List, Any, Optional, Set
+import pandas as pd
 from pydantic import BaseModel, model_validator
 
 from lib.core import SYMBOLS
+from lib.core.core_sna import SNADict
+from lib.core.core_sociogram import SociogramDict
 
 forbidden_chars = re.compile(r'[^A-Za-zÀ-ÖØ-öø-ÿĀ-ſƀ-ɏḀ-ỿЀ-ӿͰ-Ͽ\d\s\'\.,\-\?\!]')
 
@@ -36,94 +39,70 @@ class PydanticValidationException(Exception):
         error_messages = [f"{error['location']}: {error['error_message']}" for error in errors]
         super().__init__("\n".join(error_messages))
 
-def validate_text_field(field_name: str, value: Any, min_len: int, max_len: int) -> List[Dict[str, Any]]:
-    """
-    Validate a text field with length and character constraints.
-    
-    This function validates that a field is a string within specified length bounds
-    and contains only allowed characters (letters, numbers, and safe punctuation).
-    
-    Args:
-        field_name: Name of the field being validated (for error reporting)
-        value: The value to validate
-        min_len: Minimum allowed length for the string
-        max_len: Maximum allowed length for the string
-        
-    Returns:
-        List of error dictionaries. Empty list if validation passes.
-    """
-    errors = []
-    
-    if value is None:
-        errors.append({
-            "location": field_name,
-            "value_to_blame": None,
-            "error_message": "field_is_required"
-        })
-        return errors
-    
-    if not isinstance(value, str):
-        errors.append({
-            "location": field_name,
-            "value_to_blame": value,
-            "error_message": "field_must_be_a_string"
-        })
-        return errors
-    
-    if len(value) < min_len:
-        errors.append({
-            "location": field_name,
-            "value_to_blame": value,
-            "error_message": f"field_is_too_short"
-        })
-    
-    if len(value) > max_len:
-        errors.append({
-            "location": field_name,
-            "value_to_blame": value,
-            "error_message": f"field_is_too_long"
-        })
 
-    # Check for forbidden characters
-    if forbidden_chars.findall(value):
-        errors.append({
-            "location": field_name,
-            "value_to_blame": value,
-            "error_message": f"field_contains_invalid_characters"
-        })
+class RelevantNodesSchema(BaseModel):
+    """Pydantic model for relevant nodes analysis results."""
+    a: pd.DataFrame  # Positive relevance nodes DataFrame
+    b: pd.DataFrame  # Negative relevance nodes DataFrame
     
-    return errors
+    model_config = {
+        "arbitrary_types_allowed": True  # Allow pandas DataFrames
+    }
 
-def validate_group_field(value: Any) -> List[Dict[str, Any]]:
-    """
-    Validate the group field.
-    
-    The group field must be an integer.
-    
-    Args:
-        value: The value to validate
-        
-    Returns:
-        List of error dictionaries. Empty list if validation passes.
-    """
-    errors = []
-    
-    if value is None:
-        errors.append({
-            "location": "group",
-            "value_to_blame": None,
-            "error_message": "field_is_required"
-        })
-    elif not isinstance(value, int):
-        errors.append({
-            "location": "group",
-            "value_to_blame": value,
-            "error_message": "field_must_be_an_integer"
-        })
-    
-    return errors
 
-class ABGridGroupSchema(BaseModel):
+class IsolatedNodesSchema(BaseModel):
+    """Pydantic model for isolated nodes by network type."""
+    a: pd.Index  # Isolated nodes from network A
+    b: pd.Index  # Isolated nodes from network B
+    
+    model_config = {
+        "arbitrary_types_allowed": True  # Allow pandas Index
+    }
+
+
+class ABGridGroupSchemaOut(BaseModel):
+    """
+    Pydantic model for group data structure returned by get_group_data().
+    
+    Contains basic group information extracted from ABGridGroupSchemaIn with
+    processed member symbols for display and validation purposes.
+    """
+    project_title: str  # Title of the AB-Grid project
+    question_a: str  # Text of question A from the survey
+    question_b: str  # Text of question B from the survey
+    group: int  # Group identifier
+    members: List[str]  # List of member symbols (A, B, C, etc.) based on group size
+    
+    model_config = {
+        "extra": "forbid"  # Don't allow extra fields
+    }
+
+
+class ABGridReportSchemaOut(BaseModel):
+    """
+    Pydantic model for report data structure returned by get_report_data().
+    
+    Contains comprehensive analysis results including project metadata, network analysis,
+    sociogram data (optional), relevant nodes identification, and isolated nodes detection.
+    """
+    year: int  # Current year when report was generated
+    project_title: str  # Title of the AB-Grid project
+    question_a: str  # Text of question A from the survey
+    question_b: str  # Text of question B from the survey
+    group: int  # Group identifier
+    group_size: int  # Number of participants in the group
+    sna: SNADict  # Complete social network analysis results (SNADict)
+    sociogram: Optional[SociogramDict]  # Sociogram analysis results (None if not requested)
+    relevant_nodes_ab: RelevantNodesSchema  # Most/least relevant nodes for positive/negative outcomes
+    isolated_nodes_ab: IsolatedNodesSchema  # Nodes with no connections in each network
+    
+    model_config = {
+        "arbitrary_types_allowed": True,  # Allow complex types like DataFrames
+        "extra": "forbid"  # Don't allow extra fields
+    }
+
+
+class ABGridGroupSchemaIn(BaseModel):
     """
     Pydantic model for basic group information collection.
     
@@ -169,10 +148,10 @@ class ABGridGroupSchema(BaseModel):
         errors = []
         
         # Validate fields
-        errors.extend(validate_text_field("project_title", data.get("project_title"), 1, 100))
-        errors.extend(validate_text_field("question_a", data.get("question_a"), 1, 300))
-        errors.extend(validate_text_field("question_b", data.get("question_b"), 1, 300))        
-        errors.extend(validate_group_field(data.get("group")))
+        errors.extend(_validate_text_field("project_title", data.get("project_title"), 1, 100))
+        errors.extend(_validate_text_field("question_a", data.get("question_a"), 1, 300))
+        errors.extend(_validate_text_field("question_b", data.get("question_b"), 1, 300))        
+        errors.extend(_validate_group_field(data.get("group")))
         cls._validate_members_field(data.get("members"), errors)
 
         if errors:
@@ -213,7 +192,8 @@ class ABGridGroupSchema(BaseModel):
                 "error_message": "field_is_out_of_range"
             })
        
-class ABGridReportSchema(BaseModel):
+
+class ABGridReportSchemaIn(BaseModel):
     """
     Pydantic model representing a complete ABGrid data project.
     
@@ -275,10 +255,10 @@ class ABGridReportSchema(BaseModel):
         errors = []
         
         # Validate basic fields
-        errors.extend(validate_text_field("project_title", data.get("project_title"), 1, 100))
-        errors.extend(validate_text_field("question_a", data.get("question_a"), 1, 300))
-        errors.extend(validate_text_field("question_b", data.get("question_b"), 1, 300))
-        errors.extend(validate_group_field(data.get("group")))
+        errors.extend(_validate_text_field("project_title", data.get("project_title"), 1, 100))
+        errors.extend(_validate_text_field("question_a", data.get("question_a"), 1, 300))
+        errors.extend(_validate_text_field("question_b", data.get("question_b"), 1, 300))
+        errors.extend(_validate_group_field(data.get("group")))
         
         # Validate choices structure and collect keys
         choices_a_keys = cls._validate_choices_structure(data, "choices_a", errors)
@@ -308,7 +288,7 @@ class ABGridReportSchema(BaseModel):
         return data
     
     @model_validator(mode="after")
-    def strip_choice_values_after(self) -> "ABGridReportSchema":
+    def strip_choice_values_after(self) -> "ABGridReportSchemaIn":
         """
         Strip spaces from choice values after validation.
         
@@ -609,3 +589,92 @@ class ABGridReportSchema(BaseModel):
                 },
                 "error_message": "too_many_nodes_have_empty_values"
             })
+
+
+def _validate_text_field(field_name: str, value: Any, min_len: int, max_len: int) -> List[Dict[str, Any]]:
+    """
+    Validate a text field with length and character constraints.
+    
+    This function validates that a field is a string within specified length bounds
+    and contains only allowed characters (letters, numbers, and safe punctuation).
+    
+    Args:
+        field_name: Name of the field being validated (for error reporting)
+        value: The value to validate
+        min_len: Minimum allowed length for the string
+        max_len: Maximum allowed length for the string
+        
+    Returns:
+        List of error dictionaries. Empty list if validation passes.
+    """
+    errors = []
+    
+    if value is None:
+        errors.append({
+            "location": field_name,
+            "value_to_blame": None,
+            "error_message": "field_is_required"
+        })
+        return errors
+    
+    if not isinstance(value, str):
+        errors.append({
+            "location": field_name,
+            "value_to_blame": value,
+            "error_message": "field_must_be_a_string"
+        })
+        return errors
+    
+    if len(value) < min_len:
+        errors.append({
+            "location": field_name,
+            "value_to_blame": value,
+            "error_message": f"field_is_too_short"
+        })
+    
+    if len(value) > max_len:
+        errors.append({
+            "location": field_name,
+            "value_to_blame": value,
+            "error_message": f"field_is_too_long"
+        })
+
+    # Check for forbidden characters
+    if forbidden_chars.findall(value):
+        errors.append({
+            "location": field_name,
+            "value_to_blame": value,
+            "error_message": f"field_contains_invalid_characters"
+        })
+    
+    return errors
+
+
+def _validate_group_field(value: Any) -> List[Dict[str, Any]]:
+    """
+    Validate the group field.
+    
+    The group field must be an integer.
+    
+    Args:
+        value: The value to validate
+        
+    Returns:
+        List of error dictionaries. Empty list if validation passes.
+    """
+    errors = []
+    
+    if value is None:
+        errors.append({
+            "location": "group",
+            "value_to_blame": None,
+            "error_message": "field_is_required"
+        })
+    elif not isinstance(value, int):
+        errors.append({
+            "location": "group",
+            "value_to_blame": value,
+            "error_message": "field_must_be_an_integer"
+        })
+    
+    return errors

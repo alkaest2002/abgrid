@@ -5,85 +5,47 @@ The code is part of the AB-Grid project and is licensed under the MIT License.
 """
 import datetime
 import pandas as pd
-from typing import Any, Dict, List, Optional, TypedDict, cast
+from typing import Dict,Any 
 
 from lib.core import SYMBOLS
-from lib.core.core_schemas import ABGridGroupSchema, ABGridReportSchema
+from lib.core.core_schemas import (
+    ABGridGroupSchemaIn, 
+    ABGridReportSchemaIn,
+    ABGridGroupSchemaOut,
+    ABGridReportSchemaOut,
+    RelevantNodesSchema,
+    IsolatedNodesSchema
+)
 from lib.core.core_sna import CoreSna, SNADict
 from lib.core.core_sociogram import CoreSociogram, SociogramDict
-
-class RelevantNodesDict(TypedDict):
-    """Dictionary structure for relevant nodes analysis results."""
-    a: pd.DataFrame  # Positive relevance nodes DataFrame
-    b: pd.DataFrame  # Negative relevance nodes DataFrame
-
-
-class IsolatedNodesDict(TypedDict):
-    """Dictionary structure for isolated nodes by network type."""
-    a: pd.Index  # Isolated nodes from network A
-    b: pd.Index  # Isolated nodes from network B
-
-
-class ReportDataDict(TypedDict):
-    """
-    Complete type definition for report data structure returned by get_report_data().
-    
-    Contains comprehensive analysis results including project metadata, network analysis,
-    sociogram data (optional), relevant nodes identification, and isolated nodes detection.
-    """
-    year: int  # Current year when report was generated
-    project_title: str  # Title of the AB-Grid project
-    question_a: str  # Text of question A from the survey
-    question_b: str  # Text of question B from the survey
-    group: int  # Group identifier
-    group_size: int  # Number of participants in the group
-    sna: SNADict  # Complete social network analysis results
-    sociogram: Optional[SociogramDict]  # Sociogram analysis results (None if not requested)
-    relevant_nodes_ab: RelevantNodesDict  # Most/least relevant nodes for positive/negative outcomes
-    isolated_nodes_ab: IsolatedNodesDict  # Nodes with no connections in each network
-
-
-class GroupDataDict(TypedDict):
-    """
-    Type definition for group data structure returned by get_group_data().
-    
-    Contains basic group information extracted from ABGridGroupSchema with
-    processed member symbols for display and validation purposes.
-    """
-    project_title: str  # Title of the AB-Grid project
-    question_a: str  # Text of question A from the survey
-    question_b: str  # Text of question B from the survey
-    group: int  # Group identifier
-    members: List[str]  # List of member symbols (A, B, C, etc.) based on group size
 
 
 class CoreData:
     """Processes AB-Grid data for report generation."""
 
-
-    def get_group_data(self, validated_model: ABGridGroupSchema) -> GroupDataDict:
-        """Extracts and processes group data from a validated ABGridGroupSchema model.
+    def get_group_data(self, validated_group_data_in: ABGridGroupSchemaIn) -> Dict[str, Any]:
+        """Extracts and processes group data from a validated ABGridGroupSchemaIn model.
 
         Args:
-            validated_model: An instance of ABGridGroupSchema containing validated group data.
+            validated_group_data_in: An instance of ABGridGroupSchemaIn containing validated group data.
 
         Returns:
-            A dictionary containing the group data with associated member symbols
-            from the validated ABGridGroupSchema model.
+            Dict containing the group data with associated member symbols
+            from the validated ABGridGroupSchemaIn model.
         """
         # Extract raw data from the validated model
-        group_data = validated_model.model_dump()
+        group_data = validated_group_data_in.model_dump()
         
         # Add members list
         group_data["members"] = SYMBOLS[:group_data["members"]]
 
-        # Cast group_data to GroupDataDict type for type safety
-        casted_group_data: GroupDataDict = cast(GroupDataDict, group_data)
-    
-        return casted_group_data
+        # Validate and convert group data to ABGridGroupSchemaOut
+        validated_group_data_out = ABGridGroupSchemaOut(**group_data)
+        
+        return validated_group_data_out.model_dump()
 
           
-    def get_report_data(self, validated_model: ABGridReportSchema, with_sociogram: bool = False) -> ReportDataDict:
+    def get_report_data(self, validated_report_data_in: ABGridReportSchemaIn, with_sociogram: bool = False) -> Dict:
         """Generate comprehensive report data with SNA and optional sociogram analysis.
         
         Args:
@@ -91,7 +53,7 @@ class CoreData:
             with_sociogram: Whether to include sociogram analysis
             
         Returns:
-            ReportDataDict containing complete report data with analysis results
+            Dict containing complete report data with analysis results
             
         Notes:
             Combines SNA results with optional sociogram analysis and identifies
@@ -99,34 +61,21 @@ class CoreData:
         """
         # Initialize SNA analysis class
         abgrid_sna: CoreSna = CoreSna()
+        
         # Initialize sociogram analysis class
         abgrid_sociogram: CoreSociogram = CoreSociogram()
         
         # Compute SNA results from group choice data
-        sna_results: SNADict = abgrid_sna.get(validated_model.choices_a, validated_model.choices_b)
+        sna_results: SNADict = abgrid_sna.get(validated_report_data_in.choices_a, validated_report_data_in.choices_b)
         
         # Compute sociogram results from SNA data
         sociogram_results: SociogramDict = abgrid_sociogram.get(dict(sna_results))
        
-        # Prepare the comprehensive report data structure
-        report_data: Dict[str, Any] = {
-            "year": datetime.datetime.now(datetime.UTC).year,
-            "project_title": validated_model.project_title,
-            "question_a": validated_model.question_a,
-            "question_b": validated_model.question_b,
-            "group": validated_model.group,
-            "group_size": len(validated_model.choices_a),
-            "sna": sna_results,
-        }
-        
-        # Add sociogram data to report data, if requested
-        report_data["sociogram"] = sociogram_results if with_sociogram else None
-
-        # Add isolated nodes to report data
-        report_data["isolated_nodes_ab"] = {
-            "a": sna_results["micro_stats_a"].loc[sna_results["micro_stats_a"]["nd"].eq(3)].index,
-            "b": sna_results["micro_stats_b"].loc[sna_results["micro_stats_b"]["nd"].eq(3)].index
-        }
+        # Prepare isolated nodes
+        isolated_nodes_ab = IsolatedNodesSchema(
+            a=sna_results["micro_stats_a"].loc[sna_results["micro_stats_a"]["nd"].eq(3)].index,
+            b=sna_results["micro_stats_b"].loc[sna_results["micro_stats_b"]["nd"].eq(3)].index
+        )
 
         # Get relevant nodes from both SNA and sociogram analyses
         relevant_nodes_ab_sna: Dict[str, pd.DataFrame] = sna_results["relevant_nodes_ab"].copy()
@@ -142,7 +91,7 @@ class CoreData:
         for valence_type in ("a", "b"):
 
             # Get isolated nodes
-            isolated_nodes = report_data["isolated_nodes_ab"][valence_type]
+            isolated_nodes = getattr(isolated_nodes_ab, valence_type)
 
             # Concat relevant nodes from sna and sociogram
             nodes: pd.DataFrame = (
@@ -182,11 +131,25 @@ class CoreData:
             
             # Add relevant nodes of specific valence type to relevant_nodes_ab
             relevant_nodes_ab[valence_type] = nodes
-            
-        # Add relevant_nodes_ab to report data
-        report_data["relevant_nodes_ab"] = relevant_nodes_ab
-
-        # Cast report_data to ReportDataDict type for type safety
-        casted_report_data: ReportDataDict = cast(ReportDataDict, report_data)
         
-        return casted_report_data
+        # Create RelevantNodesSchema
+        relevant_nodes_model = RelevantNodesSchema(**relevant_nodes_ab)
+        
+        # Prepare the comprehensive report data structure
+        report_data = {
+            "year": datetime.datetime.now(datetime.UTC).year,
+            "project_title": validated_report_data_in.project_title,
+            "question_a": validated_report_data_in.question_a,
+            "question_b": validated_report_data_in.question_b,
+            "group": validated_report_data_in.group,
+            "group_size": len(validated_report_data_in.choices_a),
+            "sna": sna_results,
+            "sociogram": sociogram_results if with_sociogram else None,
+            "isolated_nodes_ab": isolated_nodes_ab,
+            "relevant_nodes_ab": relevant_nodes_model
+        }
+        
+        # Validate and convert report data to ABGridReportSchemaOut
+        validated_report_data_out = ABGridReportSchemaOut(**report_data)
+        
+        return validated_report_data_out.model_dump()
