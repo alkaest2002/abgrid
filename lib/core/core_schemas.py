@@ -254,12 +254,12 @@ class ABGridReportSchemaIn(BaseModel):
         """Validate all fields comprehensively.
         
         Validates all fields including complex choice validation logic:
-        1. Basic field validation.
-        2. Choice structure correctness.
-        3. Choice key consistency between questions.
-        4. Valid value references.
-        5. Maximum 60% nodes without choices.
-        6. Value count less than key count.
+        - Basic field validation.
+        - Choice structure correctness.
+        - Choice key consistency between questions.
+        - Valid value references.
+        - Maximum 60% nodes without choices.
+        - Value count less than key count.
         
         Args:
             data: Raw input data dictionary.
@@ -330,14 +330,14 @@ class ABGridReportSchemaIn(BaseModel):
         """Validate choices structure and format.
         
         Validates:
-        1. Choices is non-empty list.
-        2. Each choice is single key-value dictionary.
-        3. Keys are single alphabetic characters (no duplicates).
-        4. Keys don't exceed SYMBOLS length.
-        5. Values have correct format.
-        6. Keys don't self-reference.
-        7. No duplicate values within choice.
-        8. Value count less than key count.
+        - Choices is non-empty list.
+        - Each choice is single key-value dictionary.
+        - Keys are single alphabetic characters (no duplicates).
+        - Keys don't exceed SYMBOLS length.
+        - Values have correct format.
+        - Keys don't self-reference.
+        - No duplicate values within choice.
+        - Value count less than key count.
         
         Args:
             data: Full data dictionary.
@@ -531,8 +531,8 @@ class ABGridReportSchemaIn(BaseModel):
         """Validate choice completion requirements.
         
         For both choices_a and choices_b, validates:
-        1. At least 3 nodes have expressed a choice.
-        2. Maximum 60% of nodes have empty values.
+        - At least 3 nodes have expressed a choice.
+        - Maximum 60% of nodes have empty values.
         
         A node has expressed a choice if it has a non-null, non-empty value.
         
