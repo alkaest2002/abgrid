@@ -9,7 +9,7 @@ import time
 import hashlib
 from collections import OrderedDict
 from functools import wraps
-from typing import Tuple, Callable, Any, Awaitable
+from typing import Tuple, Callable, Any, Awaitable, Optional
 
 class RateLimitException(Exception):
     """
@@ -29,21 +29,24 @@ class SimpleRateLimiter:
 
     This rate limiter extracts JWT tokens from Authorization headers and
     applies rate limiting per token per endpoint using asyncio for FastAPI compatibility.
+    OPTIONS requests (CORS preflight) bypass rate limiting entirely.
     
     Args:
         limit: Maximum number of requests allowed per window.
         window_seconds: Time window duration in seconds.
         max_cache_size: Maximum number of entries to keep in cache.
+        skip_options: Whether to skip rate limiting for OPTIONS requests (default: True).
     
     Raises:
-        ValueError: If any parameter is <= 0.
+        ValueError: If any numeric parameter is <= 0.
     """
     
     def __init__(
         self, 
         limit: int, 
         window_seconds: int,
-        max_cache_size: int = 10000
+        max_cache_size: int = 10000,
+        skip_options: bool = True
     ) -> None:
         """
         Initialize the rate limiter with asyncio lock for FastAPI compatibility.
@@ -52,6 +55,7 @@ class SimpleRateLimiter:
             limit: Maximum requests allowed per window.
             window_seconds: Duration of rate limit window in seconds.
             max_cache_size: Maximum cache entries to prevent memory leaks.
+            skip_options: Skip rate limiting for OPTIONS requests (CORS preflight).
         """
         if limit <= 0 or window_seconds <= 0 or max_cache_size <= 0:
             raise ValueError("rate_limiter_all_parameters_must_be_positive_integers")
@@ -63,6 +67,7 @@ class SimpleRateLimiter:
         self.limit = limit
         self.window_seconds = window_seconds
         self.max_cache_size = max_cache_size
+        self.skip_options = skip_options
         
         # Cache stores: key -> (window_start_time, request_count)
         self._cache: OrderedDict[str, Tuple[float, int]] = OrderedDict()
@@ -74,7 +79,8 @@ class SimpleRateLimiter:
         Decorator that applies rate limiting to an async function.
 
         The decorated function must accept a 'request' parameter that contains 
-        the HTTP request object with headers.
+        the HTTP request object with headers. OPTIONS requests bypass rate limiting
+        if skip_options is True.
         
         Args:
             func: Async function to be rate limited.
@@ -89,8 +95,15 @@ class SimpleRateLimiter:
         async def wrapper(*args: Any, **kwargs: Any) -> Any:
             if not (request := kwargs.get("request")):
                 raise RateLimitException("request_object_required_for_rate_limiting")
+            
+            # Skip rate limiting for OPTIONS requests (CORS preflight)
+            if self.skip_options and getattr(request, 'method', None) == 'OPTIONS':
+                return await func(*args, **kwargs)
+            
+            # Get cache key from JWT token
             key: str = self._get_cache_key(request)
-            # Await the async rate limit check
+            
+            # Check rate limit
             await self._check_rate_limit(key)
             
             return await func(*args, **kwargs)
@@ -104,41 +117,54 @@ class SimpleRateLimiter:
             request: HTTP request object with headers and url attributes.
             
         Returns:
-            Unique cache key string in format "rate_limit:{token_hash}:{path}".
+            Unique cache key string in format "rate_limit:{limiter_id}:{token_hash}:{path}".
 
         Raises:
             RateLimitException: If Authorization header is missing, malformed,
                                 or doesn't contain a Bearer token.
         """
-        try:
-            auth_header = request.headers.get("Authorization", "")
-        except (AttributeError, TypeError):
+        # Extract JWT token
+        token: Optional[str] = self._extract_jwt_token(request)
+        
+        if not token:
             raise RateLimitException("required_jwt_token")
         
-        if not auth_header.startswith("Bearer "):
-            raise RateLimitException("required_jwt_token")
-            
-        if not (token := auth_header[7:].strip()):
-            raise RateLimitException("required_jwt_token")
-        
-        # SECURITY: Validate token size
+        # Validate token size
         if len(token) > 2048:
             raise RateLimitException("jwt_token_too_large")
         
-        # SECURITY: Basic format validation
+        # Validate basic JWT format (header.payload.signature)
         if token.count('.') != 2:
             raise RateLimitException("invalid_jwt_format")
         
-        # Token is safe to hash
-        token_hash = hashlib.sha256(token.encode('utf-8')).hexdigest()
+        # Hash the token for security
+        token_hash: str = hashlib.sha256(token.encode('utf-8')).hexdigest()
         
-        try:
-            path = getattr(getattr(request, 'url', None), 'path', '')
-        except (AttributeError, TypeError):
-            path = ''
+        # Get request path
+        path: str = getattr(getattr(request, 'url', None), 'path', '')
             
         return f"rate_limit:{self.limiter_id}:{token_hash}:{path}"
+    
+    def _extract_jwt_token(self, request: Any) -> Optional[str]:
+        """
+        Safely extract JWT token from Authorization header.
         
+        Args:
+            request: HTTP request object with headers.
+            
+        Returns:
+            JWT token string if found and valid, None otherwise.
+        """
+        try:
+            auth_header: str = request.headers.get("Authorization", "")
+        except (AttributeError, TypeError):
+            return None
+        
+        if not auth_header.startswith("Bearer "):
+            return None
+        
+        token: str = auth_header[7:].strip()
+        return token if token else None
 
     async def _check_rate_limit(self, key: str) -> None:
         """
