@@ -30,13 +30,12 @@ class CoreData:
             validated_group_data_in: An instance of ABGridGroupSchemaIn containing validated group data.
 
         Returns:
-            Dict containing the group data with associated member symbols
-            from the validated ABGridGroupSchemaIn model.
+            Dict containing the group data from the validated ABGridGroupSchemaIn model.
         """
         # Extract group data from the validated model
         group_data: Dict[str, Any] = validated_group_data_in.model_dump()
         
-        # Add members list
+        # Add members list to group data, using SYMBOLS for member symbols
         group_data["members"] = SYMBOLS[:group_data["members"]]
 
         # Validate and convert group data to ABGridGroupSchemaOut
@@ -72,7 +71,7 @@ class CoreData:
         sociogram_results: SociogramDict = abgrid_sociogram.get(dict(sna_results))
        
         # Prepare isolated nodes
-        isolated_nodes_ab = ABGridIsolatedNodesSchema(
+        isolated_nodes_ab: ABGridIsolatedNodesSchema = ABGridIsolatedNodesSchema(
             a=sna_results["micro_stats_a"].loc[sna_results["micro_stats_a"]["nd"].eq(3)].index,
             b=sna_results["micro_stats_b"].loc[sna_results["micro_stats_b"]["nd"].eq(3)].index
         )
@@ -91,7 +90,7 @@ class CoreData:
         for valence_type in ("a", "b"):
 
             # Get isolated nodes
-            isolated_nodes = getattr(isolated_nodes_ab, valence_type)
+            isolated_nodes: pd.Index = getattr(isolated_nodes_ab, valence_type)
 
             # Concat relevant nodes from sna and sociogram
             nodes: pd.DataFrame = (
