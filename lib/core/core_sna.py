@@ -568,12 +568,27 @@ class CoreSna:
     
         # Get network
         network: nx.DiGraph = self.sna[f"network_{network_type}"]
+
+        # Get cliques
+        cliques: pd.Series = pd.Series(
+            [ "".join(sorted(list(c))) for c in sorted(nx.find_cliques(network.to_undirected()), key=len, reverse=True) if len(c) > 2 ])
         
-        # Compute network components
+        # Get strongly connected components
+        strongly_connected: pd.Series = pd.Series(
+            [ "".join(sorted(list(c))) for c in sorted(nx.strongly_connected_components(network), key=len, reverse=True) if len(c) > 2 ])
+        
+        # Get weakly connected components
+        weakly_connected: pd.Series =  pd.Series(
+            [ "".join(sorted(list(c))) for c in sorted(nx.weakly_connected_components(network), key=len, reverse=True) if len(c) > 2 ])
+        
+        # Exclude strongly connected components from weakly connected components
+        weakly_connected = weakly_connected.loc[~weakly_connected.isin(strongly_connected)]
+
+        # Cobine components
         components: Dict[str, pd.Series] = {
-            "cliques": pd.Series([ "".join(sorted(list(c))) for c in sorted(nx.find_cliques(network.to_undirected()), key=len, reverse=True) if len(c) > 2 ]),
-            "strongly_connected": pd.Series([ "".join(sorted(list(c))) for c in sorted(nx.strongly_connected_components(network), key=len, reverse=True) if len(c) > 2 ]),
-            "weakly_connected": pd.Series([ "".join(sorted(list(c))) for c in sorted(nx.weakly_connected_components(network), key=len, reverse=True) if len(c) > 2 ]),
+            "cliques": cliques,
+            "strongly_connected": strongly_connected,
+            "weakly_connected": weakly_connected,
         }
 
         return components
