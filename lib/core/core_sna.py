@@ -569,15 +569,15 @@ class CoreSna:
         # Get network
         network: nx.DiGraph = self.sna[f"network_{network_type}"]
 
-        # Get cliques
+        # Get cliques with min length of 3, ordered by size
         cliques: pd.Series = pd.Series(
             [ "".join(sorted(list(c))) for c in sorted(nx.find_cliques(network.to_undirected()), key=len, reverse=True) if len(c) > 2 ])
         
-        # Get strongly connected components
+        # Get strongly connected components with min length of 3, ordered by size
         strongly_connected: pd.Series = pd.Series(
             [ "".join(sorted(list(c))) for c in sorted(nx.strongly_connected_components(network), key=len, reverse=True) if len(c) > 2 ])
         
-        # Get weakly connected components
+        # Get weakly connected components with min length of 3, ordered by size
         weakly_connected: pd.Series =  pd.Series(
             [ "".join(sorted(list(c))) for c in sorted(nx.weakly_connected_components(network), key=len, reverse=True) if len(c) > 2 ])
         
