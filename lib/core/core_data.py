@@ -132,7 +132,7 @@ class CoreData:
             relevant_nodes_ab[valence_type] = nodes
         
         # Create RelevantNodesSchema
-        relevant_nodes_model = ABGridRelevantNodesSchema(**relevant_nodes_ab)
+        relevant_nodes_model: ABGridRelevantNodesSchema = ABGridRelevantNodesSchema(**relevant_nodes_ab)
         
         # Prepare the comprehensive report data structure
         report_data = {
@@ -149,6 +149,6 @@ class CoreData:
         }
         
         # Validate and convert report data to ABGridReportSchemaOut
-        validated_report_data_out: ABGridReportSchemaOut = ABGridReportSchemaOut(**report_data)
+        validated_report_data_out: ABGridReportSchemaOut = ABGridReportSchemaOut(**report_data) # type: ignore[bad-argument]
         
         return validated_report_data_out.model_dump()
