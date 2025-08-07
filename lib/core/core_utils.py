@@ -87,7 +87,7 @@ def compute_descriptives(data: pd.DataFrame) -> pd.DataFrame:
     
     return descriptives
 
-def gini_coefficient(values: Union[Sequence[float], np.ndarray, pd.Series]) -> float:
+def gini_coefficient(values: pd.Series) -> float:
     """
     Calculate the Gini coefficient for measuring inequality in a distribution.
     
@@ -107,24 +107,28 @@ def gini_coefficient(values: Union[Sequence[float], np.ndarray, pd.Series]) -> f
         - Uses the standard Gini formula: G = (2 * Σ(i * x_i)) / (n * Σ(x_i)) - (n + 1) / n
         - Commonly used in social network analysis for measuring centralization
     """
-    # Convert to numpy array (make sure values are positive)
-    values = np.array(values, dtype=np.float64) - np.min(values)
+    # Convert to non-negative values by subtracting minimum
+    pos_values: pd.Series = values.sub(values.min())
     
     # Sort the values
-    sorted_values = np.sort(values)
-    n = len(sorted_values)
+    sorted_values: pd.Series = pos_values.sort_values(ignore_index=True)
+    n: int = len(sorted_values)
     
     # Calculate mean
-    mean_value = np.mean(sorted_values)
+    mean_value: float = sorted_values.mean()
     
     # If all values are zero or mean is zero, return 0
     if mean_value == 0:
         return 0.0
     
+    # Create index series (1 to n)
+    index_series: pd.Series = pd.Series(range(1, n + 1), index=sorted_values.index)
+    
     # Calculate Gini coefficient using the correct formula
     # G = (2 * sum(i * x_i)) / (n * sum(x_i)) - (n + 1) / n
-    index_weighted_sum = np.sum((np.arange(1, n + 1) * sorted_values))
-    total_sum = np.sum(sorted_values)
-    gini = (2.0 * index_weighted_sum) / (n * total_sum) - (n + 1) / n
+    index_weighted_sum: float = sorted_values.mul(index_series).sum()
+    total_sum: float = sorted_values.sum()
+    gini: float = (2.0 * index_weighted_sum) / (n * total_sum) - (n + 1) / n
     
     return gini
+
