@@ -12,7 +12,7 @@ from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.responses import JSONResponse, Response
 from lib.interfaces.fastapi.settings import Settings
 
-settings = Settings.load()
+settings: Settings = Settings.load()
 
 
 class RequestProtectionMiddleware(BaseHTTPMiddleware):
@@ -101,8 +101,8 @@ class RequestProtectionMiddleware(BaseHTTPMiddleware):
         request_path: str = request.url.path
         
         # Determine endpoint type and check concurrent limits
-        is_group_request = request_path.startswith("/api/group")
-        is_report_request = request_path.startswith("/api/report")
+        is_group_request: bool = request_path.startswith("/api/group")
+        is_report_request: bool = request_path.startswith("/api/report")
         
         # Apply concurrent request limit based on endpoint type
         if is_group_request:
