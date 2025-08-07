@@ -9,9 +9,8 @@ from collections.abc import Awaitable
 from typing import Callable, Optional
 from fastapi import Request, status
 from starlette.middleware.base import BaseHTTPMiddleware
-from starlette.responses import JSONResponse, Response
+from fastapi.responses import JSONResponse, Response
 from lib.interfaces.fastapi.settings import Settings
-
 settings: Settings = Settings.load()
 
 
