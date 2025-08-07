@@ -16,24 +16,21 @@ from lib.core.core_sociogram import SociogramDict
 FORBIDDEN_CHARS = re.compile(r'[^A-Za-zÀ-ÖØ-öø-ÿĀ-ſƀ-ɏḀ-ỿЀ-ӿͰ-Ͽ\d\s\'\.,\-\?\!]')
 
 class PydanticValidationException(Exception):
-    """
-    Custom exception that carries structured error information.
+    """Custom exception for structured validation errors.
     
-    This exception is raised when validation fails and contains detailed
-    error information for each validation failure.
+    Raised when validation fails, containing detailed error information
+    for each validation failure.
     
     Attributes:
-        errors: List of error dictionaries containing location, value, and message
+        errors: List of error dictionaries with location, value, and message.
     """
     
     def __init__(self, errors: List[Dict[str, Any]]):
-        """
-        Initialize the exception with validation errors.
+        """Initialize exception with validation errors.
         
         Args:
-            errors: List of dictionaries containing validation error details.
-                   Each dictionary should have 'location', 'value_to_blame', 
-                   and 'error_message' keys.
+            errors: List of validation error dictionaries. Each dictionary
+                contains 'location', 'value_to_blame', and 'error_message' keys.
         """
         self.errors = errors
         error_messages = [f"{error['location']}: {error['error_message']}" for error in errors]
@@ -41,9 +38,14 @@ class PydanticValidationException(Exception):
 
 
 class ABGridRelevantNodesSchema(BaseModel):
-    """Pydantic model for relevant nodes analysis results."""
-    a: pd.DataFrame  # Positive relevance nodes DataFrame
-    b: pd.DataFrame  # Negative relevance nodes DataFrame
+    """Schema for relevant nodes analysis results.
+    
+    Attributes:
+        a: Positive relevance nodes from network A.
+        b: Negative relevance nodes from network B.
+    """
+    a: pd.DataFrame  # Positive relevance nodes from network A
+    b: pd.DataFrame  # Negative relevance nodes from network B
     
     model_config = {
         "arbitrary_types_allowed": True  # Allow pandas DataFrames
@@ -51,7 +53,12 @@ class ABGridRelevantNodesSchema(BaseModel):
 
 
 class ABGridIsolatedNodesSchema(BaseModel):
-    """Pydantic model for isolated nodes by network type."""
+    """Schema for isolated nodes by network type.
+    
+    Attributes:
+        a: Isolated nodes from network A.
+        b: Isolated nodes from network B.
+    """
     a: pd.Index  # Isolated nodes from network A
     b: pd.Index  # Isolated nodes from network B
     
@@ -61,11 +68,17 @@ class ABGridIsolatedNodesSchema(BaseModel):
 
 
 class ABGridGroupSchemaOut(BaseModel):
-    """
-    Pydantic model for group data structure returned by get_group_data().
+    """Output schema for group data.
     
-    Contains basic group information extracted from ABGridGroupSchemaIn with
-    processed member symbols for display and validation purposes.
+    Contains basic group information extracted from ABGridGroupSchemaIn
+    with processed member symbols for display and validation.
+    
+    Attributes:
+        project_title: Title of the AB-Grid project.
+        question_a: Text of question A from the survey.
+        question_b: Text of question B from the survey.
+        group: Group identifier.
+        members: List of member symbols (A, B, C, etc.) based on group size.
     """
     project_title: str  # Title of the AB-Grid project
     question_a: str  # Text of question A from the survey
@@ -79,11 +92,22 @@ class ABGridGroupSchemaOut(BaseModel):
 
 
 class ABGridReportSchemaOut(BaseModel):
-    """
-    Pydantic model for report data structure returned by get_report_data().
+    """Output schema for comprehensive report data.
     
-    Contains comprehensive analysis results including project metadata, network analysis,
-    sociogram data (optional), relevant nodes identification, and isolated nodes detection.
+    Contains complete analysis results including project metadata, network
+    analysis, sociogram data (optional), relevant nodes, and isolated nodes.
+    
+    Attributes:
+        year: Current year when report was generated.
+        project_title: Title of the AB-Grid project.
+        question_a: Text of question A from the survey.
+        question_b: Text of question B from the survey.
+        group: Group identifier.
+        group_size: Number of participants in the group.
+        sna: Complete social network analysis results.
+        sociogram: Sociogram analysis results (None if not requested).
+        relevant_nodes_ab: Relevant nodes from both networks.
+        isolated_nodes_ab: Isolated nodes from both networks.
     """
     year: int  # Current year when report was generated
     project_title: str  # Title of the AB-Grid project
@@ -91,10 +115,10 @@ class ABGridReportSchemaOut(BaseModel):
     question_b: str  # Text of question B from the survey
     group: int  # Group identifier
     group_size: int  # Number of participants in the group
-    sna: SNADict  # Complete social network analysis results (SNADict)
+    sna: SNADict  # Complete social network analysis results
     sociogram: Optional[SociogramDict]  # Sociogram analysis results (None if not requested)
-    relevant_nodes_ab: ABGridRelevantNodesSchema  # Most/least relevant nodes for positive/negative outcomes
-    isolated_nodes_ab: ABGridIsolatedNodesSchema  # Nodes with no connections in each network
+    relevant_nodes_ab: ABGridRelevantNodesSchema  # Relevant nodes from both networks
+    isolated_nodes_ab: ABGridIsolatedNodesSchema  # Isolated nodes from both networks
     
     model_config = {
         "arbitrary_types_allowed": True,  # Allow complex types like DataFrames
@@ -103,19 +127,21 @@ class ABGridReportSchemaOut(BaseModel):
 
 
 class ABGridGroupSchemaIn(BaseModel):
-    """
-    Pydantic model for basic group information collection.
+    """Input schema for basic group information.
     
-    This schema is used for initial data collection when creating an AB-Grid project.
-    It validates the basic information needed before proceeding to the more complex
-    choice configuration.
+    Used for initial data collection when creating an AB-Grid project.
+    Validates basic information before proceeding to choice configuration.
     
     Attributes:
-        project_title: The project title (1-100 characters)
-        question_a: First question text (1-300 characters)
-        question_b: Second question text (1-300 characters)
-        group: Group identifier (must be an integer)
-        members: Number of members per group (integer between 8 and 50)
+        project_title: Project title (1-100 characters).
+        question_a: First question text (1-300 characters).
+        question_b: Second question text (1-300 characters).
+        group: Group identifier (integer).
+        members: Number of members per group (8-50).
+        
+    Notes:
+        All fields are typed as Any to enable custom validation and
+        error collection in a single pass.
     """
     
     project_title: Any
@@ -124,26 +150,26 @@ class ABGridGroupSchemaIn(BaseModel):
     group: Any
     members: Any
     
-    model_config = {"extra": "forbid"}
+    model_config = {
+        "extra": "forbid"
+    }
 
     @model_validator(mode="before")
     @classmethod
     def validate_all_fields(cls, data: Dict[str, Any]) -> Dict[str, Any]:
-        """
-        Validate all fields and collect errors.
+        """Validate all fields and collect errors.
         
-        This method performs comprehensive validation of all fields in the schema.
-        It collects all validation errors and raises a single exception with all
-        errors if any validation fails.
+        Performs comprehensive validation of all fields, collecting all
+        validation errors and raising a single exception if any fail.
         
         Args:
-            data: Raw input data dictionary
+            data: Raw input data dictionary.
             
         Returns:
-            The validated data dictionary
+            Validated data dictionary.
             
         Raises:
-            PydanticValidationException: If any validation errors are found
+            PydanticValidationException: If validation errors are found.
         """
         errors = []
         
@@ -161,17 +187,13 @@ class ABGridGroupSchemaIn(BaseModel):
     
     @classmethod
     def _validate_members_field(cls, value: Any, errors: List[Dict[str, Any]]) -> None:
-        """
-        Validate the members field.
+        """Validate the members field.
         
-        The members field must be an integer between 8 and 50 inclusive.
+        Ensures members is an integer between 8 and 50 inclusive.
         
         Args:
-            value: The value to validate
-            errors: List to append errors to
-            
-        Returns:
-            None.
+            value: Value to validate.
+            errors: List to append errors to.
         """
         if value is None:
             errors.append({
@@ -194,29 +216,27 @@ class ABGridGroupSchemaIn(BaseModel):
        
 
 class ABGridReportSchemaIn(BaseModel):
-    """
-    Pydantic model representing a complete ABGrid data project.
+    """Input schema for complete AB-Grid project data.
     
-    This schema validates the complete AB-Grid project data including the choice
-    structures that define the relationships between different options. It ensures
-    that all choice keys are consistent between questions and that all value
-    references are valid.
+    Validates complete project data including choice structures that define
+    relationships between options. Ensures choice keys consistency and
+    valid value references.
     
     Attributes:
-        project_title: The project title (1-100 characters)
-        question_a: First question text (1-300 characters)
-        question_b: Second question text (1-300 characters)
-        group: Group identifier (must be an integer)
-        choices_a: List of choice dictionaries for question A (must be non-empty)
-        choices_b: List of choice dictionaries for question B (must be non-empty)
-
+        project_title: Project title (1-100 characters).
+        question_a: First question text (1-300 characters).
+        question_b: Second question text (1-300 characters).
+        group: Group identifier (integer).
+        choices_a: Choice dictionaries for question A (non-empty list).
+        choices_b: Choice dictionaries for question B (non-empty list).
+        
     Notes:
-        - Keys in choices_a and choices_b must be identical
-        - All values must reference valid keys from either choices_a or choices_b
-        - Keys and values must be single alphabetic characters
-        - Choice keys must follow the SYMBOLS pattern (A, B, C, etc.)
-        - At least 3 nodes must have expressed a choice (have non-null, non-empty values)
-        - Length of values in each key-value pair must be less than the total number of keys
+        - All fields typed as Any for custom validation.
+        - Keys in choices_a and choices_b must be identical.
+        - Values must reference valid keys.
+        - Keys and values must be single alphabetic characters.
+        - Maximum 60% of nodes can have no choice.
+        - Value count must be less than total key count.
     """
     
     project_title: Any
@@ -231,26 +251,24 @@ class ABGridReportSchemaIn(BaseModel):
     @model_validator(mode="before")
     @classmethod
     def validate_all_fields(cls, data: Dict[str, Any]) -> Dict[str, Any]:
-        """
-        Comprehensive validation of all fields.
+        """Validate all fields comprehensively.
         
-        This method validates all fields in the schema, including the complex
-        choice validation logic. It ensures that:
-        1. Basic fields are valid
-        2. Choice structures are correct
-        3. Choice keys are consistent between questions
-        4. All value references point to valid keys
-        5. No more than 60% of nodes have expressed no choice
-        6. Length of values is less than the number of keys
+        Validates all fields including complex choice validation logic:
+        1. Basic field validation.
+        2. Choice structure correctness.
+        3. Choice key consistency between questions.
+        4. Valid value references.
+        5. Maximum 60% nodes without choices.
+        6. Value count less than key count.
         
         Args:
-            data: Raw input data dictionary
+            data: Raw input data dictionary.
             
         Returns:
-            The validated data dictionary
+            Validated data dictionary.
             
         Raises:
-            PydanticValidationException: If any validation errors are found
+            PydanticValidationException: If validation errors are found.
         """
         errors = []
         
@@ -289,14 +307,13 @@ class ABGridReportSchemaIn(BaseModel):
     
     @model_validator(mode="after")
     def strip_choice_values_after(self) -> "ABGridReportSchemaIn":
-        """
-        Strip spaces from choice values after validation.
+        """Strip spaces from choice values post-validation.
         
-        This method removes spaces around commas in choice values after
-        the model has been validated and the data structure is confirmed valid.
+        Removes spaces around commas in choice values after model validation
+        confirms data structure validity.
         
         Returns:
-            The model instance with stripped choice values
+            Model instance with stripped choice values.
         """
         for field_name in ["choices_a", "choices_b"]:
             choices = getattr(self, field_name)
@@ -310,26 +327,25 @@ class ABGridReportSchemaIn(BaseModel):
     
     @classmethod
     def _validate_choices_structure(cls, data: Dict[str, Any], field_name: str, errors: List[Dict[str, Any]]) -> Set[str]:
-        """
-        Validate choices structure and format.
+        """Validate choices structure and format.
         
-        This method validates that:
-        1. Choices is a non-empty list
-        2. Each choice is a dictionary with exactly one key-value pair
-        3. Keys are single alphabetic characters (no duplicates)
-        4. Keys should not exceed SYMBOLS length
-        5. Values have correct format (comma-separated single alphabetic characters)
-        6. Keys don't reference themselves in values
-        7. No duplicate values within a choice
-        8. Length of values must be less than the total number of keys
+        Validates:
+        1. Choices is non-empty list.
+        2. Each choice is single key-value dictionary.
+        3. Keys are single alphabetic characters (no duplicates).
+        4. Keys don't exceed SYMBOLS length.
+        5. Values have correct format.
+        6. Keys don't self-reference.
+        7. No duplicate values within choice.
+        8. Value count less than key count.
         
         Args:
-            data: The full data dictionary
-            field_name: Name of the choices field ("choices_a" or "choices_b")
-            errors: List to append errors to
+            data: Full data dictionary.
+            field_name: Name of choices field ("choices_a" or "choices_b").
+            errors: List to append errors to.
             
         Returns:
-            Set of extracted keys from the choices
+            Set of extracted keys from choices.
         """
         choices = data.get(field_name)
         extracted_keys: Set[str] = set()
@@ -410,21 +426,19 @@ class ABGridReportSchemaIn(BaseModel):
     @classmethod
     def _validate_value_format(cls, field_name: str, index: int, key: str, value_str: Any, 
                                errors: List[Dict[str, Any]], total_keys: int) -> None:
-        """
-        Validate the format of a choice value.
+        """Validate choice value format.
         
-        This method validates that values are either None, empty strings, or
-        comma-separated lists of single alphabetic characters. It also ensures
-        that keys don't reference themselves, there are no duplicates, and
-        the number of values is less than the total number of keys.
+        Validates values are None, empty strings, or comma-separated single
+        alphabetic characters. Ensures no self-reference, no duplicates,
+        and value count less than key count.
         
         Args:
-            field_name: Name of the choices field
-            index: the choice zero-based index
-            key: The choice key
-            value_str: The value to validate
-            errors: List to append errors to
-            total_keys: Total number of keys in the choice set
+            field_name: Name of choices field.
+            index: Choice zero-based index.
+            key: Choice key.
+            value_str: Value to validate.
+            errors: List to append errors to.
+            total_keys: Total number of keys in choice set.
         """
         if value_str is None:
             return
@@ -477,17 +491,15 @@ class ABGridReportSchemaIn(BaseModel):
     
     @classmethod
     def _validate_value_references(cls, data: Dict[str, Any], all_valid_keys: Set[str], errors: List[Dict[str, Any]]) -> None:
-        """
-        Validate that all value references point to valid keys.
+        """Validate value references point to valid keys.
         
-        This method ensures that every value in the choices references only
-        keys that actually exist in the combined key set from both choices_a
-        and choices_b.
+        Ensures every value in choices references only existing keys from
+        the combined key set of both choices_a and choices_b.
         
         Args:
-            data: The full data dictionary
-            all_valid_keys: Set of all valid keys from both choices
-            errors: List to append errors to
+            data: Full data dictionary.
+            all_valid_keys: Set of all valid keys from both choices.
+            errors: List to append errors to.
         """
         for field_name in ["choices_a", "choices_b"]:
             choices = data.get(field_name)
@@ -516,19 +528,17 @@ class ABGridReportSchemaIn(BaseModel):
     
     @classmethod
     def _validate_minimum_nodes_with_choices(cls, data: Dict[str, Any], errors: List[Dict[str, Any]]) -> None:
-        """
-        Validate choice completion requirements for each choice set separately.
+        """Validate choice completion requirements.
         
-        This method validates that for both choices_a and choices_b:
-        1. At least 3 nodes have expressed a choice
-        2. No more than 60% of nodes have empty values (i.e., no choices)
+        For both choices_a and choices_b, validates:
+        1. At least 3 nodes have expressed a choice.
+        2. Maximum 60% of nodes have empty values.
         
-        A node is considered to have expressed a choice if it has a non-null,
-        non-empty value in the respective choice set.
+        A node has expressed a choice if it has a non-null, non-empty value.
         
         Args:
-            data: The full data dictionary
-            errors: List to append errors to
+            data: Full data dictionary.
+            errors: List to append errors to.
         """
         choices_a = data.get("choices_a")
         choices_b = data.get("choices_b")
@@ -545,13 +555,12 @@ class ABGridReportSchemaIn(BaseModel):
 
     @classmethod
     def _validate_single_choice_set(cls, choices: List[Dict[str, Any]], field_name: str, errors: List[Dict[str, Any]]) -> None:
-        """
-        Validate a single choice set for completion requirements.
+        """Validate single choice set for completion requirements.
         
         Args:
-            choices: List of choice dictionaries
-            field_name: Name of the choice field for error reporting
-            errors: List to append errors to
+            choices: List of choice dictionaries.
+            field_name: Name of choice field for error reporting.
+            errors: List to append errors to.
         """
         if len(choices) == 0:
             return  # No choices to validate
@@ -592,20 +601,19 @@ class ABGridReportSchemaIn(BaseModel):
 
 
 def _validate_text_field(field_name: str, value: Any, min_len: int, max_len: int) -> List[Dict[str, Any]]:
-    """
-    Validate a text field with length and character constraints.
+    """Validate text field with length and character constraints.
     
-    This function validates that a field is a string within specified length bounds
-    and contains only allowed characters (letters, numbers, and safe punctuation).
+    Validates field is a string within length bounds containing only
+    allowed characters (letters, numbers, safe punctuation).
     
     Args:
-        field_name: Name of the field being validated (for error reporting)
-        value: The value to validate
-        min_len: Minimum allowed length for the string
-        max_len: Maximum allowed length for the string
+        field_name: Name of field for error reporting.
+        value: Value to validate.
+        min_len: Minimum allowed string length.
+        max_len: Maximum allowed string length.
         
     Returns:
-        List of error dictionaries. Empty list if validation passes.
+        List of error dictionaries. Empty if validation passes.
     """
     errors = []
     
@@ -651,16 +659,13 @@ def _validate_text_field(field_name: str, value: Any, min_len: int, max_len: int
 
 
 def _validate_group_field(value: Any) -> List[Dict[str, Any]]:
-    """
-    Validate the group field.
-    
-    The group field must be an integer.
+    """Validate group field as integer.
     
     Args:
-        value: The value to validate
+        value: Value to validate.
         
     Returns:
-        List of error dictionaries. Empty list if validation passes.
+        List of error dictionaries. Empty if validation passes.
     """
     errors = []
     
