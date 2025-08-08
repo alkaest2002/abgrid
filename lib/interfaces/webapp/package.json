@@ -16,7 +16,7 @@
   },
   "devDependencies": {
     "@vitejs/plugin-basic-ssl": "^2.1.0",
-    "vite": "^7.0.6"
+    "vite": "^7.1.1"
   },
   "dependencies": {
     "@alpinejs/persist": "^3.14.9",
@@ -25,6 +25,6 @@
     "alpinejs": "^3.14.9",
     "alpinejs-i18n": "^2.5.3",
     "tailwindcss": "^4.1.11",
-    "yaml": "^2.8.0"
+    "yaml": "^2.8.1"
   }
 }
