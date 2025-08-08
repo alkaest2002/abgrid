@@ -5,6 +5,7 @@ The code is part of the AB-Grid project and is licensed under the MIT License.
 """
 
 import re
+import asyncio
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
@@ -75,10 +76,31 @@ class CoreSna:
             packed_edges_b: List[Dict[str, Optional[str]]], 
     ) -> SNADict:
         """
+        Synchronous wrapper for the async get_async method.
+        
         Compute and store comprehensive network analysis for two directed networks.
 
-        Performs a complete social network analysis on input networks,
-        including graph construction, statistical analysis, centrality measures, 
+        Args:
+            packed_edges_a: Edge data for network A. Each dictionary represents edges from a source node,
+                with keys as source nodes and values as comma-separated target nodes or None.
+            packed_edges_b: Edge data for network B. Structure mirrors `packed_edges_a`.
+
+        Returns:
+            A dictionary containing all network analysis results including nodes, edges, 
+            adjacency matrices, statistics, rankings, components, and visualization data 
+            for both networks.
+        """
+        return asyncio.run(self.get_async(packed_edges_a, packed_edges_b))
+
+    async def get_async(self, 
+                       packed_edges_a: List[Dict[str, Optional[str]]], 
+                       packed_edges_b: List[Dict[str, Optional[str]]], 
+    ) -> SNADict:
+        """
+        Asynchronously compute and store comprehensive network analysis for two directed networks.
+
+        Performs a complete social network analysis on input networks using concurrent execution
+        where possible, including graph construction, statistical analysis, centrality measures, 
         component detection, and visualization generation.
 
         Args:
@@ -92,6 +114,120 @@ class CoreSna:
             for both networks.
         """
 
+        # STEP 1: Create networks (must happen first, synchronously)
+        await self._create_networks_async(packed_edges_a, packed_edges_b)
+        
+        # STEP 2 & 3: Concurrent computation using TaskGroups
+        
+        # Batch 1: Independent computations that only depend on Step 1
+        async with asyncio.TaskGroup() as tg:
+            # Store tasks with their result keys for later retrieval
+            tasks = {}
+            for network_type in ("a", "b"):
+                tasks[f"edges_types_{network_type}"] = tg.create_task(
+                    self._run_in_executor(self._compute_edges_types, network_type)
+                )
+                tasks[f"components_{network_type}"] = tg.create_task(
+                    self._run_in_executor(self._compute_components, network_type)
+                )
+                tasks[f"graph_{network_type}"] = tg.create_task(
+                    self._run_in_executor(self._create_graph, network_type)
+                )
+        
+        # Store batch 1 results
+        for key, task in tasks.items():
+            self.sna[key] = task.result()
+        
+        # Batch 2: Computations that depend on edges_types
+        async with asyncio.TaskGroup() as tg:
+            tasks = {}
+            for network_type in ("a", "b"):
+                tasks[f"macro_stats_{network_type}"] = tg.create_task(
+                    self._run_in_executor(self._compute_macro_stats, network_type)
+                )
+                tasks[f"micro_stats_{network_type}"] = tg.create_task(
+                    self._run_in_executor(self._compute_micro_stats, network_type)
+                )
+        
+        # Store batch 2 results
+        for key, task in tasks.items():
+            self.sna[key] = task.result()
+        
+        # Batch 3: Computations that depend on micro_stats
+        async with asyncio.TaskGroup() as tg:
+            tasks = {}
+            for network_type in ("a", "b"):
+                tasks[f"descriptives_{network_type}"] = tg.create_task(
+                    self._run_in_executor(self._compute_descriptives, network_type)
+                )
+                tasks[f"rankings_{network_type}"] = tg.create_task(
+                    self._run_in_executor(self._compute_rankings, network_type)
+                )
+        
+        # Store batch 3 results
+        for key, task in tasks.items():
+            self.sna[key] = task.result()
+        
+        # Final batch: Cross-network comparisons
+        async with asyncio.TaskGroup() as tg:
+            rankings_ab_task = tg.create_task(
+                self._run_in_executor(self._compute_rankings_ab)
+            )
+            relevant_nodes_task = tg.create_task(
+                self._run_in_executor(self._compute_relevant_nodes_ab)
+            )
+        
+        self.sna["rankings_ab"] = rankings_ab_task.result()
+        self.sna["relevant_nodes_ab"] = relevant_nodes_task.result()
+
+        return cast(SNADict, self.sna)
+    
+    async def _run_in_executor(self, func, *args):
+        """
+        Run a synchronous function in a thread pool executor.
+        
+        This allows CPU-bound synchronous functions to run without blocking
+        the asyncio event loop.
+        
+        Args:
+            func: The synchronous function to run
+            *args: Arguments to pass to the function
+            
+        Returns:
+            The result of the function call
+        """
+        loop = asyncio.get_event_loop()
+        return await loop.run_in_executor(None, func, *args)
+    
+    async def _create_networks_async(self, 
+                                    packed_edges_a: List[Dict[str, Optional[str]]], 
+                                    packed_edges_b: List[Dict[str, Optional[str]]]) -> None:
+        """
+        Asynchronously create networks with nodes, edges, and adjacency lists.
+        
+        This is Step 1 of the analysis and must complete before other computations can begin.
+        Even though this is wrapped as async, the actual work is synchronous but allows
+        for proper integration with the async workflow.
+        
+        Args:
+            packed_edges_a: Edge data for network A
+            packed_edges_b: Edge data for network B
+        """
+        # Run the synchronous network creation in executor to avoid blocking
+        await self._run_in_executor(self._create_networks_sync, packed_edges_a, packed_edges_b)
+    
+    def _create_networks_sync(self, 
+                             packed_edges_a: List[Dict[str, Optional[str]]], 
+                             packed_edges_b: List[Dict[str, Optional[str]]]) -> None:
+        """
+        Synchronously create networks with nodes, edges, and adjacency lists.
+        
+        This performs the actual work of network creation.
+        
+        Args:
+            packed_edges_a: Edge data for network A
+            packed_edges_b: Edge data for network B
+        """
         # Set network data
         network_edges: list[tuple[Literal["a", "b"], Any]] = [
             ("a", packed_edges_a), 
@@ -104,8 +240,7 @@ class CoreSna:
             self.sna[f"edges_{network_type}"] = self._unpack_network_edges(packed_edges)
             self.sna[f"network_{network_type}"] = nx.DiGraph(self.sna[f"edges_{network_type}"])
 
-        # Add isolated nodes to networks A and B, and 
-        # store nodes layout locations
+        # Add isolated nodes to networks A and B, and store nodes layout locations
         network_data: list[tuple[Literal["a", "b"], Any, Any]] = [
             ("a", self.sna["network_a"], self.sna["nodes_a"]), 
             ("b", self.sna["network_b"], self.sna["nodes_b"])
@@ -129,24 +264,6 @@ class CoreSna:
 
             # Store current network adjacency matrix
             self.sna[f"adjacency_{network_type}"] = nx.to_pandas_adjacency(network, nodelist=nodes)
-                    
-        # Store edge types, components, macro stats, micro stats, descriptives, rankings and graphs
-        for network_type in ("a", "b"):
-            self.sna[f"edges_types_{network_type}"] = self._compute_edges_types(network_type)
-            self.sna[f"components_{network_type}"] = self._compute_components(network_type)
-            self.sna[f"macro_stats_{network_type}"] = self._compute_macro_stats(network_type)
-            self.sna[f"micro_stats_{network_type}"] = self._compute_micro_stats(network_type)
-            self.sna[f"descriptives_{network_type}"] = self._compute_descriptives(network_type)
-            self.sna[f"rankings_{network_type}"] = self._compute_rankings(network_type)
-            self.sna[f"graph_{network_type}"] = self._create_graph(network_type)
-
-        # Store rankings comparison between networks
-        self.sna["rankings_ab"] = self._compute_rankings_ab()
-
-        # Store relevant nodes analysis
-        self.sna["relevant_nodes_ab"] = self._compute_relevant_nodes_ab()
-
-        return cast(SNADict, self.sna)
     
     def _compute_macro_stats(self, network_type: Literal["a", "b"]) -> pd.Series:
         """
