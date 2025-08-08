@@ -67,9 +67,9 @@ class RequestProtectionMiddleware(BaseHTTPMiddleware):
         # Use semaphores for thread-safe concurrent request limiting
         # Semaphores automatically handle counting and are exception-safe
         self.report_semaphore = asyncio.Semaphore(max_concurrent_requests_for_report)
-        print(max_concurrent_requests_for_group, max_concurrent_requests_for_report)
-        self.group_semaphore = asyncio.Semaphore(max_concurrent_requests_for_group)
-        self.report_semaphore = asyncio.Semaphore(max_concurrent_requests_for_report)
+        
+        self.group_semaphore = asyncio.Semaphore(15)
+        self.report_semaphore = asyncio.Semaphore(5)
         
         # Store limits for reference
         self.max_concurrent_requests_for_group = max_concurrent_requests_for_group
