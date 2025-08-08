@@ -78,9 +78,11 @@ class CoreSociogram:
                 - "graph_ii": Base64-encoded SVG string of integration index polar visualization
                 - "graph_ai": Base64-encoded SVG string of activity index polar visualization
                 - "relevant_nodes_ab": Dictionary with most/least relevant nodes for positive/negative outcomes
+        
         """
         # Store social network analysis data
         self.sna = sna
+        
         # Compute all sociogram components in sequence
         self.sociogram["macro_stats"] = self._compute_macro_stats()
         self.sociogram["micro_stats"] = self._compute_micro_stats()
@@ -106,13 +108,7 @@ class CoreSociogram:
                 - "ui_ii": Type II cohesion index (ratio of bidirectional positive edges to network size)
                 - "wi_i": Type I conflict index (ratio of bidirectional negative edges to total negative edges)
                 - "wi_ii": Type II conflict index (ratio of bidirectional negative edges to network size)
-                
-        Raises:
-            AttributeError: If sna data has not been set via the get() method.
         """
-        if self.sna is None:
-            raise AttributeError("SNA data must be set before computing statistics.")
-            
         # Get typed references to networks and edge types
         network_a: nx.DiGraph = self.sna["network_a"]
         network_b: nx.DiGraph = self.sna["network_b"]
@@ -166,11 +162,7 @@ class CoreSociogram:
                 - "st": Sociometric status classification (categorical)
                 - "*_rank": Dense ranking for each numeric metric and status (lower rank = better)
                 
-        Raises:
-            AttributeError: If sna data has not been set via the get() method.
         """
-        if self.sna is None:
-            raise AttributeError("SNA data must be set before computing statistics.")
         # Retrieve network graphs and adjacency matrices
         network_a: nx.DiGraph = self.sna["network_a"]
         network_b: nx.DiGraph = self.sna["network_b"]
@@ -231,11 +223,7 @@ class CoreSociogram:
             A DataFrame containing descriptive statistics (median, mean, std, IQR, sum, etc.)
             for all numeric columns in the micro-level statistics DataFrame.
             
-        Raises:
-            AttributeError: If micro_stats have not been computed yet.
         """
-        if self.sociogram["micro_stats"] is None:
-            raise AttributeError("Micro stats must be computed before descriptives.")
             
         # Select only non-rank numeric columns for statistical aggregation
         sociogram_numeric_columns: pd.DataFrame = (
@@ -312,13 +300,7 @@ class CoreSociogram:
             - Weight calculation uses formula: 10.0 / (rank ** 0.8)
             - Processes all ranking columns ending with '_rank' from sociogram rankings
                 
-        Raises:
-            AttributeError: If sociogram rankings or micro_stats have not been computed yet.
         """
-        # Make sure data is available
-        if self.sociogram["rankings"] is None or self.sociogram["micro_stats"] is None:
-            raise AttributeError("Sociogram micro statistics and rankings are required.")
-        
         # Select micro_stats and rankings to use
         micro_stats: pd.DataFrame = self.sociogram["micro_stats"]
         rankings: Dict[str, pd.Series] = self.sociogram["rankings"]
@@ -556,12 +538,7 @@ class CoreSociogram:
             The plot shows nodes as scatter points with labels, arranged radially with
             groups organized by score levels and angular jitter applied to reduce overlap.
             
-        Raises:
-            AttributeError: If micro_stats have not been computed yet.
         """
-        if self.sociogram["micro_stats"] is None:
-            raise AttributeError("Micro stats must be computed before creating graphs.")
-            
         # Extract values for the specified centrality coefficient
         data: pd.DataFrame = self.sociogram["micro_stats"].loc[:, [coefficient]].copy()
         
