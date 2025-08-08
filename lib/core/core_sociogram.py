@@ -5,6 +5,7 @@ The code is part of the AB-Grid project and is licensed under the MIT License.
 """
 
 import re
+import asyncio
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
@@ -58,6 +59,8 @@ class CoreSociogram:
 
     def get(self, sna: Dict[str, Any]) -> SociogramDict:
         """
+        Synchronous wrapper for the async get_async method.
+        
         Compute and store comprehensive sociogram analysis from social network data.
 
         Args:
@@ -80,19 +83,94 @@ class CoreSociogram:
                 - "relevant_nodes_ab": Dictionary with most/least relevant nodes for positive/negative outcomes
         
         """
+        return asyncio.run(self.get_async(sna))
+    
+    async def get_async(self, sna: Dict[str, Any]) -> SociogramDict:
+        """
+        Asynchronously compute and store comprehensive sociogram analysis from social network data.
+        
+        Uses concurrent execution where possible to optimize performance while respecting
+        data dependencies between different computations.
+
+        Args:
+            sna: A dictionary containing social network analysis data with the following structure:
+                - "network_a": NetworkX DiGraph for positive relationships
+                - "network_b": NetworkX DiGraph for negative relationships  
+                - "adjacency_a": Pandas DataFrame adjacency matrix for positive relationships
+                - "adjacency_b": Pandas DataFrame adjacency matrix for negative relationships
+                - "edges_types_a": Dictionary with edge type classifications for network A
+                - "edges_types_b": Dictionary with edge type classifications for network B
+
+        Returns:
+            A dictionary containing complete sociogram analysis with all computed metrics,
+            statistics, rankings, and visualizations.
+        """
         # Store social network analysis data
         self.sna = sna
         
-        # Compute all sociogram components in sequence
-        self.sociogram["macro_stats"] = self._compute_macro_stats()
-        self.sociogram["micro_stats"] = self._compute_micro_stats()
-        self.sociogram["descriptives"] = self._compute_descriptives()
-        self.sociogram["rankings"] = self._compute_rankings()
-        self.sociogram["relevant_nodes_ab"] = self._compute_relevant_nodes_ab()
-        self.sociogram["graph_ai"] = self._create_graph("ai")
-        self.sociogram["graph_ii"] = self._create_graph("ii")
+        # Batch 1: Independent computations that only depend on self.sna
+        # macro_stats and micro_stats can run concurrently
+        async with asyncio.TaskGroup() as tg:
+            macro_stats_task = tg.create_task(
+                self._run_in_executor(self._compute_macro_stats)
+            )
+            micro_stats_task = tg.create_task(
+                self._run_in_executor(self._compute_micro_stats)
+            )
+        
+        # Store batch 1 results
+        self.sociogram["macro_stats"] = macro_stats_task.result()
+        self.sociogram["micro_stats"] = micro_stats_task.result()
+        
+        # Batch 2: Computations that depend on micro_stats
+        # descriptives, rankings, and both graphs can run concurrently
+        async with asyncio.TaskGroup() as tg:
+            descriptives_task = tg.create_task(
+                self._run_in_executor(self._compute_descriptives)
+            )
+            rankings_task = tg.create_task(
+                self._run_in_executor(self._compute_rankings)
+            )
+            graph_ai_task = tg.create_task(
+                self._run_in_executor(self._create_graph, "ai")
+            )
+            graph_ii_task = tg.create_task(
+                self._run_in_executor(self._create_graph, "ii")
+            )
+        
+        # Store batch 2 results
+        self.sociogram["descriptives"] = descriptives_task.result()
+        self.sociogram["rankings"] = rankings_task.result()
+        self.sociogram["graph_ai"] = graph_ai_task.result()
+        self.sociogram["graph_ii"] = graph_ii_task.result()
+        
+        # Batch 3: Computations that depend on both micro_stats and rankings
+        async with asyncio.TaskGroup() as tg:
+            relevant_nodes_task = tg.create_task(
+                self._run_in_executor(self._compute_relevant_nodes_ab)
+            )
+        
+        # Store batch 3 results
+        self.sociogram["relevant_nodes_ab"] = relevant_nodes_task.result()
 
         return cast(SociogramDict, self.sociogram)
+    
+    async def _run_in_executor(self, func, *args):
+        """
+        Run a synchronous function in a thread pool executor.
+        
+        This allows CPU-bound synchronous functions to run without blocking
+        the asyncio event loop, enabling true concurrency for independent computations.
+        
+        Args:
+            func: The synchronous function to run
+            *args: Arguments to pass to the function
+            
+        Returns:
+            The result of the function call
+        """
+        loop = asyncio.get_event_loop()
+        return await loop.run_in_executor(None, func, *args)
 
     def _compute_macro_stats(self) -> pd.Series:
         """
