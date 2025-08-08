@@ -4,6 +4,7 @@ Author: Pierpaolo Calanna
 The code is part of the AB-Grid project and is licensed under the MIT License.
 """
 
+import asyncio
 import io
 import numpy as np
 import pandas as pd
@@ -132,3 +133,19 @@ def gini_coefficient(values: pd.Series) -> float:
     
     return gini
 
+async def run_in_executor(func, *args):
+    """
+    Run a synchronous function in a thread pool executor.
+    
+    This allows CPU-bound synchronous functions to run without blocking
+    the asyncio event loop.
+    
+    Args:
+        func: The synchronous function to run
+        *args: Arguments to pass to the function
+        
+    Returns:
+        The result of the function call
+    """
+    loop = asyncio.get_event_loop()
+    return await loop.run_in_executor(None, func, *args)

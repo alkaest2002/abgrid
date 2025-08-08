@@ -15,7 +15,7 @@ from typing import Any, Literal, Dict, TypedDict, Tuple, List, cast
 from matplotlib.figure import Figure
 
 from lib.core import CM_TO_INCHES
-from lib.core.core_utils import compute_descriptives, figure_to_base64_svg
+from lib.core.core_utils import compute_descriptives, figure_to_base64_svg, run_in_executor
 
 class SociogramDict(TypedDict):
     """Dictionary structure for storing sociogram analysis results."""
@@ -112,10 +112,10 @@ class CoreSociogram:
         # macro_stats and micro_stats can run concurrently
         async with asyncio.TaskGroup() as tg:
             macro_stats_task = tg.create_task(
-                self._run_in_executor(self._compute_macro_stats)
+                run_in_executor(self._compute_macro_stats)
             )
             micro_stats_task = tg.create_task(
-                self._run_in_executor(self._compute_micro_stats)
+                run_in_executor(self._compute_micro_stats)
             )
         
         # Store batch 1 results
@@ -126,16 +126,16 @@ class CoreSociogram:
         # descriptives, rankings, and both graphs can run concurrently
         async with asyncio.TaskGroup() as tg:
             descriptives_task = tg.create_task(
-                self._run_in_executor(self._compute_descriptives)
+                run_in_executor(self._compute_descriptives)
             )
             rankings_task = tg.create_task(
-                self._run_in_executor(self._compute_rankings)
+                run_in_executor(self._compute_rankings)
             )
             graph_ai_task = tg.create_task(
-                self._run_in_executor(self._create_graph, "ai")
+                run_in_executor(self._create_graph, "ai")
             )
             graph_ii_task = tg.create_task(
-                self._run_in_executor(self._create_graph, "ii")
+                run_in_executor(self._create_graph, "ii")
             )
         
         # Store batch 2 results
@@ -147,7 +147,7 @@ class CoreSociogram:
         # Batch 3: Computations that depend on both micro_stats and rankings
         async with asyncio.TaskGroup() as tg:
             relevant_nodes_task = tg.create_task(
-                self._run_in_executor(self._compute_relevant_nodes_ab)
+                run_in_executor(self._compute_relevant_nodes_ab)
             )
         
         # Store batch 3 results
@@ -155,23 +155,6 @@ class CoreSociogram:
 
         return cast(SociogramDict, self.sociogram)
     
-    async def _run_in_executor(self, func, *args):
-        """
-        Run a synchronous function in a thread pool executor.
-        
-        This allows CPU-bound synchronous functions to run without blocking
-        the asyncio event loop, enabling true concurrency for independent computations.
-        
-        Args:
-            func: The synchronous function to run
-            *args: Arguments to pass to the function
-            
-        Returns:
-            The result of the function call
-        """
-        loop = asyncio.get_event_loop()
-        return await loop.run_in_executor(None, func, *args)
-
     def _compute_macro_stats(self) -> pd.Series:
         """
         Compute macro-level sociogram statistics including cohesion and conflict indices.

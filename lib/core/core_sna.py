@@ -16,7 +16,7 @@ from functools import reduce
 from scipy.spatial import ConvexHull
 
 from lib.core import A_COLOR, B_COLOR, CM_TO_INCHES
-from lib.core.core_utils import compute_descriptives, figure_to_base64_svg
+from lib.core.core_utils import compute_descriptives, figure_to_base64_svg, run_in_executor
 
 class SNADict(TypedDict):
     """Type definition for the SNA dictionary containing network analysis results."""
@@ -115,7 +115,7 @@ class CoreSna:
         """
 
         # STEP 1: Create networks (must happen first, synchronously)
-        await self._create_networks_async(packed_edges_a, packed_edges_b)
+        await run_in_executor(self._create_networks, packed_edges_a, packed_edges_b)
         
         # STEP 2 & 3: Concurrent computation using TaskGroups
         
@@ -125,13 +125,13 @@ class CoreSna:
             tasks = {}
             for network_type in ("a", "b"):
                 tasks[f"edges_types_{network_type}"] = tg.create_task(
-                    self._run_in_executor(self._compute_edges_types, network_type)
+                    run_in_executor(self._compute_edges_types, network_type)
                 )
                 tasks[f"components_{network_type}"] = tg.create_task(
-                    self._run_in_executor(self._compute_components, network_type)
+                    run_in_executor(self._compute_components, network_type)
                 )
                 tasks[f"graph_{network_type}"] = tg.create_task(
-                    self._run_in_executor(self._create_graph, network_type)
+                    run_in_executor(self._create_graph, network_type)
                 )
         
         # Store batch 1 results
@@ -143,10 +143,10 @@ class CoreSna:
             tasks = {}
             for network_type in ("a", "b"):
                 tasks[f"macro_stats_{network_type}"] = tg.create_task(
-                    self._run_in_executor(self._compute_macro_stats, network_type)
+                    run_in_executor(self._compute_macro_stats, network_type)
                 )
                 tasks[f"micro_stats_{network_type}"] = tg.create_task(
-                    self._run_in_executor(self._compute_micro_stats, network_type)
+                    run_in_executor(self._compute_micro_stats, network_type)
                 )
         
         # Store batch 2 results
@@ -158,10 +158,10 @@ class CoreSna:
             tasks = {}
             for network_type in ("a", "b"):
                 tasks[f"descriptives_{network_type}"] = tg.create_task(
-                    self._run_in_executor(self._compute_descriptives, network_type)
+                    run_in_executor(self._compute_descriptives, network_type)
                 )
                 tasks[f"rankings_{network_type}"] = tg.create_task(
-                    self._run_in_executor(self._compute_rankings, network_type)
+                    run_in_executor(self._compute_rankings, network_type)
                 )
         
         # Store batch 3 results
@@ -171,10 +171,10 @@ class CoreSna:
         # Final batch: Cross-network comparisons
         async with asyncio.TaskGroup() as tg:
             rankings_ab_task = tg.create_task(
-                self._run_in_executor(self._compute_rankings_ab)
+                run_in_executor(self._compute_rankings_ab)
             )
             relevant_nodes_task = tg.create_task(
-                self._run_in_executor(self._compute_relevant_nodes_ab)
+                run_in_executor(self._compute_relevant_nodes_ab)
             )
         
         self.sna["rankings_ab"] = rankings_ab_task.result()
@@ -182,41 +182,8 @@ class CoreSna:
 
         return cast(SNADict, self.sna)
     
-    async def _run_in_executor(self, func, *args):
-        """
-        Run a synchronous function in a thread pool executor.
-        
-        This allows CPU-bound synchronous functions to run without blocking
-        the asyncio event loop.
-        
-        Args:
-            func: The synchronous function to run
-            *args: Arguments to pass to the function
-            
-        Returns:
-            The result of the function call
-        """
-        loop = asyncio.get_event_loop()
-        return await loop.run_in_executor(None, func, *args)
-    
-    async def _create_networks_async(self, 
-                                    packed_edges_a: List[Dict[str, Optional[str]]], 
-                                    packed_edges_b: List[Dict[str, Optional[str]]]) -> None:
-        """
-        Asynchronously create networks with nodes, edges, and adjacency lists.
-        
-        This is Step 1 of the analysis and must complete before other computations can begin.
-        Even though this is wrapped as async, the actual work is synchronous but allows
-        for proper integration with the async workflow.
-        
-        Args:
-            packed_edges_a: Edge data for network A
-            packed_edges_b: Edge data for network B
-        """
-        # Run the synchronous network creation in executor to avoid blocking
-        await self._run_in_executor(self._create_networks_sync, packed_edges_a, packed_edges_b)
-    
-    def _create_networks_sync(self, 
+  
+    def _create_networks(self, 
                              packed_edges_a: List[Dict[str, Optional[str]]], 
                              packed_edges_b: List[Dict[str, Optional[str]]]) -> None:
         """
