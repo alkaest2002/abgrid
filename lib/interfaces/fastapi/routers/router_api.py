@@ -4,6 +4,7 @@ Author: Pierpaolo Calanna
 The code is part of the AB-Grid project and is licensed under the MIT License.
 """
 
+import asyncio
 from typing import Any, Dict
 from fastapi import APIRouter, Query, Depends, status, Request
 from fastapi.responses import JSONResponse
@@ -79,13 +80,20 @@ def get_router_api() -> APIRouter:
             Limited to 1 request per 5 seconds per client
         """
         try:
-            group_data: Dict[str, Any] = _abgrid_data.get_group_data(model)
-
-            # Render the group template
-            template_path = f"/{language}/group.yaml"
-            rendered_group = _abgrid_renderer.render(template_path, group_data)
+            # Run CPU-bound group data processing in thread pool
+            group_data: Dict[str, Any] = await asyncio.to_thread(
+                _abgrid_data.get_group_data, 
+                model
+            )
             
-            # Generate safe filename
+            # Template rendering is typically I/O bound, but can also be threaded if heavy
+            template_path = f"/{language}/group.yaml"
+            rendered_group = await asyncio.to_thread(
+                _abgrid_renderer.render,
+                template_path,
+                group_data
+            )
+            
             safe_title = "".join(c for c in model.project_title if c.isalnum() or c in (' ', '-', '_')).rstrip()
             safe_title = safe_title.replace(' ', '_')[:30]
             filename = f"{safe_title}_g{model.group}.yaml"
@@ -154,21 +162,36 @@ def get_router_api() -> APIRouter:
         Note:
             Report generation is computationally intensive, hence the longer rate limit window.
             The sociogram parameter significantly affects processing time and resource usage.
+            CPU-intensive operations are executed in thread pool to prevent blocking.
         """
         try:
-            # Generate report data
-            report_data: Dict[str, Any] = _abgrid_data.get_report_data(model, with_sociogram)
+            # Run heavy computation in thread pool to avoid blocking event loop
+            report_data: Dict[str, Any] = await asyncio.to_thread(
+                _abgrid_data.get_report_data,
+                model,
+                with_sociogram
+            )
             
-            # Render report template
+            # Template rendering in thread pool as well
             template_path = f"./{language}/report.html"
-            rendered_report = _abgrid_renderer.render(template_path, report_data)
+            rendered_report = await asyncio.to_thread(
+                _abgrid_renderer.render,
+                template_path,
+                report_data
+            )
+            
+            # JSON serialization can also be CPU-intensive for large data
+            report_json = await asyncio.to_thread(
+                to_json,
+                report_data
+            )
 
             return JSONResponse(
                 status_code=status.HTTP_200_OK,
                 content={
                     "detail": {
                         "report_html": rendered_report,
-                        "report_json": to_json(report_data)
+                        "report_json": report_json
                     }
                 }
             )
