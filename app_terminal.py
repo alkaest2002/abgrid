@@ -386,8 +386,8 @@ class ABGridTerminalApp:
         """
         try:
             check_python_version()
-            args = self.parse_args()
-            self.validate_args(args)
+            args = self._parse_args()
+            self._validate_args(args)
             
             command = self.commands[args.action](args, self.config)
             command.execute()
@@ -403,7 +403,7 @@ class ABGridTerminalApp:
             print(f"Unexpected error: {error}")
             return EXIT_SYSTEM_ERROR
     
-    def parse_args(self) -> argparse.Namespace:
+    def _parse_args(self) -> argparse.Namespace:
         """
         Parse and structure command line arguments.
         
@@ -439,7 +439,7 @@ class ABGridTerminalApp:
         
         return parser.parse_args()
     
-    def validate_args(self, args: argparse.Namespace) -> None:
+    def _validate_args(self, args: argparse.Namespace) -> None:
         """
         Validate parsed command line arguments for consistency and requirements.
         
