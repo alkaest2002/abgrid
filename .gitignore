@@ -19,3 +19,4 @@ lib/interfaces/docker/abgrid-fastapi.tar
 todo.md
 jwt_token.yaml
 venv
+.vscode
