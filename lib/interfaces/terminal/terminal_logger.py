@@ -149,7 +149,7 @@ def extract_traceback_info(error: Exception, exclude_files: Optional[Set[str]] =
     error_header = f"{type(error).__name__}: {str(error)}"
     
     if traceback_lines:
-        return f"Traceback (most recent call last):\n" + "\n".join(traceback_lines) + f"\n{error_header}"
+        return "Traceback (most recent call last):\n" + "\n".join(traceback_lines) + f"\n{error_header}"
     else:
         return f"Error: {error_header}"
     

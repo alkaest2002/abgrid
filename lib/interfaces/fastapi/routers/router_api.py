@@ -116,7 +116,7 @@ def get_router_api() -> APIRouter:
                 status_code=status.HTTP_404_NOT_FOUND,
                 content={"detail": "group_template_not_found_for_language"}
             )
-        except Exception as e:
+        except Exception:
             return JSONResponse(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
                 content={"detail": "failed_to_render_group_template"}
@@ -201,12 +201,12 @@ def get_router_api() -> APIRouter:
                 status_code=status.HTTP_404_NOT_FOUND,
                 content={"detail": "report_template_not_found_for_language"}
             )
-        except ValueError as e:
+        except ValueError:
             return JSONResponse(
                 status_code=status.HTTP_400_BAD_REQUEST,
                 content={"detail": "invalid_report_data"}
             )
-        except Exception as e:
+        except Exception:
             return JSONResponse(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
                 content={"detail": "failed_to_generate_report"}

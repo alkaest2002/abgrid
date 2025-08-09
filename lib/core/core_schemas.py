@@ -461,7 +461,7 @@ class ABGridReportSchemaIn(BaseModel):
             errors.append({
                 "location": f"{field_name}, {key}",
                 "value_to_blame": value_str,
-                "error_message": f"values_list_too_long"
+                "error_message": "values_list_too_long"
             })
         
         # Check all parts are valid single alphabetic characters
@@ -637,14 +637,14 @@ def _validate_text_field(field_name: str, value: Any, min_len: int, max_len: int
         errors.append({
             "location": field_name,
             "value_to_blame": value,
-            "error_message": f"field_is_too_short"
+            "error_message": "field_is_too_short"
         })
     
     if len(value) > max_len:
         errors.append({
             "location": field_name,
             "value_to_blame": value,
-            "error_message": f"field_is_too_long"
+            "error_message": "field_is_too_long"
         })
 
     # Check for forbidden characters
@@ -652,7 +652,7 @@ def _validate_text_field(field_name: str, value: Any, min_len: int, max_len: int
         errors.append({
             "location": field_name,
             "value_to_blame": value,
-            "error_message": f"field_contains_invalid_characters"
+            "error_message": "field_contains_invalid_characters"
         })
     
     return errors

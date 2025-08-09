@@ -11,7 +11,7 @@ import yaml
 import json
 
 from pathlib import Path
-from typing import Dict, Any, List, Union
+from typing import Dict, Any, List
 from weasyprint import HTML # type: ignore
 from lib.utils import to_json
 from lib.core import SYMBOLS

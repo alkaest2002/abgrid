@@ -37,7 +37,7 @@ def get_router_auth() -> APIRouter:
                 status_code=status.HTTP_200_OK,
                 content={"detail": token}
             )
-        except Exception as e:
+        except Exception:
             return JSONResponse(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
                 content={"detail": "failed_to_generate_token"}

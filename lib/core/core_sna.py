@@ -585,7 +585,7 @@ class CoreSna:
             adj_ref_df = self.sna["adjacency_a"]
 
         # Define a function for filtering edges
-        fn = lambda x: x == 1
+        fn = lambda x: x == 1 # noqa: E731
 
         # Compute type I edges, non-reciprocal
         # i.e. same network: A -> B and not B -> A

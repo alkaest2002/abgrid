@@ -69,7 +69,7 @@ class HeaderSizeLimitMiddleware(BaseHTTPMiddleware):
             if len(header_value) > self.max_header_size:
                 return JSONResponse(
                     status_code=status.HTTP_413_REQUEST_ENTITY_TOO_LARGE,
-                    content={"detail": f"header_is_too_large"}
+                    content={"detail": "header_is_too_large"}
                 )
         
         response = await call_next(request)

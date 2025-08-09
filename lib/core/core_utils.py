@@ -6,11 +6,9 @@ The code is part of the AB-Grid project and is licensed under the MIT License.
 
 import asyncio
 import io
-import numpy as np
 import pandas as pd
 
 from base64 import b64encode
-from typing import Sequence, Union
 from matplotlib import pyplot as plt
 
 
