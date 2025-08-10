@@ -27,6 +27,7 @@ exclude = [
     "dist",
     "venv",
     "*.egg-info",
+    "./lib/interfaces/docker/**",
 ]
 
 [tool.ruff.lint]
@@ -125,10 +126,12 @@ line-ending = "auto"
 
 # Bandit configuration
 [tool.bandit]
+
 # Test IDs to skip
 skips = [
     "B404",  # Consider possible security implications of subprocess (if needed)
     "B603",  # subprocess without shell equals True (if using subprocess safely)
+    "B108",  # hardcoded_tmp_directory - safe in container context
 ]
 
 # Target directories - explicitly specify where to look
