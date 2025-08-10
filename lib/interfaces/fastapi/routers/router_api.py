@@ -43,8 +43,10 @@ def get_router_api() -> APIRouter:
         All endpoints return consistent JSON responses with "detail" field
         containing either success data or error information.
     """
+    # Initialize router
     router = APIRouter(prefix="/api")
 
+    # Add endpoints
     @router.post("/group")
     @SimpleRateLimiter(limit=1, window_seconds=5)
     async def create_group(

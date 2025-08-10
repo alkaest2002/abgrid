@@ -4,10 +4,9 @@ Author: Pierpaolo Calanna
 The code is part of the AB-Grid project and is licensed under the MIT License.
 """
 
-from fastapi import APIRouter, Query
+from fastapi import APIRouter, Query, status
 from fastapi.responses import JSONResponse
 
-from fastapi import status
 
 error_codes = {
     "duplicate_query_parameter_key": status.HTTP_400_BAD_REQUEST,
@@ -38,20 +37,22 @@ error_codes = {
 }
 
 def get_router_fake() -> APIRouter:
-    
+    """Create and configure the FastAPI router for fake endpoints."""
+    # Initialize router
     router = APIRouter(prefix="/fake", include_in_schema=False)
 
+    # Add endpoints
     @router.get("/error")
     async def get_error(error_type: str = Query(..., description="Error type to simulate")) -> JSONResponse:
         """
         Simulate an error response based on the provided error type.
-        
+
         Args:
             error_type: The error type key that matches one of the predefined error codes
-            
+
         Returns:
             JSONResponse: Error response with appropriate status code and detail message
-            
+
         Status Codes:
             Various: Depends on the error_type parameter
             400: If error_type is not found in error_codes
@@ -61,10 +62,10 @@ def get_router_fake() -> APIRouter:
                 status_code=error_codes[error_type],
                 content={"detail": error_type}
             )
-        else:
-            return JSONResponse(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                content={"detail": "unknown_error_type"}
-            )
+
+        return JSONResponse(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            content={"detail": "unknown_error_type"}
+        )
 
     return router
