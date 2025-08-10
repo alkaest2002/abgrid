@@ -93,4 +93,4 @@ class Settings(BaseSettings):
             across multiple calls, making it safe to call Settings.load() anywhere
             in the application without performance concerns.
         """
-        return cls()  # type: ignore[call-arg]
+        return cls()
