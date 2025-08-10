@@ -9,6 +9,7 @@ from collections.abc import AsyncIterator, Awaitable, Callable
 from contextlib import asynccontextmanager
 
 from starlette.middleware.base import BaseHTTPMiddleware
+from starlette.types import ASGIApp
 
 from fastapi import Request, status
 from fastapi.responses import JSONResponse, Response
@@ -50,7 +51,7 @@ class RequestProtectionMiddleware(BaseHTTPMiddleware):
 
     def __init__(
         self,
-        app,
+        app: ASGIApp,
         request_timeout: int = 60,
         max_concurrent_requests_for_group: int = settings.max_concurrent_requests_for_group,
         max_concurrent_requests_for_report: int = settings.max_concurrent_requests_for_report,

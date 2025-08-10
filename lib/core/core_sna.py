@@ -31,8 +31,8 @@ class SNADict(TypedDict):
     edges_b: list[tuple[str, str]]
     adjacency_a: pd.DataFrame
     adjacency_b: pd.DataFrame
-    network_a: nx.DiGraph
-    network_b: nx.DiGraph
+    network_a: nx.DiGraph  # type: ignore[type-arg]
+    network_b: nx.DiGraph  # type: ignore[type-arg]
     loc_a: dict[str, np.ndarray]
     loc_b: dict[str, np.ndarray]
     macro_stats_a: pd.Series
@@ -276,7 +276,7 @@ class CoreSna:
         network_nodes: int = network.number_of_nodes()
         network_edges: int = network.number_of_edges()
         network_edges_reciprocal: int = edges_types["type_ii"].shape[0]
-        network_density: float = nx.density(network)
+        network_density: float = nx.density(network) 
         network_centralization: float = self._compute_network_centralization(network.to_undirected())
         network_transitivity: float = nx.transitivity(network)
         network_reciprocity: float = nx.overall_reciprocity(network)

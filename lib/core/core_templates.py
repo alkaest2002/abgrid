@@ -67,11 +67,6 @@ class CoreRenderer:
             error_message = "Template path cannot be empty or None."
             raise ValueError(error_message)
 
-        # Ensure template_data
-        if not isinstance(template_data, dict):
-            error_message = "Template data must be a dictionary."
-            raise TypeError(error_message)
-
         try:
             # Try to load template
             template = abgrid_jinja_env.get_template(template_path_str)

@@ -8,6 +8,7 @@ from collections.abc import Awaitable, Callable
 
 from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.responses import Response
+from starlette.types import ASGIApp
 
 from fastapi import Request, status
 from fastapi.responses import JSONResponse
@@ -34,7 +35,7 @@ class HeaderSizeLimitMiddleware(BaseHTTPMiddleware):
         of all headers combined. Each header value must be within the limit.
     """
 
-    def __init__(self, app, max_header_size: int = 8 * 1024) -> None:
+    def __init__(self, app: ASGIApp, max_header_size: int = 8 * 1024) -> None:
         """
         Initialize the middleware with header size limit configuration.
 

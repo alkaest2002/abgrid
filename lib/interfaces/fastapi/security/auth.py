@@ -23,7 +23,7 @@ class Auth:
     async def verify_token(
         self,
         token: HTTPAuthorizationCredentials | None = Depends(HTTPBearer(auto_error=False))
-    ) -> dict[str, Any]:
+    ) -> Any:
         """"Verify JWT token.
 
         Args:

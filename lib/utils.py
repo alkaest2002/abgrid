@@ -89,7 +89,7 @@ def to_json(report_data: dict[str, Any]) -> dict[str, Any]:
         # For range index, convert to list
         return series.tolist()
 
-    def _convert_networkx(graph: nx.DiGraph) -> dict[str, Any]:
+    def _convert_networkx(graph) -> dict[str, Any]:  # type: ignore[no-untyped-def]
         """Convert NetworkX DiGraph to JSON-serializable format."""
         return {
             "nodes": list(graph.nodes()),

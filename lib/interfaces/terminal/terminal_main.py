@@ -207,7 +207,7 @@ class TerminalMain:
         return [path for path in self.project_folderpath.glob("*_g*.*")
                 if re.search(r"_g\d+\.\w+$", path.name)]
 
-    def _load_yaml_data(self, yaml_file_path: Path) -> dict[str, Any]:
+    def _load_yaml_data(self, yaml_file_path: Path) -> Any:
         """
         Load and parse YAML data from file with error handling.
 

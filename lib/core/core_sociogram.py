@@ -22,8 +22,8 @@ from lib.core.core_utils import (
 
 if TYPE_CHECKING:
     import networkx as nx
+    from matplotlib.axes import Axes
     from matplotlib.figure import Figure
-
 
 
 class SociogramDict(TypedDict):
@@ -178,8 +178,8 @@ class CoreSociogram:
                 - "wi_ii": Type II conflict index (ratio of bidirectional negative edges to network size)
         """
         # Get typed references to networks and edge types
-        network_a: nx.DiGraph = self.sna["network_a"]
-        network_b: nx.DiGraph = self.sna["network_b"]
+        network_a: nx.DiGraph = self.sna["network_a"] # type: ignore[type-arg]
+        network_b: nx.DiGraph = self.sna["network_b"] # type: ignore[type-arg]
         edges_types_a: dict[str, pd.Index] = self.sna["edges_types_a"]
         edges_types_b: dict[str, pd.Index] = self.sna["edges_types_b"]
 
@@ -616,7 +616,7 @@ class CoreSociogram:
 
         # Create polar coordinate subplot with specified figure size
         fig: Figure
-        ax: plt.Axes
+        ax: Axes
         fig, ax = plt.subplots(
             constrained_layout=True,
             figsize=(19 * CM_TO_INCHES, 19 * CM_TO_INCHES),

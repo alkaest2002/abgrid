@@ -45,7 +45,7 @@ class AnonymousJWT:
         return jwt.encode(payload, self.secret_key, algorithm=self.algorithm)
 
 
-    def verify_token(self, token: str) -> dict[str, Any]:
+    def verify_token(self, token: str) -> Any:
         """
         Verify and decode a JWT token.
 

@@ -10,6 +10,7 @@ from urllib.parse import parse_qs
 
 from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.responses import Response
+from starlette.types import ASGIApp
 
 from fastapi import Request, status
 from fastapi.responses import JSONResponse
@@ -55,7 +56,7 @@ class QueryParamLimitMiddleware(BaseHTTPMiddleware):
     MAX_PARAM_VALUE_LENGTH: ClassVar[int] = 10    # Language codes are typically 2-5 chars
     MAX_PARAMS_COUNT: ClassVar[int] = 2           # Only 2 possible parameters
 
-    def __init__(self, app) -> None:
+    def __init__(self, app: ASGIApp) -> None:
         """Initialize the aggressive query parameter validation middleware."""
         super().__init__(app)
 

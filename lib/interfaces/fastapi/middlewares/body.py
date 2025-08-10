@@ -9,6 +9,7 @@ from typing import Any
 from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.requests import Request as StarletteRequest
 from starlette.responses import Response
+from starlette.types import ASGIApp
 
 from fastapi import Request, status
 from fastapi.responses import JSONResponse
@@ -30,7 +31,7 @@ class BodySizeLimitMiddleware(BaseHTTPMiddleware):
         processing of oversized requests before they consume significant resources.
     """
 
-    def __init__(self, app, max_body_size: int = 20 * 1024) -> None:
+    def __init__(self, app: ASGIApp, max_body_size: int = 20 * 1024) -> None:
         """
         Initialize the body size limit middleware.
 
