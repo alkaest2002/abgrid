@@ -3,13 +3,17 @@ Author: Pierpaolo Calanna
 
 The code is part of the AB-Grid project and is licensed under the MIT License.
 """
+# ruff: noqa: UP017
 
-import jwt
 import uuid
 from datetime import datetime, timedelta, timezone
-from typing import Dict, Any
+from typing import Any
+
+import jwt
+
 from fastapi import HTTPException, status
 from lib.interfaces.fastapi.settings import Settings
+
 
 settings = Settings.load()
 
@@ -17,9 +21,7 @@ class AnonymousJWT:
     """Simple JWT handler for anonymous user tracking."""
 
     def __init__(self) -> None:
-        """
-        Initializes an AnonymousJWT instance.
-        """
+        """Initializes an AnonymousJWT instance."""
         self.secret_key = settings.auth_secret
         self.algorithm = "HS256"
         self.token_lifetime = timedelta(hours=720)
@@ -36,14 +38,14 @@ class AnonymousJWT:
         expires = now + self.token_lifetime
         payload = {
             "sub": str(uuid.uuid4()),
-            "iat": now,                
-            "exp": expires 
+            "iat": now,
+            "exp": expires
         }
-    
+
         return jwt.encode(payload, self.secret_key, algorithm=self.algorithm)
 
 
-    def verify_token(self, token: str) -> Dict[str, Any]:
+    def verify_token(self, token: str) -> dict[str, Any]:
         """
         Verify and decode a JWT token.
 
@@ -58,9 +60,9 @@ class AnonymousJWT:
         """
         try:
             return jwt.decode(token, self.secret_key, algorithms=[self.algorithm])
-        
-        except jwt.InvalidTokenError:
+
+        except jwt.InvalidTokenError as e:
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
                 detail="invalid_or_expired_jwt_token"
-            )
+            ) from e
