@@ -94,9 +94,9 @@ class CoreSna:
             adjacency matrices, statistics, rankings, components, and visualization data
             for both networks.
         """
-        return asyncio.run(self.get_async(packed_edges_a, packed_edges_b))
+        return asyncio.run(self._get_async(packed_edges_a, packed_edges_b))
 
-    async def get_async(self,
+    async def _get_async(self,
                        packed_edges_a: list[dict[str, str | None]],
                        packed_edges_b: list[dict[str, str | None]],
     ) -> SNADict:

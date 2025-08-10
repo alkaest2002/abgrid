@@ -90,9 +90,9 @@ class CoreSociogram:
                 - "relevant_nodes_ab": Dictionary with most/least relevant nodes for positive/negative outcomes
 
         """
-        return asyncio.run(self.get_async(sna))
+        return asyncio.run(self._get_async(sna))
 
-    async def get_async(self, sna: dict[str, Any]) -> SociogramDict:
+    async def _get_async(self, sna: dict[str, Any]) -> SociogramDict:
         """
         Asynchronously compute and store comprehensive sociogram analysis from social network data.
 
