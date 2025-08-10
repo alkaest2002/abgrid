@@ -197,8 +197,8 @@ class ABGridGroupSchemaIn(BaseModel):
             value: Value to validate.
             errors: List to append errors to.
         """
-        min_group_size = 8
-        max_group_size = 50
+        min_group_size: int = 8
+        max_group_size: int = 50
         if value is None:
             errors.append({
                 "location": "members",
