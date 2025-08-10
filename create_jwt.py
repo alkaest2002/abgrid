@@ -5,12 +5,13 @@ Author: Pierpaolo Calanna
 The code is part of the AB-Grid project and is licensed under the MIT License.
 """
 # ruff: noqa: T201
+# ruff: noqa: UP017
 
 import argparse
 import os
 import sys
 import uuid
-from datetime import datetime
+from datetime import datetime, timezone
 from pathlib import Path
 
 import jwt
@@ -57,11 +58,11 @@ class JWTGenerator:
             Tuple of (token, user_uuid).
         """
         user_uuid = user_uuid or str(uuid.uuid4())
-        now = datetime.now(datetime.UTC)
+        now = datetime.now(timezone.utc)
 
         # Ensure timezone awareness
         if expiration_date.tzinfo is None:
-            expiration_date = expiration_date.replace(tzinfo=datetime.UTC)
+            expiration_date = expiration_date.replace(tzinfo=timezone.utc)
 
         payload = {
             "sub": user_uuid,
@@ -80,7 +81,7 @@ def parse_expiration_date(date_string):
     """Parse date string to datetime with UTC timezone."""
     for fmt in DATE_FORMATS:
         try:
-            return datetime.strptime(date_string, fmt).replace(tzinfo=datetime.UTC)
+            return datetime.strptime(date_string, fmt).replace(tzinfo=timezone.utc)
         except ValueError:
             continue
 
@@ -104,7 +105,7 @@ def save_token_data(token, expiration_date, user_uuid, output_path, algorithm):
         "uuid": user_uuid,
         "expiration_date": expiration_date.isoformat(),
         "expiration_timestamp": int(expiration_date.timestamp()),
-        "generated_at": datetime.now(datetime.UTC).isoformat(),
+        "generated_at": datetime.now(timezone.utc).isoformat(),
         "algorithm": algorithm,
     }
 
@@ -164,8 +165,8 @@ def main():
 
     # Parse and validate expiration date
     expiration_date = parse_expiration_date(args.expiration)
-    if expiration_date <= datetime.now(datetime.UTC):
-        print("⚠️  Expiration date is in the past!")
+    if expiration_date <= datetime.now(timezone.utc):
+        print("❌ Error: Expiration date is in the past")
         sys.exit(1)
 
     # Prepare parameters
