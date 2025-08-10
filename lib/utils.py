@@ -16,7 +16,7 @@ import numpy as np
 import pandas as pd
 
 
-def check_python_version():
+def check_python_version() -> None:
     """Check if Python version meets minimum requirements."""
     required_version = (3, 12)
     current_version = sys.version_info[:2]
