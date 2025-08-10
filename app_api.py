@@ -7,7 +7,7 @@ The code is part of the AB-Grid project and is licensed under the MIT License.
 from fastapi import FastAPI, HTTPException, Request, status
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
-from lib.core.core_schemas import PydanticValidationException
+from lib.core.core_schemas import PydanticValidationError
 from lib.interfaces.fastapi.security.limiter import RateLimitException
 from lib.interfaces.fastapi.middlewares.body import BodySizeLimitMiddleware
 from lib.interfaces.fastapi.middlewares.query import QueryParamLimitMiddleware
@@ -98,16 +98,16 @@ async def custom_403_handler(request: Request, exc: HTTPException):
         content={"detail": "not_authorized"}
     )
 
-@app.exception_handler(PydanticValidationException)
+@app.exception_handler(PydanticValidationError)
 async def custom_pydantic_validation_exception_handler(
-    request: Request, exc: PydanticValidationException
+    request: Request, exc: PydanticValidationError
 ) -> JSONResponse:
     """
-    Custom exception handler for PydanticValidationException.
+    Custom exception handler for PydanticValidationError.
 
     Args:
         request (Request): The request that resulted in the exception.
-        exc (PydanticValidationException): The exception instance.
+        exc (PydanticValidationError): The exception instance.
     
     Returns:
         JSONResponse: A JSON response with status code 422 and error details.

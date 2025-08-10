@@ -7,7 +7,7 @@ The code is part of the AB-Grid project and is licensed under the MIT License.
 from functools import wraps
 from pathlib import Path
 from typing import Any, Callable, Optional, Set, TypeVar, Union, cast, overload
-from lib.core.core_schemas import PydanticValidationException
+from lib.core.core_schemas import PydanticValidationError
 from lib.core.core_templates import TemplateRenderError
 
 # Type variable for any callable
@@ -90,7 +90,7 @@ def logger_decorator(func: Optional[F] = None) -> Union[F, Callable[[F], F]]:
                 print(str(error))
                 return None
             
-            except PydanticValidationException as error:
+            except PydanticValidationError as error:
                 print(extract_pydantic_errors(error))
                 return None
             
@@ -154,15 +154,15 @@ def extract_traceback_info(error: Exception, exclude_files: Optional[Set[str]] =
         return f"Error: {error_header}"
     
 
-def extract_pydantic_errors(pydantic_validation_exception: PydanticValidationException) -> str:
+def extract_pydantic_errors(pydantic_validation_exception: PydanticValidationError) -> str:
     """
     Format Pydantic validation errors into human-readable error messages.
     
-    Converts PydanticValidationException objects into formatted strings that provide
+    Converts PydanticValidationError objects into formatted strings that provide
     clear information about field locations and error descriptions.
     
     Args:
-        pydantic_validation_exception: PydanticValidationException containing error details
+        pydantic_validation_exception: PydanticValidationError containing error details
     
     Returns:
         Formatted string containing all validation errors
