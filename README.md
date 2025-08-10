@@ -2,6 +2,8 @@
 
 A comprehensive open-source software for sociometric analysis and Social Network Analysis (SNA) designed to optimize peer group dynamics.
 
+[![Ruff](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/ruff/main/assets/badge/v2.json)](https://github.com/astral-sh/ruff)
+
 ## 🎯 Overview
 
 ABGrid is developed for those who need to analyze group dynamics within peer groups (teams operating at the same hierarchical level). The software applies sociometric techniques and Social Network Analysis to identify key members, map relationships, and optimize group cohesion.
