@@ -23,7 +23,6 @@ from dotenv import load_dotenv
 load_dotenv()
 
 # Configuration constants
-DEFAULT_SECRET = "default-secret-key"
 DEFAULT_ALGORITHM = "HS256"
 DEFAULT_OUTPUT_DIR = Path("./")
 DATE_FORMATS = [
@@ -41,11 +40,8 @@ class JWTGenerator:
             secret_key: Secret key for JWT signing (uses env var if not provided).
             algorithm: JWT algorithm (uses env var if not provided).
         """
-        self.secret_key = secret_key or os.getenv("AUTH_SECRET", DEFAULT_SECRET)
+        self.secret_key = secret_key or os.getenv("AUTH_SECRET")
         self.algorithm = algorithm or os.getenv("JWT_ALGORITHM", DEFAULT_ALGORITHM)
-
-        if self.secret_key == DEFAULT_SECRET:
-            print("⚠️  Warning: Using default secret key. Configure AUTH_SECRET in .env for production.")
 
     def generate_token(self, expiration_date, user_uuid=None):
         """Generate a JWT token.
@@ -116,8 +112,8 @@ def save_token_data(token, expiration_date, user_uuid, output_path, algorithm):
 def show_configuration():
     """Display current environment configuration."""
     config = {
-        "AUTH_SECRET": os.getenv("AUTH_SECRET", DEFAULT_SECRET),
-        "JWT_ALGORITHM": os.getenv("JWT_ALGORITHM", DEFAULT_ALGORITHM),
+        "AUTH_SECRET": os.getenv("AUTH_SECRET"),
+        "JWT_ALGORITHM": os.getenv("JWT_ALGORITHM"),
         "OUTPUT_DIRECTORY": DEFAULT_OUTPUT_DIR,
     }
 
@@ -125,7 +121,7 @@ def show_configuration():
     print("=" * 50)
     for key, value in config.items():
         # Mask secret key for security
-        display_value = "*" * 20 if key == "AUTH_SECRET" and value != DEFAULT_SECRET else value
+        display_value = "*" * 20 if key == "AUTH_SECRET" else value
         print(f"{key}: {display_value}")
 
 def create_parser():
