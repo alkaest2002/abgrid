@@ -3,22 +3,24 @@ Author: Pierpaolo Calanna
 
 The code is part of the AB-Grid project and is licensed under the MIT License.
 """
+# ruff: noqa: T201
 
+import datetime
+import json
 import re
 import sys
-import datetime
-import pandas as pd
-import numpy as np
-import networkx as nx
-import json
+from typing import Any
 
-from typing import Any, Dict, List, Union
+import networkx as nx
+import numpy as np
+import pandas as pd
+
 
 def check_python_version():
     """Check if Python version meets minimum requirements."""
-    required_version = (3, 10)
+    required_version = (3, 12)
     current_version = sys.version_info[:2]
-    
+
     if current_version < required_version:
         print("=" * 60)
         print("PYTHON VERSION ERROR")
@@ -29,23 +31,23 @@ def check_python_version():
         print("Please upgrade your Python installation:")
         print("- Visit https://www.python.org/downloads/")
         print("- Or use your system's package manager")
-        print("- Or use pyenv/conda to install a newer version")
+        print("- Or use virtual environments to install a newer version")
         print("=" * 60)
         sys.exit(1)
 
-def to_json(report_data: Dict[str, Any]) -> Dict[str, Any]:
+def to_json(report_data: dict[str, Any]) -> dict[str, Any]:
     """
     Convert ReportDataDict to a JSON-serializable format.
-    
+
     This function handles the specific data types commonly found in AB-Grid report data,
     including pandas DataFrames/Series, NetworkX graphs, numpy arrays, and nested dictionaries.
-    
+
     Args:
         report_data: The report data dictionary to convert
-        
+
     Returns:
         A JSON-serializable dictionary with the same structure as the input
-        
+
     Note:
         - DataFrames are converted to dict format with index preservation
         - NetworkX graphs are converted to node/edge lists
@@ -53,43 +55,41 @@ def to_json(report_data: Dict[str, Any]) -> Dict[str, Any]:
         - Datetime objects become ISO format strings
         - Complex objects are converted to string representation as fallback
     """
-    
-    def _convert_pandas_dataframe(df: pd.DataFrame) -> Dict[str, Any]:
+
+    def _convert_pandas_dataframe(df: pd.DataFrame) -> dict[str, Any]:
         """Convert pandas DataFrame to JSON-serializable format."""
         if df.empty:
             return {}
-        
+
         # Fill missing values
         df = df.replace([np.inf, -np.inf], np.nan)
         df = df.fillna("-")
-        
+
         # Handle DataFrames with duplicate indices by resetting index
         if df.index.has_duplicates:
             # Reset index to ensure no duplicates
             df = df.reset_index(drop=False, names="index")
             # Convert index keys to strings for JSON compatibility
             return {str(k): v for k, v in df.to_dict("index").items()}
-        else:
-            # Convert index keys to strings for JSON compatibility
-            return {str(k): v for k, v in df.to_dict("index").items()}
-    
-    def _convert_pandas_series(series: pd.Series) -> Union[Dict[str, Any], List[Any]]:
+        # Convert index keys to strings for JSON compatibility
+        return {str(k): v for k, v in df.to_dict("index").items()}
+
+    def _convert_pandas_series(series: pd.Series) -> dict[str, Any] | list[Any]:
         """Convert pandas Series to JSON-serializable format."""
         if series.empty:
             return {}
-        
+
         # Fill missing values
         series = series.replace([np.inf, -np.inf], np.nan)
         series = series.fillna("-")
-        
+
         # If series has a meaningful index, convert to dict
         if not isinstance(series.index, pd.RangeIndex):
             return series.to_dict()
-        else:
-            # For range index, convert to list
-            return series.tolist()
-    
-    def _convert_networkx(graph: nx.DiGraph) -> Dict[str, Any]:
+        # For range index, convert to list
+        return series.tolist()
+
+    def _convert_networkx(graph: nx.DiGraph) -> dict[str, Any]:
         """Convert NetworkX DiGraph to JSON-serializable format."""
         return {
             "nodes": list(graph.nodes()),
@@ -97,54 +97,51 @@ def to_json(report_data: Dict[str, Any]) -> Dict[str, Any]:
             "number_of_nodes": graph.number_of_nodes(),
             "number_of_edges": graph.number_of_edges()
         }
-    
-    def _convert_numpy_array(arr: np.ndarray) -> List[Any]:
+
+    def _convert_numpy_array(arr: np.ndarray) -> list[Any]:
         """Convert numpy array to JSON-serializable list."""
         result = _convert_pandas_series(pd.Series(arr))
         if isinstance(result, dict):
             return list(result.values())
         return result
-    
+
     def _convert_datetime(dt: datetime.datetime) -> str:
         """Convert datetime to ISO format string."""
         return dt.isoformat()
-    
-    def _convert_value(value: Any) -> Any:
+
+    def _convert_value(value: Any) -> Any:  # noqa: PLR0911
         """Convert individual values to JSON-serializable format."""
         if value is None:
             return None
-        elif isinstance(value, (str, int, float, bool)):
+        if isinstance(value, str | int | float | bool):
             return value
-        elif isinstance(value, pd.DataFrame):
+        if isinstance(value, pd.DataFrame):
             return _convert_pandas_dataframe(value)
-        elif isinstance(value, pd.Series):
+        if isinstance(value, pd.Series):
             return _convert_pandas_series(value)
-        elif isinstance(value, pd.Index):
+        if isinstance(value, pd.Index):
             return value.tolist()
-        elif isinstance(value, nx.DiGraph):
+        if isinstance(value, nx.DiGraph):
             return _convert_networkx(value)
-        elif isinstance(value, np.ndarray):
+        if isinstance(value, np.ndarray):
             return _convert_numpy_array(value)
-        elif isinstance(value, datetime.datetime):
+        if isinstance(value, datetime.datetime):
             return _convert_datetime(value)
-        elif isinstance(value, datetime.date):
-            # Convert date to datetime before formatting
+        if isinstance(value, datetime.date):
             return _convert_datetime(datetime.datetime.combine(value, datetime.time()))
-        elif isinstance(value, dict):
+        if isinstance(value, dict):
             return {k: _convert_value(v) for k, v in value.items()}
-        elif isinstance(value, (list, tuple)):
+        if isinstance(value, list | tuple):
             return [_convert_value(item) for item in value]
-        else:
-            # Fallback: try to serialize directly, otherwise convert to string
-            try:
-                json.dumps(value)
-                return value
-            except (TypeError, ValueError):
-                return str(value)
-    
+        # Fallback: try to serialize directly, otherwise convert to string
+        try:
+            return json.dumps(value)
+        except (TypeError, ValueError):
+            return str(value)
+
     # Convert the main report data structure
-    json_data: Dict[str, Any] = {}
-    
+    json_data: dict[str, Any] = {}
+
     # Handle basic metadata fields
     json_data["year"] = report_data["year"]
     json_data["project_title"] = report_data["project_title"]
@@ -152,33 +149,45 @@ def to_json(report_data: Dict[str, Any]) -> Dict[str, Any]:
     json_data["question_b"] = report_data["question_b"]
     json_data["group"] = report_data["group"]
     json_data["group_size"] = report_data["group_size"]
-    
+
     # Handle SNA data (complex nested structure)
     json_data["sna"] = _convert_value(report_data["sna"])
-    
+
     # Handle sociogram data (optional, can be None)
     json_data["sociogram"] = _convert_value(report_data["sociogram"])
-    
+
     # Handle relevant nodes data (nested DataFrames)
     json_data["relevant_nodes_ab"] = {
         "a": _convert_pandas_dataframe(report_data["relevant_nodes_ab"]["a"]),
         "b": _convert_pandas_dataframe(report_data["relevant_nodes_ab"]["b"])
     }
-    
+
     # Handle isolated nodes data (pandas Index objects)
     json_data["isolated_nodes_ab"] = {
         "a": report_data["isolated_nodes_ab"]["a"].tolist(),
         "b": report_data["isolated_nodes_ab"]["b"].tolist()
     }
-    
+
     return json_data
 
 def to_snake_case(text: str) -> str:
+    """
+    Convert text to snake_case.
+
+    This function replaces spaces and other separators with underscores,
+    converts the text to lowercase, and removes leading/trailing underscores.
+
+    Args:
+        text: The input text to convert.
+
+    Returns:
+        The converted text in snake_case.
+    """
     # Replace spaces and other separators with underscores
-    text = re.sub(r'[\s\-\.]+', '_', text)
+    text = re.sub(r"[\s\-\.]+", "_", text)
     # Insert underscore before uppercase letters (except at the start)
-    text = re.sub(r'(?<!^)(?=[A-Z])', '_', text)
+    text = re.sub(r"(?<!^)(?=[A-Z])", "_", text)
     # Convert to lowercase and clean up multiple underscores
-    text = re.sub(r'_+', '_', text.lower())
+    text = re.sub(r"_+", "_", text.lower())
     # Remove leading/trailing underscores
-    return text.strip('_')
+    return text.strip("_")
