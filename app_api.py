@@ -88,7 +88,7 @@ def catchall(path: str) -> JSONResponse:
 #######################################################################################
 
 @app.exception_handler(status.HTTP_401_UNAUTHORIZED)
-async def custom_401_handler(request: Request, exc: HTTPException):
+async def custom_401_handler(request: Request, exc: HTTPException) -> JSONResponse:
     """Custom handler for 401 Unauthorized errors."""
     return JSONResponse(
         status_code=status.HTTP_401_UNAUTHORIZED,
@@ -96,7 +96,7 @@ async def custom_401_handler(request: Request, exc: HTTPException):
     )
 
 @app.exception_handler(status.HTTP_403_FORBIDDEN)
-async def custom_403_handler(request: Request, exc: HTTPException):
+async def custom_403_handler(request: Request, exc: HTTPException) -> JSONResponse:
     """Custom handler for 403 Forbidden errors."""
     return JSONResponse(
         status_code=status.HTTP_403_FORBIDDEN,
@@ -114,7 +114,7 @@ async def custom_pydantic_validation_exception_handler(
     )
 
 @app.exception_handler(RequestValidationError)
-async def validation_exception_handler(request, exc) -> JSONResponse:
+async def validation_exception_handler(request: Request, exc: RequestValidationError) -> JSONResponse:
     """Custom handler for RequestValidationError errors."""
     errors = []
     for error in exc.errors():
