@@ -35,8 +35,8 @@ class PydanticValidationError(Exception):
                 contains 'location', 'value_to_blame', and 'error_message' keys.
         """
         self.errors = errors
-        error_messages = [f"{error['location']}: {error['error_message']}" for error in errors]
-        super().__init__("\n".join(error_messages))
+        error_message = [f"{error['location']}: {error['error_message']}" for error in errors]
+        super().__init__("\n".join(error_message))
 
 
 class ABGridRelevantNodesSchema(BaseModel):
@@ -158,7 +158,7 @@ class ABGridGroupSchemaIn(BaseModel):
 
     @model_validator(mode="before")
     @classmethod
-    def validate_all_fields(cls, data: dict[str, Any]) -> dict[str, Any]:
+    def _validate_all_fields(cls, data: dict[str, Any]) -> dict[str, Any]:
         """Validate all fields and collect errors.
 
         Performs comprehensive validation of all fields, collecting all
@@ -254,7 +254,7 @@ class ABGridReportSchemaIn(BaseModel):
 
     @model_validator(mode="before")
     @classmethod
-    def validate_all_fields(cls, data: dict[str, Any]) -> dict[str, Any]:
+    def _validate_all_fields(cls, data: dict[str, Any]) -> dict[str, Any]:
         """Validate all fields comprehensively.
 
         Validates all fields including complex choice validation logic:
@@ -310,7 +310,7 @@ class ABGridReportSchemaIn(BaseModel):
         return data
 
     @model_validator(mode="after")
-    def strip_choice_values_after(self) -> "ABGridReportSchemaIn":
+    def _strip_choice_values_after(self) -> "ABGridReportSchemaIn":
         """Strip spaces from choice values post-validation.
 
         Removes spaces around commas in choice values after model validation
