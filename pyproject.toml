@@ -1,0 +1,148 @@
+[project]
+name = "ab-grid"
+version = "0.1.0"
+description = "AB-Grid project for group management and reporting"
+authors = [{name = "Pierpaolo Calanna"}]
+license = {text = "MIT"}
+readme = "README.md"
+requires-python = ">=3.12"
+
+# Ruff configuration
+[tool.ruff]
+# Python version target
+target-version = "py312"
+
+# Line length (matching Black's default)
+line-length = 88
+
+# File patterns to analyze - explicitly include root and lib
+include = ["*.py", "lib/**/*.py"]
+
+# Exclude common directories
+exclude = [
+    ".git",
+    ".venv",
+    "__pycache__",
+    "build",
+    "dist",
+    "venv",
+    "*.egg-info",
+]
+
+[tool.ruff.lint]
+# Enable these rule sets
+select = [
+    "E",      # pycodestyle errors
+    "W",      # pycodestyle warnings
+    "F",      # pyflakes
+    "I",      # isort
+    "N",      # pep8-naming
+    "D",      # pydocstyle
+    "UP",     # pyupgrade
+    "B",      # flake8-bugbear
+    "C4",     # flake8-comprehensions
+    "DTZ",    # flake8-datetimez
+    "T10",    # flake8-debugger
+    "EM",     # flake8-errmsg
+    "ISC",    # flake8-implicit-str-concat
+    "G",      # flake8-logging-format
+    "PIE",    # flake8-pie
+    "T20",    # flake8-print
+    "Q",      # flake8-quotes
+    "RSE",    # flake8-raise
+    "RET",    # flake8-return
+    "SLF",    # flake8-self
+    "SIM",    # flake8-simplify
+    "TID",    # flake8-tidy-imports
+    "TCH",    # flake8-type-checking
+    "ARG",    # flake8-unused-arguments
+    "PTH",    # flake8-use-pathlib
+    "ERA",    # eradicate
+    "PGH",    # pygrep-hooks
+    "PL",     # Pylint
+    "TRY",    # tryceratops
+    "FLY",    # flynt
+    "PERF",   # Perflint
+    "RUF",    # Ruff-specific rules
+]
+
+# Ignore specific rules
+ignore = [
+    "D100",   # Missing docstring in public module
+    "D104",   # Missing docstring in public package
+    "D203",   # 1 blank line required before class docstring (conflicts with D211)
+    "D212",   # Multi-line docstring summary should start at the first line (conflicts with D213)
+    "D415",    # First line should end with a period, question mark, or exclamation point
+    "E501",   # Line too long (handled by formatter)
+    "PLR0913", # Too many arguments to function call
+    "TRY003", # Avoid specifying long messages outside the exception class
+]
+
+# Allow autofix for all enabled rules
+fixable = ["ALL"]
+unfixable = []
+
+# Allow unused variables when underscore-prefixed
+dummy-variable-rgx = "^(_+|(_+[a-zA-Z0-9_]*[a-zA-Z0-9]+?))$"
+
+[tool.ruff.lint.per-file-ignores]
+# Ignore import violations in __init__ files
+"__init__.py" = ["F401", "F403"]
+"lib/**/__init__.py" = ["F401", "F403"]
+
+[tool.ruff.lint.isort]
+# Configure import sorting
+known-first-party = ["lib", "app_terminal"]
+force-single-line = false
+lines-after-imports = 2
+
+[tool.ruff.lint.pydocstyle]
+# Use Google-style docstrings
+convention = "google"
+
+[tool.ruff.lint.mccabe]
+# Maximum McCabe complexity
+max-complexity = 10
+
+[tool.ruff.lint.pylint]
+# Maximum number of arguments for functions/methods
+max-args = 7
+# Maximum number of local variables
+max-locals = 15
+
+[tool.ruff.format]
+# Use double quotes for strings
+quote-style = "double"
+
+# Indent with spaces
+indent-style = "space"
+
+# Respect magic trailing commas
+skip-magic-trailing-comma = false
+
+# Automatically detect the line ending
+line-ending = "auto"
+
+# Bandit configuration
+[tool.bandit]
+# Test IDs to skip
+skips = [
+    "B404",  # Consider possible security implications of subprocess (if needed)
+    "B603",  # subprocess without shell equals True (if using subprocess safely)
+]
+
+# Target directories - explicitly specify where to look
+targets = [".", "lib"]
+
+# Exclude paths
+exclude_dirs = [
+    "/.venv/",
+    "/venv/",
+    "/build/",
+    "/dist/",
+    "/.git/",
+    "__pycache__",
+]
+
+# Severity level (LOW, MEDIUM, HIGH)
+severity = "MEDIUM"
