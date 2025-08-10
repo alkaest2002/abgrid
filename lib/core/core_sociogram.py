@@ -232,8 +232,8 @@ class CoreSociogram:
 
         """
         # Retrieve network graphs and adjacency matrices
-        network_a: nx.DiGraph = self.sna["network_a"]
-        network_b: nx.DiGraph = self.sna["network_b"]
+        network_a: nx.DiGraph = self.sna["network_a"]  # type: ignore[type-arg]
+        network_b: nx.DiGraph = self.sna["network_b"]  # type: ignore[type-arg]
         adjacency_a: pd.DataFrame = self.sna["adjacency_a"]
         adjacency_b: pd.DataFrame = self.sna["adjacency_b"]
 

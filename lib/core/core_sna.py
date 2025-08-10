@@ -131,10 +131,10 @@ class CoreSna:
                     run_in_executor(self._compute_edges_types, network_type)
                 )
                 tasks[f"components_{network_type}"] = tg.create_task(
-                    run_in_executor(self._compute_components, network_type)
+                    run_in_executor(self._compute_components, network_type)  # type: ignore[arg-type]
                 )
                 tasks[f"graph_{network_type}"] = tg.create_task(
-                    run_in_executor(self._create_graph, network_type)
+                    run_in_executor(self._create_graph, network_type)  # type: ignore[arg-type]
                 )
 
         # Store batch 1 results
@@ -146,10 +146,10 @@ class CoreSna:
             tasks = {}
             for network_type in ("a", "b"):
                 tasks[f"macro_stats_{network_type}"] = tg.create_task(
-                    run_in_executor(self._compute_macro_stats, network_type)
+                    run_in_executor(self._compute_macro_stats, network_type)  # type: ignore[arg-type]
                 )
                 tasks[f"micro_stats_{network_type}"] = tg.create_task(
-                    run_in_executor(self._compute_micro_stats, network_type)
+                    run_in_executor(self._compute_micro_stats, network_type)  # type: ignore[arg-type]
                 )
 
         # Store batch 2 results
@@ -161,10 +161,10 @@ class CoreSna:
             tasks = {}
             for network_type in ("a", "b"):
                 tasks[f"descriptives_{network_type}"] = tg.create_task(
-                    run_in_executor(self._compute_descriptives, network_type)
+                    run_in_executor(self._compute_descriptives, network_type)  # type: ignore[arg-type]
                 )
                 tasks[f"rankings_{network_type}"] = tg.create_task(
-                    run_in_executor(self._compute_rankings, network_type)
+                    run_in_executor(self._compute_rankings, network_type)  # type: ignore[arg-type]
                 )
 
         # Store batch 3 results
@@ -267,7 +267,7 @@ class CoreSna:
             raise ValueError(error_message)
 
         # Get network
-        network: nx.DiGraph = self.sna[f"network_{network_type}"]
+        network: nx.DiGraph = self.sna[f"network_{network_type}"] # type: ignore[type-arg]
 
         # Get network edges types
         edges_types: dict[str, pd.Index] = self.sna[f"edges_types_{network_type}"]
@@ -276,7 +276,7 @@ class CoreSna:
         network_nodes: int = network.number_of_nodes()
         network_edges: int = network.number_of_edges()
         network_edges_reciprocal: int = edges_types["type_ii"].shape[0]
-        network_density: float = nx.density(network) 
+        network_density: float = nx.density(network) # type: ignore[no-untyped-call]
         network_centralization: float = self._compute_network_centralization(network.to_undirected())
         network_transitivity: float = nx.transitivity(network)
         network_reciprocity: float = nx.overall_reciprocity(network)
@@ -327,7 +327,7 @@ class CoreSna:
             raise ValueError(error_message)
 
         # Get network and adjacency
-        network: nx.DiGraph = self.sna[f"network_{network_type}"]
+        network = self.sna[f"network_{network_type}"]
         adjacency: pd.DataFrame = self.sna[f"adjacency_{network_type}"]
 
         # Create a DataFrame with micro-level statistics
@@ -663,7 +663,7 @@ class CoreSna:
         component_min_size: int = 3
 
         # Get network
-        network: nx.DiGraph = self.sna[f"network_{network_type}"]
+        network = self.sna[f"network_{network_type}"]
 
         # Get cliques with min length of 3, ordered by size
         cliques: pd.Series = pd.Series(
@@ -689,7 +689,7 @@ class CoreSna:
 
         return components
 
-    def _compute_network_centralization(self, network: nx.Graph) -> float:
+    def _compute_network_centralization(self, network: nx.Graph) -> float:  # type: ignore[type-arg]
         """
         Calculate the degree centralization of an undirected network.
 
@@ -719,7 +719,7 @@ class CoreSna:
         number_of_nodes: int = network.number_of_nodes()
 
         # Compute node centralities (degree values)
-        node_centralities: pd.Series = pd.Series(dict(nx.degree(network)))
+        node_centralities: pd.Series = pd.Series(dict(nx.degree(network)))  # type: ignore[no-untyped-call]
 
         # Compute Max centrality
         max_centrality: int = node_centralities.max()
@@ -764,7 +764,7 @@ class CoreSna:
             ValueError: If the network layout computation fails.
         """
         # Get network
-        network: nx.DiGraph = self.sna[f"network_{network_type}"]
+        network: nx.DiGraph = self.sna[f"network_{network_type}"] # type: ignore[type-arg]
 
         # Get network layout locations
         loc: dict[str, np.ndarray] = self.sna[f"loc_{network_type}"]
@@ -811,7 +811,7 @@ class CoreSna:
 
         return figure_to_base64_svg(fig)
 
-    def _handle_isolated_nodes(self, network: nx.DiGraph, loc: dict[str, np.ndarray]) -> dict[str, np.ndarray]:
+    def _handle_isolated_nodes(self, network: nx.DiGraph, loc: dict[str, np.ndarray]) -> dict[str, np.ndarray]: # type: ignore[type-arg]
         """
         Position isolated nodes at the periphery of the network layout.
 
