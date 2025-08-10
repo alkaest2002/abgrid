@@ -89,7 +89,7 @@ class Command(ABC):
         Returns:
             Path object pointing to the user's data directory
         """
-        return self.config.data_path / self.args.user
+        return self.config.data_path / Path(str(self.args.user))
 
     def get_project_path(self) -> Path:
         """
@@ -101,7 +101,7 @@ class Command(ABC):
         Returns:
             Path object pointing to the specific project directory
         """
-        return self.get_user_path() / self.args.project
+        return self.get_user_path() / Path(str(self.args.project))
 
     def ensure_folder_exists(self, path: Path) -> None:
         """
