@@ -124,6 +124,89 @@ skip-magic-trailing-comma = false
 # Automatically detect the line ending
 line-ending = "auto"
 
+# MyPy configuration
+[tool.mypy]
+# Python version target
+python_version = "3.12"
+
+# Files to check - specify individual directories to avoid conflicts
+files = ["lib"]
+
+# Exclude patterns
+exclude = [
+    "^build/",
+    "^dist/",
+    "^\\.venv/",
+    "^venv/",
+    "^\\.git/",
+    "^__pycache__/",
+    "lib/interfaces/docker/",
+]
+
+# Import discovery
+namespace_packages = true
+explicit_package_bases = true
+
+# Platform configuration  
+platform = "linux"
+
+# Strictness and error reporting
+strict = true
+warn_return_any = true
+warn_unused_configs = true
+warn_redundant_casts = true
+warn_unused_ignores = true
+warn_no_return = true
+warn_unreachable = true
+strict_equality = true
+strict_concatenate = true
+
+# Untyped definitions
+check_untyped_defs = true
+disallow_untyped_calls = true
+disallow_untyped_defs = true
+disallow_incomplete_defs = true
+disallow_untyped_decorators = true
+
+# Optional handling
+no_implicit_optional = true
+strict_optional = true
+
+# Miscellaneous
+show_error_codes = true
+show_column_numbers = true
+show_error_context = true
+color_output = true
+error_summary = true
+pretty = true
+
+# Cache
+sqlite_cache = true
+cache_dir = ".mypy_cache"
+
+# Per-module options for tests (using proper module patterns)
+[[tool.mypy.overrides]]
+module = [
+    "tests.*",
+    "test.*",
+    "*.test.*",
+    "*_test",
+]
+# Relax some rules for tests
+disallow_untyped_defs = false
+disallow_incomplete_defs = false
+
+[[tool.mypy.overrides]]
+module = [
+    "uvicorn.*",
+    "gunicorn.*",
+    "jwt.*",
+    "yaml.*",
+    "dotenv.*",
+]
+# Ignore missing imports for third-party libraries without stubs
+ignore_missing_imports = true
+
 # Bandit configuration
 [tool.bandit]
 
