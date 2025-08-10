@@ -6,14 +6,16 @@ The code is part of the AB-Grid project and is licensed under the MIT License.
 """
 
 from itertools import product
-from typing import cast, Any
+from typing import Any, cast
+
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+
 
 def add_cors_middleware(app: FastAPI) -> None:
     """
     Add CORS middleware to the FastAPI application.
-    
+
     Args:
         app (FastAPI): The FastAPI application instance
     """
@@ -31,7 +33,7 @@ def add_cors_middleware(app: FastAPI) -> None:
 
     # Add CORS middleware with type casting to satisfy type checker
     app.add_middleware(
-        cast(Any, CORSMiddleware),
+        cast("Any", CORSMiddleware),
         allow_origins=origins,
         allow_credentials=True,
         allow_methods=["HEAD", "GET", "POST", "PUT", "DELETE", "OPTIONS"],
