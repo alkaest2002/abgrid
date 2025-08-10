@@ -7,12 +7,18 @@ The code is part of the AB-Grid project and is licensed under the MIT License.
 import asyncio
 import io
 from base64 import b64encode
+from collections.abc import Callable
+from typing import Any, TypeVar
 
 import pandas as pd
 from matplotlib import pyplot as plt
+from matplotlib.figure import Figure
 
 
-def figure_to_base64_svg(fig: plt.Figure) -> str:
+# Type variable for the return type of the function
+T = TypeVar("T")
+
+def figure_to_base64_svg(fig: Figure) -> str:
     """
     Convert a matplotlib figure to a base64-encoded SVG string for web embedding.
 
@@ -128,7 +134,7 @@ def gini_coefficient(values: pd.Series) -> float:
 
     return gini
 
-async def run_in_executor(func, *args):
+async def run_in_executor[T](func: Callable[..., T], *args: Any) -> T:
     """
     Run a synchronous function in a thread pool executor.
 
