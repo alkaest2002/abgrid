@@ -3,6 +3,7 @@ Author: Pierpaolo Calanna
 
 The code is part of the AB-Grid project and is licensed under the MIT License.
 """
+# ruff: noqa: T201
 
 from collections.abc import Callable
 from functools import wraps
@@ -62,39 +63,39 @@ def logger_decorator[F: Callable[..., Any]](func: F | None = None) -> F | Callab
                 return function(*args, **kwargs)
 
             except ValueError as error:
-                print(str(error))  # noqa: T201
+                print(str(error))
                 return None
 
             except AttributeError as error:
-                print(str(error))  # noqa: T201
+                print(str(error))
                 return None
 
             except TypeError as error:
-                print(str(error))  # noqa: T201
+                print(str(error))
                 return None
 
             except FileNotFoundError as error:
-                print(str(error))  # noqa: T201
+                print(str(error))
                 return None
 
             except OSError as error:
-                print(str(error))  # noqa: T201
+                print(str(error))
                 return None
 
             except RuntimeError as error:
-                print(str(error))  # noqa: T201
+                print(str(error))
                 return None
 
             except TemplateRenderError as error:
-                print(str(error))  # noqa: T201
+                print(str(error))
                 return None
 
             except PydanticValidationError as error:
-                print(extract_pydantic_errors(error))  # noqa: T201
+                print(extract_pydantic_errors(error))
                 return None
 
             except Exception as error:
-                print(extract_traceback_info(error)) # noqa: T201
+                print(extract_traceback_info(error))
                 return None
 
         # Cast the wrapper to the original function type
