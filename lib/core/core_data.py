@@ -150,6 +150,6 @@ class CoreData:
         }
 
         # Validate and convert report data to ABGridReportSchemaOut
-        validated_report_data_out: ABGridReportSchemaOut = ABGridReportSchemaOut(**report_data) # type: ignore[bad-argument]
+        validated_report_data_out: ABGridReportSchemaOut = ABGridReportSchemaOut(**report_data)
 
         return validated_report_data_out.model_dump()
