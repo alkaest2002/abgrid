@@ -19,7 +19,7 @@ from lib.interfaces.fastapi.middlewares.query import QueryParamLimitMiddleware
 from lib.interfaces.fastapi.middlewares.request import RequestProtectionMiddleware
 from lib.interfaces.fastapi.routers.router_api import get_router_api
 from lib.interfaces.fastapi.routers.router_fake import get_router_fake
-from lib.interfaces.fastapi.security.limiter import RateLimitException
+from lib.interfaces.fastapi.security.limiter import RateLimitError
 from lib.utils import to_snake_case
 
 
@@ -133,11 +133,11 @@ async def validation_exception_handler(request, exc) -> JSONResponse:
         content={"detail": errors}
     )
 
-@app.exception_handler(RateLimitException)
+@app.exception_handler(RateLimitError)
 async def rate_limit_exception_handler(
-    request: Request, exc: RateLimitException
+    request: Request, exc: RateLimitError
 ) -> JSONResponse:
-    """Custom handler for RateLimitException errors."""
+    """Custom handler for RateLimitError errors."""
     return JSONResponse(
         status_code=status.HTTP_429_TOO_MANY_REQUESTS,
         content={"detail": exc.message}
