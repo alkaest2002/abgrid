@@ -56,6 +56,7 @@
         },
         "server": {
             "down": "server non raggiungibile",
+            "failed_to_generate_report": "generazione del report non riuscita",
             "failed_to_render_jinja_template": "non è stato possibile trovare il template jinja",
             "invalid_or_expired_jwt_token": "licenza ab-grid non fornita o scaduta",
             "internal_error": "errore interno del server",
