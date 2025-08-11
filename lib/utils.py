@@ -11,9 +11,9 @@ import re
 import sys
 from typing import Any
 
-import networkx as nx
 import numpy as np
 import pandas as pd
+from networkx import DiGraph
 
 
 def check_python_version() -> None:
@@ -89,7 +89,7 @@ def to_json(report_data: dict[str, Any]) -> dict[str, Any]:
         # For range index, convert to list
         return series.tolist()
 
-    def _convert_networkx(graph) -> dict[str, Any]:  # type: ignore[no-untyped-def]
+    def _convert_networkx(graph: DiGraph) -> dict[str, Any]: # type: ignore[type-arg]
         """Convert NetworkX DiGraph to JSON-serializable format."""
         return {
             "nodes": list(graph.nodes()),
@@ -121,7 +121,7 @@ def to_json(report_data: dict[str, Any]) -> dict[str, Any]:
             return _convert_pandas_series(value)
         if isinstance(value, pd.Index):
             return value.tolist()
-        if isinstance(value, nx.DiGraph):
+        if isinstance(value, DiGraph):
             return _convert_networkx(value)
         if isinstance(value, np.ndarray):
             return _convert_numpy_array(value)
