@@ -131,10 +131,10 @@ class CoreSna:
                     run_in_executor(self._compute_edges_types, network_type)
                 )
                 tasks[f"components_{network_type}"] = tg.create_task(
-                    run_in_executor(self._compute_components, network_type)  # type: ignore[arg-type]
+                    run_in_executor(self._compute_components, network_type)
                 )
                 tasks[f"graph_{network_type}"] = tg.create_task(
-                    run_in_executor(self._create_graph, network_type)  # type: ignore[arg-type]
+                    run_in_executor(self._create_graph, network_type)
                 )
 
         # Store batch 1 results
@@ -146,10 +146,10 @@ class CoreSna:
             tasks = {}
             for network_type in ("a", "b"):
                 tasks[f"macro_stats_{network_type}"] = tg.create_task(
-                    run_in_executor(self._compute_macro_stats, network_type)  # type: ignore[arg-type]
+                    run_in_executor(self._compute_macro_stats, network_type)
                 )
                 tasks[f"micro_stats_{network_type}"] = tg.create_task(
-                    run_in_executor(self._compute_micro_stats, network_type)  # type: ignore[arg-type]
+                    run_in_executor(self._compute_micro_stats, network_type)
                 )
 
         # Store batch 2 results
@@ -161,10 +161,10 @@ class CoreSna:
             tasks = {}
             for network_type in ("a", "b"):
                 tasks[f"descriptives_{network_type}"] = tg.create_task(
-                    run_in_executor(self._compute_descriptives, network_type)  # type: ignore[arg-type]
+                    run_in_executor(self._compute_descriptives, network_type)
                 )
                 tasks[f"rankings_{network_type}"] = tg.create_task(
-                    run_in_executor(self._compute_rankings, network_type)  # type: ignore[arg-type]
+                    run_in_executor(self._compute_rankings, network_type)
                 )
 
         # Store batch 3 results
@@ -549,7 +549,7 @@ class CoreSna:
                 ], ignore_index=True)
         return relevant_nodes_ab
 
-    def _compute_edges_types(self, network_type: Literal["a", "b"]) -> dict[str, pd.Index]:
+    def _compute_edges_types(self, network_type: Literal["a", "b"]) -> Any:
         """
         Classify edges into five types based on reciprocity and cross-network relationships.
 
