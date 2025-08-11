@@ -16,11 +16,11 @@ from fastapi.responses import JSONResponse
 
 class HeaderSizeLimitMiddleware(BaseHTTPMiddleware):
     """
-    Middleware to limit HTTP header sizes and prevent header-based attacks.
+    Middleware to limit HTTP header sizes and ensure JSON content for POST requests.
 
-    This middleware inspects all incoming request headers and rejects requests
-    where any individual header value exceeds the configured size limit. This
-    helps prevent header-based denial of service attacks and memory exhaustion.
+    This middleware inspects all incoming request headers and:
+    1. Rejects requests where any individual header value exceeds the size limit
+    2. Ensures POST requests have Content-Type: application/json
 
     Args:
         app: The ASGI application instance
@@ -29,6 +29,7 @@ class HeaderSizeLimitMiddleware(BaseHTTPMiddleware):
 
     Raises:
         JSONResponse: Returns 413 status for headers exceeding the size limit
+        JSONResponse: Returns 415 status for POST requests without JSON content type
 
     Note:
         This middleware checks individual header values, not the total size
@@ -49,24 +50,23 @@ class HeaderSizeLimitMiddleware(BaseHTTPMiddleware):
 
     async def dispatch(self, request: Request, call_next: Callable[[Request], Awaitable[Response]]) -> Response:
         """
-        Process incoming request and enforce header size limits.
+        Process incoming request and enforce header validations.
 
-        Iterates through all request headers and validates that each header value
-        does not exceed the configured size limit. If any header is too large,
-        returns an error response immediately.
+        Validates header sizes and ensures POST requests have JSON content type.
 
         Args:
             request: The incoming HTTP request with headers to validate
             call_next: The next middleware or route handler in the chain
 
         Returns:
-            Response: Either an error response for oversized headers or the result
+            Response: Either an error response for validation failures or the result
                      from the next handler in the chain
 
         Raises:
-            JSONResponse: 413 status if any header value exceeds the size limit.
-                         The error message includes the name of the offending header.
+            JSONResponse: 413 status if any header value exceeds the size limit
+            JSONResponse: 415 status if POST request doesn't have JSON content type
         """
+        # Check header sizes
         for header_value in request.headers.values():
             if len(header_value) > self.max_header_size:
                 return JSONResponse(
@@ -74,5 +74,16 @@ class HeaderSizeLimitMiddleware(BaseHTTPMiddleware):
                     content={"detail": "header_is_too_large"}
                 )
 
-        return await call_next(request)
+        # Check JSON content type for POST requests
+        if request.method == "POST":
+            content_type = request.headers.get("content-type", "")
+            # Extract main content type (ignore charset and other parameters)
+            main_content_type = content_type.split(";")[0].strip().lower()
 
+            if main_content_type != "application/json":
+                return JSONResponse(
+                    status_code=status.HTTP_415_UNSUPPORTED_MEDIA_TYPE,
+                    content={"detail": "post_requests_must_be_json"}
+                )
+
+        return await call_next(request)
