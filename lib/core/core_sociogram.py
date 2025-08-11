@@ -90,7 +90,49 @@ class CoreSociogram:
                 - "relevant_nodes_ab": Dictionary with most/least relevant nodes for positive/negative outcomes
 
         """
-        return asyncio.run(self._get_async(sna))
+        # return asyncio.run(self._get_async(sna))  # noqa: ERA001
+        return self._get_sync(sna)
+
+    def _get_sync(self, sna: dict[str, Any]) -> SociogramDict:
+        """
+        Synchronous wrapper for the async get_async method.
+
+        Compute and store comprehensive sociogram analysis from social network data.
+
+        Args:
+            sna: A dictionary containing social network analysis data with the following structure:
+                - "network_a": NetworkX DiGraph for positive relationships
+                - "network_b": NetworkX DiGraph for negative relationships
+                - "adjacency_a": Pandas DataFrame adjacency matrix for positive relationships
+                - "adjacency_b": Pandas DataFrame adjacency matrix for negative relationships
+                - "edges_types_a": Dictionary with edge type classifications for network A
+                - "edges_types_b": Dictionary with edge type classifications for network B
+
+        Returns:
+            A dictionary containing complete sociogram analysis with the following structure:
+                - "macro_stats": Series of network-level cohesion and conflict indices
+                - "micro_stats": DataFrame of individual-level statistics and ranks for each node
+                - "descriptives": DataFrame with aggregated descriptive statistics
+                - "rankings": Dictionary with sorted node rankings by centrality metrics and status
+                - "graph_ii": Base64-encoded SVG string of integration index polar visualization
+                - "graph_ai": Base64-encoded SVG string of activity index polar visualization
+                - "relevant_nodes_ab": Dictionary with most/least relevant nodes for positive/negative outcomes
+
+        """
+        # Store social network analysis data
+        self.sna = sna
+
+        # Compute all sociogram components in sequence
+        self.sociogram["macro_stats"] = self._compute_macro_stats()
+        self.sociogram["micro_stats"] = self._compute_micro_stats()
+        self.sociogram["descriptives"] = self._compute_descriptives()
+        self.sociogram["rankings"] = self._compute_rankings()
+        self.sociogram["relevant_nodes_ab"] = self._compute_relevant_nodes_ab()
+        self.sociogram["graph_ai"] = self._create_graph("ai")
+        self.sociogram["graph_ii"] = self._create_graph("ii")
+
+        return cast("SociogramDict", self.sociogram)
+
 
     async def _get_async(self, sna: dict[str, Any]) -> SociogramDict:
         """

@@ -94,7 +94,48 @@ class CoreSna:
             adjacency matrices, statistics, rankings, components, and visualization data
             for both networks.
         """
-        return asyncio.run(self._get_async(packed_edges_a, packed_edges_b))
+        # return asyncio.run(self._get_async(packed_edges_a, packed_edges_b))  # noqa: ERA001
+        return self._get_sync(packed_edges_a, packed_edges_b)
+
+    def _get_sync(self,
+            packed_edges_a: list[dict[str, str | None]],
+            packed_edges_b: list[dict[str, str | None]],
+    ) -> SNADict:
+        """
+        Synchronous wrapper for the async get_async method.
+
+        Compute and store comprehensive network analysis for two directed networks.
+
+        Args:
+            packed_edges_a: Edge data for network A. Each dictionary represents edges from a source node,
+                with keys as source nodes and values as comma-separated target nodes or None.
+            packed_edges_b: Edge data for network B. Structure mirrors `packed_edges_a`.
+
+        Returns:
+            A dictionary containing all network analysis results including nodes, edges,
+            adjacency matrices, statistics, rankings, components, and visualization data
+            for both networks.
+        """
+        self._create_networks(packed_edges_a, packed_edges_b)
+
+        # Store edge types, components, macro stats, micro stats, descriptives, rankings and graphs
+        for network_type in ("a", "b"):
+            self.sna[f"edges_types_{network_type}"] = self._compute_edges_types(network_type)
+            self.sna[f"components_{network_type}"] = self._compute_components(network_type)
+            self.sna[f"macro_stats_{network_type}"] = self._compute_macro_stats(network_type)
+            self.sna[f"micro_stats_{network_type}"] = self._compute_micro_stats(network_type)
+            self.sna[f"descriptives_{network_type}"] = self._compute_descriptives(network_type)
+            self.sna[f"rankings_{network_type}"] = self._compute_rankings(network_type)
+            self.sna[f"graph_{network_type}"] = self._create_graph(network_type)
+
+        # Store rankings comparison between networks
+        self.sna["rankings_ab"] = self._compute_rankings_ab()
+
+        # Store relevant nodes analysis
+        self.sna["relevant_nodes_ab"] = self._compute_relevant_nodes_ab()
+
+        return cast("SNADict", self.sna)
+
 
     async def _get_async(self,
                        packed_edges_a: list[dict[str, str | None]],
