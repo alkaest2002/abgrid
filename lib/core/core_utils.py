@@ -8,6 +8,7 @@ import asyncio
 import io
 from base64 import b64encode
 from collections.abc import Callable
+from functools import reduce
 from typing import Any, TypeVar
 
 import pandas as pd
@@ -17,6 +18,62 @@ from matplotlib.figure import Figure
 
 # Type variable for the return type of the function
 T = TypeVar("T")
+
+async def run_in_executor[T](func: Callable[..., T], *args: Any) -> T:
+    """
+    Run a synchronous function in a thread pool executor.
+
+    This allows CPU-bound synchronous functions to run without blocking
+    the asyncio event loop.
+
+    Args:
+        func: The synchronous function to run
+        *args: Arguments to pass to the function
+
+    Returns:
+        The result of the function call
+    """
+    loop = asyncio.get_event_loop()
+    return await loop.run_in_executor(None, func, *args)
+
+
+def unpack_network_edges(packed_edges: list[dict[str, str | None]]) -> list[tuple[str, str]]:
+        """
+        Unpack edge dictionaries into a list of directed edge tuples.
+
+        Takes a list of dictionaries where each dictionary represents outgoing edges
+        from source nodes, and converts them into a flat list of (source, target) tuples.
+
+        Args:
+            packed_edges: List of dictionaries where keys are source nodes and values are
+                comma-separated strings of target nodes. None values are safely handled.
+
+        Returns:
+            Flat list of directed edge tuples (source, target).
+        """
+        return reduce(
+            lambda acc, itr: [
+                *acc,
+                *[
+                    (node_from, node_to) for node_from, edges in itr.items() if edges is not None
+                        for node_to in edges.split(",")
+                ]
+            ],
+            packed_edges,
+            []
+        )
+
+def unpack_network_nodes(packed_edges: list[dict[str, str | None]]) -> list[str]:
+    """
+    Extract unique source nodes from packed edge dictionaries.
+
+    Args:
+        packed_edges: List of dictionaries where keys represent source nodes.
+
+    Returns:
+        Sorted list of unique source node identifiers.
+    """
+    return sorted([node for node_edges in packed_edges for node in node_edges])
 
 def figure_to_base64_svg(fig: Figure) -> str:
     """
@@ -133,20 +190,3 @@ def gini_coefficient(values: pd.Series) -> float:
     gini: float = (2.0 * index_weighted_sum) / (n * total_sum) - (n + 1) / n
 
     return gini
-
-async def run_in_executor[T](func: Callable[..., T], *args: Any) -> T:
-    """
-    Run a synchronous function in a thread pool executor.
-
-    This allows CPU-bound synchronous functions to run without blocking
-    the asyncio event loop.
-
-    Args:
-        func: The synchronous function to run
-        *args: Arguments to pass to the function
-
-    Returns:
-        The result of the function call
-    """
-    loop = asyncio.get_event_loop()
-    return await loop.run_in_executor(None, func, *args)

@@ -6,7 +6,6 @@ The code is part of the AB-Grid project and is licensed under the MIT License.
 
 import asyncio
 import re
-from functools import reduce
 from typing import Any, Literal, TypedDict, cast
 
 import matplotlib.pyplot as plt
@@ -20,6 +19,8 @@ from lib.core.core_utils import (
     compute_descriptives,
     figure_to_base64_svg,
     run_in_executor,
+    unpack_network_edges,
+    unpack_network_nodes,
 )
 
 
@@ -246,8 +247,8 @@ class CoreSna:
 
         # Store network A and B nodes and edges
         for network_type, packed_edges in network_edges:
-            self.sna[f"nodes_{network_type}"] = self._unpack_network_nodes(packed_edges)
-            self.sna[f"edges_{network_type}"] = self._unpack_network_edges(packed_edges)
+            self.sna[f"nodes_{network_type}"] = unpack_network_nodes(packed_edges)
+            self.sna[f"edges_{network_type}"] = unpack_network_edges(packed_edges)
             self.sna[f"network_{network_type}"] = nx.DiGraph(self.sna[f"edges_{network_type}"])
 
         # Add isolated nodes to networks A and B, and store nodes layout locations
@@ -941,41 +942,3 @@ class CoreSna:
         # All isolated nodes have been placed
         except StopIteration:
             return loc
-
-    def _unpack_network_edges(self, packed_edges: list[dict[str, str | None]]) -> list[tuple[str, str]]:
-        """
-        Unpack edge dictionaries into a list of directed edge tuples.
-
-        Takes a list of dictionaries where each dictionary represents outgoing edges
-        from source nodes, and converts them into a flat list of (source, target) tuples.
-
-        Args:
-            packed_edges: List of dictionaries where keys are source nodes and values are
-                comma-separated strings of target nodes. None values are safely handled.
-
-        Returns:
-            Flat list of directed edge tuples (source, target).
-        """
-        return reduce(
-            lambda acc, itr: [
-                *acc,
-                *[
-                    (node_from, node_to) for node_from, edges in itr.items() if edges is not None
-                        for node_to in edges.split(",")
-                ]
-            ],
-            packed_edges,
-            []
-        )
-
-    def _unpack_network_nodes(self, packed_edges: list[dict[str, str | None]]) -> list[str]:
-        """
-        Extract unique source nodes from packed edge dictionaries.
-
-        Args:
-            packed_edges: List of dictionaries where keys represent source nodes.
-
-        Returns:
-            Sorted list of unique source node identifiers.
-        """
-        return sorted([node for node_edges in packed_edges for node in node_edges])
