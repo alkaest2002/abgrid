@@ -54,6 +54,7 @@ def to_json(report_data: dict[str, Any]) -> dict[str, Any]:
         - Numpy arrays become Python lists
         - Datetime objects become ISO format strings
         - Complex objects are converted to string representation as fallback
+        - All keys are treated as optional and missing keys will result in None values
     """
 
     def _convert_pandas_dataframe(df: pd.DataFrame) -> dict[str, Any]:
@@ -142,33 +143,36 @@ def to_json(report_data: dict[str, Any]) -> dict[str, Any]:
     # Convert the main report data structure
     json_data: dict[str, Any] = {}
 
-    # Handle basic metadata fields
-    json_data["year"] = report_data["year"]
-    json_data["project_title"] = report_data["project_title"]
-    json_data["question_a"] = report_data["question_a"]
-    json_data["question_b"] = report_data["question_b"]
-    json_data["group"] = report_data["group"]
-    json_data["group_size"] = report_data["group_size"]
+    # Handle basic metadata fields with defaults
+    json_data["year"] = report_data.get("year")
+    json_data["project_title"] = report_data.get("project_title")
+    json_data["question_a"] = report_data.get("question_a")
+    json_data["question_b"] = report_data.get("question_b")
+    json_data["group"] = report_data.get("group")
+    json_data["group_size"] = report_data.get("group_size")
 
     # Handle SNA data (complex nested structure)
-    json_data["sna"] = _convert_value(report_data["sna"])
+    json_data["sna"] = _convert_value(report_data.get("sna"))
 
     # Handle sociogram data (optional, can be None)
-    json_data["sociogram"] = _convert_value(report_data["sociogram"])
+    json_data["sociogram"] = _convert_value(report_data.get("sociogram"))
 
     # Handle relevant nodes data (nested DataFrames)
+    relevant_nodes = report_data.get("relevant_nodes_ab", {})
     json_data["relevant_nodes_ab"] = {
-        "a": _convert_pandas_dataframe(report_data["relevant_nodes_ab"]["a"]),
-        "b": _convert_pandas_dataframe(report_data["relevant_nodes_ab"]["b"])
+        "a": _convert_pandas_dataframe(relevant_nodes.get("a", pd.DataFrame())),
+        "b": _convert_pandas_dataframe(relevant_nodes.get("b", pd.DataFrame()))
     }
 
     # Handle isolated nodes data (pandas Index objects)
+    isolated_nodes = report_data.get("isolated_nodes_ab", {})
     json_data["isolated_nodes_ab"] = {
-        "a": report_data["isolated_nodes_ab"]["a"].tolist(),
-        "b": report_data["isolated_nodes_ab"]["b"].tolist()
+        "a": isolated_nodes.get("a", pd.Index([])).tolist(),
+        "b": isolated_nodes.get("b", pd.Index([])).tolist()
     }
 
     return json_data
+
 
 def to_snake_case(text: str) -> str:
     """

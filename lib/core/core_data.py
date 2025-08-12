@@ -46,6 +46,21 @@ class CoreData:
 
         return validated_group_data_out.model_dump()
 
+    def get_sna_data(self, validated_report_data_in: ABGridReportSchemaIn) -> dict[str, Any]:
+        """Generate SNA data from the validated report data.
+
+        Args:
+            validated_report_data_in: An instance of ABGridReportSchemaIn containing validated report data.
+
+        Returns:
+            Dict containing the SNA data extracted from the validated report data.
+        """
+        # Extract SNA data from the validated model
+        # Initialize SNA analysis class
+        abgrid_sna: CoreSna = CoreSna(
+            validated_report_data_in.choices_a, validated_report_data_in.choices_b)
+
+        return dict(abgrid_sna.get())
 
     def get_report_data(self, validated_report_data_in: ABGridReportSchemaIn, with_sociogram: bool = False) -> dict[str, Any]:
         """Generate comprehensive report data with SNA and optional sociogram analysis.
