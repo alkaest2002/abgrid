@@ -11,6 +11,8 @@ from pydantic import BaseModel, model_validator
 
 from lib.core import SYMBOLS
 from lib.core.core_schemas_errors import PydanticValidationError
+from lib.core.core_sna import SNADict
+from lib.core.core_sociogram import SociogramDict
 
 
 FORBIDDEN_CHARS = re.compile(r"[^A-Za-zÀ-ÖØ-öø-ÿĀ-ſƀ-ɏḀ-ỿЀ-ӿͰ-Ͽ\d\s\'\.,\-\?\!]")
@@ -106,6 +108,37 @@ class ABGridGroupSchemaIn(BaseModel):
                 "error_message": "field_is_out_of_range"
             })
 
+
+class ABGridReportSchemaInFromJson(BaseModel):
+    """Output schema for comprehensive report data.
+
+    Contains complete analysis results including project metadata, network
+    analysis, sociogram data (optional), relevant nodes, and isolated nodes.
+
+    Attributes:
+        year: Current year when report was generated.
+        project_title: Title of the AB-Grid project.
+        question_a: Text of question A from the survey.
+        question_b: Text of question B from the survey.
+        group: Group identifier.
+        group_size: Number of participants in the group.
+        sna: Complete social network analysis results.
+        sociogram: Sociogram analysis results (None if not requested).
+        relevant_nodes_ab: Relevant nodes from both networks.
+        isolated_nodes_ab: Isolated nodes from both networks.
+    """
+    year: int
+    project_title: str
+    question_a: str
+    question_b: str
+    group: int
+    group_size: int
+    sna: SNADict
+    sociogram: SociogramDict | None
+
+    model_config = {
+        "extra": "forbid"  # Don't allow extra fields
+    }
 
 class ABGridReportSchemaIn(BaseModel):
     """Input schema for complete AB-Grid project data.
