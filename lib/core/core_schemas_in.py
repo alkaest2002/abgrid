@@ -137,6 +137,7 @@ class ABGridReportSchemaInFromJson(BaseModel):
     sociogram: SociogramDict | None
 
     model_config = {
+        "arbitrary_types_allowed": True,  # Allow pandas DataFrames
         "extra": "forbid"  # Don't allow extra fields
     }
 
