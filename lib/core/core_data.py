@@ -75,6 +75,29 @@ class CoreData:
         # Compute Sociogram results from group choice data
         sociogram_results: SociogramDict = abgrid_sociogram.get()
 
+        # Process isolated and relevant nodes, then prepare final report data
+        return self._prepare_report_output(
+            validated_report_data_in, sna_results, sociogram_results, with_sociogram
+        )
+
+    def _prepare_report_output(
+        self,
+        validated_report_data_in: ABGridReportSchemaIn,
+        sna_results: SNADict,
+        sociogram_results: SociogramDict,
+        with_sociogram: bool
+    ) -> dict[str, Any]:
+        """Prepare the final report output with isolated nodes, relevant nodes, and validation.
+
+        Args:
+            validated_report_data_in: Validated ABGrid report data schema instance
+            sna_results: Results from SNA analysis
+            sociogram_results: Results from Sociogram analysis
+            with_sociogram: Whether to include sociogram analysis
+
+        Returns:
+            Dict containing the validated report data output
+        """
         # Prepare isolated nodes
         isolated_nodes_ab: ABGridIsolatedNodesSchema = ABGridIsolatedNodesSchema(
             a=sna_results["micro_stats_a"].loc[sna_results["micro_stats_a"]["nd"].eq(3)].index,
