@@ -16,7 +16,7 @@ from lib.core.core_schemas_in import ABGridGroupSchemaIn, ABGridReportSchemaIn
 from lib.core.core_templates import CoreRenderer
 from lib.interfaces.fastapi.security.auth import Auth
 from lib.interfaces.fastapi.security.limiter import SimpleRateLimiter
-from lib.utils import to_json
+from lib.utils import to_json_report
 
 
 # Initialize once at module level
@@ -185,7 +185,7 @@ def get_router_api() -> APIRouter:
 
             # JSON serialization can also be CPU-intensive for large data
             report_json = await asyncio.to_thread(
-                to_json,
+                to_json_report,
                 report_data
             )
 
@@ -263,7 +263,7 @@ def get_router_api() -> APIRouter:
 
             # JSON serialization can also be CPU-intensive for large data
             sna_json = await asyncio.to_thread(
-                to_json,
+                to_json_report,
                 sna_data
             )
 

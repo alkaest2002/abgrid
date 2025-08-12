@@ -35,18 +35,41 @@ def check_python_version() -> None:
         print("=" * 60)
         sys.exit(1)
 
-def to_json(report_data: dict[str, Any]) -> dict[str, Any]:
+def to_snake_case(text: str) -> str:
     """
-    Convert ReportDataDict to a JSON-serializable format.
+    Convert text to snake_case.
 
-    This function handles the specific data types commonly found in AB-Grid report data,
-    including pandas DataFrames/Series, NetworkX graphs, numpy arrays, and nested dictionaries.
+    This function replaces spaces and other separators with underscores,
+    converts the text to lowercase, and removes leading/trailing underscores.
 
     Args:
-        report_data: The report data dictionary to convert
+        text: The input text to convert.
 
     Returns:
-        A JSON-serializable dictionary with the same structure as the input
+        The converted text in snake_case.
+    """
+    # Replace spaces and other separators with underscores
+    text = re.sub(r"[\s\-\.]+", "_", text)
+    # Insert underscore before uppercase letters (except at the start)
+    text = re.sub(r"(?<!^)(?=[A-Z])", "_", text)
+    # Convert to lowercase and clean up multiple underscores
+    text = re.sub(r"_+", "_", text.lower())
+    # Remove leading/trailing underscores
+    return text.strip("_")
+
+def _to_json_encoders(value: Any) -> Any:  # noqa: PLR0911
+    """
+    Convert various Python/scientific computing types to JSON-serializable format.
+
+    This function provides encoders for common data types used in scientific computing
+    and data analysis, including pandas DataFrames/Series, NetworkX graphs, numpy arrays,
+    and datetime objects.
+
+    Args:
+        value: The value to convert to JSON-serializable format
+
+    Returns:
+        A JSON-serializable representation of the input value
 
     Note:
         - DataFrames are converted to dict format with index preservation
@@ -54,7 +77,6 @@ def to_json(report_data: dict[str, Any]) -> dict[str, Any]:
         - Numpy arrays become Python lists
         - Datetime objects become ISO format strings
         - Complex objects are converted to string representation as fallback
-        - All keys are treated as optional and missing keys will result in None values
     """
 
     def _convert_pandas_dataframe(df: pd.DataFrame) -> dict[str, Any]:
@@ -90,7 +112,7 @@ def to_json(report_data: dict[str, Any]) -> dict[str, Any]:
         # For range index, convert to list
         return series.tolist()
 
-    def _convert_networkx(graph: DiGraph) -> dict[str, Any]: # type: ignore[type-arg]
+    def _convert_networkx(graph: DiGraph) -> dict[str, Any]:  # type: ignore[type-arg]
         """Convert NetworkX DiGraph to JSON-serializable format."""
         return {
             "nodes": list(graph.nodes()),
@@ -110,36 +132,54 @@ def to_json(report_data: dict[str, Any]) -> dict[str, Any]:
         """Convert datetime to ISO format string."""
         return dt.isoformat()
 
-    def _convert_value(value: Any) -> Any:  # noqa: PLR0911
-        """Convert individual values to JSON-serializable format."""
-        if value is None:
-            return None
-        if isinstance(value, str | int | float | bool):
-            return value
-        if isinstance(value, pd.DataFrame):
-            return _convert_pandas_dataframe(value)
-        if isinstance(value, pd.Series):
-            return _convert_pandas_series(value)
-        if isinstance(value, pd.Index):
-            return value.tolist()
-        if isinstance(value, DiGraph):
-            return _convert_networkx(value)
-        if isinstance(value, np.ndarray):
-            return _convert_numpy_array(value)
-        if isinstance(value, datetime.datetime):
-            return _convert_datetime(value)
-        if isinstance(value, datetime.date):
-            return _convert_datetime(datetime.datetime.combine(value, datetime.time()))
-        if isinstance(value, dict):
-            return {k: _convert_value(v) for k, v in value.items()}
-        if isinstance(value, list | tuple):
-            return [_convert_value(item) for item in value]
-        # Fallback: try to serialize directly, otherwise convert to string
-        try:
-            return json.dumps(value)
-        except (TypeError, ValueError):
-            return str(value)
+    # Main conversion logic
+    if value is None:
+        return None
+    if isinstance(value, str | int | float | bool):
+        return value
+    if isinstance(value, pd.DataFrame):
+        return _convert_pandas_dataframe(value)
+    if isinstance(value, pd.Series):
+        return _convert_pandas_series(value)
+    if isinstance(value, pd.Index):
+        return value.tolist()
+    if isinstance(value, DiGraph):
+        return _convert_networkx(value)
+    if isinstance(value, np.ndarray):
+        return _convert_numpy_array(value)
+    if isinstance(value, datetime.datetime):
+        return _convert_datetime(value)
+    if isinstance(value, datetime.date):
+        return _convert_datetime(datetime.datetime.combine(value, datetime.time()))
+    if isinstance(value, dict):
+        return {k: _to_json_encoders(v) for k, v in value.items()}
+    if isinstance(value, list | tuple):
+        return [_to_json_encoders(item) for item in value]
 
+    # Fallback: try to serialize directly, otherwise convert to string
+    try:
+        return json.dumps(value)
+    except (TypeError, ValueError):
+        return str(value)
+
+
+def to_json_report(report_data: dict[str, Any]) -> dict[str, Any]:
+    """
+    Convert AB-Grid ReportDataDict to a JSON-serializable format.
+
+    This function specifically handles the structure of AB-Grid report data,
+    treating all keys as optional and providing appropriate defaults.
+
+    Args:
+        report_data: The report data dictionary to convert
+
+    Returns:
+        A JSON-serializable dictionary with the same structure as the input
+
+    Note:
+        All keys are treated as optional and missing keys will result in None values
+        or appropriate empty defaults (empty DataFrames, empty lists, etc.)
+    """
     # Convert the main report data structure
     json_data: dict[str, Any] = {}
 
@@ -152,46 +192,24 @@ def to_json(report_data: dict[str, Any]) -> dict[str, Any]:
     json_data["group_size"] = report_data.get("group_size")
 
     # Handle SNA data (complex nested structure)
-    json_data["sna"] = _convert_value(report_data.get("sna"))
+    json_data["sna"] = _to_json_encoders(report_data.get("sna"))
 
     # Handle sociogram data (optional, can be None)
-    json_data["sociogram"] = _convert_value(report_data.get("sociogram"))
+    json_data["sociogram"] = _to_json_encoders(report_data.get("sociogram"))
 
     # Handle relevant nodes data (nested DataFrames)
     relevant_nodes = report_data.get("relevant_nodes_ab", {})
     json_data["relevant_nodes_ab"] = {
-        "a": _convert_pandas_dataframe(relevant_nodes.get("a", pd.DataFrame())),
-        "b": _convert_pandas_dataframe(relevant_nodes.get("b", pd.DataFrame()))
+        "a": _to_json_encoders(relevant_nodes.get("a", pd.DataFrame())),
+        "b": _to_json_encoders(relevant_nodes.get("b", pd.DataFrame()))
     }
 
     # Handle isolated nodes data (pandas Index objects)
     isolated_nodes = report_data.get("isolated_nodes_ab", {})
     json_data["isolated_nodes_ab"] = {
-        "a": isolated_nodes.get("a", pd.Index([])).tolist(),
-        "b": isolated_nodes.get("b", pd.Index([])).tolist()
+        "a": _to_json_encoders(isolated_nodes.get("a", pd.Index([]))),
+        "b": _to_json_encoders(isolated_nodes.get("b", pd.Index([])))
     }
 
     return json_data
 
-
-def to_snake_case(text: str) -> str:
-    """
-    Convert text to snake_case.
-
-    This function replaces spaces and other separators with underscores,
-    converts the text to lowercase, and removes leading/trailing underscores.
-
-    Args:
-        text: The input text to convert.
-
-    Returns:
-        The converted text in snake_case.
-    """
-    # Replace spaces and other separators with underscores
-    text = re.sub(r"[\s\-\.]+", "_", text)
-    # Insert underscore before uppercase letters (except at the start)
-    text = re.sub(r"(?<!^)(?=[A-Z])", "_", text)
-    # Convert to lowercase and clean up multiple underscores
-    text = re.sub(r"_+", "_", text.lower())
-    # Remove leading/trailing underscores
-    return text.strip("_")
