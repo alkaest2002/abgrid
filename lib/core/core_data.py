@@ -70,8 +70,8 @@ class CoreData:
         # Compute SNA results from group choice data
         sna_results: SNADict = abgrid_sna.get(validated_report_data_in.choices_a, validated_report_data_in.choices_b)
 
-        # Compute sociogram results from SNA data
-        sociogram_results: SociogramDict = abgrid_sociogram.get(dict(sna_results))
+        # Compute sociogram results from group choice data
+        sociogram_results: SociogramDict = abgrid_sociogram.get(validated_report_data_in.choices_a, validated_report_data_in.choices_b)
 
         # Prepare isolated nodes
         isolated_nodes_ab: ABGridIsolatedNodesSchema = ABGridIsolatedNodesSchema(

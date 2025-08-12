@@ -9,6 +9,7 @@ import re
 from typing import TYPE_CHECKING, Any, Literal, TypedDict, cast
 
 import matplotlib.pyplot as plt
+import networkx as nx
 import numpy as np
 import pandas as pd
 
@@ -17,11 +18,12 @@ from lib.core.core_utils import (
     compute_descriptives,
     figure_to_base64_svg,
     run_in_executor,
+    unpack_network_edges,
+    unpack_network_nodes,
 )
 
 
 if TYPE_CHECKING:
-    import networkx as nx
     from matplotlib.axes import Axes
     from matplotlib.figure import Figure
 
@@ -57,6 +59,7 @@ class CoreSociogram:
 
         Sets up internal data structures for storing social network analysis data
         and computed sociogram results.
+
         """
         # Initialize social network analysis dictionary
         self.sna: dict[str, Any] = {}
@@ -64,20 +67,13 @@ class CoreSociogram:
         # Initialize sociogram results dictionary
         self.sociogram: dict[str, Any] = {}
 
-    def get(self, sna: dict[str, Any]) -> SociogramDict:
+    def get(self,
+            packed_edges_a: list[dict[str, str | None]],
+            packed_edges_b: list[dict[str, str | None]]) -> SociogramDict:
         """
         Synchronous wrapper for the async get_async method.
 
         Compute and store comprehensive sociogram analysis from social network data.
-
-        Args:
-            sna: A dictionary containing social network analysis data with the following structure:
-                - "network_a": NetworkX DiGraph for positive relationships
-                - "network_b": NetworkX DiGraph for negative relationships
-                - "adjacency_a": Pandas DataFrame adjacency matrix for positive relationships
-                - "adjacency_b": Pandas DataFrame adjacency matrix for negative relationships
-                - "edges_types_a": Dictionary with edge type classifications for network A
-                - "edges_types_b": Dictionary with edge type classifications for network B
 
         Returns:
             A dictionary containing complete sociogram analysis with the following structure:
@@ -90,23 +86,16 @@ class CoreSociogram:
                 - "relevant_nodes_ab": Dictionary with most/least relevant nodes for positive/negative outcomes
 
         """
-        # return self._get_sync(sna)  # noqa: ERA001
-        return cast("SociogramDict",asyncio.run(self._get_async(sna)))
+        # return self._get_sync(packed_edges_a, packed_edges_b)  # noqa: ERA001
+        return cast("SociogramDict", asyncio.run(self._get_async(packed_edges_a, packed_edges_b)))
 
-    def _get_sync(self, sna: dict[str, Any]) -> dict[str, Any]:
+    def _get_sync(self,
+                packed_edges_a: list[dict[str, str | None]],
+                packed_edges_b: list[dict[str, str | None]]) -> dict[str, Any]:
         """
         Synchronous wrapper for the async get_async method.
 
         Compute and store comprehensive sociogram analysis from social network data.
-
-        Args:
-            sna: A dictionary containing social network analysis data with the following structure:
-                - "network_a": NetworkX DiGraph for positive relationships
-                - "network_b": NetworkX DiGraph for negative relationships
-                - "adjacency_a": Pandas DataFrame adjacency matrix for positive relationships
-                - "adjacency_b": Pandas DataFrame adjacency matrix for negative relationships
-                - "edges_types_a": Dictionary with edge type classifications for network A
-                - "edges_types_b": Dictionary with edge type classifications for network B
 
         Returns:
             A dictionary containing complete sociogram analysis with the following structure:
@@ -119,8 +108,8 @@ class CoreSociogram:
                 - "relevant_nodes_ab": Dictionary with most/least relevant nodes for positive/negative outcomes
 
         """
-        # Store social network analysis data
-        self.sna = sna
+        # Create networks first
+        self._create_networks(packed_edges_a, packed_edges_b)
 
         # Compute all sociogram components in sequence
         self.sociogram["macro_stats"] = self._compute_macro_stats()
@@ -134,28 +123,21 @@ class CoreSociogram:
         return self.sociogram
 
 
-    async def _get_async(self, sna: dict[str, Any]) -> dict[str, Any]:
+    async def _get_async(self,
+            packed_edges_a: list[dict[str, str | None]],
+            packed_edges_b: list[dict[str, str | None]]) -> dict[str, Any]:
         """
         Asynchronously compute and store comprehensive sociogram analysis from social network data.
 
         Uses concurrent execution where possible to optimize performance while respecting
         data dependencies between different computations.
 
-        Args:
-            sna: A dictionary containing social network analysis data with the following structure:
-                - "network_a": NetworkX DiGraph for positive relationships
-                - "network_b": NetworkX DiGraph for negative relationships
-                - "adjacency_a": Pandas DataFrame adjacency matrix for positive relationships
-                - "adjacency_b": Pandas DataFrame adjacency matrix for negative relationships
-                - "edges_types_a": Dictionary with edge type classifications for network A
-                - "edges_types_b": Dictionary with edge type classifications for network B
-
         Returns:
             A dictionary containing complete sociogram analysis with all computed metrics,
             statistics, rankings, and visualizations.
         """
-        # Store social network analysis data
-        self.sna = sna
+        # STEP 1: Create networks (must happen first)
+        await run_in_executor(self._create_networks, packed_edges_a, packed_edges_b)
 
         # Batch 1: Independent computations that only depend on self.sna
         # macro_stats and micro_stats can run concurrently
@@ -204,6 +186,42 @@ class CoreSociogram:
 
         return self.sociogram
 
+    def _create_networks(self,
+            packed_edges_a: list[dict[str, str | None]],
+            packed_edges_b: list[dict[str, str | None]]) -> None:
+        """
+        Create networks with nodes, edges, and adjacency matrices.
+
+        Performs the actual work of network creation from the packed edges data.
+        """
+        # Set network data
+        network_edges: list[tuple[Literal["a", "b"], Any]] = [
+            ("a", packed_edges_a),
+            ("b", packed_edges_b)
+        ]
+
+        # Store network A and B nodes and edges
+        for network_type, packed_edges in network_edges:
+            self.sna[f"nodes_{network_type}"] = unpack_network_nodes(packed_edges)
+            self.sna[f"edges_{network_type}"] = unpack_network_edges(packed_edges)
+            self.sna[f"network_{network_type}"] = nx.DiGraph(self.sna[f"edges_{network_type}"])
+
+        # Add isolated nodes to networks A and B
+        network_data: list[tuple[Literal["a", "b"], Any, Any]] = [
+            ("a", self.sna["network_a"], self.sna["nodes_a"]),
+            ("b", self.sna["network_b"], self.sna["nodes_b"])
+        ]
+
+        for network_type, network, nodes in network_data:
+            # Find isolated nodes
+            isolated_nodes: set[str] = set(network).symmetric_difference(set(nodes))
+
+            # Add isolated nodes to current network
+            network.add_nodes_from(isolated_nodes)
+
+            # Store current network adjacency matrix
+            self.sna[f"adjacency_{network_type}"] = nx.to_pandas_adjacency(network, nodelist=nodes)
+
     def _compute_macro_stats(self) -> pd.Series:
         """
         Compute macro-level sociogram statistics including cohesion and conflict indices.
@@ -219,27 +237,46 @@ class CoreSociogram:
                 - "wi_i": Type I conflict index (ratio of bidirectional negative edges to total negative edges)
                 - "wi_ii": Type II conflict index (ratio of bidirectional negative edges to network size)
         """
-        # Get typed references to networks and edge types
+        # Get typed references to networks and adjacency matrices
         network_a: nx.DiGraph = self.sna["network_a"] # type: ignore[type-arg]
         network_b: nx.DiGraph = self.sna["network_b"] # type: ignore[type-arg]
-        edges_types_a: dict[str, pd.Index] = self.sna["edges_types_a"]
-        edges_types_b: dict[str, pd.Index] = self.sna["edges_types_b"]
+        adjacency_a: pd.DataFrame = self.sna["adjacency_a"]
+        adjacency_b: pd.DataFrame = self.sna["adjacency_b"]
+
+        # Compute mutual relationships directly from adjacency matrices
+        # Element-wise multiplication of adjacency with its transpose gives mutual edges
+        mutual_a: pd.DataFrame = adjacency_a * adjacency_a.T
+        mutual_b: pd.DataFrame = adjacency_b * adjacency_b.T
+
+        # Count mutual relationships (sum of upper triangular to avoid double counting)
+        mutual_count_a: int = np.triu(mutual_a).sum()
+        mutual_count_b: int = np.triu(mutual_b).sum()
+
+        # Get total edge counts
+        total_edges_a: int = len(network_a.edges())
+        total_edges_b: int = len(network_b.edges())
+
+        # Get network sizes
+        network_size_a: int = len(network_a)
+        network_size_b: int = len(network_b)
 
         # Compute cohesion indices based on mutual positive relationships
         cohesion_index_type_i: float = (
-            (len(edges_types_a["type_ii"]) * 2) / len(network_a.edges())
-        )
+            (mutual_count_a * 2) / total_edges_a
+        ) if total_edges_a > 0 else 0.0
+
         cohesion_index_type_ii: float = (
-            len(edges_types_a["type_ii"]) / len(network_a)
-        )
+            mutual_count_a / network_size_a
+        ) if network_size_a > 0 else 0.0
 
         # Compute conflict indices based on mutual negative relationships
         conflict_index_type_i: float = (
-            (len(edges_types_b["type_ii"]) * 2) / len(network_b.edges())
-        )
+            (mutual_count_b * 2) / total_edges_b
+        ) if total_edges_b > 0 else 0.0
+
         conflict_index_type_ii: float = (
-            len(edges_types_b["type_ii"]) / len(network_b)
-        )
+            mutual_count_b / network_size_b
+        ) if network_size_b > 0 else 0.0
 
         return pd.Series({
             "ui_i": cohesion_index_type_i,
@@ -247,6 +284,7 @@ class CoreSociogram:
             "wi_i": conflict_index_type_i,
             "wi_ii": conflict_index_type_ii
         })
+
 
     def _compute_micro_stats(self) -> pd.DataFrame:
         """

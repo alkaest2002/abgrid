@@ -139,8 +139,8 @@ class CoreSna:
 
 
     async def _get_async(self,
-                       packed_edges_a: list[dict[str, str | None]],
-                       packed_edges_b: list[dict[str, str | None]],
+            packed_edges_a: list[dict[str, str | None]],
+            packed_edges_b: list[dict[str, str | None]],
     ) -> dict[str, Any]:
         """
         Asynchronously compute and store comprehensive network analysis for two directed networks.
@@ -228,8 +228,8 @@ class CoreSna:
         return self.sna
 
     def _create_networks(self,
-                             packed_edges_a: list[dict[str, str | None]],
-                             packed_edges_b: list[dict[str, str | None]]) -> None:
+            packed_edges_a: list[dict[str, str | None]],
+            packed_edges_b: list[dict[str, str | None]]) -> None:
         """
         Synchronously create networks with nodes, edges, and adjacency lists.
 
