@@ -10,7 +10,7 @@ from functools import wraps
 from pathlib import Path
 from typing import Any, TypeVar, cast, overload
 
-from lib.core.core_schemas import PydanticValidationError
+from lib.core.core_schemas_errors import PydanticValidationError
 from lib.core.core_templates import TemplateRenderError
 
 

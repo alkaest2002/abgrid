@@ -9,12 +9,14 @@ from typing import Any
 import pandas as pd
 
 from lib.core import SYMBOLS
-from lib.core.core_schemas import (
+from lib.core.core_schemas_in import (
     ABGridGroupSchemaIn,
+    ABGridReportSchemaIn,
+)
+from lib.core.core_schemas_out import (
     ABGridGroupSchemaOut,
     ABGridIsolatedNodesSchema,
     ABGridRelevantNodesSchema,
-    ABGridReportSchemaIn,
     ABGridReportSchemaOut,
 )
 from lib.core.core_sna import CoreSna, SNADict

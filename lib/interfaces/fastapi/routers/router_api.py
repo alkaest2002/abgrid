@@ -12,7 +12,7 @@ from typing import Any
 from fastapi import APIRouter, Depends, Query, Request, status
 from fastapi.responses import JSONResponse
 from lib.core.core_data import CoreData
-from lib.core.core_schemas import ABGridGroupSchemaIn, ABGridReportSchemaIn
+from lib.core.core_schemas_in import ABGridGroupSchemaIn, ABGridReportSchemaIn
 from lib.core.core_templates import CoreRenderer
 from lib.interfaces.fastapi.security.auth import Auth
 from lib.interfaces.fastapi.security.limiter import SimpleRateLimiter

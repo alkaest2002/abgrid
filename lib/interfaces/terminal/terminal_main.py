@@ -15,7 +15,7 @@ from weasyprint import HTML  # type: ignore[import-untyped]
 
 from lib.core import SYMBOLS
 from lib.core.core_data import CoreData
-from lib.core.core_schemas import ABGridReportSchemaIn
+from lib.core.core_schemas_in import ABGridReportSchemaIn
 from lib.core.core_templates import CoreRenderer, abgrid_jinja_env
 from lib.interfaces.terminal.terminal_errors import ABGridError
 from lib.interfaces.terminal.terminal_logger import logger_decorator

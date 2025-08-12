@@ -9,7 +9,7 @@ from fastapi import FastAPI, HTTPException, Request, status
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
 
-from lib.core.core_schemas import PydanticValidationError
+from lib.core.core_schemas_errors import PydanticValidationError
 from lib.interfaces.fastapi.middlewares.body import BodySizeLimitMiddleware
 from lib.interfaces.fastapi.middlewares.coors import (
     add_cors_middleware,  # Import the CORS function
