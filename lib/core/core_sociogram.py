@@ -53,23 +53,31 @@ class CoreSociogram:
         sna: Social network analysis data containing NetworkX graphs and adjacency matrices.
         sociogram: Dictionary containing all computed sociogram data and visualizations.
     """
-    def __init__(self) -> None:
+    def __init__(self,
+            packed_edges_a: list[dict[str, str | None]],
+            packed_edges_b: list[dict[str, str | None]]) -> None:
         """
         Initialize the CoreSociogram instance.
 
         Sets up internal data structures for storing social network analysis data
         and computed sociogram results.
 
+        Args:
+            packed_edges_a: List of packed edges for group A
+            packed_edges_b: List of packed edges for group B
+
         """
+        # Store packed edges for later use
+        self.packed_edges_a = packed_edges_a
+        self.packed_edges_b = packed_edges_b
+
         # Initialize social network analysis dictionary
         self.sna: dict[str, Any] = {}
 
         # Initialize sociogram results dictionary
         self.sociogram: dict[str, Any] = {}
 
-    def get(self,
-            packed_edges_a: list[dict[str, str | None]],
-            packed_edges_b: list[dict[str, str | None]]) -> SociogramDict:
+    def get(self) -> SociogramDict:
         """
         Synchronous wrapper for the async get_async method.
 
@@ -87,29 +95,21 @@ class CoreSociogram:
 
         """
         # return self._get_sync(packed_edges_a, packed_edges_b)  # noqa: ERA001
-        return cast("SociogramDict", asyncio.run(self._get_async(packed_edges_a, packed_edges_b)))
+        return cast("SociogramDict", asyncio.run(self._get_async()))
 
-    def _get_sync(self,
-                packed_edges_a: list[dict[str, str | None]],
-                packed_edges_b: list[dict[str, str | None]]) -> dict[str, Any]:
+    def _get_sync(self) -> dict[str, Any]:
         """
         Synchronous wrapper for the async get_async method.
 
         Compute and store comprehensive sociogram analysis from social network data.
 
         Returns:
-            A dictionary containing complete sociogram analysis with the following structure:
-                - "macro_stats": Series of network-level cohesion and conflict indices
-                - "micro_stats": DataFrame of individual-level statistics and ranks for each node
-                - "descriptives": DataFrame with aggregated descriptive statistics
-                - "rankings": Dictionary with sorted node rankings by centrality metrics and status
-                - "graph_ii": Base64-encoded SVG string of integration index polar visualization
-                - "graph_ai": Base64-encoded SVG string of activity index polar visualization
-                - "relevant_nodes_ab": Dictionary with most/least relevant nodes for positive/negative outcomes
+            A dictionary containing complete sociogram analysis with all computed metrics,
+            statistics, rankings, and visualizations.
 
         """
         # Create networks first
-        self._create_networks(packed_edges_a, packed_edges_b)
+        self._create_networks()
 
         # Compute all sociogram components in sequence
         self.sociogram["macro_stats"] = self._compute_macro_stats()
@@ -123,9 +123,7 @@ class CoreSociogram:
         return self.sociogram
 
 
-    async def _get_async(self,
-            packed_edges_a: list[dict[str, str | None]],
-            packed_edges_b: list[dict[str, str | None]]) -> dict[str, Any]:
+    async def _get_async(self) -> dict[str, Any]:
         """
         Asynchronously compute and store comprehensive sociogram analysis from social network data.
 
@@ -137,7 +135,7 @@ class CoreSociogram:
             statistics, rankings, and visualizations.
         """
         # STEP 1: Create networks (must happen first)
-        await run_in_executor(self._create_networks, packed_edges_a, packed_edges_b)
+        await run_in_executor(self._create_networks)
 
         # Batch 1: Independent computations that only depend on self.sna
         # macro_stats and micro_stats can run concurrently
@@ -186,9 +184,7 @@ class CoreSociogram:
 
         return self.sociogram
 
-    def _create_networks(self,
-            packed_edges_a: list[dict[str, str | None]],
-            packed_edges_b: list[dict[str, str | None]]) -> None:
+    def _create_networks(self) -> None:
         """
         Create networks with nodes, edges, and adjacency matrices.
 
@@ -196,8 +192,8 @@ class CoreSociogram:
         """
         # Set network data
         network_edges: list[tuple[Literal["a", "b"], Any]] = [
-            ("a", packed_edges_a),
-            ("b", packed_edges_b)
+            ("a", self.packed_edges_a),
+            ("b", self.packed_edges_b)
         ]
 
         # Store network A and B nodes and edges

@@ -66,29 +66,31 @@ class CoreSna:
         sna (SNADict): Dictionary containing all computed network analysis data for both networks.
     """
 
-    def __init__(self) -> None:
+    def __init__(self,
+            packed_edges_a: list[dict[str, str | None]],
+            packed_edges_b: list[dict[str, str | None]]) -> None:
         """
         Initialize the social network analysis object.
 
         Sets up an internal dictionary for storing SNA data
         for both networks A and B, with all values initially set to None.
+
+        Args:
+            packed_edges_a: List of packed edges for group A
+            packed_edges_b: List of packed edges for group B
         """
+        # Store packed edges for later use
+        self.packed_edges_a = packed_edges_a
+        self.packed_edges_b = packed_edges_b
+
         # Initialize SNA dict with all possible keys
         self.sna: dict[str, Any] = {}
 
-    def get(self,
-            packed_edges_a: list[dict[str, str | None]],
-            packed_edges_b: list[dict[str, str | None]],
-    ) -> SNADict:
+    def get(self) -> SNADict:
         """
         Synchronous wrapper for the async get_async method.
 
         Compute and store comprehensive network analysis for two directed networks.
-
-        Args:
-            packed_edges_a: Edge data for network A. Each dictionary represents edges from a source node,
-                with keys as source nodes and values as comma-separated target nodes or None.
-            packed_edges_b: Edge data for network B. Structure mirrors `packed_edges_a`.
 
         Returns:
             A dictionary containing all network analysis results including nodes, edges,
@@ -96,28 +98,20 @@ class CoreSna:
             for both networks.
         """
         # return self._get_sync(packed_edges_a, packed_edges_b)  # noqa: ERA001
-        return cast("SNADict", asyncio.run(self._get_async(packed_edges_a, packed_edges_b)))
+        return cast("SNADict", asyncio.run(self._get_async()))
 
-    def _get_sync(self,
-            packed_edges_a: list[dict[str, str | None]],
-            packed_edges_b: list[dict[str, str | None]],
-    ) -> dict[str, Any] :
+    def _get_sync(self) -> dict[str, Any] :
         """
         Synchronous wrapper for the async get_async method.
 
         Compute and store comprehensive network analysis for two directed networks.
-
-        Args:
-            packed_edges_a: Edge data for network A. Each dictionary represents edges from a source node,
-                with keys as source nodes and values as comma-separated target nodes or None.
-            packed_edges_b: Edge data for network B. Structure mirrors `packed_edges_a`.
 
         Returns:
             A dictionary containing all network analysis results including nodes, edges,
             adjacency matrices, statistics, rankings, components, and visualization data
             for both networks.
         """
-        self._create_networks(packed_edges_a, packed_edges_b)
+        self._create_networks()
 
         # Store edge types, components, macro stats, micro stats, descriptives, rankings and graphs
         for network_type in ("a", "b"):
@@ -138,10 +132,7 @@ class CoreSna:
         return self.sna
 
 
-    async def _get_async(self,
-            packed_edges_a: list[dict[str, str | None]],
-            packed_edges_b: list[dict[str, str | None]],
-    ) -> dict[str, Any]:
+    async def _get_async(self) -> dict[str, Any]:
         """
         Asynchronously compute and store comprehensive network analysis for two directed networks.
 
@@ -149,18 +140,13 @@ class CoreSna:
         where possible, including graph construction, statistical analysis, centrality measures,
         component detection, and visualization generation.
 
-        Args:
-            packed_edges_a: Edge data for network A. Each dictionary represents edges from a source node,
-                with keys as source nodes and values as comma-separated target nodes or None.
-            packed_edges_b: Edge data for network B. Structure mirrors `packed_edges_a`.
-
         Returns:
             A dictionary containing all network analysis results including nodes, edges,
             adjacency matrices, statistics, rankings, components, and visualization data
             for both networks.
         """
         # STEP 1: Create networks (must happen first, synchronously)
-        await run_in_executor(self._create_networks, packed_edges_a, packed_edges_b)
+        await run_in_executor(self._create_networks)
 
         # STEP 2 & 3: Concurrent computation using TaskGroups
 
@@ -227,22 +213,17 @@ class CoreSna:
 
         return self.sna
 
-    def _create_networks(self,
-            packed_edges_a: list[dict[str, str | None]],
-            packed_edges_b: list[dict[str, str | None]]) -> None:
+    def _create_networks(self) -> None:
         """
         Synchronously create networks with nodes, edges, and adjacency lists.
 
         This performs the actual work of network creation.
 
-        Args:
-            packed_edges_a: Edge data for network A
-            packed_edges_b: Edge data for network B
         """
         # Set network data
         network_edges: list[tuple[Literal["a", "b"], Any]] = [
-            ("a", packed_edges_a),
-            ("b", packed_edges_b)
+            ("a", self.packed_edges_a),
+            ("b", self.packed_edges_b)
         ]
 
         # Store network A and B nodes and edges

@@ -62,16 +62,18 @@ class CoreData:
             relevant nodes across both analysis types
         """
         # Initialize SNA analysis class
-        abgrid_sna: CoreSna = CoreSna()
+        abgrid_sna: CoreSna = CoreSna(
+            validated_report_data_in.choices_a, validated_report_data_in.choices_b)
 
-        # Initialize sociogram analysis class
-        abgrid_sociogram: CoreSociogram = CoreSociogram()
+        # Initialize Sociogram analysis class
+        abgrid_sociogram: CoreSociogram = CoreSociogram(
+            validated_report_data_in.choices_a, validated_report_data_in.choices_b)
 
         # Compute SNA results from group choice data
-        sna_results: SNADict = abgrid_sna.get(validated_report_data_in.choices_a, validated_report_data_in.choices_b)
+        sna_results: SNADict = abgrid_sna.get()
 
-        # Compute sociogram results from group choice data
-        sociogram_results: SociogramDict = abgrid_sociogram.get(validated_report_data_in.choices_a, validated_report_data_in.choices_b)
+        # Compute Sociogram results from group choice data
+        sociogram_results: SociogramDict = abgrid_sociogram.get()
 
         # Prepare isolated nodes
         isolated_nodes_ab: ABGridIsolatedNodesSchema = ABGridIsolatedNodesSchema(
