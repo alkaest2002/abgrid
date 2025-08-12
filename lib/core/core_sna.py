@@ -94,13 +94,13 @@ class CoreSna:
             adjacency matrices, statistics, rankings, components, and visualization data
             for both networks.
         """
-        # return asyncio.run(self._get_async(packed_edges_a, packed_edges_b))  # noqa: ERA001
-        return self._get_sync(packed_edges_a, packed_edges_b)
+        # return self._get_sync(packed_edges_a, packed_edges_b)  # noqa: ERA001
+        return cast("SNADict", asyncio.run(self._get_async(packed_edges_a, packed_edges_b)))
 
     def _get_sync(self,
             packed_edges_a: list[dict[str, str | None]],
             packed_edges_b: list[dict[str, str | None]],
-    ) -> SNADict:
+    ) -> dict[str, Any] :
         """
         Synchronous wrapper for the async get_async method.
 
@@ -134,13 +134,13 @@ class CoreSna:
         # Store relevant nodes analysis
         self.sna["relevant_nodes_ab"] = self._compute_relevant_nodes_ab()
 
-        return cast("SNADict", self.sna)
+        return self.sna
 
 
     async def _get_async(self,
                        packed_edges_a: list[dict[str, str | None]],
                        packed_edges_b: list[dict[str, str | None]],
-    ) -> SNADict:
+    ) -> dict[str, Any]:
         """
         Asynchronously compute and store comprehensive network analysis for two directed networks.
 
@@ -224,7 +224,7 @@ class CoreSna:
         self.sna["rankings_ab"] = rankings_ab_task.result()
         self.sna["relevant_nodes_ab"] = relevant_nodes_task.result()
 
-        return cast("SNADict", self.sna)
+        return self.sna
 
     def _create_networks(self,
                              packed_edges_a: list[dict[str, str | None]],

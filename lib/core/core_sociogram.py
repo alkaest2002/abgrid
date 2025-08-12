@@ -90,10 +90,10 @@ class CoreSociogram:
                 - "relevant_nodes_ab": Dictionary with most/least relevant nodes for positive/negative outcomes
 
         """
-        # return asyncio.run(self._get_async(sna))  # noqa: ERA001
-        return self._get_sync(sna)
+        # return self._get_sync(sna)  # noqa: ERA001
+        return cast("SociogramDict",asyncio.run(self._get_async(sna)))
 
-    def _get_sync(self, sna: dict[str, Any]) -> SociogramDict:
+    def _get_sync(self, sna: dict[str, Any]) -> dict[str, Any]:
         """
         Synchronous wrapper for the async get_async method.
 
@@ -131,10 +131,10 @@ class CoreSociogram:
         self.sociogram["graph_ai"] = self._create_graph("ai")
         self.sociogram["graph_ii"] = self._create_graph("ii")
 
-        return cast("SociogramDict", self.sociogram)
+        return self.sociogram
 
 
-    async def _get_async(self, sna: dict[str, Any]) -> SociogramDict:
+    async def _get_async(self, sna: dict[str, Any]) -> dict[str, Any]:
         """
         Asynchronously compute and store comprehensive sociogram analysis from social network data.
 
@@ -202,7 +202,7 @@ class CoreSociogram:
         # Store batch 3 results
         self.sociogram["relevant_nodes_ab"] = relevant_nodes_task.result()
 
-        return cast("SociogramDict", self.sociogram)
+        return self.sociogram
 
     def _compute_macro_stats(self) -> pd.Series:
         """
