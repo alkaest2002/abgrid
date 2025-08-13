@@ -15,11 +15,11 @@ from weasyprint import HTML  # type: ignore[import-untyped]
 
 from lib.core import SYMBOLS
 from lib.core.core_data import CoreData
+from lib.core.core_export import CoreExport
 from lib.core.core_schemas_in import ABGridReportSchemaIn
 from lib.core.core_templates import CoreRenderer, abgrid_jinja_env
 from lib.interfaces.terminal.terminal_errors import ABGridError
 from lib.interfaces.terminal.terminal_logger import logger_decorator
-from lib.utils import to_json_report
 
 
 class TerminalMain:
@@ -188,7 +188,7 @@ class TerminalMain:
             print(f"Report for {group_file.stem} successfully generated.")  # noqa: T201
 
             # Convert report data to json
-            filtered_data = to_json_report(report_data)
+            filtered_data = CoreExport.to_json_report(report_data)
 
             # Add the filtered data to the collection
             all_groups_data[group_file.stem] = filtered_data
