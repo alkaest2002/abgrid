@@ -3,9 +3,6 @@ Author: Pierpaolo Calanna
 
 The code is part of the AB-Grid project and is licensed under the MIT License.
 """
-
-
-
 from typing import Any
 
 
