@@ -54,18 +54,10 @@ class Settings(BaseSettings):
         validation_alias="AUTH_SECRET"
     )
 
-    max_concurrent_requests_for_group: int = Field(
-        default=15,
-        description="Maximum number of concurrent requests allowed for /api/group endpoint",
-        validation_alias="MAX_CONCURRENT_REQUESTS_FOR_GROUP",
-        ge=1,  # Must allow at least 1 request
-        le=1000  # Reasonable upper limit
-    )
-
-    max_concurrent_requests_for_report: int = Field(
+    max_concurrent_requests: int = Field(
         default=5,
-        description="Maximum number of concurrent requests allowed for /api/report endpoint",
-        validation_alias="MAX_CONCURRENT_REQUESTS_FOR_REPORT",
+        description="Maximum number of concurrent requests allowed for /api endpoints",
+        validation_alias="MAX_CONCURRENT_REQUESTS",
         ge=1,  # Must allow at least 1 request
         le=1000  # Reasonable upper limit
     )

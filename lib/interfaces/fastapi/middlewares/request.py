@@ -3,10 +3,8 @@ Author: Pierpaolo Calanna
 
 The code is part of the AB-Grid project and is licensed under the MIT License.
 """
-
 import asyncio
-from collections.abc import AsyncIterator, Awaitable, Callable
-from contextlib import asynccontextmanager
+from collections.abc import Awaitable, Callable
 
 from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.types import ASGIApp
@@ -18,121 +16,144 @@ from lib.interfaces.fastapi.settings import Settings
 
 settings: Settings = Settings.load()
 
-# Alternative implementation with a single combined context manager
+
 class RequestProtectionMiddleware(BaseHTTPMiddleware):
     """
     Middleware to protect against request-based attacks and resource exhaustion.
 
-    This middleware provides comprehensive request protection through:
-    - Request timeout enforcement to prevent slow HTTP attacks
-    - Concurrent request limiting for specific routes to prevent resource exhaustion
-    - Separate concurrent limits for different endpoint types
+    This middleware provides comprehensive request protection by implementing:
+    - Request timeout enforcement for all incoming requests
+    - Concurrent request limiting specifically for /api routes to prevent overload
+    - Automatic rejection of requests when concurrency limits are exceeded
 
-    The middleware uses asyncio.Semaphore for thread-safe concurrent request limiting,
-    ensuring robust protection against resource exhaustion attacks.
+    The middleware applies different handling strategies based on the request path:
+    - API routes (/api/*): Subject to both timeout and concurrency controls
+    - Other routes: Subject to timeout control only
 
-    Args:
-        app: The ASGI application instance
-        request_timeout: Maximum time in seconds a request can take before timing out
-                        (default: 60 seconds)
-        max_concurrent_requests_for_group: Maximum concurrent requests for /api/group endpoint
-        max_concurrent_requests_for_report: Maximum concurrent requests for /api/report endpoint
-
-    Raises:
-        JSONResponse: Returns 429 status when concurrent request limit is exceeded
-        JSONResponse: Returns 408 status when request timeout is exceeded
-
-    Note:
-        - Request timeout applies to ALL requests regardless of route
-        - Concurrent request limits apply separately to /api/group and /api/report routes
-        - Route matching uses prefix matching (startswith)
-        - Semaphores automatically handle the acquire/release pattern in a thread-safe manner
+    Attributes:
+        request_timeout (int): Maximum time in seconds to wait for request completion
+        semaphore (asyncio.Semaphore): Controls concurrent request limits for API routes
     """
 
     def __init__(
         self,
         app: ASGIApp,
-        request_timeout: int = 60,
-        max_concurrent_requests_for_group: int = settings.max_concurrent_requests_for_group,
-        max_concurrent_requests_for_report: int = settings.max_concurrent_requests_for_report,
     ) -> None:
-        """Initialize the middleware."""
+        """
+        Initialize the middleware with validation and protection settings.
+
+        Sets up the middleware with timeout and concurrency controls based on
+        application settings. The semaphore limit is loaded from settings to
+        control maximum concurrent API requests.
+
+        Args:
+            app (ASGIApp): The ASGI application instance to wrap with protection
+
+        Note:
+            The request timeout is hardcoded to 60 seconds, while max concurrent
+            requests is loaded from the Settings configuration.
+        """
         super().__init__(app)
-        self.request_timeout = request_timeout
-
-        self.semaphores = {
-            "/api/group": asyncio.Semaphore(max_concurrent_requests_for_group),
-            "/api/report": asyncio.Semaphore(max_concurrent_requests_for_report),
-        }
-
-        self.error_messages = {
-            "/api/group": "too_many_concurrent_group_requests",
-            "/api/report": "too_many_concurrent_report_requests",
-        }
+        max_concurrent = settings.max_concurrent_requests
+        self.request_timeout = 60
+        self.semaphore = asyncio.Semaphore(max_concurrent)
 
     async def dispatch(
         self,
         request: Request,
         call_next: Callable[[Request], Awaitable[Response]]
     ) -> Response:
-        """Process request with protection."""
-        async with self._protected_request(request, call_next) as response:
-            return response
+        """
+        Process incoming requests with appropriate protection measures.
 
-    @asynccontextmanager
-    async def _protected_request(
+        Routes requests to different protection handlers based on the URL path:
+        - API routes (/api/*): Apply both timeout and concurrency limiting
+        - Other routes: Apply timeout protection only
+
+        Args:
+            request (Request): The incoming HTTP request object
+            call_next (Callable): The next middleware or route handler in the chain
+
+        Returns:
+            Response: HTTP response from the protected request processing
+
+        Raises:
+            The method handles exceptions internally and returns appropriate
+            HTTP error responses rather than propagating exceptions.
+        """
+        if request.url.path.startswith("/api"):
+            return await self._handle_api_request(request, call_next)
+        return await self._execute_with_timeout(request, call_next)
+
+    async def _handle_api_request(
         self,
         request: Request,
         call_next: Callable[[Request], Awaitable[Response]]
-    ) -> AsyncIterator[Response]:
-        """Combined context manager for all request protection.
-
-        This context manager handles both rate limiting and timeout protection
-        in a single, clean interface.
+    ) -> Response:
         """
-        path = request.url.path
-        semaphore = None
-        error_detail = None
+        Handle API requests with concurrency limiting protection.
 
-        # Find applicable semaphore
-        for prefix, sem in self.semaphores.items():
-            if path.startswith(prefix):
-                semaphore = sem
-                error_detail = self.error_messages[prefix]
-                break
+        Checks if the concurrent request limit has been reached and either
+        processes the request or returns a 429 Too Many Requests response.
+        Uses a semaphore to control concurrent access to API endpoints.
 
-        if semaphore:
-            # Check if we can acquire the semaphore
-            if semaphore._value == 0:  # noqa: SLF001
-                yield JSONResponse(
-                    status_code=status.HTTP_429_TOO_MANY_REQUESTS,
-                    content={"detail": error_detail}
-                )
-                return
+        Args:
+            request (Request): The API request to process
+            call_next (Callable): The next handler in the processing chain
 
-            # Acquire semaphore and process request
-            async with semaphore:
-                try:
-                    response = await asyncio.wait_for(
-                        call_next(request),
-                        timeout=self.request_timeout
-                    )
-                    yield response
-                except TimeoutError:
-                    yield JSONResponse(
-                        status_code=status.HTTP_408_REQUEST_TIMEOUT,
-                        content={"detail": "request_timeout"}
-                    )
-        else:
-            # No rate limiting, just timeout protection
-            try:
-                response = await asyncio.wait_for(
-                    call_next(request),
-                    timeout=self.request_timeout
-                )
-                yield response
-            except TimeoutError:
-                yield JSONResponse(
-                    status_code=status.HTTP_408_REQUEST_TIMEOUT,
-                    content={"detail": "request_timeout"}
-                )
+        Returns:
+            Response: Either the processed request response or a 429 error response
+                - 200-5xx: Normal response from successful request processing
+                - 429: Too many concurrent requests error with JSON detail
+
+        Note:
+            The semaphore.locked() check provides immediate rejection without
+            waiting, preventing request queuing when at capacity.
+        """
+        if self.semaphore.locked():
+            return JSONResponse(
+                status_code=status.HTTP_429_TOO_MANY_REQUESTS,
+                content={"detail": "too_many_concurrent_requests"}
+            )
+
+        async with self.semaphore:
+            return await self._execute_with_timeout(request, call_next)
+
+    async def _execute_with_timeout(
+        self,
+        request: Request,
+        call_next: Callable[[Request], Awaitable[Response]]
+    ) -> Response:
+        """
+        Execute request processing with timeout protection.
+
+        Wraps the request processing in an asyncio timeout to prevent
+        long-running requests from consuming resources indefinitely.
+
+        Args:
+            request (Request): The request to process with timeout protection
+            call_next (Callable): The next handler in the processing chain
+
+        Returns:
+            Response: Either the processed request response or a timeout error
+                - 200-5xx: Normal response from successful request processing
+                - 408: Request timeout error with JSON detail
+
+        Raises:
+            TimeoutError: Caught internally and converted to 408 HTTP response
+
+        Note:
+            The timeout value is configured in self.request_timeout (60 seconds).
+            This prevents both malicious and accidental resource exhaustion from
+            long-running requests.
+        """
+        try:
+            return await asyncio.wait_for(
+                call_next(request),
+                timeout=self.request_timeout
+            )
+        except TimeoutError:
+            return JSONResponse(
+                status_code=status.HTTP_408_REQUEST_TIMEOUT,
+                content={"detail": "request_timeout"}
+            )
