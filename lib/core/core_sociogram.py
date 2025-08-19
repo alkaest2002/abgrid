@@ -457,7 +457,7 @@ class CoreSociogram:
             for metric_rank_name, ranks_series in rankings.items():
 
                 # Init vars
-                relevant_ranks: pd.Series
+                current_relevant_ranks: pd.Series
                 threshold_value: float
                 ascending: bool
 
@@ -470,7 +470,7 @@ class CoreSociogram:
                     threshold_value = ranks_series.quantile(threshold)
 
                     # Filter nodes with ranks at or below threshold (best performers)
-                    relevant_ranks = ranks_series[ranks_series.le(threshold_value)]
+                    current_relevant_ranks = ranks_series[ranks_series.le(threshold_value)]
 
                     # Set ascending so that smaller ranks are considered more important
                     ascending = True
@@ -480,19 +480,19 @@ class CoreSociogram:
                     threshold_value = ranks_series.quantile(1 - threshold)
 
                     # Filter nodes with ranks at or above threshold (worst performers)
-                    relevant_ranks = ranks_series[ranks_series.ge(threshold_value)]
+                    current_relevant_ranks = ranks_series[ranks_series.ge(threshold_value)]
 
                     # Set ascending so that higher ranks are considered more important
                     ascending = False
 
                 # Compute relevant nodes data
                 current_relevant_nodes: pd.DataFrame = (
-                    relevant_ranks
+                    current_relevant_ranks
                         .to_frame()
                         .assign(
                             metric=metric_name,
-                            recomputed_rank=relevant_ranks.rank(method="dense", ascending=ascending),
-                            value=micro_stats.loc[relevant_ranks.index, metric_name],
+                            recomputed_rank=current_relevant_ranks.rank(method="dense", ascending=ascending),
+                            value=micro_stats.loc[current_relevant_ranks.index, metric_name],
                             weight=lambda x: x["recomputed_rank"].pow(.8).rdiv(10),
                             evidence_type="sociogram"
                         )

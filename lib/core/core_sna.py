@@ -523,16 +523,16 @@ class CoreSna:
                 threshold_value: float = ranks_series.quantile(threshold)
 
                 # Filter top nodes (assuming lower rank = better)
-                relevant_ranks: pd.Series = ranks_series[ranks_series.le(threshold_value)]
+                current_relevant_ranks: pd.Series = ranks_series[ranks_series.le(threshold_value)]
 
                 # Compute relevant nodes data
                 current_relevant_nodes: pd.DataFrame = (
-                    relevant_ranks
+                    current_relevant_ranks
                         .to_frame()
                         .assign(
                             metric=metric_name,
-                            recomputed_rank=relevant_ranks.rank(method="dense", ascending=True),
-                            value=micro_stats.loc[relevant_ranks.index, metric_name],
+                            recomputed_rank=current_relevant_ranks.rank(method="dense", ascending=True),
+                            value=micro_stats.loc[current_relevant_ranks.index, metric_name],
                             weight=lambda x: x["recomputed_rank"].pow(.8).rdiv(10),
                             evidence_type="sna"
                         )
@@ -547,6 +547,7 @@ class CoreSna:
                     relevant_nodes[valence_type],
                     current_relevant_nodes
                 ], ignore_index=True)
+
         return relevant_nodes
 
     def _compute_edges_types(self, network_type: Literal["a", "b"]) -> Any:
