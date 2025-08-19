@@ -119,15 +119,15 @@ class CoreData:
         )
 
         # Get relevant nodes from both SNA and sociogram analyses
-        relevant_nodes_ab_sna: dict[str, pd.DataFrame] = sna_results["relevant_nodes_ab"].copy()
-        relevant_nodes_ab_sociogram: dict[str, pd.DataFrame] = (
-            sociogram_results["relevant_nodes_ab"].copy() if with_sociogram else
+        relevant_nodes_sna: dict[str, pd.DataFrame] = sna_results["relevant_nodes"].copy()
+        relevant_nodes_sociogram: dict[str, pd.DataFrame] = (
+            sociogram_results["relevant_nodes"].copy() if with_sociogram else
             {"a": pd.DataFrame(), "b": pd.DataFrame()}
         )
 
-        relevant_nodes_ab: dict[str, pd.DataFrame] = {}
+        relevant_nodes: dict[str, pd.DataFrame] = {}
 
-        # Loop through relevant_nodes_ab keys
+        # Loop through relevant_nodes keys
         for valence_type in ("a", "b"):
 
             # Get isolated nodes
@@ -137,8 +137,8 @@ class CoreData:
             nodes: pd.DataFrame = (
                 pd.concat(
                     [
-                        relevant_nodes_ab_sna[valence_type],
-                        relevant_nodes_ab_sociogram[valence_type]
+                        relevant_nodes_sna[valence_type],
+                        relevant_nodes_sociogram[valence_type]
                     ]
                 )
             )
@@ -159,7 +159,7 @@ class CoreData:
             )
 
             # Do some other calculation with nodes
-            relevant_nodes_ab[valence_type] = (
+            relevant_nodes[valence_type] = (
                 nodes
                     # Keep nodes with multiple metrics only
                     .loc[nodes["metric"].str.len() > 1, :]
@@ -170,9 +170,9 @@ class CoreData:
             )
 
         # Create RelevantNodesSchema
-        relevant_nodes_model: ABGridRelevantNodesSchema = ABGridRelevantNodesSchema(**relevant_nodes_ab)
+        relevant_nodes_model: ABGridRelevantNodesSchema = ABGridRelevantNodesSchema(**relevant_nodes)
 
         return {
-            "isolated_nodes_ab": isolated_nodes_model.model_dump(),
-            "relevant_nodes_ab": relevant_nodes_model.model_dump()
+            "isolated_nodes": isolated_nodes_model.model_dump(),
+            "relevant_nodes": relevant_nodes_model.model_dump()
         }

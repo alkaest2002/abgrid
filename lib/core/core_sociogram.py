@@ -82,7 +82,7 @@ class CoreSociogram:
                 - "rankings": Dictionary with sorted node rankings by centrality metrics and status
                 - "graph_ii": Base64-encoded SVG string of integration index polar visualization
                 - "graph_ai": Base64-encoded SVG string of activity index polar visualization
-                - "relevant_nodes_ab": Dictionary with most/least relevant nodes for positive/negative outcomes
+                - "relevant_nodes": Dictionary with most/least relevant nodes for positive/negative outcomes
 
         """
         # Get data
@@ -112,7 +112,7 @@ class CoreSociogram:
         self.sociogram["micro_stats"] = self._compute_micro_stats()
         self.sociogram["descriptives"] = self._compute_descriptives()
         self.sociogram["rankings"] = self._compute_rankings()
-        self.sociogram["relevant_nodes_ab"] = self._compute_relevant_nodes_ab()
+        self.sociogram["relevant_nodes"] = self._compute_relevant_nodes()
         self.sociogram["graph_ai"] = self._create_graph("ai")
         self.sociogram["graph_ii"] = self._create_graph("ii")
 
@@ -174,11 +174,11 @@ class CoreSociogram:
         # Batch 3: Computations that depend on both micro_stats and rankings
         async with asyncio.TaskGroup() as tg:
             relevant_nodes_task = tg.create_task(
-                run_in_executor(self._compute_relevant_nodes_ab)
+                run_in_executor(self._compute_relevant_nodes)
             )
 
         # Store batch 3 results
-        self.sociogram["relevant_nodes_ab"] = relevant_nodes_task.result()
+        self.sociogram["relevant_nodes"] = relevant_nodes_task.result()
 
         return self.sociogram
 
@@ -412,7 +412,7 @@ class CoreSociogram:
 
         return rankings
 
-    def _compute_relevant_nodes_ab(self, threshold: float = 0.05) -> dict[str, pd.DataFrame]:
+    def _compute_relevant_nodes(self, threshold: float = 0.05) -> dict[str, pd.DataFrame]:
         """
         Identify most and least relevant nodes for positive and negative outcomes.
 
@@ -448,7 +448,7 @@ class CoreSociogram:
         rankings: dict[str, pd.Series] = self.sociogram["rankings"]
 
         # Init dict with empty sub-dicts for storing relevant nodes
-        relevant_nodes_ab: dict[str, pd.DataFrame] = {"a": pd.DataFrame(), "b": pd.DataFrame()}
+        relevant_nodes: dict[str, pd.DataFrame] = {"a": pd.DataFrame(), "b": pd.DataFrame()}
 
         # Process both positive (a) and negative (b) relevance directions
         for valence_type in ["a", "b"]:
@@ -486,7 +486,7 @@ class CoreSociogram:
                     ascending = False
 
                 # Compute relevant nodes data
-                relevant_nodes: pd.DataFrame = (
+                current_relevant_nodes: pd.DataFrame = (
                     relevant_ranks
                         .to_frame()
                         .assign(
@@ -503,12 +503,12 @@ class CoreSociogram:
                 )
 
                 # Add relevant nodes to dataframe
-                relevant_nodes_ab[valence_type] = pd.concat([
-                    relevant_nodes_ab[valence_type],
-                    relevant_nodes
+                relevant_nodes[valence_type] = pd.concat([
+                    relevant_nodes[valence_type],
+                    current_relevant_nodes
                 ], ignore_index=True)
 
-        return relevant_nodes_ab
+        return relevant_nodes
 
     def _compute_status(self, sociogram_micro_stats: pd.DataFrame) -> pd.Series:
         """

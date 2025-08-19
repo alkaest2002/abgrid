@@ -68,7 +68,7 @@ class ABGridSNASchema(BaseModel):
     graph_a: str
     graph_b: str
     rankings_ab: dict[str, pd.DataFrame]
-    relevant_nodes_ab: dict[str, pd.DataFrame]
+    relevant_nodes: dict[str, pd.DataFrame]
 
     model_config = {
         "arbitrary_types_allowed": True,
@@ -84,7 +84,7 @@ class ABGridSociogramSchema(BaseModel):
     rankings: dict[str, pd.Series]
     graph_ii: str
     graph_ai: str
-    relevant_nodes_ab: dict[str, pd.DataFrame]
+    relevant_nodes: dict[str, pd.DataFrame]
 
     model_config = {
         "arbitrary_types_allowed": True,

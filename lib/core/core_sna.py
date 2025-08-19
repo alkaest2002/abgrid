@@ -104,7 +104,7 @@ class CoreSna:
         self.sna["rankings_ab"] = self._compute_rankings_ab()
 
         # Store relevant nodes analysis
-        self.sna["relevant_nodes_ab"] = self._compute_relevant_nodes_ab()
+        self.sna["relevant_nodes"] = self._compute_relevant_nodes()
 
         return self.sna
 
@@ -182,11 +182,11 @@ class CoreSna:
                 run_in_executor(self._compute_rankings_ab)
             )
             relevant_nodes_task = tg.create_task(
-                run_in_executor(self._compute_relevant_nodes_ab)
+                run_in_executor(self._compute_relevant_nodes)
             )
 
         self.sna["rankings_ab"] = rankings_ab_task.result()
-        self.sna["relevant_nodes_ab"] = relevant_nodes_task.result()
+        self.sna["relevant_nodes"] = relevant_nodes_task.result()
 
         return self.sna
 
@@ -471,7 +471,7 @@ class CoreSna:
 
         return rankings_ab
 
-    def _compute_relevant_nodes_ab(self, threshold: float = 0.05) -> dict[str, pd.DataFrame]:
+    def _compute_relevant_nodes(self, threshold: float = 0.05) -> dict[str, pd.DataFrame]:
         """
         Finds nodes that rank highly (indicated by low rank values) for both network A and network B.
 
@@ -504,7 +504,7 @@ class CoreSna:
             raise ValueError(error_message)
 
         # Init dict with empty sub-dicts for storing relevant nodes
-        relevant_nodes_ab: dict[str, pd.DataFrame] = {"a": pd.DataFrame(), "b": pd.DataFrame()}
+        relevant_nodes: dict[str, pd.DataFrame] = {"a": pd.DataFrame(), "b": pd.DataFrame()}
 
         # Process both positive (a) and negative (b) relevance directions
         for valence_type in ["a", "b"]:
@@ -526,7 +526,7 @@ class CoreSna:
                 relevant_ranks: pd.Series = ranks_series[ranks_series.le(threshold_value)]
 
                 # Compute relevant nodes data
-                relevant_nodes: pd.DataFrame = (
+                current_relevant_nodes: pd.DataFrame = (
                     relevant_ranks
                         .to_frame()
                         .assign(
@@ -543,11 +543,11 @@ class CoreSna:
                 )
 
                 # Add relevant nodes to dataframe
-                relevant_nodes_ab[valence_type] = pd.concat([
-                    relevant_nodes_ab[valence_type],
-                    relevant_nodes
+                relevant_nodes[valence_type] = pd.concat([
+                    relevant_nodes[valence_type],
+                    current_relevant_nodes
                 ], ignore_index=True)
-        return relevant_nodes_ab
+        return relevant_nodes
 
     def _compute_edges_types(self, network_type: Literal["a", "b"]) -> Any:
         """

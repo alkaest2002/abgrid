@@ -52,8 +52,8 @@ class ABGridReportSchemaOut(BaseModel):
         group_size: Number of participants in the group.
         sna: Complete social network analysis results.
         sociogram: Sociogram analysis results (None if not requested).
-        relevant_nodes_ab: Relevant nodes from both networks.
-        isolated_nodes_ab: Isolated nodes from both networks.
+        relevant_nodes: Relevant nodes from both networks.
+        isolated_nodes: Isolated nodes from both networks.
     """
     year: int
     project_title: str
@@ -63,8 +63,8 @@ class ABGridReportSchemaOut(BaseModel):
     group_size: int
     sna: ABGridSNASchema
     sociogram: ABGridSociogramSchema | None
-    relevant_nodes_ab: ABGridRelevantNodesSchema
-    isolated_nodes_ab: ABGridIsolatedNodesSchema
+    relevant_nodes: ABGridRelevantNodesSchema
+    isolated_nodes: ABGridIsolatedNodesSchema
 
     model_config = {
         "arbitrary_types_allowed": True,

@@ -151,15 +151,15 @@ class CoreExport:
         json_data["sociogram"] = CoreExport._to_json_encoders(report_data.get("sociogram"))
 
         # Handle relevant nodes data (nested DataFrames)
-        relevant_nodes = report_data.get("relevant_nodes_ab", {})
-        json_data["relevant_nodes_ab"] = {
+        relevant_nodes = report_data.get("relevant_nodes", {})
+        json_data["relevant_nodes"] = {
             "a": CoreExport._to_json_encoders(relevant_nodes.get("a", pd.DataFrame())),
             "b": CoreExport._to_json_encoders(relevant_nodes.get("b", pd.DataFrame()))
         }
 
         # Handle isolated nodes data (pandas Index objects)
-        isolated_nodes = report_data.get("isolated_nodes_ab", {})
-        json_data["isolated_nodes_ab"] = {
+        isolated_nodes = report_data.get("isolated_nodes", {})
+        json_data["isolated_nodes"] = {
             "a": CoreExport._to_json_encoders(isolated_nodes.get("a", pd.Index([]))),
             "b": CoreExport._to_json_encoders(isolated_nodes.get("b", pd.Index([])))
         }

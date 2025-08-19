@@ -205,12 +205,12 @@
             {{ report_macro.render_disclaimer() }}
             {{ report_macro.render_report_header(project_title, group, "relevant_nodes") }}
             {{ base_report_macro.render_question("a", question_a) }}
-            {{ base_report_macro.render_relevant_nodes("a", relevant_nodes_ab["a"]) }}
+            {{ base_report_macro.render_relevant_nodes("a", relevant_nodes["a"]) }}
             {{ base_report_macro.render_question("b", question_b) }}
-            {{ base_report_macro.render_relevant_nodes("b", relevant_nodes_ab["b"]) }}
+            {{ base_report_macro.render_relevant_nodes("b", relevant_nodes["b"]) }}
         </div>
         <div>
-            {{ base_report_macro.render_isolated_nodes(isolated_nodes_ab) }}
+            {{ base_report_macro.render_isolated_nodes(isolated_nodes) }}
             {{ report_macro.render_data_legend(['ai', 'amb', 'app', 'bt', 'cl', 'con', 'dis', 'hu', 'ic', 'ii', 'im', 'iso', 'kz', 'mar', 'pop', 'pr', 'rej']) }}
             {{ report_macro.render_footer(year) }}
         </div>
