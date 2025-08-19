@@ -69,9 +69,12 @@ class CoreSna:
             adjacency matrices, statistics, rankings, components, and visualization data
             for both networks.
         """
-        # return self._get_sync(packed_edges_a, packed_edges_b)  # noqa: ERA001
+        # Get data
         data = asyncio.run(self._get_async())
+
+        # Validate data
         validated_data = ABGridSNASchemaIn(**data)
+
         return validated_data.model_dump()
 
     def _get_sync(self) -> dict[str, Any] :
