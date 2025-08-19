@@ -13,7 +13,7 @@ from fastapi import APIRouter, Depends, Query, Request, status
 from fastapi.responses import JSONResponse
 from lib.core.core_data import CoreData
 from lib.core.core_export import CoreExport
-from lib.core.core_schemas_in import ABGridGroupSchemaIn, ABGridReportSchemaIn
+from lib.core.core_schemas_in import ABGridGroupSchemaIn, ABGridSurveySchemaIn
 from lib.core.core_templates import CoreRenderer
 from lib.interfaces.fastapi.security.auth import Auth
 from lib.interfaces.fastapi.security.limiter import SimpleRateLimiter
@@ -129,7 +129,7 @@ def get_router_api() -> APIRouter:
     @SimpleRateLimiter(limit=1, window_seconds=15)
     async def create_sna(
         request: Request,
-        model: ABGridReportSchemaIn,
+        model: ABGridSurveySchemaIn,
         user_data: dict[str, Any] = Depends(_auth.verify_token)
     ) -> JSONResponse:
         """
@@ -192,7 +192,7 @@ def get_router_api() -> APIRouter:
     @SimpleRateLimiter(limit=1, window_seconds=15)
     async def create_sociogram(
         request: Request,
-        model: ABGridReportSchemaIn,
+        model: ABGridSurveySchemaIn,
         user_data: dict[str, Any] = Depends(_auth.verify_token)
     ) -> JSONResponse:
         """
@@ -256,7 +256,7 @@ def get_router_api() -> APIRouter:
     @SimpleRateLimiter(limit=1, window_seconds=15)
     async def create_report(
         request: Request,
-        model: ABGridReportSchemaIn,
+        model: ABGridSurveySchemaIn,
         language: str = Query(..., description="Language of the report"),
         with_sociogram: bool = Query(..., description="Include sociogram visualization"),
         user_data: dict[str, Any] = Depends(_auth.verify_token)
