@@ -62,6 +62,23 @@ class CoreData:
 
         return dict(abgrid_sna.get())
 
+    def get_sociogram_data(self, validated_report_data_in: ABGridReportSchemaIn) -> dict[str, Any]:
+        """Generate sociogram data from the validated report data.
+
+        Args:
+            validated_report_data_in: An instance of ABGridReportSchemaIn containing validated report data.
+
+        Returns:
+            Dict containing the sociogram data extracted from the validated report data.
+        """
+        # Extract sociogram data from the validated model
+        # Initialize sociogram analysis class
+        abgrid_sociogram: CoreSociogram = CoreSociogram(
+            validated_report_data_in.choices_a, validated_report_data_in.choices_b)
+
+        return dict(abgrid_sociogram.get())
+
+
     def get_report_data(self, validated_report_data_in: ABGridReportSchemaIn, with_sociogram: bool = False) -> dict[str, Any]:
         """Generate comprehensive report data with SNA and optional sociogram analysis.
 
