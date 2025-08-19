@@ -110,9 +110,7 @@ class ABGridGroupSchemaIn(BaseModel):
 class ABGridSurveySchemaIn(BaseModel):
     """Input schema for complete AB-Grid project data.
 
-    Validates complete project data including choice structures that define
-    relationships between options. Ensures choice keys consistency and
-    valid value references.
+    Validates complete survey data.
 
     Attributes:
         project_title: Project title (1-100 characters).
