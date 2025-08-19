@@ -63,7 +63,7 @@ class CoreData:
         abgrid_sna: CoreSna = CoreSna(
             validated_report_data_in.choices_a, validated_report_data_in.choices_b)
 
-        return dict(abgrid_sna.get())
+        return abgrid_sna.get()
 
 
     def get_sociogram_data(self, validated_report_data_in: ABGridSurveySchemaIn) -> dict[str, Any]:
@@ -80,7 +80,7 @@ class CoreData:
         abgrid_sociogram: CoreSociogram = CoreSociogram(
             validated_report_data_in.choices_a, validated_report_data_in.choices_b)
 
-        return dict(abgrid_sociogram.get())
+        return abgrid_sociogram.get()
 
 
     def get_report_data(self, validated_report_data_in: ABGridSurveySchemaIn, with_sociogram: bool = False) -> dict[str, Any]:
