@@ -137,6 +137,8 @@ class CoreSociogram:
         # STEP 1: Create networks (must happen first)
         await run_in_executor(self._create_networks)
 
+        # STEP 2: Concurrent computation using TaskGroups
+
         # Batch 1: Independent computations that only depend on self.sna
         # macro_stats and micro_stats can run concurrently
         async with asyncio.TaskGroup() as tg:

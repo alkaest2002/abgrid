@@ -148,7 +148,7 @@ class CoreSna:
         # STEP 1: Create networks (must happen first, synchronously)
         await run_in_executor(self._create_networks)
 
-        # STEP 2 & 3: Concurrent computation using TaskGroups
+        # STEP 2: Concurrent computation using TaskGroups
 
         # Batch 1: Independent computations that only depend on Step 1
         async with asyncio.TaskGroup() as tg:
