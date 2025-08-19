@@ -54,9 +54,8 @@ class RequestProtectionMiddleware(BaseHTTPMiddleware):
             requests is loaded from the Settings configuration.
         """
         super().__init__(app)
-        max_concurrent = settings.max_concurrent_requests
         self.request_timeout = 60
-        self.semaphore = asyncio.Semaphore(max_concurrent)
+        self.semaphore = asyncio.Semaphore(settings.max_concurrent_requests)
 
     async def dispatch(
         self,
