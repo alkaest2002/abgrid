@@ -15,7 +15,7 @@ from lib.core.core_schemas import (
 )
 from lib.core.core_schemas_in import (
     ABGridGroupSchemaIn,
-    ABGridSurveySchemaIn,
+    ABGridReportSchemaIn,
 )
 from lib.core.core_schemas_out import (
     ABGridGroupSchemaOut,
@@ -49,7 +49,7 @@ class CoreData:
         return validated_group_data_out.model_dump()
 
 
-    def get_report_data(self, validated_survey_data: ABGridSurveySchemaIn, with_sociogram: bool = False) -> dict[str, Any]:
+    def get_report_data(self, validated_survey_data: ABGridReportSchemaIn, with_sociogram: bool = False) -> dict[str, Any]:
         """Generate comprehensive report data with SNA and optional sociogram analysis.
 
         Args:

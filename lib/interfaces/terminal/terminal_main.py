@@ -16,7 +16,7 @@ from weasyprint import HTML  # type: ignore[import-untyped]
 from lib.core import SYMBOLS
 from lib.core.core_data import CoreData
 from lib.core.core_export import CoreExport
-from lib.core.core_schemas_in import ABGridSurveySchemaIn
+from lib.core.core_schemas_in import ABGridReportSchemaIn
 from lib.core.core_templates import CoreRenderer, abgrid_jinja_env
 from lib.interfaces.terminal.terminal_errors import ABGridError
 from lib.interfaces.terminal.terminal_logger import logger_decorator
@@ -171,7 +171,7 @@ class TerminalMain:
             group_data: dict[str, Any] = self._load_yaml_data(group_file)
 
             # Validate current group data
-            validated_data: ABGridSurveySchemaIn = ABGridSurveySchemaIn.model_validate(group_data)
+            validated_data: ABGridReportSchemaIn = ABGridReportSchemaIn.model_validate(group_data)
 
             # Get report data
             report_data: dict[str, Any] = self.core_data.get_report_data(validated_data, with_sociogram)

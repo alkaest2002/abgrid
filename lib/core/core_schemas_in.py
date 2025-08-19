@@ -17,10 +17,9 @@ FORBIDDEN_CHARS = re.compile(r"[^A-Za-zÀ-ÖØ-öø-ÿĀ-ſƀ-ɏḀ-ỿЀ-ӿͰ-�
 
 
 class ABGridGroupSchemaIn(BaseModel):
-    """Input schema for basic group information.
+    """Input schema for AB-Grid group data.
 
-    Used for initial data collection when creating an AB-Grid project.
-    Validates basic information before proceeding to choice configuration.
+    Validates group data.
 
     Attributes:
         project_title: Project title (1-100 characters).
@@ -107,10 +106,10 @@ class ABGridGroupSchemaIn(BaseModel):
             })
 
 
-class ABGridSurveySchemaIn(BaseModel):
-    """Input schema for complete AB-Grid project data.
+class ABGridReportSchemaIn(BaseModel):
+    """Input schema for AB-Grid report data.
 
-    Validates complete survey data.
+    Validates report data.
 
     Attributes:
         project_title: Project title (1-100 characters).
@@ -196,7 +195,7 @@ class ABGridSurveySchemaIn(BaseModel):
         return data
 
     @model_validator(mode="after")
-    def _strip_choice_values_after(self) -> "ABGridSurveySchemaIn":
+    def _strip_choice_values_after(self) -> "ABGridReportSchemaIn":
         """Strip spaces from choice values post-validation.
 
         Removes spaces around commas in choice values after model validation
