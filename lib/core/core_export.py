@@ -124,10 +124,7 @@ class CoreExport:
     @staticmethod
     def to_json_report(report_data: dict[str, Any]) -> dict[str, Any]:
         """
-        Convert AB-Grid ReportDataDict to a JSON-serializable format.
-
-        This function specifically handles the structure of AB-Grid report data,
-        treating all keys as optional and providing appropriate defaults.
+        Convert AB-Grid report data to a JSON-serializable format.
 
         Args:
             report_data: The report data dictionary to convert
@@ -139,7 +136,7 @@ class CoreExport:
             All keys are treated as optional and missing keys will result in None values
             or appropriate empty defaults (empty DataFrames, empty lists, etc.)
         """
-        # Convert the main report data structure
+        # Init dictionary
         json_data: dict[str, Any] = {}
 
         # Handle basic metadata fields with defaults
@@ -169,5 +166,51 @@ class CoreExport:
             "a": CoreExport._to_json_encoders(isolated_nodes.get("a", pd.Index([]))),
             "b": CoreExport._to_json_encoders(isolated_nodes.get("b", pd.Index([])))
         }
+
+        return json_data
+
+    @staticmethod
+    def to_json_sna(sna_data: dict[str, Any]) -> dict[str, Any]:
+        """
+        Convert AB-Grid SNA data to a JSON-serializable format.
+
+        Args:
+            sna_data: The sna data dictionary to convert
+
+        Returns:
+            A JSON-serializable dictionary with the same structure as the input
+
+        Note:
+            All keys are treated as optional and missing keys will result in None values
+            or appropriate empty defaults (empty DataFrames, empty lists, etc.)
+        """
+        # Init dictionary
+        json_data: dict[str, Any] = {}
+
+        # Handle SNA data (complex nested structure)
+        json_data["sna"] = CoreExport._to_json_encoders(sna_data)
+
+        return json_data
+
+    @staticmethod
+    def to_json_sociogram(sociogram_data: dict[str, Any]) -> dict[str, Any]:
+        """
+        Convert AB-Grid sociogram data to a JSON-serializable format.
+
+        Args:
+            sociogram_data: The sociogram data dictionary to convert
+
+        Returns:
+            A JSON-serializable dictionary with the same structure as the input
+
+        Note:
+            All keys are treated as optional and missing keys will result in None values
+            or appropriate empty defaults (empty DataFrames, empty lists, etc.)
+        """
+        # Init dictionary
+        json_data: dict[str, Any] = {}
+
+        # Handle SNA data (complex nested structure)
+        json_data["sna"] = CoreExport._to_json_encoders(sociogram_data)
 
         return json_data
