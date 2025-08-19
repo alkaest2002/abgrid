@@ -500,7 +500,6 @@ class ABGridSurveySchemaFromJsonIn(BaseModel):
     sociogram: dict[str, Any] | None
 
     model_config = {
-        "arbitrary_types_allowed": True,
         "extra": "forbid"
     }
 
