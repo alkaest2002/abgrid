@@ -19,8 +19,8 @@ from lib.core.core_schemas_out import (
     ABGridRelevantNodesSchema,
     ABGridReportSchemaOut,
 )
-from lib.core.core_sna import CoreSna, SNADict
-from lib.core.core_sociogram import CoreSociogram, SociogramDict
+from lib.core.core_sna import CoreSna
+from lib.core.core_sociogram import CoreSociogram
 
 
 class CoreData:
@@ -102,10 +102,10 @@ class CoreData:
             validated_report_data_in.choices_a, validated_report_data_in.choices_b)
 
         # Compute SNA results from group choice data
-        sna_results: SNADict = abgrid_sna.get()
+        sna_results: dict[str, Any] = abgrid_sna.get()
 
         # Compute Sociogram results from group choice data
-        sociogram_results: SociogramDict = abgrid_sociogram.get()
+        sociogram_results: dict[str, Any] = abgrid_sociogram.get()
 
         # Process isolated and relevant nodes, then prepare final report data
         return self._prepare_report_output(
@@ -115,8 +115,8 @@ class CoreData:
     def _prepare_report_output(
         self,
         validated_report_data_in: ABGridReportSchemaIn,
-        sna_results: SNADict,
-        sociogram_results: SociogramDict,
+        sna_results: dict[str, Any],
+        sociogram_results: dict[str, Any],
         with_sociogram: bool
     ) -> dict[str, Any]:
         """Prepare the final report output with isolated nodes, relevant nodes, and validation.

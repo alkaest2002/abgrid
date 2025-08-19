@@ -6,7 +6,7 @@ The code is part of the AB-Grid project and is licensed under the MIT License.
 
 import asyncio
 import re
-from typing import TYPE_CHECKING, Any, Literal, TypedDict, cast
+from typing import TYPE_CHECKING, Any, Literal
 
 import matplotlib.pyplot as plt
 import networkx as nx
@@ -14,6 +14,7 @@ import numpy as np
 import pandas as pd
 
 from lib.core import CM_TO_INCHES
+from lib.core.core_schemas_in import ABGridSociogramSchemaIn
 from lib.core.core_utils import (
     compute_descriptives,
     figure_to_base64_svg,
@@ -27,16 +28,6 @@ if TYPE_CHECKING:
     from matplotlib.axes import Axes
     from matplotlib.figure import Figure
 
-
-class SociogramDict(TypedDict):
-    """Dictionary structure for storing sociogram analysis results."""
-    macro_stats: pd.Series
-    micro_stats: pd.DataFrame
-    descriptives: pd.DataFrame
-    rankings: dict[str, pd.Series]
-    graph_ii: str
-    graph_ai: str
-    relevant_nodes_ab: dict[str, pd.DataFrame]
 
 class CoreSociogram:
     """
@@ -77,7 +68,7 @@ class CoreSociogram:
         # Initialize sociogram results dictionary
         self.sociogram: dict[str, Any] = {}
 
-    def get(self) -> SociogramDict:
+    def get(self) -> dict[str, Any]:
         """
         Synchronous wrapper for the async get_async method.
 
@@ -94,8 +85,10 @@ class CoreSociogram:
                 - "relevant_nodes_ab": Dictionary with most/least relevant nodes for positive/negative outcomes
 
         """
-        # return self._get_sync(packed_edges_a, packed_edges_b)  # noqa: ERA001
-        return cast("SociogramDict", asyncio.run(self._get_async()))
+        # Validate and return the model dump
+        data = asyncio.run(self._get_async())
+        validated_data = ABGridSociogramSchemaIn(**data)
+        return validated_data.model_dump()
 
     def _get_sync(self) -> dict[str, Any]:
         """

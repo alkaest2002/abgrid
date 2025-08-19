@@ -6,7 +6,7 @@ The code is part of the AB-Grid project and is licensed under the MIT License.
 
 import asyncio
 import re
-from typing import Any, Literal, TypedDict, cast
+from typing import Any, Literal
 
 import matplotlib.pyplot as plt
 import networkx as nx
@@ -15,6 +15,7 @@ import pandas as pd
 from scipy.spatial import ConvexHull
 
 from lib.core import A_COLOR, B_COLOR, CM_TO_INCHES
+from lib.core.core_schemas_in import ABGridSNASchemaIn
 from lib.core.core_utils import (
     compute_descriptives,
     figure_to_base64_svg,
@@ -23,35 +24,6 @@ from lib.core.core_utils import (
     unpack_network_nodes,
 )
 
-
-class SNADict(TypedDict):
-    """Type definition for the SNA dictionary containing network analysis results."""
-    nodes_a: list[str]
-    nodes_b: list[str]
-    edges_a: list[tuple[str, str]]
-    edges_b: list[tuple[str, str]]
-    adjacency_a: pd.DataFrame
-    adjacency_b: pd.DataFrame
-    network_a: nx.DiGraph  # type: ignore[type-arg]
-    network_b: nx.DiGraph  # type: ignore[type-arg]
-    loc_a: dict[str, np.ndarray]
-    loc_b: dict[str, np.ndarray]
-    macro_stats_a: pd.Series
-    macro_stats_b: pd.Series
-    micro_stats_a: pd.DataFrame
-    micro_stats_b: pd.DataFrame
-    descriptives_a: pd.DataFrame
-    descriptives_b: pd.DataFrame
-    rankings_a: dict[str, pd.Series]
-    rankings_b: dict[str, pd.Series]
-    edges_types_a: dict[str, pd.Index]
-    edges_types_b: dict[str, pd.Index]
-    components_a: dict[str, pd.Series]
-    components_b: dict[str, pd.Series]
-    graph_a: str
-    graph_b: str
-    rankings_ab: dict[str, pd.DataFrame]
-    relevant_nodes_ab: dict[str, pd.DataFrame]
 
 class CoreSna:
     """
@@ -86,7 +58,7 @@ class CoreSna:
         # Initialize SNA dict with all possible keys
         self.sna: dict[str, Any] = {}
 
-    def get(self) -> SNADict:
+    def get(self) -> dict[str, Any]:
         """
         Synchronous wrapper for the async get_async method.
 
@@ -98,7 +70,9 @@ class CoreSna:
             for both networks.
         """
         # return self._get_sync(packed_edges_a, packed_edges_b)  # noqa: ERA001
-        return cast("SNADict", asyncio.run(self._get_async()))
+        data = asyncio.run(self._get_async())
+        validated_data = ABGridSNASchemaIn(**data)
+        return validated_data.model_dump()
 
     def _get_sync(self) -> dict[str, Any] :
         """

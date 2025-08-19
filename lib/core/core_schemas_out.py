@@ -7,8 +7,7 @@ The code is part of the AB-Grid project and is licensed under the MIT License.
 import pandas as pd
 from pydantic import BaseModel
 
-from lib.core.core_sna import SNADict
-from lib.core.core_sociogram import SociogramDict
+from lib.core.core_schemas_in import ABGridSNASchemaIn, ABGridSociogramSchemaIn
 
 
 class ABGridRelevantNodesSchema(BaseModel):
@@ -88,8 +87,8 @@ class ABGridReportSchemaOut(BaseModel):
     question_b: str  # Text of question B from the survey
     group: int  # Group identifier
     group_size: int  # Number of participants in the group
-    sna: SNADict  # Complete social network analysis results
-    sociogram: SociogramDict | None # Sociogram analysis results (None if not requested)
+    sna: ABGridSNASchemaIn  # Complete social network analysis results
+    sociogram: ABGridSociogramSchemaIn | None  # Sociogram analysis results (None if not requested)
     relevant_nodes_ab: ABGridRelevantNodesSchema  # Relevant nodes from both networks
     isolated_nodes_ab: ABGridIsolatedNodesSchema  # Isolated nodes from both networks
 
