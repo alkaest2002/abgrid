@@ -66,10 +66,7 @@ class CoreExport:
             series = series.fillna("-")
 
             # If series has a meaningful index, convert to dict
-            if not isinstance(series.index, pd.RangeIndex):
-                return series.to_dict()
-            # For range index, convert to list
-            return series.tolist()
+            return series.to_dict()
 
         def _convert_networkx(graph: DiGraph) -> dict[str, Any]:  # type: ignore[type-arg]
             """Convert NetworkX DiGraph to JSON-serializable format."""
