@@ -13,7 +13,10 @@ from fastapi import APIRouter, Depends, Query, Request, status
 from fastapi.responses import JSONResponse
 from lib.core.core_data import CoreData
 from lib.core.core_export import CoreExport
-from lib.core.core_schemas_in import ABGridGroupSchemaIn, ABGridSurveySchemaIn
+from lib.core.core_schemas_in import (
+    ABGridGroupSchemaIn,
+    ABGridSurveySchemaIn,
+)
 from lib.core.core_templates import CoreRenderer
 from lib.interfaces.fastapi.security.auth import Auth
 from lib.interfaces.fastapi.security.limiter import SimpleRateLimiter
@@ -123,132 +126,6 @@ def get_router_api() -> APIRouter:
             return JSONResponse(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
                 content={"detail": "failed_to_render_group_template"}
-            )
-
-    @router.post("/sna")
-    @SimpleRateLimiter(limit=1, window_seconds=15)
-    async def create_sna(
-        request: Request,
-        model: ABGridSurveySchemaIn,
-        user_data: dict[str, Any] = Depends(_auth.verify_token)
-    ) -> JSONResponse:
-        """
-        Generate SNA data for the provided report schema.
-
-        Args:
-            request: The HTTP request object (used by rate limiter)
-            model: Report data schema containing all analysis parameters
-            user_data: Authenticated user data from JWT token verification
-
-        Returns:
-            JSONResponse: Success response with SNA data in JSON format
-
-        Status Codes:
-            200: Report generated successfully
-            401: Authentication token invalid or missing
-            429: Rate limit exceeded (1 request per 15 seconds)
-            500: Report generation failed or internal server error
-
-        Rate Limiting:
-            Limited to 1 request per 15 seconds per client due to computational intensity
-
-        Note:
-            Report generation is computationally intensive, hence the longer rate limit window.
-            The sociogram parameter significantly affects processing time and resource usage.
-            CPU-intensive operations are executed in thread pool to prevent blocking.
-        """
-        try:
-            # Run heavy computation in thread pool to avoid blocking event loop
-            sna_data: dict[str, Any] = await asyncio.to_thread(
-                _abgrid_data.get_sna_data,
-                model,
-            )
-
-            # JSON serialization can also be CPU-intensive for large data
-            sna_json = await asyncio.to_thread(
-                CoreExport.to_json_sna,
-                sna_data
-            )
-
-            return JSONResponse(
-                status_code=status.HTTP_200_OK,
-                content={
-                    "detail": sna_json
-                }
-            )
-
-        except ValueError:
-            return JSONResponse(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                content={"detail": "invalid_report_data"}
-            )
-        except Exception:
-            return JSONResponse(
-                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                content={"detail": "failed_to_generate_report"}
-            )
-
-    @router.post("/sociogram")
-    @SimpleRateLimiter(limit=1, window_seconds=15)
-    async def create_sociogram(
-        request: Request,
-        model: ABGridSurveySchemaIn,
-        user_data: dict[str, Any] = Depends(_auth.verify_token)
-    ) -> JSONResponse:
-        """
-        Generate sociogram data for the provided report schema.
-
-        Args:
-            request: The HTTP request object (used by rate limiter)
-            model: Report data schema containing all analysis parameters
-            user_data: Authenticated user data from JWT token verification
-
-        Returns:
-            JSONResponse: Success response with sociogram data in JSON format
-
-        Status Codes:
-            200: Report generated successfully
-            401: Authentication token invalid or missing
-            429: Rate limit exceeded (1 request per 15 seconds)
-            500: Report generation failed or internal server error
-
-        Rate Limiting:
-            Limited to 1 request per 15 seconds per client due to computational intensity
-
-        Note:
-            Report generation is computationally intensive, hence the longer rate limit window.
-            The sociogram parameter significantly affects processing time and resource usage.
-            CPU-intensive operations are executed in thread pool to prevent blocking.
-        """
-        try:
-            # Run heavy computation in thread pool to avoid blocking event loop
-            sociogram_data: dict[str, Any] = await asyncio.to_thread(
-                _abgrid_data.get_sociogram_data,
-                model,
-            )
-
-            # JSON serialization can also be CPU-intensive for large data
-            sna_json = await asyncio.to_thread(
-                CoreExport.to_json_sociogram,
-                sociogram_data
-            )
-
-            return JSONResponse(
-                status_code=status.HTTP_200_OK,
-                content={
-                    "detail": sna_json
-                }
-            )
-
-        except ValueError:
-            return JSONResponse(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                content={"detail": "invalid_report_data"}
-            )
-        except Exception:
-            return JSONResponse(
-                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                content={"detail": "failed_to_generate_report"}
             )
 
 

@@ -27,14 +27,14 @@ class ABGridGroupSchemaOut(BaseModel):
         group: Group identifier.
         members: List of member symbols (A, B, C, etc.) based on group size.
     """
-    project_title: str  # Title of the AB-Grid project
-    question_a: str  # Text of question A from the survey
-    question_b: str  # Text of question B from the survey
-    group: int  # Group identifier
-    members: list[str]  # List of member symbols (A, B, C, etc.) based on group size
+    project_title: str
+    question_a: str
+    question_b: str
+    group: int
+    members: list[str]
 
     model_config = {
-        "extra": "forbid"  # Don't allow extra fields
+        "extra": "forbid"
     }
 
 class ABGridReportSchemaOut(BaseModel):
@@ -55,19 +55,18 @@ class ABGridReportSchemaOut(BaseModel):
         relevant_nodes_ab: Relevant nodes from both networks.
         isolated_nodes_ab: Isolated nodes from both networks.
     """
-    year: int  # Current year when report was generated
-    project_title: str  # Title of the AB-Grid project
-    question_a: str  # Text of question A from the survey
-    question_b: str  # Text of question B from the survey
-    group: int  # Group identifier
-    group_size: int  # Number of participants in the group
-    sna: ABGridSNASchema  # Complete social network analysis results
-    sociogram: ABGridSociogramSchema | None  # Sociogram analysis results (None if not requested)
-    relevant_nodes_ab: ABGridRelevantNodesSchema  # Relevant nodes from both networks
-    isolated_nodes_ab: ABGridIsolatedNodesSchema  # Isolated nodes from both networks
+    year: int
+    project_title: str
+    question_a: str
+    question_b: str
+    group: int
+    group_size: int
+    sna: ABGridSNASchema
+    sociogram: ABGridSociogramSchema | None
+    relevant_nodes_ab: ABGridRelevantNodesSchema
+    isolated_nodes_ab: ABGridIsolatedNodesSchema
 
     model_config = {
-        "arbitrary_types_allowed": True,  # Allow complex types like DataFrames
-        "extra": "forbid"  # Don't allow extra fields
+        "arbitrary_types_allowed": True,
+        "extra": "forbid"
     }
-

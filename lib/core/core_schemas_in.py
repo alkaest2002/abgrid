@@ -486,24 +486,6 @@ class ABGridSurveySchemaIn(BaseModel):
             })
 
 
-class ABGridSurveySchemaFromJsonIn(BaseModel):
-    """Output schema for comprehensive report data.
-
-    Validates data including social network analysis and (optional) sociogram analysis.
-
-    Attributes:
-        sna: Complete social network analysis results.
-        sociogram: Sociogram analysis results (None if not requested).
-    """
-    survey: dict[str, Any]
-    sna: dict[str, Any]
-    sociogram: dict[str, Any] | None
-
-    model_config = {
-        "extra": "forbid"
-    }
-
-
 def _validate_text_field(field_name: str, value: Any, min_len: int, max_len: int) -> list[dict[str, Any]]:
     """Validate text field with length and character constraints.
 

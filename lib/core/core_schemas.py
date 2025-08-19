@@ -16,8 +16,8 @@ class ABGridRelevantNodesSchema(BaseModel):
         a: Positive relevance nodes from network A.
         b: Negative relevance nodes from network B.
     """
-    a: pd.DataFrame  # Positive relevance nodes from network A
-    b: pd.DataFrame  # Negative relevance nodes from network B
+    a: pd.DataFrame
+    b: pd.DataFrame
 
     model_config = {
         "arbitrary_types_allowed": True,
@@ -32,13 +32,14 @@ class ABGridIsolatedNodesSchema(BaseModel):
         a: Isolated nodes from network A.
         b: Isolated nodes from network B.
     """
-    a: pd.Index  # Isolated nodes from network A
-    b: pd.Index  # Isolated nodes from network B
+    a: pd.Index
+    b: pd.Index
 
     model_config = {
         "arbitrary_types_allowed": True,
         "extra": "forbid"
     }
+
 
 class ABGridSNASchema(BaseModel):
     """Pydantic model for SNA dictionary containing network analysis results."""
@@ -48,8 +49,8 @@ class ABGridSNASchema(BaseModel):
     edges_b: list[tuple[str, str]]
     adjacency_a: pd.DataFrame
     adjacency_b: pd.DataFrame
-    network_a: nx.DiGraph # type: ignore[type-arg]
-    network_b: nx.DiGraph # type: ignore[type-arg]
+    network_a: nx.DiGraph  # type: ignore[type-arg]
+    network_b: nx.DiGraph  # type: ignore[type-arg]
     loc_a: dict[str, np.ndarray]
     loc_b: dict[str, np.ndarray]
     macro_stats_a: pd.Series
@@ -73,6 +74,7 @@ class ABGridSNASchema(BaseModel):
         "arbitrary_types_allowed": True,
         "extra": "forbid"
     }
+
 
 class ABGridSociogramSchema(BaseModel):
     """Pydantic model for storing sociogram analysis results."""

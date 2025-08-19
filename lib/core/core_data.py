@@ -116,7 +116,7 @@ class CoreData:
 
         # Process isolated and relevant nodes, then prepare final report data
         return self._prepare_report_output(
-            validated_data_in,
+            validated_data_in.model_dump(),
             sna_results,
             sociogram_results,
             isolated_and_relevant_nodes,
@@ -207,7 +207,7 @@ class CoreData:
 
     def _prepare_report_output(
         self,
-        validated_data_in: ABGridSurveySchemaIn,
+        survey_data: dict[str, Any],
         sna_results: dict[str, Any],
         sociogram_results: dict[str, Any],
         isolated_and_relevant_nodes: dict[str, Any],
@@ -216,7 +216,7 @@ class CoreData:
         """Prepare the final report output with isolated nodes, relevant nodes, and validation.
 
         Args:
-            validated_data_in: Validated ABGrid report data schema instance
+            survey_data: Survey data
             sna_results: Results from SNA analysis
             sociogram_results: Results from Sociogram analysis
             isolated_and_relevant_nodes: Isolated and relevant nodes data
@@ -228,11 +228,11 @@ class CoreData:
         # Prepare the comprehensive report data structure
         report_data = {
             "year": datetime.datetime.now(datetime.UTC).year,
-            "project_title": validated_data_in.project_title,
-            "question_a": validated_data_in.question_a,
-            "question_b": validated_data_in.question_b,
-            "group": validated_data_in.group,
-            "group_size": len(validated_data_in.choices_a),
+            "project_title": survey_data["project_title"],
+            "question_a": survey_data["question_a"],
+            "question_b": survey_data["question_b"],
+            "group": survey_data["group"],
+            "group_size": len(survey_data["choices_a"]),
             "sna": sna_results,
             "sociogram": sociogram_results if with_sociogram else None,
             **isolated_and_relevant_nodes
