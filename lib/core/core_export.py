@@ -211,6 +211,6 @@ class CoreExport:
         json_data: dict[str, Any] = {}
 
         # Handle SNA data (complex nested structure)
-        json_data["sna"] = CoreExport._to_json_encoders(sociogram_data)
+        json_data["sociogram"] = CoreExport._to_json_encoders(sociogram_data)
 
         return json_data
