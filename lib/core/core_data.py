@@ -66,14 +66,17 @@ class CoreData:
         # Initialize SNA analysis class
         abgrid_sna: CoreSna = CoreSna(validated_survey_data.choices_a, validated_survey_data.choices_b)
 
-        # Initialize Sociogram analysis class
-        abgrid_sociogram: CoreSociogram = CoreSociogram(validated_survey_data.choices_a, validated_survey_data.choices_b)
-
         # Compute SNA results from group choice data
         sna_results: dict[str, Any] = abgrid_sna.get()
 
-        # Compute Sociogram results from group choice data
-        sociogram_results: dict[str, Any] = abgrid_sociogram.get()
+        # Compute Sociogram results if requested
+        if with_sociogram:
+
+            # Initialize Sociogram analysis class
+            abgrid_sociogram: CoreSociogram = CoreSociogram(validated_survey_data.choices_a, validated_survey_data.choices_b)
+
+            # Compute Sociogram results from group choice data
+            sociogram_results: dict[str, Any] = abgrid_sociogram.get()
 
         # Get isolated and relevat nodes
         isolated_and_relevant_nodes = self._add_isolated_and_relevant_nodes(sna_results, sociogram_results, with_sociogram)
