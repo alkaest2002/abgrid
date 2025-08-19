@@ -122,7 +122,7 @@ class CoreSna:
             adjacency matrices, statistics, rankings, components, and visualization data
             for both networks.
         """
-        # STEP 1: Create networks (must happen first, synchronously)
+        # STEP 1: Create networks (must happen first)
         await run_in_executor(self._create_networks)
 
         # STEP 2: Concurrent computation using TaskGroups

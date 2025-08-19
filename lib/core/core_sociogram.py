@@ -135,8 +135,7 @@ class CoreSociogram:
 
         # STEP 2: Concurrent computation using TaskGroups
 
-        # Batch 1: Independent computations that only depend on self.sna
-        # macro_stats and micro_stats can run concurrently
+        # Batch 1: Independent computations that only depend on step 1
         async with asyncio.TaskGroup() as tg:
             macro_stats_task = tg.create_task(
                 run_in_executor(self._compute_macro_stats)
@@ -150,7 +149,6 @@ class CoreSociogram:
         self.sociogram["micro_stats"] = micro_stats_task.result()
 
         # Batch 2: Computations that depend on micro_stats
-        # descriptives, rankings, and both graphs can run concurrently
         async with asyncio.TaskGroup() as tg:
             descriptives_task = tg.create_task(
                 run_in_executor(self._compute_descriptives)
