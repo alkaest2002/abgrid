@@ -9,14 +9,16 @@ from typing import Any
 import pandas as pd
 
 from lib.core import SYMBOLS
+from lib.core.core_schemas import (
+    ABGridIsolatedNodesSchema,
+    ABGridRelevantNodesSchema,
+)
 from lib.core.core_schemas_in import (
     ABGridGroupSchemaIn,
-    ABGridReportSchemaIn,
+    ABGridSurveySchemaIn,
 )
 from lib.core.core_schemas_out import (
     ABGridGroupSchemaOut,
-    ABGridIsolatedNodesSchema,
-    ABGridRelevantNodesSchema,
     ABGridReportSchemaOut,
 )
 from lib.core.core_sna import CoreSna
@@ -46,11 +48,12 @@ class CoreData:
 
         return validated_group_data_out.model_dump()
 
-    def get_sna_data(self, validated_report_data_in: ABGridReportSchemaIn) -> dict[str, Any]:
+
+    def get_sna_data(self, validated_report_data_in: ABGridSurveySchemaIn) -> dict[str, Any]:
         """Generate SNA data from the validated report data.
 
         Args:
-            validated_report_data_in: An instance of ABGridReportSchemaIn containing validated report data.
+            validated_report_data_in: An instance of ABGridSurveySchemaIn containing validated report data.
 
         Returns:
             Dict containing the SNA data extracted from the validated report data.
@@ -62,11 +65,12 @@ class CoreData:
 
         return dict(abgrid_sna.get())
 
-    def get_sociogram_data(self, validated_report_data_in: ABGridReportSchemaIn) -> dict[str, Any]:
+
+    def get_sociogram_data(self, validated_report_data_in: ABGridSurveySchemaIn) -> dict[str, Any]:
         """Generate sociogram data from the validated report data.
 
         Args:
-            validated_report_data_in: An instance of ABGridReportSchemaIn containing validated report data.
+            validated_report_data_in: An instance of ABGridSurveySchemaIn containing validated report data.
 
         Returns:
             Dict containing the sociogram data extracted from the validated report data.
@@ -79,7 +83,7 @@ class CoreData:
         return dict(abgrid_sociogram.get())
 
 
-    def get_report_data(self, validated_report_data_in: ABGridReportSchemaIn, with_sociogram: bool = False) -> dict[str, Any]:
+    def get_report_data(self, validated_report_data_in: ABGridSurveySchemaIn, with_sociogram: bool = False) -> dict[str, Any]:
         """Generate comprehensive report data with SNA and optional sociogram analysis.
 
         Args:
@@ -114,7 +118,7 @@ class CoreData:
 
     def _prepare_report_output(
         self,
-        validated_report_data_in: ABGridReportSchemaIn,
+        validated_report_data_in: ABGridSurveySchemaIn,
         sna_results: dict[str, Any],
         sociogram_results: dict[str, Any],
         with_sociogram: bool

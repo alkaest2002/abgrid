@@ -7,9 +7,6 @@ The code is part of the AB-Grid project and is licensed under the MIT License.
 import re
 from typing import Any
 
-import networkx as nx
-import numpy as np
-import pandas as pd
 from pydantic import BaseModel, model_validator
 
 from lib.core import SYMBOLS
@@ -109,74 +106,8 @@ class ABGridGroupSchemaIn(BaseModel):
                 "error_message": "field_is_out_of_range"
             })
 
-class ABGridSNASchemaIn(BaseModel):
-    """Pydantic model for SNA dictionary containing network analysis results."""
-    nodes_a: list[str]
-    nodes_b: list[str]
-    edges_a: list[tuple[str, str]]
-    edges_b: list[tuple[str, str]]
-    adjacency_a: pd.DataFrame
-    adjacency_b: pd.DataFrame
-    network_a: nx.DiGraph # type: ignore[type-arg]
-    network_b: nx.DiGraph # type: ignore[type-arg]
-    loc_a: dict[str, np.ndarray]
-    loc_b: dict[str, np.ndarray]
-    macro_stats_a: pd.Series
-    macro_stats_b: pd.Series
-    micro_stats_a: pd.DataFrame
-    micro_stats_b: pd.DataFrame
-    descriptives_a: pd.DataFrame
-    descriptives_b: pd.DataFrame
-    rankings_a: dict[str, pd.Series]
-    rankings_b: dict[str, pd.Series]
-    edges_types_a: dict[str, pd.Index]
-    edges_types_b: dict[str, pd.Index]
-    components_a: dict[str, pd.Series]
-    components_b: dict[str, pd.Series]
-    graph_a: str
-    graph_b: str
-    rankings_ab: dict[str, pd.DataFrame]
-    relevant_nodes_ab: dict[str, pd.DataFrame]
 
-    model_config = {
-        "arbitrary_types_allowed": True,
-        "extra": "forbid"
-    }
-
-class ABGridSociogramSchemaIn(BaseModel):
-    """Pydantic model for storing sociogram analysis results."""
-    macro_stats: pd.Series
-    micro_stats: pd.DataFrame
-    descriptives: pd.DataFrame
-    rankings: dict[str, pd.Series]
-    graph_ii: str
-    graph_ai: str
-    relevant_nodes_ab: dict[str, pd.DataFrame]
-
-    model_config = {
-        "arbitrary_types_allowed": True,
-        "extra": "forbid"
-    }
-
-
-class ABGridReportSchemaInFromJson(BaseModel):
-    """Output schema for comprehensive report data.
-
-    Validates data including social network analysis and (optional) sociogram analysis.
-
-    Attributes:
-        sna: Complete social network analysis results.
-        sociogram: Sociogram analysis results (None if not requested).
-    """
-    sna: ABGridSNASchemaIn
-    sociogram: ABGridSociogramSchemaIn | None
-
-    model_config = {
-        "arbitrary_types_allowed": True,
-        "extra": "forbid"
-    }
-
-class ABGridReportSchemaIn(BaseModel):
+class ABGridSurveySchemaIn(BaseModel):
     """Input schema for complete AB-Grid project data.
 
     Validates complete project data including choice structures that define
@@ -267,7 +198,7 @@ class ABGridReportSchemaIn(BaseModel):
         return data
 
     @model_validator(mode="after")
-    def _strip_choice_values_after(self) -> "ABGridReportSchemaIn":
+    def _strip_choice_values_after(self) -> "ABGridSurveySchemaIn":
         """Strip spaces from choice values post-validation.
 
         Removes spaces around commas in choice values after model validation
@@ -553,6 +484,25 @@ class ABGridReportSchemaIn(BaseModel):
                 "value_to_blame": round(empty_percentage, 1),
                 "error_message": "too_many_nodes_have_empty_values"
             })
+
+
+class ABGridSurveySchemaFromJsonIn(BaseModel):
+    """Output schema for comprehensive report data.
+
+    Validates data including social network analysis and (optional) sociogram analysis.
+
+    Attributes:
+        sna: Complete social network analysis results.
+        sociogram: Sociogram analysis results (None if not requested).
+    """
+    survey: dict[str, Any]
+    sna: dict[str, Any]
+    sociogram: dict[str, Any] | None
+
+    model_config = {
+        "arbitrary_types_allowed": True,
+        "extra": "forbid"
+    }
 
 
 def _validate_text_field(field_name: str, value: Any, min_len: int, max_len: int) -> list[dict[str, Any]]:

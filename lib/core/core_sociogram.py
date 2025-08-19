@@ -14,7 +14,7 @@ import numpy as np
 import pandas as pd
 
 from lib.core import CM_TO_INCHES
-from lib.core.core_schemas_in import ABGridSociogramSchemaIn
+from lib.core.core_schemas import ABGridSociogramSchema
 from lib.core.core_utils import (
     compute_descriptives,
     figure_to_base64_svg,
@@ -89,7 +89,7 @@ class CoreSociogram:
         data = asyncio.run(self._get_async())
 
         # Validate data
-        validated_data = ABGridSociogramSchemaIn(**data)
+        validated_data = ABGridSociogramSchema(**data)
 
         return validated_data.model_dump()
 

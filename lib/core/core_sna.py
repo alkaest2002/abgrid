@@ -15,7 +15,7 @@ import pandas as pd
 from scipy.spatial import ConvexHull
 
 from lib.core import A_COLOR, B_COLOR, CM_TO_INCHES
-from lib.core.core_schemas_in import ABGridSNASchemaIn
+from lib.core.core_schemas import ABGridSNASchema
 from lib.core.core_utils import (
     compute_descriptives,
     figure_to_base64_svg,
@@ -73,7 +73,7 @@ class CoreSna:
         data = asyncio.run(self._get_async())
 
         # Validate data
-        validated_data = ABGridSNASchemaIn(**data)
+        validated_data = ABGridSNASchema(**data)
 
         return validated_data.model_dump()
 

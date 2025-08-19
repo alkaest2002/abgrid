@@ -4,40 +4,14 @@ Author: Pierpaolo Calanna
 The code is part of the AB-Grid project and is licensed under the MIT License.
 """
 
-import pandas as pd
 from pydantic import BaseModel
 
-from lib.core.core_schemas_in import ABGridSNASchemaIn, ABGridSociogramSchemaIn
-
-
-class ABGridRelevantNodesSchema(BaseModel):
-    """Schema for relevant nodes analysis results.
-
-    Attributes:
-        a: Positive relevance nodes from network A.
-        b: Negative relevance nodes from network B.
-    """
-    a: pd.DataFrame  # Positive relevance nodes from network A
-    b: pd.DataFrame  # Negative relevance nodes from network B
-
-    model_config = {
-        "arbitrary_types_allowed": True  # Allow pandas DataFrames
-    }
-
-
-class ABGridIsolatedNodesSchema(BaseModel):
-    """Schema for isolated nodes by network type.
-
-    Attributes:
-        a: Isolated nodes from network A.
-        b: Isolated nodes from network B.
-    """
-    a: pd.Index  # Isolated nodes from network A
-    b: pd.Index  # Isolated nodes from network B
-
-    model_config = {
-        "arbitrary_types_allowed": True  # Allow pandas Index
-    }
+from lib.core.core_schemas import (
+    ABGridIsolatedNodesSchema,
+    ABGridRelevantNodesSchema,
+    ABGridSNASchema,
+    ABGridSociogramSchema,
+)
 
 
 class ABGridGroupSchemaOut(BaseModel):
@@ -87,8 +61,8 @@ class ABGridReportSchemaOut(BaseModel):
     question_b: str  # Text of question B from the survey
     group: int  # Group identifier
     group_size: int  # Number of participants in the group
-    sna: ABGridSNASchemaIn  # Complete social network analysis results
-    sociogram: ABGridSociogramSchemaIn | None  # Sociogram analysis results (None if not requested)
+    sna: ABGridSNASchema  # Complete social network analysis results
+    sociogram: ABGridSociogramSchema | None  # Sociogram analysis results (None if not requested)
     relevant_nodes_ab: ABGridRelevantNodesSchema  # Relevant nodes from both networks
     isolated_nodes_ab: ABGridIsolatedNodesSchema  # Isolated nodes from both networks
 
