@@ -65,9 +65,12 @@ class ABGridSNASchema(BaseModel):
     edges_types_b: dict[str, pd.Index]
     components_a: dict[str, pd.Series]
     components_b: dict[str, pd.Series]
+    isolated_nodes_a: pd.Index
+    isolated_nodes_b: pd.Index
+    relevant_nodes_a: pd.DataFrame
+    relevant_nodes_b: pd.DataFrame
     graph_a: str
     graph_b: str
-    relevant_nodes: dict[str, pd.DataFrame]
 
     model_config = {
         "arbitrary_types_allowed": True,
@@ -81,9 +84,9 @@ class ABGridSociogramSchema(BaseModel):
     micro_stats: pd.DataFrame
     descriptives: pd.DataFrame
     rankings: dict[str, pd.Series]
+    relevant_nodes: dict[str, pd.DataFrame]
     graph_ii: str
     graph_ai: str
-    relevant_nodes: dict[str, pd.DataFrame]
 
     model_config = {
         "arbitrary_types_allowed": True,

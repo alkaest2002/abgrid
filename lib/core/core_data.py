@@ -117,17 +117,19 @@ class CoreData:
         """
         # Prepare isolated nodes
         isolated_nodes_model: ABGridIsolatedNodesSchema = ABGridIsolatedNodesSchema(
-            a=sna_results["micro_stats_a"].loc[sna_results["micro_stats_a"]["nd"].eq(3)].index,
-            b=sna_results["micro_stats_b"].loc[sna_results["micro_stats_b"]["nd"].eq(3)].index
+            a=sna_results["isolated_nodes_a"],
+            b=sna_results["isolated_nodes_b"]
         )
 
         # Get relevant nodes from both SNA and sociogram analyses
-        relevant_nodes_sna: dict[str, pd.DataFrame] = sna_results["relevant_nodes"].copy()
+        relevant_nodes_sna: dict[str, pd.DataFrame] = {
+            "a": sna_results["relevant_nodes_a"].copy(),
+            "b": sna_results["relevant_nodes_b"].copy()
+        }
         relevant_nodes_sociogram: dict[str, pd.DataFrame] = (
             sociogram_results["relevant_nodes"].copy() if with_sociogram else
             {"a": pd.DataFrame(), "b": pd.DataFrame()}
         )
-
         relevant_nodes: dict[str, pd.DataFrame] = {}
 
         # Loop through relevant_nodes keys

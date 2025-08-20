@@ -98,10 +98,9 @@ class CoreSna:
             self.sna[f"micro_stats_{network_type}"] = self._compute_micro_stats(network_type)
             self.sna[f"descriptives_{network_type}"] = self._compute_descriptives(network_type)
             self.sna[f"rankings_{network_type}"] = self._compute_rankings(network_type)
+            self.sna[f"isolated_nodes_{network_type}"] = self._compute_isolated_nodes(network_type)
+            self.sna[f"relevant_nodes_{network_type}"] = self._compute_relevant_nodes(network_type)
             self.sna[f"graph_{network_type}"] = self._create_graph(network_type)
-
-        # Store relevant nodes analysis
-        self.sna["relevant_nodes"] = self._compute_relevant_nodes()
 
         return self.sna
 
@@ -173,13 +172,19 @@ class CoreSna:
         for key, task in tasks.items():
             self.sna[key] = task.result()
 
-        # Final batch: Cross-network comparisons
+        # Batch 4: isolated and relevant nodes
         async with asyncio.TaskGroup() as tg:
-            relevant_nodes_task = tg.create_task(
-                run_in_executor(self._compute_relevant_nodes)
-            )
-
-        self.sna["relevant_nodes"] = relevant_nodes_task.result()
+            tasks = {}
+            for network_type in ("a", "b"):
+                tasks[f"isolated_nodes_{network_type}"] = tg.create_task(
+                    run_in_executor(self._compute_isolated_nodes, network_type)
+                )
+                tasks[f"relevant_nodes_{network_type}"] = tg.create_task(
+                    run_in_executor(self._compute_relevant_nodes, network_type)
+                )
+        # Store batch 4 results
+        for key, task in tasks.items():
+            self.sna[key] = task.result()
 
         return self.sna
 
@@ -284,6 +289,7 @@ class CoreSna:
             "network_reciprocity": network_reciprocity,
         })
 
+
     def _compute_micro_stats(self, network_type: Literal["a", "b"]) -> pd.DataFrame:
         """
         Calculate node-level (micro) statistics for the specified network.
@@ -361,6 +367,7 @@ class CoreSna:
                 .sort_index()
         )
 
+
     def _compute_descriptives(self, network_type: Literal["a", "b"]) -> pd.DataFrame:
         """
         Compute descriptive statistics for centrality measures.
@@ -391,6 +398,7 @@ class CoreSna:
         sna_numeric_columns: pd.DataFrame = self.sna[f"micro_stats_{network_type}"].loc[:, columns_to_retain]
 
         return compute_descriptives(sna_numeric_columns)
+
 
     def _compute_rankings(self, network_type: Literal["a", "b"]) -> dict[str, pd.Series]:
         """
@@ -428,84 +436,6 @@ class CoreSna:
 
         return rankings
 
-    def _compute_relevant_nodes(self, threshold: float = 0.05) -> dict[str, pd.DataFrame]:
-        """
-        Finds nodes that rank highly (indicated by low rank values) for both network A and network B.
-
-        Args:
-            threshold: Percentile threshold for selecting top nodes (default: 0.05 for top 5%)
-
-        Returns:
-            Dictionary with keys 'a' and 'b', each containing a DataFrame of relevant nodes.
-            Each DataFrame has columns:
-            - 'node_id': node identifier
-            - 'metric': metric name without '_rank' suffix
-            - 'rank': re-computed dense rank position
-            - 'value': original metric value from micro_stats
-            - 'weight': computed weight using formula 10 / (rank ** 0.8)
-            - 'evidence_type': always 'sna'
-
-        Note:
-            - Lower rank values indicate higher centrality (rank 1 = most central)
-            - Weight calculation uses formula: 10.0 / (rank ** 0.8)
-            - Only nodes ranking in the top threshold percentile are included
-            - Processes all ranking columns ending with '_rank' from rankings data
-
-        Raises:
-            ValueError: If rankings or micro_stats for both networks are not available.
-        """
-        # Make sure data is available
-        if self.sna["rankings_a"] is None or self.sna["rankings_b"] is None\
-                or self.sna["micro_stats_a"] is None or self.sna["micro_stats_b"] is None:
-            error_message = "SNA micro stats and rankings for both networks a and b are required."
-            raise ValueError(error_message)
-
-        # Init dict with empty sub-dicts for storing relevant nodes
-        relevant_nodes: dict[str, pd.DataFrame] = {"a": pd.DataFrame(), "b": pd.DataFrame()}
-
-        # Process both positive (a) and negative (b) relevance directions
-        for valence_type in ["a", "b"]:
-
-            # Select micro_stats and rankings to use
-            micro_stats: pd.DataFrame =  self.sna["micro_stats_a"] if valence_type == "a" else self.sna["micro_stats_b"]
-            rankings: dict[str, pd.Series] = self.sna["rankings_a"] if valence_type == "a" else self.sna["rankings_b"]
-
-            # Loop through metrics and associated ranks
-            for metric_rank_name, ranks_series in rankings.items():
-
-                # Clean metric name
-                metric_name: str = re.sub("_rank", "", metric_rank_name)
-
-                # Get threshold value for this metric
-                threshold_value: float = ranks_series.quantile(threshold)
-
-                # Filter top nodes (assuming lower rank = better)
-                current_relevant_ranks: pd.Series = ranks_series[ranks_series.le(threshold_value)]
-
-                # Compute relevant nodes data
-                current_relevant_nodes: pd.DataFrame = (
-                    current_relevant_ranks
-                        .to_frame()
-                        .assign(
-                            metric=metric_name,
-                            recomputed_rank=current_relevant_ranks.rank(method="dense", ascending=True),
-                            value=micro_stats.loc[current_relevant_ranks.index, metric_name],
-                            weight=lambda x: x["recomputed_rank"].pow(.8).rdiv(10),
-                            evidence_type="sna"
-                        )
-                        .reset_index(drop=False, names="node_id")
-                        .rename(columns={
-                            metric_rank_name: "original_rank"
-                        })
-                )
-
-                # Add relevant nodes to dataframe
-                relevant_nodes[valence_type] = pd.concat([
-                    relevant_nodes[valence_type],
-                    current_relevant_nodes
-                ], ignore_index=True)
-
-        return relevant_nodes
 
     def _compute_edges_types(self, network_type: Literal["a", "b"]) -> Any:
         """
@@ -535,20 +465,13 @@ class CoreSna:
             ValueError: If required adjacency matrix data is not available.
         """
         # Check if required data is available
-        if self.sna["adjacency_a"] is None:
-            error_message = "Adjacency matrix for network 'a' is not available."
-            raise ValueError(error_message)
-        if self.sna["adjacency_b"] is None:
-            error_message = "Adjacency matrix for network 'b' is not available."
+        if self.sna[f"adjacency_{network_type}"] is None:
+            error_message = f"Adjacency matrix for network '{network_type}' is not available."
             raise ValueError(error_message)
 
         # Get the adjacency DataFrames for the specified network type and reference
-        if network_type == "a":
-            adj_df: pd.DataFrame = self.sna["adjacency_a"]
-            adj_ref_df: pd.DataFrame = self.sna["adjacency_b"]
-        else:
-            adj_df = self.sna["adjacency_b"]
-            adj_ref_df = self.sna["adjacency_a"]
+        adj_df: pd.DataFrame = self.sna[f"adjacency_{network_type}"]
+        adj_ref_df: pd.DataFrame = self.sna[f"adjacency_{network_type}"]
 
         # Define a function for filtering edges
         fn = lambda x: x == 1 # noqa: E731
@@ -588,6 +511,7 @@ class CoreSna:
             "type_iv": type_iv,
             "type_v": type_v
         }
+
 
     def _compute_components(self, network_type: Literal["a", "b"]) -> dict[str, pd.Series]:
         """
@@ -647,6 +571,103 @@ class CoreSna:
 
         return components
 
+
+    def _compute_isolated_nodes(self, network_type: Literal["a", "b"]) -> Any:
+        """
+        Identify isolated nodes in both networks.
+
+        Isolated nodes are those with no incoming or outgoing edges.
+
+        Args:
+            network_type: Type of network ('a' or 'b')
+
+        Returns:
+            Dictionary with keys 'a' and 'b', each containing an Index of isolated node IDs.
+        """
+        # Get the network graph
+        network = self.sna[f"network_{network_type}"]
+
+        # Find isolated nodes (degree 0)
+        return pd.Index([n for n, d in network.degree() if d == 0])
+
+
+    def _compute_relevant_nodes(self, network_type: Literal["a", "b"], threshold: float = 0.05) -> pd.DataFrame:
+        """
+        Finds nodes that rank highly (indicated by low rank values) for both network A and network B.
+
+        Args:
+            network_type: Type of network ('a' or 'b')
+            threshold: Percentile threshold for selecting top nodes (default: 0.05 for top 5%)
+
+        Returns:
+            Dictionary with keys 'a' and 'b', each containing a DataFrame of relevant nodes.
+            Each DataFrame has columns:
+            - 'node_id': node identifier
+            - 'metric': metric name without '_rank' suffix
+            - 'rank': re-computed dense rank position
+            - 'value': original metric value from micro_stats
+            - 'weight': computed weight using formula 10 / (rank ** 0.8)
+            - 'evidence_type': always 'sna'
+
+        Note:
+            - Lower rank values indicate higher centrality (rank 1 = most central)
+            - Weight calculation uses formula: 10.0 / (rank ** 0.8)
+            - Only nodes ranking in the top threshold percentile are included
+            - Processes all ranking columns ending with '_rank' from rankings data
+
+        Raises:
+            ValueError: If rankings or micro_stats for both networks are not available.
+        """
+        # Make sure data is available
+        if self.sna[f"rankings_{network_type}"] is None or self.sna[f"micro_stats_{network_type}"] is None:
+            error_message = f"SNA micro stats and rankings for network {network_type} are required."
+            raise ValueError(error_message)
+
+        # Select micro_stats and rankings to use
+        micro_stats: pd.DataFrame =  self.sna[f"micro_stats_{network_type}"]
+        rankings: dict[str, pd.Series] = self.sna[f"rankings_{network_type}"]
+
+        # Init dict with empty sub-dicts for storing relevant nodes
+        relevant_nodes: pd.DataFrame = pd.DataFrame()
+
+        # Loop through metrics and associated ranks
+        for metric_rank_name, ranks_series in rankings.items():
+
+            # Clean metric name
+            metric_name: str = re.sub("_rank", "", metric_rank_name)
+
+            # Get threshold value for this metric
+            threshold_value: float = ranks_series.quantile(threshold)
+
+            # Filter top nodes (assuming lower rank = better)
+            current_relevant_ranks: pd.Series = ranks_series[ranks_series.le(threshold_value)]
+
+            # Compute relevant nodes data
+            current_relevant_nodes: pd.DataFrame = (
+                current_relevant_ranks
+                    .to_frame()
+                    .assign(
+                        metric=metric_name,
+                        recomputed_rank=current_relevant_ranks.rank(method="dense", ascending=True),
+                        value=micro_stats.loc[current_relevant_ranks.index, metric_name],
+                        weight=lambda x: x["recomputed_rank"].pow(.8).rdiv(10),
+                        evidence_type="sna"
+                    )
+                    .reset_index(drop=False, names="node_id")
+                    .rename(columns={
+                        metric_rank_name: "original_rank"
+                    })
+            )
+
+            # Add relevant nodes to dataframe
+            relevant_nodes = pd.concat([
+                relevant_nodes,
+                current_relevant_nodes
+            ], ignore_index=True)
+
+        return relevant_nodes
+
+
     def _compute_network_centralization(self, network: nx.Graph) -> float:  # type: ignore[type-arg]
         """
         Calculate the degree centralization of an undirected network.
@@ -691,6 +712,7 @@ class CoreSna:
         )
 
         return network_centralization
+
 
     def _create_graph(self, network_type: Literal["a","b"]) -> str:
         """
@@ -768,6 +790,7 @@ class CoreSna:
         )
 
         return figure_to_base64_svg(fig)
+
 
     def _handle_isolated_nodes(self, network: nx.DiGraph, loc: dict[str, np.ndarray]) -> dict[str, np.ndarray]: # type: ignore[type-arg]
         """
