@@ -224,7 +224,7 @@ class CoreSna:
             loc: dict[str, np.ndarray] = nx.kamada_kawai_layout(network)
 
             # Update loc to push isolated nodes away from other nodes
-            updated_loc: dict[str, np.ndarray] = self._handle_isolated_nodes(network, loc)
+            updated_loc: dict[str, np.ndarray] = self._handle_isolated_nodes_in_graph(network, loc)
 
             # Store current network layout locations
             self.sna[f"loc_{network_type}"] = updated_loc
@@ -792,7 +792,7 @@ class CoreSna:
         return figure_to_base64_svg(fig)
 
 
-    def _handle_isolated_nodes(self, network: nx.DiGraph, loc: dict[str, np.ndarray]) -> dict[str, np.ndarray]: # type: ignore[type-arg]
+    def _handle_isolated_nodes_in_graph(self, network: nx.DiGraph, loc: dict[str, np.ndarray]) -> dict[str, np.ndarray]: # type: ignore[type-arg]
         """
         Position isolated nodes at the periphery of the network layout.
 
