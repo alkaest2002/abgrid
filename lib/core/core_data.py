@@ -115,14 +115,11 @@ class CoreData:
         Returns:
             Dict containing the validated report data output
         """
-        # Extract data
+        # Extract data from SNA results
         sna_isolated_a = sna_results["isolated_nodes_a"]
         sna_isolated_b = sna_results["isolated_nodes_b"]
         sna_relevant_a = sna_results["relevant_nodes_a"]
         sna_relevant_b = sna_results["relevant_nodes_b"]
-        sociogram_relevant = sociogram_results["relevant_nodes"]
-        sociogram_relevant_a = sociogram_relevant["a"]
-        sociogram_relevant_b = sociogram_relevant["b"]
 
         # Prepare isolated nodes
         isolated_nodes_model: ABGridIsolatedNodesSchema = ABGridIsolatedNodesSchema(
@@ -144,8 +141,14 @@ class CoreData:
                 else pd.DataFrame.from_dict(sna_relevant_b, orient="index")
         }
 
-        # Prepare relevant nodes from sociogram
+        # If sociogram analysis is included
         if with_sociogram:
+            # Extract relevant nodes from sociogram results
+            sociogram_relevant = sociogram_results["relevant_nodes"]
+            sociogram_relevant_a = sociogram_relevant["a"]
+            sociogram_relevant_b = sociogram_relevant["b"]
+
+            # Prepare relevant nodes from sociogram
             relevant_nodes_sociogram: dict[str, pd.DataFrame] = (
                 sociogram_relevant.copy()
                     if all(isinstance(x, pd.DataFrame) for x in sociogram_relevant.values())
@@ -155,6 +158,7 @@ class CoreData:
                     }
             )
         else:
+            # Prepare default nodes from sociogram
             relevant_nodes_sociogram = {
                 "a": pd.DataFrame(),
                 "b": pd.DataFrame()
@@ -164,25 +168,25 @@ class CoreData:
         relevant_nodes: dict[str, pd.DataFrame] = {}
 
         # Loop through relevant_nodes keys
-        for valence_type in ("a", "b"):
+        for network_type in ("a", "b"):
 
             # Get isolated nodes
-            isolated_nodes: pd.Index = getattr(isolated_nodes_model, valence_type)
+            isolated_nodes: pd.Index = getattr(isolated_nodes_model, network_type)
 
             # Concat relevant nodes from sna and sociogram
-            nodes: pd.DataFrame = (
+            relevant_nodes_combo: pd.DataFrame = (
                 pd.concat(
                     [
-                        relevant_nodes_sna[valence_type],
-                        relevant_nodes_sociogram[valence_type]
+                        relevant_nodes_sna[network_type],
+                        relevant_nodes_sociogram[network_type]
                     ]
                 )
             )
 
             # Group nodes with same id and consolidate their values
-            nodes = (
+            relevant_nodes_combo = (
                 # Omit isolated nodes first
-                nodes.loc[~nodes["node_id"].isin(isolated_nodes), :]
+                relevant_nodes_combo.loc[~relevant_nodes_combo["node_id"].isin(isolated_nodes), :]
                 .groupby(by="node_id")
                     .aggregate({
                         "metric": list,
@@ -195,12 +199,12 @@ class CoreData:
             )
 
             # Do some other calculation with nodes
-            relevant_nodes[valence_type] = (
-                nodes
+            relevant_nodes[network_type] = (
+                relevant_nodes_combo
                     # Keep nodes with multiple metrics only
-                    .loc[nodes["metric"].str.len() > 1, :]
+                    .loc[relevant_nodes_combo["metric"].str.len() > 1, :]
                     # Add 10 more points to weight of nodes with metrics from both sna and sociogram
-                    .assign(weight=nodes["weight"] + nodes["evidence_type"].str.len().gt(1).mul(10))
+                    .assign(weight=relevant_nodes_combo["weight"] + relevant_nodes_combo["evidence_type"].str.len().gt(1).mul(10))
                     # Sort nodes by weight
                     .sort_values(by="weight", ascending=False)
             )
