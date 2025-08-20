@@ -53,10 +53,11 @@ class CoreExport:
                 df = df.reset_index(drop=False, names="index")
                 # Convert index keys to strings for JSON compatibility
                 return {str(k): v for k, v in df.to_dict("index").items()}
+
             # Convert index keys to strings for JSON compatibility
             return {str(k): v for k, v in df.to_dict("index").items()}
 
-        def _convert_pandas_series(series: pd.Series) -> dict[str, Any] | list[Any]:
+        def _convert_pandas_series(series: pd.Series) -> dict[str, Any]:
             """Convert pandas Series to JSON-serializable format."""
             if series.empty:
                 return {}
@@ -65,8 +66,12 @@ class CoreExport:
             series = series.replace([np.inf, -np.inf], np.nan)
             series = series.fillna("-")
 
-            # If series has a meaningful index, convert to dict
-            return series.to_dict()
+            # Convert index keys to strings for JSON compatibility
+            return {str(k): v for k, v in series.to_dict().items()}
+
+        def _convert_numpy_array(arr: np.ndarray) -> dict[str, Any]:
+            """Convert numpy array to JSON-serializable dict."""
+            return _convert_pandas_series(pd.Series(arr))
 
         def _convert_networkx(graph: DiGraph) -> dict[str, Any]:  # type: ignore[type-arg]
             """Convert NetworkX DiGraph to JSON-serializable format."""
@@ -76,13 +81,6 @@ class CoreExport:
                 "number_of_nodes": graph.number_of_nodes(),
                 "number_of_edges": graph.number_of_edges()
             }
-
-        def _convert_numpy_array(arr: np.ndarray) -> list[Any]:
-            """Convert numpy array to JSON-serializable list."""
-            result = _convert_pandas_series(pd.Series(arr))
-            if isinstance(result, dict):
-                return list(result.values())
-            return result
 
         def _convert_datetime(dt: datetime.datetime) -> str:
             """Convert datetime to ISO format string."""
