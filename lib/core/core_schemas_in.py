@@ -150,7 +150,7 @@ class ABGridReportMultiStepSchemaIn(BaseModel):
                 errors.append({
                     "location": field_name,
                     "value_to_blame": None,
-                    "error_message": "field_is_required"
+                    "error_message": "required_field_is_missing"
                 })
                 continue
 
@@ -168,23 +168,23 @@ class ABGridReportMultiStepSchemaIn(BaseModel):
                 errors.append({
                     "location": field_name,
                     "value_to_blame": str(field_value)[:10],
-                    "error_message": "missing_signature"
+                    "error_message": "signature_is_missing"
                 })
                 continue
 
-            # Verify HMAC signature
             try:
+                # Verify HMAC signature
                 if not verify_hmac_signature(field_value):
                     errors.append({
                         "location": field_name,
                         "value_to_blame": field_value.get("_signature"),
-                        "error_message": "invalid_signature"
+                        "error_message": "signature_is_invalid"
                     })
             except Exception:
                 errors.append({
                     "location": field_name,
                     "value_to_blame": str(field_value),
-                    "error_message": "signature_verification_failed"
+                    "error_message": "signature_verification_error"
                 })
 
         if errors:
