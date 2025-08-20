@@ -39,6 +39,7 @@ def universal_iter_rows(data: Any) -> Any:
             return data.iterrows()
         except AttributeError:
             pass
+
     # Dictionary
     if isinstance(data, dict):
         return data.items()
