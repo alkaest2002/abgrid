@@ -67,7 +67,6 @@ class ABGridSNASchema(BaseModel):
     components_b: dict[str, pd.Series]
     graph_a: str
     graph_b: str
-    rankings_ab: dict[str, pd.DataFrame]
     relevant_nodes: dict[str, pd.DataFrame]
 
     model_config = {

@@ -173,32 +173,6 @@
 </div>
 {% endmacro %}
 
-<!-- Macro: render_rankings_comparison -->
-{% macro render_rankings_comparison(rankings_ab, render_node_label) %}
-<div class="rankings-comparison-container mt-lg">
-    {% for metric_label, data in rankings_ab.items() %}
-        <div class="rankings-comparison-main">
-            <table class="table-data table-bordered table-striped full-width">
-                <tr>
-                    <th>{{ render_node_label() | upper }}</th>
-                    <th>{{ metric_label[:2] | upper }} A-B</th>
-                </tr>
-                {% for letter, ranks in data.iterrows() %}
-                    <tr>
-                        <td>
-                            {{ letter }}
-                        </td>
-                        <td>
-                            {{ (ranks[0] - ranks[1]) | int }}
-                        </td>
-                    </tr>
-                {% endfor %}
-            </table>
-        </div>
-    {% endfor %}
-</div>
-{% endmacro %}
-
 <!-- Macro: render_sna_edges_types -->
 {% macro render_sna_edges_types(network_type, edges_types, render_edges_types_label, render_edges_type_empty_list) %}
 <div class="sna-edges-types-container mt-lg">

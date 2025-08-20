@@ -100,9 +100,6 @@ class CoreSna:
             self.sna[f"rankings_{network_type}"] = self._compute_rankings(network_type)
             self.sna[f"graph_{network_type}"] = self._create_graph(network_type)
 
-        # Store rankings comparison between networks
-        self.sna["rankings_ab"] = self._compute_rankings_ab()
-
         # Store relevant nodes analysis
         self.sna["relevant_nodes"] = self._compute_relevant_nodes()
 
@@ -178,14 +175,10 @@ class CoreSna:
 
         # Final batch: Cross-network comparisons
         async with asyncio.TaskGroup() as tg:
-            rankings_ab_task = tg.create_task(
-                run_in_executor(self._compute_rankings_ab)
-            )
             relevant_nodes_task = tg.create_task(
                 run_in_executor(self._compute_relevant_nodes)
             )
 
-        self.sna["rankings_ab"] = rankings_ab_task.result()
         self.sna["relevant_nodes"] = relevant_nodes_task.result()
 
         return self.sna
@@ -434,42 +427,6 @@ class CoreSna:
             rankings[metric_name] = rank_columns[metric_name].sort_values()
 
         return rankings
-
-    def _compute_rankings_ab(self) -> dict[str, pd.DataFrame]:
-        """
-        Compute combined rankings from both networks A and B.
-
-        Merges the rankings from both networks into side-by-side DataFrames
-        for easy comparison of node rankings across the two networks.
-
-        Returns:
-            Dictionary where each key corresponds to a ranking metric (e.g., 'ic_rank', 'pr_rank'),
-            and the value is a DataFrame with two columns:
-            - Column ending with '_a': Rankings from network A
-            - Column ending with '_b': Rankings from network B
-
-        Raises:
-            ValueError: If the rankings for network 'a' or 'b' are not available.
-        """
-        # Check if required data is available
-        if self.sna["rankings_a"] is None or self.sna["rankings_b"] is None:
-            error_message = "Rankings for network a and b are not available."
-            raise ValueError(error_message)
-
-        # Get the rankings from network A and B
-        rankings_a: dict[str, pd.Series] = self.sna["rankings_a"]
-        rankings_b: dict[str, pd.Series] = self.sna["rankings_b"]
-
-        # Combine them into side-by-side DataFrames
-        rankings_ab: dict[str, pd.DataFrame] = {}
-        for metric, series_a in rankings_a.items():
-            series_a_copy = series_a.copy()
-            series_b_copy = rankings_b[metric].copy()
-            series_a_copy.name = str(series_a_copy.name) + "_a"
-            series_b_copy.name = str(series_b_copy.name) + "_b"
-            rankings_ab[metric] = pd.concat([series_a_copy, series_b_copy], axis=1)
-
-        return rankings_ab
 
     def _compute_relevant_nodes(self, threshold: float = 0.05) -> dict[str, pd.DataFrame]:
         """
