@@ -189,7 +189,7 @@ def get_router_api() -> APIRouter:
 
             # JSON serialization can also be CPU-intensive for large data
             report_json = await asyncio.to_thread(
-                CoreExport.to_json_report,
+                CoreExport.to_json,
                 report_data
             )
 

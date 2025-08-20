@@ -119,7 +119,7 @@ class CoreExport:
             return str(value)
 
     @staticmethod
-    def to_json_report(report_data: dict[str, Any]) -> dict[str, Any]:
+    def to_json(report_data: dict[str, Any]) -> dict[str, Any]:
         """
         Convert AB-Grid report data to a JSON-serializable format.
 

@@ -188,7 +188,7 @@ class TerminalMain:
             print(f"Report for {group_file.stem} successfully generated.")  # noqa: T201
 
             # Convert report data to json
-            filtered_data = CoreExport.to_json_report(report_data)
+            filtered_data = CoreExport.to_json(report_data)
 
             # Add the filtered data to the collection
             all_groups_data[group_file.stem] = filtered_data
