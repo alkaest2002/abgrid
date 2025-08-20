@@ -63,6 +63,9 @@ class CoreData:
             Combines SNA results with optional sociogram analysis and identifies
             relevant nodes across both analysis types
         """
+        # Extract survey data from the validated model
+        survey_data = validated_survey_data.model_dump()
+
         # Initialize SNA analysis class
         abgrid_sna: CoreSna = CoreSna(validated_survey_data.choices_a, validated_survey_data.choices_b)
 
@@ -81,23 +84,14 @@ class CoreData:
         # Get isolated and relevat nodes
         isolated_and_relevant_nodes = self._add_isolated_and_relevant_nodes(sna_results, sociogram_results, with_sociogram)
 
-        # Prepare the comprehensive report data structure
-        report_data = {
-            "year": datetime.datetime.now(datetime.UTC).year,
-            "project_title": validated_survey_data.project_title,
-            "question_a": validated_survey_data.question_a,
-            "question_b": validated_survey_data.question_b,
-            "group": validated_survey_data.group,
-            "group_size": len(validated_survey_data.choices_a),
-            "sna": sna_results,
-            "sociogram": sociogram_results if with_sociogram else None,
-            **isolated_and_relevant_nodes
-        }
-
-        # Validate and convert report data to ABGridReportSchemaOut
-        validated_report_data_out: ABGridReportSchemaOut = ABGridReportSchemaOut(**report_data)
-
-        return validated_report_data_out.model_dump()
+        # Build and return the final report data output
+        return self._build_report_data_out(
+            survey_data,
+            sna_results,
+            sociogram_results,
+            isolated_and_relevant_nodes,
+            with_sociogram
+        )
 
     def _add_isolated_and_relevant_nodes(
         self,
@@ -216,3 +210,40 @@ class CoreData:
             "isolated_nodes": isolated_nodes_model.model_dump(),
             "relevant_nodes": relevant_nodes_model.model_dump()
         }
+
+    def _build_report_data_out(self,
+            survey_data: dict[str, Any],
+            sna_results: dict[str, Any],
+            sociogram_results: dict[str, Any],
+            isolated_and_relevant_nodes: dict[str, Any],
+            with_sociogram: bool
+            ) -> dict[str, pd.DataFrame]:
+        """Build the final data structure for output.
+
+        Args:
+            survey_data: The survey data.
+            sna_results: The SNA results.
+            sociogram_results: The sociogram results.
+            isolated_and_relevant_nodes: The isolated and relevant nodes.
+            with_sociogram: Whether to include sociogram data.
+
+        Returns:
+            Dictionary containing the final data structure.
+        """
+        # Prepare the comprehensive report data structure
+        report_data = {
+            "year": datetime.datetime.now(datetime.UTC).year,
+            "project_title": survey_data["project_title"],
+            "question_a": survey_data["question_a"],
+            "question_b": survey_data["question_b"],
+            "group": survey_data["group"],
+            "group_size": len(survey_data["choices_a"]),
+            "sna": sna_results,
+            "sociogram": sociogram_results if with_sociogram else None,
+            **isolated_and_relevant_nodes
+        }
+
+        # Validate and convert report data to ABGridReportSchemaOut
+        validated_report_data_out: ABGridReportSchemaOut = ABGridReportSchemaOut(**report_data)
+
+        return validated_report_data_out.model_dump()

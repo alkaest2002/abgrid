@@ -4,14 +4,9 @@ Author: Pierpaolo Calanna
 The code is part of the AB-Grid project and is licensed under the MIT License.
 """
 
-from pydantic import BaseModel
+from typing import Any
 
-from lib.core.core_schemas import (
-    ABGridIsolatedNodesSchema,
-    ABGridRelevantNodesSchema,
-    ABGridSNASchema,
-    ABGridSociogramSchema,
-)
+from pydantic import BaseModel
 
 
 class ABGridGroupSchemaOut(BaseModel):
@@ -61,10 +56,10 @@ class ABGridReportSchemaOut(BaseModel):
     question_b: str
     group: int
     group_size: int
-    sna: ABGridSNASchema
-    sociogram: ABGridSociogramSchema | None
-    relevant_nodes: ABGridRelevantNodesSchema
-    isolated_nodes: ABGridIsolatedNodesSchema
+    sna: dict[str, Any]
+    sociogram: dict[str, Any] | None
+    relevant_nodes: dict[str, Any]
+    isolated_nodes: dict[str, Any]
 
     model_config = {
         "arbitrary_types_allowed": True,
