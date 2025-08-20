@@ -45,8 +45,8 @@ class SimpleRateLimiter:
 
     def __init__(
         self,
-        limit: int,
-        window_seconds: int,
+        limit: int = 1,
+        window_seconds: int = 15,
         max_cache_size: int = 10000,
         skip_options: bool = True
     ) -> None:
@@ -54,9 +54,9 @@ class SimpleRateLimiter:
         Initialize the rate limiter with asyncio lock for FastAPI compatibility.
 
         Args:
-            limit: Maximum requests allowed per window.
-            window_seconds: Duration of rate limit window in seconds.
-            max_cache_size: Maximum cache entries to prevent memory leaks.
+            limit: Maximum requests allowed per window (default 1).
+            window_seconds: Duration of rate limit window in seconds (default 15).
+            max_cache_size: Maximum cache entries to prevent memory leaks (default 10000).
             skip_options: Skip rate limiting for OPTIONS requests (CORS preflight).
         """
         if limit <= 0 or window_seconds <= 0 or max_cache_size <= 0:
