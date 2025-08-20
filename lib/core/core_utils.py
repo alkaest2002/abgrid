@@ -241,16 +241,17 @@ def verify_hmac_signature(json_data: dict[str, Any]) -> bool:
     Raises:
         KeyError: If the "_signature" key is missing from json_data
     """
+    # Check _signature key presence
     if "_signature" not in json_data:
         error_message = "no_signature_key_in_json_data"
         raise KeyError(error_message)
 
-    # Extract the signature and create data without signature for verification
+    # Extract signature and create data without signature for verification
     provided_signature = json_data["_signature"]
     data_without_signature = {k: v for k, v in json_data.items() if k != "_signature"}
 
     # Compute expected signature
     expected_signature = compute_hmac_signature(data_without_signature)
 
-    # Use hmac.compare_digest for timing-attack resistance
+    # Compare signatures
     return hmac.compare_digest(provided_signature, expected_signature)
