@@ -5,7 +5,10 @@ The code is part of the AB-Grid project and is licensed under the MIT License.
 """
 
 import asyncio
+import hashlib
+import hmac
 import io
+import json
 from base64 import b64encode
 from collections.abc import Callable
 from functools import reduce
@@ -15,6 +18,10 @@ import pandas as pd
 from matplotlib import pyplot as plt
 from matplotlib.figure import Figure
 
+from lib.interfaces.fastapi.settings import Settings
+
+
+settings = Settings.load()
 
 # Type variable for the return type of the function
 T = TypeVar("T")
@@ -194,3 +201,56 @@ def gini_coefficient(values: pd.Series) -> float:
     gini: float = (2.0 * index_weighted_sum) / (n * total_sum) - (n + 1) / n
 
     return gini
+
+def compute_hmac_signature(json_data: dict[str, Any]) -> str:
+    """
+    Compute an HMAC signature of the JSON data for cryptographic integrity and authentication.
+
+    Uses HMAC-SHA256 which provides:
+    - Cryptographic integrity (tamper detection)
+    - Authentication (proves the data came from someone with the secret key)
+    - Collision resistance
+    - Platform independence
+
+    Args:
+        json_data: The JSON data dictionary to sign (excluding signature keys)
+
+    Returns:
+        A hexadecimal string representation of the HMAC signature
+    """
+    # Convert to JSON string with sorted keys for consistent signing
+    json_string = json.dumps(json_data, sort_keys=True, separators=(",", ":"))
+
+    # Compute HMAC-SHA256
+    return hmac.new(
+        settings.auth_secret.encode("utf-8"),
+        json_string.encode("utf-8"),
+        hashlib.sha256
+    ).hexdigest()
+
+def verify_hmac_signature(json_data: dict[str, Any]) -> bool:
+    """
+    Verify the HMAC signature of JSON data.
+
+    Args:
+        json_data: The complete JSON data dictionary including the "_signature" key
+
+    Returns:
+        True if signature is valid, False otherwise
+
+    Raises:
+        KeyError: If the "_signature" key is missing from json_data
+    """
+    if "_signature" not in json_data:
+        error_message = "no_signature_key_in_json_data"
+        raise KeyError(error_message)
+
+    # Extract the signature and create data without signature for verification
+    provided_signature = json_data["_signature"]
+    data_without_signature = {k: v for k, v in json_data.items() if k != "_signature"}
+
+    # Compute expected signature
+    expected_signature = compute_hmac_signature(data_without_signature)
+
+    # Use hmac.compare_digest for timing-attack resistance
+    return hmac.compare_digest(provided_signature, expected_signature)
