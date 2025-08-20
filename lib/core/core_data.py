@@ -115,21 +115,52 @@ class CoreData:
         Returns:
             Dict containing the validated report data output
         """
+        # Extract data
+        sna_isolated_a = sna_results["isolated_nodes_a"]
+        sna_isolated_b = sna_results["isolated_nodes_b"]
+        sna_relevant_a = sna_results["relevant_nodes_a"]
+        sna_relevant_b = sna_results["relevant_nodes_b"]
+        sociogram_relevant = sociogram_results["relevant_nodes"]
+        sociogram_relevant_a = sociogram_relevant["a"]
+        sociogram_relevant_b = sociogram_relevant["b"]
+
         # Prepare isolated nodes
         isolated_nodes_model: ABGridIsolatedNodesSchema = ABGridIsolatedNodesSchema(
-            a=sna_results["isolated_nodes_a"],
-            b=sna_results["isolated_nodes_b"]
+            a=sna_isolated_a.copy()
+                if isinstance(sna_isolated_a, pd.Index)
+                else pd.Index(sna_isolated_a),
+            b=sna_isolated_b.copy()
+                if isinstance(sna_isolated_b, pd.Index)
+                else pd.Index(sna_isolated_b)
         )
 
-        # Get relevant nodes from both SNA and sociogram analyses
+        # Prepare relevant nodes from SNA
         relevant_nodes_sna: dict[str, pd.DataFrame] = {
-            "a": sna_results["relevant_nodes_a"].copy(),
-            "b": sna_results["relevant_nodes_b"].copy()
+            "a": sna_relevant_a.copy()
+                if isinstance(sna_relevant_a, pd.DataFrame)
+                else pd.DataFrame.from_dict(sna_relevant_a, orient="index"),
+            "b": sna_relevant_b.copy()
+                if isinstance(sna_relevant_b, pd.DataFrame)
+                else pd.DataFrame.from_dict(sna_relevant_b, orient="index")
         }
-        relevant_nodes_sociogram: dict[str, pd.DataFrame] = (
-            sociogram_results["relevant_nodes"].copy() if with_sociogram else
-            {"a": pd.DataFrame(), "b": pd.DataFrame()}
-        )
+
+        # Prepare relevant nodes from sociogram
+        if with_sociogram:
+            relevant_nodes_sociogram: dict[str, pd.DataFrame] = (
+                sociogram_relevant.copy()
+                    if all(isinstance(x, pd.DataFrame) for x in sociogram_relevant.values())
+                    else {
+                        "a": pd.DataFrame.from_dict(sociogram_relevant_a, orient="index"),
+                        "b": pd.DataFrame.from_dict(sociogram_relevant_b, orient="index")
+                    }
+            )
+        else:
+            relevant_nodes_sociogram = {
+                "a": pd.DataFrame(),
+                "b": pd.DataFrame()
+            }
+
+        # Init dictionary
         relevant_nodes: dict[str, pd.DataFrame] = {}
 
         # Loop through relevant_nodes keys
