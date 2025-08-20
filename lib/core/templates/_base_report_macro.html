@@ -33,7 +33,7 @@
 <div class="relevant-nodes-container mt-xl">
     <div class="relevant-nodes-main">
         <div class="relevant-nodes-list list-{{valence_type}}">
-            {% for node_id, node in relevant_nodes.iterrows() %}
+            {% for node_id, node in relevant_nodes | universal_iter_rows %}
                 <div class="node">
                     <div class="node-id">
                         {{ node_id }}
@@ -109,7 +109,7 @@
                 <th>HU</th>
                 <th>ND</th>
             </tr>
-            {% for row_label, row in data.iterrows() %}
+            {% for row_label, row in data | universal_iter_rows %}
                 {% if score_type == "ranks" %}
                     <tr>
                         <td>{{ row_label }}</td>
@@ -256,7 +256,7 @@
                 <th>II</th>
                 <th>ST</th>
             </tr>
-            {% for row_label, row in data.iterrows() %}
+            {% for row_label, row in data | universal_iter_rows %}
                 <tr>
                     <td><div><div>{{ row_label }}</div></div></td>
                     <td><div><div>{{ row["rp"] }}</div></div></td>
@@ -340,7 +340,7 @@
                 <th>P25</th>
                 <th>P75</th>
             </tr>
-            {% for row_label, row in descriptives.iterrows() %}
+            {% for row_label, row in descriptives | universal_iter_rows %}
                 <tr>
                     <td class="text-left"><div><div>{{ render_measures_label(row_label) }}</div></div></td>
                     <td><div><div>{{ "%0.2f" | format(row["count"] | round(2)) }}</div></div></td>

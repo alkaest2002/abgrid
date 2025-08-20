@@ -23,8 +23,40 @@ from jinja2.exceptions import (
 # Define cache directory
 TEMPLATE_CACHE_DIR = "./lib/core/templates/.cache"
 
-# Initialize Jinja2 environment with a file system loader for templates
+def universal_iter_rows(data: Any) -> Any:
+    """
+    Universal iterator filter that works with both DataFrames and Python objects.
+
+    Returns an iterator of (key, value) tuples:
+    - For DataFrames: uses iterrows() -> (index, Series)
+    - For dicts: uses items() -> (key, value)
+    - For lists/tuples: uses enumerate() -> (index, item)
+    - For other iterables: uses enumerate() -> (index, item)
+    """
+   # Pandas DataFrame
+    if hasattr(data, "iterrows"):
+        try:
+            return data.iterrows()
+        except AttributeError:
+            pass
+    # Dictionary
+    if isinstance(data, dict):
+        return data.items()
+
+    # List or tuple
+    if isinstance(data, list | tuple):
+        return enumerate(data)
+
+    # Other iterables (sets, generators, etc.)
+    if hasattr(data, "__iter__") and not isinstance(data, str | bytes):
+        return enumerate(data)
+
+    # Single value - wrap in list
+    return [(0, data)]
+
+
 try:
+    # Initialize Jinja2 environment with a file system loader for templates
     abgrid_jinja_env = Environment(
         loader=FileSystemLoader(["./lib/core/templates"]),
         # Enable strict undefined handling to catch missing variables
@@ -34,6 +66,9 @@ try:
         # Add bytecode cache for performance
         bytecode_cache=FileSystemBytecodeCache(TEMPLATE_CACHE_DIR)
     )
+
+    # Add custom filters
+    abgrid_jinja_env.filters["universal_iter_rows"] = universal_iter_rows
 
 except Exception as e:
     error_message = f"Failed to initialize Jinja2 environment: {e}"
