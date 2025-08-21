@@ -32,13 +32,13 @@ class CoreData:
     """Processes AB-Grid data for report generation."""
 
     def get_group_data(self, validated_group_data: ABGridGroupSchemaIn) -> dict[str, Any]:
-        """Generate Group data.
+        """Generate and validate group data with member symbols.
 
         Args:
-            validated_group_data: An instance of ABGridGroupSchemaIn containing validated group data.
+            validated_group_data: Validated Group data schema instance.
 
         Returns:
-            Dict containing the group data.
+            Dict containing the validated group data with added member symbols.
         """
         # Extract group data from the validated model
         group_data: dict[str, Any] = validated_group_data.model_dump()
@@ -56,14 +56,14 @@ class CoreData:
     ##################################################################################################################
 
     def get_report_data(self, validated_group_data: ABGridReportSchemaIn, with_sociogram: bool = False) -> dict[str, Any]:
-        """Generate Report data with SNA and optional sociogram analysis.
+        """Generate comprehensive report data with SNA and optional sociogram analysis.
 
         Args:
-            validated_group_data: Validated ABGrid group data schema instance
-            with_sociogram: Whether to include sociogram analysis
+            validated_group_data: Validated Group data schema instance.
+            with_sociogram: Whether to include sociogram analysis.
 
         Returns:
-            Dict containing complete report data with analysis results
+            Dict containing complete report data with SNA analysis and optional sociogram results.
         """
         # Extract group data from the validated model
         group_data = validated_group_data.model_dump()
@@ -74,16 +74,18 @@ class CoreData:
         # Compute SNA results from group choice data
         sna_data: dict[str, Any] = abgrid_sna.get()
 
+        # Initialize sociogram data as empty dict
+        sociogram_data: dict[str, Any] = {}
+
         # Compute Sociogram results if requested
         if with_sociogram:
-
             # Initialize Sociogram analysis class
             abgrid_sociogram: CoreSociogram = CoreSociogram(validated_group_data.choices_a, validated_group_data.choices_b)
 
             # Compute Sociogram results from group choice data
-            sociogram_data: dict[str, Any] = abgrid_sociogram.get()
+            sociogram_data = abgrid_sociogram.get()
 
-        # Get isolated and relevat nodes
+        # Get isolated and relevant nodes
         isolated_and_relevant_nodes = self._add_isolated_and_relevant_nodes(sna_data, sociogram_data, with_sociogram)
 
         # Build and return the final report data output
@@ -100,13 +102,13 @@ class CoreData:
     ##################################################################################################################
 
     def get_group_and_sna_data(self, validated_group_data: ABGridReportSchemaIn) -> dict[str, Any]:
-        """Generate Group and SNA data.
+        """Generate combined group and SNA data.
 
         Args:
-            validated_group_data: Validated ABGrid group data schema instance
+            validated_group_data: Validated Group data schema instance.
 
         Returns:
-            Dict containing Group and SNA data
+            Dict containing combined group and SNA analysis data.
         """
         # Extract group data from the validated model
         group_data = validated_group_data.model_dump()
@@ -123,56 +125,59 @@ class CoreData:
             "sna": sna_data
         }
 
-        # Validate and convert SNA data to ABGridSnaSchemaOut
+        # Validate and convert group and SNA data to ABGridGroupAndSnaSchemaOut
         group_and_sna_data_out: ABGridGroupAndSnaSchemaOut = ABGridGroupAndSnaSchemaOut(**group_and_sna_data)
 
         return group_and_sna_data_out.model_dump()
 
     def get_sociogram_data(self, validated_group_data: ABGridReportSchemaIn) -> dict[str, Any]:
-        """Generate Sociogram data.
+        """Generate sociogram analysis data.
 
         Args:
-            validated_group_data: Validated ABGrid report data schema instance
+            validated_group_data: Validated Group data schema instance.
 
         Returns:
-            Dict containing Sociogram data
+            Dict containing sociogram analysis data wrapped in a 'sociogram' key.
         """
         # Initialize Sociogram analysis class
         abgrid_sociogram: CoreSociogram = CoreSociogram(validated_group_data.choices_a, validated_group_data.choices_b)
 
-        # Compute Sociogram
+        # Compute Sociogram data and wrap in sociogram key
         sociogram_data: dict[str, Any] = {
            "sociogram": abgrid_sociogram.get()
         }
 
-        # Validate and convert SNA data to ABGridSociogramSchemaOut
+        # Validate and convert sociogram data to ABGridSociogramSchemaOut
         sociogram_data_out: ABGridSociogramSchemaOut = ABGridSociogramSchemaOut(**sociogram_data)
 
         return sociogram_data_out.model_dump()
 
     def get_multi_step_report_data(self, validated_data: ABGridReportMultiStepSchemaIn, with_sociogram: bool = False) -> dict[str, Any]:
-        """Generate comprehensive report data with SNA and optional sociogram analysis.
+        """Generate comprehensive report data from pre-computed group, SNA, and optional sociogram data.
 
         Args:
-            validated_data: Validated ABGrid Report data schema instance
-            with_sociogram: Whether to include sociogram analysis
+            validated_data: Validated ABGrid multi-step report data schema instance.
+            with_sociogram: Whether to include sociogram analysis in the final report.
 
         Returns:
-            Dict containing complete report data
+            Dict containing complete report data with isolated and relevant nodes analysis.
         """
         # Extract data from the validated model
         data = validated_data.model_dump()
 
+        # Extract and clean group data (remove internal signature)
         group_data = data["group"]
         group_data.pop("_signature", None)
 
+        # Extract and clean SNA data (remove internal signature)
         sna_data = data["sna"]
         sna_data.pop("_signature", None)
 
+        # Extract and clean sociogram data (remove internal signature)
         sociogram_data = data["sociogram"]
         sociogram_data.pop("_signature", None)
 
-        # Get isolated and relevat nodes
+        # Get isolated and relevant nodes analysis
         isolated_and_relevant_nodes = self._add_isolated_and_relevant_nodes(sna_data, sociogram_data, with_sociogram)
 
         # Build and return the final report data output
@@ -194,23 +199,30 @@ class CoreData:
         sociogram_data: dict[str, Any],
         with_sociogram: bool
     ) -> dict[str, Any]:
-        """Prepare the final report output with isolated nodes, relevant nodes, and validation.
+        """Analyze and combine isolated and relevant nodes from SNA and optional sociogram data.
+
+        This method processes nodes to identify:
+        - Isolated nodes (from SNA analysis).
+        - Relevant nodes (combining SNA and sociogram metrics, excluding isolated nodes).
+        - Nodes with multiple metrics receive additional weight scoring.
 
         Args:
-            sna_data: Results from SNA analysis
-            sociogram_data: Results from Sociogram analysis
-            with_sociogram: Whether to include sociogram analysis
+            sna_data: Results from SNA analysis containing isolated and relevant nodes.
+            sociogram_data: Results from Sociogram analysis (may be empty if not requested).
+            with_sociogram: Whether to include sociogram analysis in node relevance calculation.
 
         Returns:
-            Dict containing the validated report data output
+            Dict containing:
+            - isolated_nodes: Nodes with no connections in each network.
+            - relevant_nodes: Nodes with multiple metrics, weighted by evidence strength.
         """
-        # Extract data from SNA results
+        # Extract isolated nodes data from SNA results
         sna_isolated_a = sna_data["isolated_nodes_a"]
         sna_isolated_b = sna_data["isolated_nodes_b"]
         sna_relevant_a = sna_data["relevant_nodes_a"]
         sna_relevant_b = sna_data["relevant_nodes_b"]
 
-        # Prepare isolated nodes
+        # Prepare isolated nodes schema
         isolated_nodes_model: ABGridIsolatedNodesSchema = ABGridIsolatedNodesSchema(
             a=sna_isolated_a.copy()
                 if isinstance(sna_isolated_a, pd.Index)
@@ -220,7 +232,7 @@ class CoreData:
                 else pd.Index(sna_isolated_b)
         )
 
-        # Prepare relevant nodes from SNA
+        # Prepare relevant nodes from SNA (convert to DataFrame if needed)
         relevant_nodes_sna: dict[str, pd.DataFrame] = {
             "a": sna_relevant_a.copy()
                 if isinstance(sna_relevant_a, pd.DataFrame)
@@ -230,14 +242,14 @@ class CoreData:
                 else pd.DataFrame.from_dict(sna_relevant_b, orient="index")
         }
 
-        # If sociogram analysis is included
+        # Process sociogram relevant nodes if included
         if with_sociogram:
             # Extract relevant nodes from sociogram results
             sociogram_relevant = sociogram_data["relevant_nodes"]
             sociogram_relevant_a = sociogram_relevant["a"]
             sociogram_relevant_b = sociogram_relevant["b"]
 
-            # Prepare relevant nodes from sociogram
+            # Prepare relevant nodes from sociogram (convert to DataFrame if needed)
             relevant_nodes_sociogram: dict[str, pd.DataFrame] = (
                 sociogram_relevant.copy()
                     if all(isinstance(x, pd.DataFrame) for x in sociogram_relevant.values())
@@ -247,22 +259,22 @@ class CoreData:
                     }
             )
         else:
-            # Prepare default nodes from sociogram
+            # Create empty DataFrames when sociogram is not included
             relevant_nodes_sociogram = {
                 "a": pd.DataFrame(),
                 "b": pd.DataFrame()
             }
 
-        # Init dictionary
+        # Initialize final relevant nodes dictionary
         relevant_nodes: dict[str, pd.DataFrame] = {}
 
-        # Loop through relevant_nodes keys
+        # Process each network type (a and b)
         for network_type in ("a", "b"):
 
-            # Get isolated nodes
+            # Get isolated nodes for this network type
             isolated_nodes: pd.Index = getattr(isolated_nodes_model, network_type)
 
-            # Concat relevant nodes from sna and sociogram
+            # Combine relevant nodes from SNA and sociogram
             relevant_nodes_combo: pd.DataFrame = (
                 pd.concat(
                     [
@@ -272,9 +284,9 @@ class CoreData:
                 )
             )
 
-            # Group nodes with same id and consolidate their values
+            # Group nodes with same id and consolidate their metrics
             relevant_nodes_combo = (
-                # Omit isolated nodes first
+                # Exclude isolated nodes from relevant nodes
                 relevant_nodes_combo.loc[~relevant_nodes_combo["node_id"].isin(isolated_nodes), :]
                 .groupby(by="node_id")
                     .aggregate({
@@ -287,18 +299,18 @@ class CoreData:
                     })
             )
 
-            # Do some other calculation with nodes
+            # Filter and weight nodes based on multiple metrics
             relevant_nodes[network_type] = (
                 relevant_nodes_combo
-                    # Keep nodes with multiple metrics only
+                    # Keep only nodes with multiple metrics
                     .loc[relevant_nodes_combo["metric"].str.len() > 1, :]
-                    # Add 10 more points to weight of nodes with metrics from both sna and sociogram
+                    # Add bonus weight (10 points) for nodes with evidence from multiple sources
                     .assign(weight=relevant_nodes_combo["weight"] + relevant_nodes_combo["evidence_type"].str.len().gt(1).mul(10))
-                    # Sort nodes by weight
+                    # Sort nodes by weight (highest first)
                     .sort_values(by="weight", ascending=False)
             )
 
-        # Create RelevantNodesSchema
+        # Create validated RelevantNodesSchema
         relevant_nodes_model: ABGridRelevantNodesSchema = ABGridRelevantNodesSchema(**relevant_nodes)
 
         return {
@@ -312,18 +324,18 @@ class CoreData:
             sociogram_data: dict[str, Any],
             isolated_and_relevant_nodes: dict[str, Any],
             with_sociogram: bool
-            ) -> dict[str, pd.DataFrame]:
-        """Build the final data structure for output.
+            ) -> dict[str, Any]:
+        """Build and validate the final report data structure.
 
         Args:
-            group_data: The project data.
-            sna_data: The SNA results.
-            sociogram_data: The sociogram results.
-            isolated_and_relevant_nodes: The isolated and relevant nodes.
-            with_sociogram: Whether to include sociogram data.
+            group_data: Validated group data.
+            sna_data: Computed SNA analysis results.
+            sociogram_data: The computed sociogram analysis results (may be empty).
+            isolated_and_relevant_nodes: The processed isolated and relevant nodes analysis.
+            with_sociogram: Whether to include sociogram data in the final output.
 
         Returns:
-            Dictionary containing the final data structure.
+            Dict containing the complete validated report data structure.
         """
         # Prepare the comprehensive report data structure
         report_data = {
