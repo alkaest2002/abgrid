@@ -27,17 +27,17 @@ class CoreExport:
         and datetime objects.
 
         Args:
-            value: The value to convert to JSON-serializable format
+            value: The value to convert to JSON-serializable format.
 
         Returns:
-            A JSON-serializable representation of the input value
+            A JSON-serializable representation of the input value.
 
         Note:
-            - DataFrames are converted to dict format with index preservation
-            - NetworkX graphs are converted to node/edge lists
-            - Numpy arrays become Python lists
-            - Datetime objects become ISO format strings
-            - Complex objects are converted to string representation as fallback
+            - DataFrames are converted to dict format with index preservation.
+            - NetworkX graphs are converted to node/edge lists.
+            - Numpy arrays become Python lists.
+            - Datetime objects become ISO format strings.
+            - Complex objects are converted to string representation as fallback.
         """
 
         def _convert_pandas_dataframe(df: pd.DataFrame) -> dict[str, Any]:
@@ -120,14 +120,18 @@ class CoreExport:
     @staticmethod
     def to_json_group_and_sna(group_data: dict[str, Any], sna_data: dict[str, Any]) -> dict[str, Any]:
         """
-        Convert AB-Grid report data to a JSON-serializable format.
+        Convert AB-Grid group and SNA data to a JSON-serializable format with HMAC signatures.
+
+        Serializes both group data and SNA (Social Network Analysis) data separately,
+        adds HMAC signatures to each for data integrity verification, and combines
+        them into a single dictionary structure.
 
         Args:
-            group_data: The project data dictionary to convert
-            sna_data: The SNA data dictionary to convert
+            group_data: The group data dictionary to convert.
+            sna_data: The SNA data dictionary to convert.
 
         Returns:
-            A JSON-serializable dictionary with the same structure as the input
+            A JSON-serializable dictionary containing both group and SNA data with signatures.
         """
         # Serialize project data and add signature
         serialized_group_data = CoreExport._to_json_encoders(group_data)
@@ -148,13 +152,16 @@ class CoreExport:
     @staticmethod
     def to_json_sociogram(sociogram_data: dict[str, Any]) -> dict[str, Any]:
         """
-        Convert AB-Grid report data to a JSON-serializable format.
+        Convert AB-Grid sociogram data to a JSON-serializable format with HMAC signature.
+
+        Serializes sociogram data and adds an HMAC signature to the nested sociogram
+        structure for data integrity verification.
 
         Args:
-            sociogram_data: The sociogram data dictionary to convert
+            sociogram_data: The sociogram data dictionary to convert.
 
         Returns:
-            A JSON-serializable dictionary with the same structure as the input
+            A JSON-serializable dictionary containing the sociogram data with signature.
         """
         # Serialize project data and add signature
         serialized_sociogram_data = CoreExport._to_json_encoders(sociogram_data)
@@ -168,13 +175,23 @@ class CoreExport:
     @staticmethod
     def to_json(report_data: dict[str, Any]) -> dict[str, Any]:
         """
-        Convert AB-Grid report data to a JSON-serializable format.
+        Convert complete AB-Grid report data to a JSON-serializable format.
+
+        Handles the full AB-Grid report structure including metadata (year, project title,
+        questions), group information, SNA analysis results, sociogram data, relevant nodes
+        analysis, and isolated nodes identification.
 
         Args:
-            report_data: The report data dictionary to convert
+            report_data: The complete AB-Grid report data dictionary containing:
+                - Basic metadata (year, project_title, question_a, question_b, group, group_size).
+                - SNA analysis results (complex nested structure).
+                - Sociogram data (optional network visualization data).
+                - Relevant nodes data (DataFrames for questions A and B).
+                - Isolated nodes data (Index objects for questions A and B).
 
         Returns:
-            A JSON-serializable dictionary with the same structure as the input
+            A JSON-serializable dictionary with the same structure as the input,
+            with all pandas/numpy/networkx objects converted to JSON-compatible formats.
         """
         # Init dictionary
         json_data: dict[str, Any] = {}
