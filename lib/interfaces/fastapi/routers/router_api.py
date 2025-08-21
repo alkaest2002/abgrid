@@ -268,8 +268,8 @@ def get_router_api() -> APIRouter:  # noqa: PLR0915
             # JSON serialization
             project_sna_json = await asyncio.to_thread(
                 CoreExport.to_json_group_and_sna,
-                project_sna_data["group"],
-                project_sna_data["sna"]
+                project_sna_data["group_data"],
+                project_sna_data["sna_data"]
             )
 
             return JSONResponse(

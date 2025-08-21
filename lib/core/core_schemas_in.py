@@ -507,9 +507,9 @@ class ABGridReportMultiStepSchemaIn(BaseModel):
         - All fields are required and must pass signature verification.
     """
 
-    group: dict[str, Any]
-    sna: dict[str, Any]
-    sociogram: dict[str, Any]
+    group_data: dict[str, Any]
+    sna_data: dict[str, Any]
+    sociogram_data: dict[str, Any]
 
     @model_validator(mode="before")
     @classmethod
@@ -534,7 +534,7 @@ class ABGridReportMultiStepSchemaIn(BaseModel):
         errors = []
 
         # Validate each field
-        for field_name in ["group", "sna", "sociogram"]:
+        for field_name in ["group_data", "sna_data", "sociogram_data"]:
             field_value = data.get(field_name)
 
             # Check if field exists

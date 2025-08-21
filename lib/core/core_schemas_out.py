@@ -42,8 +42,8 @@ class ABGridGroupAndSnaSchemaOut(BaseModel):
         group: Group data as dictionary.
         sna: Social network analysis results as dictionary.
     """
-    group: dict[str, Any]
-    sna: dict[str, Any]
+    group_data: dict[str, Any]
+    sna_data: dict[str, Any]
 
     model_config = {
         "arbitrary_types_allowed": True,
@@ -59,7 +59,7 @@ class ABGridSociogramSchemaOut(BaseModel):
     Attributes:
         sociogram: Sociogram analysis results as dictionary.
     """
-    sociogram: dict[str, Any]
+    sociogram_data: dict[str, Any]
 
     model_config = {
         "arbitrary_types_allowed": True,

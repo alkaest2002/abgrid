@@ -122,8 +122,8 @@ class CoreData:
 
         # Build group and SNA data
         group_and_sna_data  = {
-            "group": group_data,
-            "sna": sna_data
+            "group_data": group_data,
+            "sna_data": sna_data
         }
 
         # Validate and convert group and SNA data to ABGridGroupAndSnaSchemaOut
@@ -145,7 +145,7 @@ class CoreData:
 
         # Compute Sociogram data and wrap in sociogram key
         sociogram_data: dict[str, Any] = {
-           "sociogram": abgrid_sociogram.get()
+           "sociogram_data": abgrid_sociogram.get()
         }
 
         # Validate and convert sociogram data to ABGridSociogramSchemaOut
@@ -167,15 +167,15 @@ class CoreData:
         data = validated_data.model_dump()
 
         # Extract and clean group data (remove internal signature)
-        group_data = data["group"]
+        group_data = data["group_data"]
         group_data.pop("_signature", None)
 
         # Extract and clean SNA data (remove internal signature)
-        sna_data = data["sna"]
+        sna_data = data["sna_data"]
         sna_data.pop("_signature", None)
 
         # Extract and clean sociogram data (remove internal signature)
-        sociogram_data = data["sociogram"]
+        sociogram_data = data["sociogram_data"]
         sociogram_data.pop("_signature", None)
 
         # Get report data
