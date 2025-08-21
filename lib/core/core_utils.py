@@ -33,40 +33,41 @@ async def run_in_executor[T](func: Callable[..., T], *args: Any) -> T:
     the asyncio event loop.
 
     Args:
-        func: The synchronous function to run
-        *args: Arguments to pass to the function
+        func: The synchronous function to run.
+        *args: Arguments to pass to the function.
 
     Returns:
-        The result of the function call
+        The result of the function call.
     """
     loop = asyncio.get_event_loop()
     return await loop.run_in_executor(None, func, *args)
 
 def unpack_network_edges(packed_edges: list[dict[str, str | None]]) -> list[tuple[str, str]]:
-        """
-        Unpack edge dictionaries into a list of directed edge tuples.
+    """
+    Unpack edge dictionaries into a list of directed edge tuples.
 
-        Takes a list of dictionaries where each dictionary represents outgoing edges
-        from source nodes, and converts them into a flat list of (source, target) tuples.
+    Takes a list of dictionaries where each dictionary represents outgoing edges
+    from source nodes, and converts them into a flat list of (source, target) tuples.
+    Safely handles None values in edge lists.
 
-        Args:
-            packed_edges: List of dictionaries where keys are source nodes and values are
-                comma-separated strings of target nodes. None values are safely handled.
+    Args:
+        packed_edges: List of dictionaries where keys are source nodes and values are.
+            comma-separated strings of target nodes. None values are ignored.
 
-        Returns:
-            Flat list of directed edge tuples (source, target).
-        """
-        return reduce(
-            lambda acc, itr: [
-                *acc,
-                *[
-                    (node_from, node_to) for node_from, edges in itr.items() if edges is not None
-                        for node_to in edges.split(",")
-                ]
-            ],
-            packed_edges,
-            []
-        )
+    Returns:
+        Flat list of directed edge tuples (source, target).
+    """
+    return reduce(
+        lambda acc, itr: [
+            *acc,
+            *[
+                (node_from, node_to) for node_from, edges in itr.items() if edges is not None
+                    for node_to in edges.split(",")
+            ]
+        ],
+        packed_edges,
+        []
+    )
 
 def unpack_network_nodes(packed_edges: list[dict[str, str | None]]) -> list[str]:
     """
@@ -89,16 +90,16 @@ def figure_to_base64_svg(fig: Figure) -> str:
     automatically closed after conversion to free memory.
 
     Args:
-        fig: Matplotlib figure object to convert
+        fig: Matplotlib figure object to convert.
 
     Returns:
-        Base64-encoded SVG string with data URI prefix for direct HTML embedding
+        Base64-encoded SVG string with data URI prefix for direct HTML embedding.
 
     Notes:
-        - Uses SVG format for scalable vector graphics
-        - Applies tight bounding box to minimize whitespace
-        - Sets transparent background for flexible styling
-        - Automatically closes the figure to prevent memory leaks
+        - Uses SVG format for scalable vector graphics.
+        - Applies tight bounding box to minimize whitespace.
+        - Sets transparent background for flexible styling.
+        - Automatically closes the figure to prevent memory leaks.
     """
     # Initialize an in-memory buffer
     buffer = io.BytesIO()
@@ -126,7 +127,9 @@ def compute_descriptives(data: pd.DataFrame) -> pd.DataFrame:
         data: DataFrame containing numerical data for statistical analysis
 
     Returns:
-        DataFrame with comprehensive descriptive statistics for each column
+        DataFrame with comprehensive descriptive statistics for each column,
+        including: count, min, max, median, mean, std, cv (coefficient of variation),
+        gn (Gini coefficient), sk (skewness), kt (kurtosis), 25%, 75%
 
     Notes:
         - Includes standard statistics: count, min, max, mean, std, quartiles
@@ -134,6 +137,7 @@ def compute_descriptives(data: pd.DataFrame) -> pd.DataFrame:
         - Calculates skewness (sk) and kurtosis (kt) for distribution shape
         - Computes Gini coefficient (gn) for inequality measurement
         - Reorders columns for logical statistical interpretation
+        - Renames "50%" to "median" for clarity
     """
     # Compute descriptive statistics with pandas descrive
     descriptives = data.describe().T
@@ -156,20 +160,21 @@ def gini_coefficient(values: pd.Series) -> float:
     Calculate the Gini coefficient for measuring inequality in a distribution.
 
     Computes the Gini coefficient, a measure of inequality ranging from 0 (perfect equality)
-    to 1 (maximum inequality). The calculation uses the standard formula adjusted for
-    non-negative values by subtracting the minimum value from all observations.
+    to 1 (maximum inequality). The calculation uses the standard formula and handles
+    negative values by subtracting the minimum value from all observations.
 
     Args:
-        values: Sequence of numerical values to analyze for inequality
+        values: Series of numerical values to analyze for inequality.
 
     Returns:
-        Gini coefficient as a float between 0 and 1
+        Gini coefficient as a float between 0 and 1.
 
     Notes:
-        - Returns 0.0 for distributions with zero variance (perfect equality)
-        - Automatically handles negative values by shifting to non-negative range
-        - Uses the standard Gini formula: G = (2 * Σ(i * x_i)) / (n * Σ(x_i)) - (n + 1) / n
-        - Commonly used in social network analysis for measuring centralization
+        - Returns 0.0 for distributions with zero variance or zero mean (perfect equality).
+        - Automatically handles negative values by shifting to non-negative range.
+        - Uses the standard Gini formula: G = (2 * Σ(i * x_i)) / (n * Σ(x_i)) - (n + 1) / n.
+        - Values are sorted before calculation for proper index weighting.
+        - Commonly used in social network analysis for measuring centralization.
     """
     # Convert to non-negative values by subtracting minimum
     pos_values: pd.Series = values.sub(values.min())
@@ -198,19 +203,23 @@ def gini_coefficient(values: pd.Series) -> float:
 
 def compute_hmac_signature(json_data: dict[str, Any]) -> str:
     """
-    Compute an HMAC signature of the JSON data for cryptographic integrity and authentication.
+    Compute an HMAC-SHA256 signature for JSON data using the application secret key.
 
-    Uses HMAC-SHA256 which provides:
-    - Cryptographic integrity (tamper detection)
-    - Authentication (proves the data came from someone with the secret key)
-    - Collision resistance
-    - Platform independence
+    Creates a cryptographic signature for integrity verification and authentication.
+    The JSON data is serialized with sorted keys for consistent signing across
+    different platforms and Python versions.
 
     Args:
-        json_data: The JSON data dictionary to sign (excluding signature keys)
+        json_data: Dictionary to sign (should not contain signature keys).
 
     Returns:
-        A hexadecimal string representation of the HMAC signature
+        Hexadecimal string representation of the HMAC-SHA256 signature.
+
+    Notes:
+        - Uses HMAC-SHA256 for cryptographic integrity and authentication.
+        - JSON is serialized with sorted keys and compact formatting for consistency.
+        - Uses the application's auth_secret from settings as the signing key.
+        - Provides tamper detection and authentication capabilities.
     """
     # Convert to JSON string with sorted keys for consistent signing
     json_string = json.dumps(json_data, sort_keys=True, separators=(",", ":"))
@@ -224,13 +233,22 @@ def compute_hmac_signature(json_data: dict[str, Any]) -> str:
 
 def verify_hmac_signature(json_data: dict[str, Any]) -> bool:
     """
-    Verify the HMAC signature of JSON data.
+    Verify the HMAC signature of JSON data against the expected signature.
+
+    Extracts the signature from the "_signature" key, recomputes the expected
+    signature for the remaining data, and performs a secure comparison.
 
     Args:
-        json_data: The complete JSON data dictionary including the "_signature" key
+        json_data: Dictionary containing data and a "_signature" key with the signature to verify.
 
     Returns:
-        True if signature is valid, False otherwise
+        True if the signature is valid and matches the expected signature, False otherwise.
+
+    Notes:
+        - Expects the signature to be stored in the "_signature" key.
+        - Uses secure comparison (hmac.compare_digest) to prevent timing attacks.
+        - Returns False if "_signature" key is missing.
+        - Signature verification is performed on all data excluding the "_signature" key.
     """
     # Extract signature from data
     provided_signature = json_data.get("_signature", "")
