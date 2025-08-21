@@ -32,6 +32,13 @@ def universal_iter_rows(data: Any) -> Any:
     - For dicts: uses items() -> (key, value)
     - For lists/tuples: uses enumerate() -> (index, item)
     - For other iterables: uses enumerate() -> (index, item)
+    - For single values: wraps in list as [(0, value)]
+
+    Args:
+        data: Input data to iterate over
+
+    Returns:
+        Iterator of (key, value) tuples
     """
    # Pandas DataFrame
     if hasattr(data, "iterrows"):
@@ -81,17 +88,22 @@ class TemplateRenderError(Exception):
 
 
 class CoreRenderer:
-    """Renders jinja templates."""
+    """
+    Renders Jinja2 templates using the configured AB-Grid environment.
+
+    Provides template rendering capabilities with comprehensive error handling
+    for template loading and rendering operations.
+    """
 
     def render(self, template_path_str: str, template_data: dict[str, Any]) -> str:
         """Render Jinja2 template with provided template_data.
 
         Args:
-            template_path_str: Path (as string) to the Jinja2 template file
-            template_data: Template context data
+            template_path_str: Path (as string) to the Jinja2 template file relative to template directory
+            template_data: Dictionary containing template context variables and data
 
         Returns:
-            Rendered template
+            Rendered template as string
 
         Raises:
             FileNotFoundError: If template file is not found
