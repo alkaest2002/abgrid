@@ -13,8 +13,8 @@ class ABGridRelevantNodesSchema(BaseModel):
     """Schema for relevant nodes analysis results.
 
     Attributes:
-        a: Positive relevance nodes from network A.
-        b: Negative relevance nodes from network B.
+        a: Relevant nodes from network A.
+        b: Relevant nodes from network B.
     """
     a: pd.DataFrame
     b: pd.DataFrame
@@ -42,7 +42,38 @@ class ABGridIsolatedNodesSchema(BaseModel):
 
 
 class ABGridSNASchema(BaseModel):
-    """Pydantic model for SNA dictionary containing network analysis results."""
+    """Pydantic model for SNA dictionary containing network analysis results.
+
+    Attributes:
+        nodes_a: List of node identifiers for network A.
+        nodes_b: List of node identifiers for network B.
+        edges_a: List of edge tuples for network A.
+        edges_b: List of edge tuples for network B.
+        adjacency_a: Adjacency matrix for network A.
+        adjacency_b: Adjacency matrix for network B.
+        network_a: NetworkX directed graph for network A.
+        network_b: NetworkX directed graph for network B.
+        loc_a: Node position coordinates for network A.
+        loc_b: Node position coordinates for network B.
+        macro_stats_a: Macro-level statistics for network A.
+        macro_stats_b: Macro-level statistics for network B.
+        micro_stats_a: Micro-level statistics for network A.
+        micro_stats_b: Micro-level statistics for network B.
+        descriptives_a: Descriptive statistics for network A.
+        descriptives_b: Descriptive statistics for network B.
+        rankings_a: Node rankings by various metrics for network A.
+        rankings_b: Node rankings by various metrics for network B.
+        edges_types_a: Edge type classifications for network A.
+        edges_types_b: Edge type classifications for network B.
+        components_a: Network component analysis for network A.
+        components_b: Network component analysis for network B.
+        isolated_nodes_a: Isolated nodes in network A.
+        isolated_nodes_b: Isolated nodes in network B.
+        relevant_nodes_a: Relevant nodes analysis for network A.
+        relevant_nodes_b: Relevant nodes analysis for network B.
+        graph_a: String representation of network A graph.
+        graph_b: String representation of network B graph.
+    """
     nodes_a: list[str]
     nodes_b: list[str]
     edges_a: list[tuple[str, str]]
@@ -79,7 +110,17 @@ class ABGridSNASchema(BaseModel):
 
 
 class ABGridSociogramSchema(BaseModel):
-    """Pydantic model for storing sociogram analysis results."""
+    """Pydantic model for storing sociogram analysis results.
+
+    Attributes:
+        macro_stats: Macro-level statistics for the sociogram.
+        micro_stats: Micro-level statistics for the sociogram.
+        descriptives: Descriptive statistics for the sociogram.
+        rankings: Node rankings by various metrics.
+        relevant_nodes: Dictionary containing relevant nodes analysis.
+        graph_ii: String representation of the ii graph.
+        graph_ai: String representation of the ai graph.
+    """
     macro_stats: pd.Series
     micro_stats: pd.DataFrame
     descriptives: pd.DataFrame
