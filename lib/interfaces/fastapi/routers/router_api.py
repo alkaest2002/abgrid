@@ -28,6 +28,21 @@ _auth = Auth()
 _abgrid_data = CoreData()
 _abgrid_renderer = CoreRenderer()
 
+# Create rate limiters for all endpoints
+api_limiter_3s = SimpleRateLimiter(
+    limit=1,
+    window_seconds=3,
+    max_cache_size=1000,
+    skip_options=True
+)
+
+api_limiter_10s = SimpleRateLimiter(
+    limit=1,
+    window_seconds=10,
+    max_cache_size=1000,
+    skip_options=True
+)
+
 def get_router_api() -> APIRouter:  # noqa: PLR0915
     """
     Create and configure the FastAPI router with API endpoints.
@@ -55,7 +70,7 @@ def get_router_api() -> APIRouter:  # noqa: PLR0915
 
     # Add endpoints
     @router.post("/group")
-    @SimpleRateLimiter(limit=1, window_seconds=5)
+    @api_limiter_3s
     async def create_group(
         request: Request,
         model: ABGridGroupSchemaIn,
@@ -135,7 +150,7 @@ def get_router_api() -> APIRouter:  # noqa: PLR0915
 
 
     @router.post("/report")
-    @SimpleRateLimiter(limit=1, window_seconds=15)
+    @api_limiter_10s
     async def create_report(
         request: Request,
         model: ABGridReportSchemaIn,
@@ -221,7 +236,7 @@ def get_router_api() -> APIRouter:  # noqa: PLR0915
 
 
     @router.post("/report/step_1")
-    @SimpleRateLimiter(limit=1, window_seconds=15)
+    @api_limiter_3s
     async def multi_step_create_group_and_sna(
         request: Request,
         model: ABGridReportSchemaIn,
@@ -291,7 +306,7 @@ def get_router_api() -> APIRouter:  # noqa: PLR0915
 
 
     @router.post("/report/step_2")
-    @SimpleRateLimiter(limit=1, window_seconds=15)
+    @api_limiter_3s
     async def multi_step_create_sociogram(
         request: Request,
         model: ABGridReportSchemaIn,
@@ -361,7 +376,7 @@ def get_router_api() -> APIRouter:  # noqa: PLR0915
 
 
     @router.post("/report/step_3")
-    @SimpleRateLimiter(limit=1, window_seconds=15)
+    @api_limiter_3s
     async def multi_step_create_report(
         request: Request,
         model: ABGridReportMultiStepSchemaIn,
