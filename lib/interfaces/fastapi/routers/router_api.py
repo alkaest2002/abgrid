@@ -86,13 +86,13 @@ def get_router_api() -> APIRouter:
             Limited to 1 request per 5 seconds per client
         """
         try:
-            # Run CPU-bound group data processing in thread pool
+            # Data computation
             group_data: dict[str, Any] = await asyncio.to_thread(
                 _abgrid_data.get_group_data,
                 model
             )
 
-            # Template rendering is typically I/O bound, but can also be threaded if heavy
+            # Template rendering
             template_path = f"/{language}/group.yaml"
             rendered_group = await asyncio.to_thread(
                 _abgrid_renderer.render,
@@ -100,6 +100,7 @@ def get_router_api() -> APIRouter:
                 group_data
             )
 
+            # Generate safe filename
             safe_title = "".join(c for c in model.project_title if c.isalnum() or c in (" ", "-", "_")).rstrip()
             safe_title = safe_title.replace(" ", "_")[:30]
             filename = f"{safe_title}_g{model.group}.yaml"
@@ -126,6 +127,72 @@ def get_router_api() -> APIRouter:
             return JSONResponse(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
                 content={"detail": "failed_to_render_group_template"}
+            )
+
+
+    @router.post("/sna")
+    @SimpleRateLimiter(limit=1, window_seconds=15)
+    async def create_sna(
+        request: Request,
+        model: ABGridReportSchemaIn,
+        user_data: dict[str, Any] = Depends(_auth.verify_token)
+    ) -> JSONResponse:
+        """
+        Generate comprehensive analysis report based on provided data.
+
+        This endpoint processes the report schema and generates both HTML and JSON
+        formatted reports, optionally including sociogram visualizations.
+
+        Args:
+            request: The HTTP request object (used by rate limiter)
+            model: Report data schema containing all analysis parameters
+            user_data: Authenticated user data from JWT token verification
+
+        Returns:
+            JSONResponse: Success response with rendered HTML report and JSON data
+                         containing "report_html" with the rendered template and
+                         "report_json" with the structured data
+
+        Status Codes:
+            200: Report generated successfully
+            401: Authentication token invalid or missing
+            429: Rate limit exceeded (1 request per 15 seconds)
+            500: Report generation failed or internal server error
+
+        Rate Limiting:
+            Limited to 1 request per 15 seconds per client due to computational intensity
+        """
+        try:
+
+            # Data computation
+            project_sna_data: dict[str, Any] = await asyncio.to_thread(
+                _abgrid_data.get_project_sna_data,
+                model,
+            )
+
+            # JSON serialization
+            project_sna_json = await asyncio.to_thread(
+                CoreExport.to_json_sna,
+                project_sna_data["project"],
+                project_sna_data["sna"]
+            )
+
+            return JSONResponse(
+                status_code=status.HTTP_200_OK,
+                content={
+                    "detail": project_sna_json
+                }
+            )
+
+        except ValueError:
+            return JSONResponse(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                content={"detail": "invalid_report_data"}
+            )
+        except Exception:
+            return JSONResponse(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                content={"detail": "failed_to_generate_report"}
             )
 
 
@@ -165,21 +232,16 @@ def get_router_api() -> APIRouter:
 
         Rate Limiting:
             Limited to 1 request per 15 seconds per client due to computational intensity
-
-        Note:
-            Report generation is computationally intensive, hence the longer rate limit window.
-            The sociogram parameter significantly affects processing time and resource usage.
-            CPU-intensive operations are executed in thread pool to prevent blocking.
         """
         try:
-            # Run heavy computation in thread pool to avoid blocking event loop
+            # Data computation
             report_data: dict[str, Any] = await asyncio.to_thread(
                 _abgrid_data.get_report_data,
                 model,
                 with_sociogram
             )
 
-            # Template rendering in thread pool as well
+            # Template rendering
             template_path = f"./{language}/report.html"
             rendered_report = await asyncio.to_thread(
                 _abgrid_renderer.render,
@@ -187,7 +249,7 @@ def get_router_api() -> APIRouter:
                 report_data
             )
 
-            # JSON serialization can also be CPU-intensive for large data
+            # JSON serialization
             report_json = await asyncio.to_thread(
                 CoreExport.to_json,
                 report_data

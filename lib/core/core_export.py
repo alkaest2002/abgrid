@@ -11,6 +11,8 @@ import numpy as np
 import pandas as pd
 from networkx import DiGraph
 
+from lib.core.core_utils import compute_hmac_signature
+
 
 class CoreExport:
     """Utility class for exporting AB-Grid report data to JSON format."""
@@ -114,6 +116,39 @@ class CoreExport:
             return json.dumps(value)
         except (TypeError, ValueError):
             return str(value)
+
+
+    @staticmethod
+    def to_json_sna(project_data: dict[str, Any], sna_data: dict[str, Any]) -> dict[str, Any]:
+        """
+        Convert AB-Grid report data to a JSON-serializable format.
+
+        Args:
+            project_data: The project data dictionary to convert
+            sna_data: The SNA data dictionary to convert
+
+        Returns:
+            A JSON-serializable dictionary with the same structure as the input
+
+        Note:
+            All keys are treated as optional and missing keys will result in None values
+            or appropriate empty defaults (empty DataFrames, empty lists, etc.)
+        """
+        # Serialize project data and add signature
+        serialized_project_data = CoreExport._to_json_encoders(project_data)
+        serialized_project_data["_signature"] = compute_hmac_signature(serialized_project_data)
+
+        # Serialize SNA data and add signature
+        serialized_sna_data = CoreExport._to_json_encoders(sna_data)
+        serialized_sna_data["_signature"] = compute_hmac_signature(serialized_sna_data)
+
+        # Init dictionary
+        json_data: dict[str, Any] = {
+            "project":  serialized_project_data,
+            "sna": serialized_sna_data
+        }
+
+        return json_data
 
     @staticmethod
     def to_json(report_data: dict[str, Any]) -> dict[str, Any]:

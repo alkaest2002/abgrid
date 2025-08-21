@@ -17,8 +17,8 @@ class ABGridGroupSchemaOut(BaseModel):
 
     Attributes:
         project_title: Title of the AB-Grid project.
-        question_a: Text of question A from the survey.
-        question_b: Text of question B from the survey.
+        question_a: Text of question A from the project .
+        question_b: Text of question B from the project .
         group: Group identifier.
         members: List of member symbols (A, B, C, etc.) based on group size.
     """
@@ -32,6 +32,23 @@ class ABGridGroupSchemaOut(BaseModel):
         "extra": "forbid"
     }
 
+class ABGridSnaSchemaOut(BaseModel):
+    """Output schema for comprehensive report data.
+
+    Contains Project data and SNA analys (first step of multistep report generation).
+
+    Attributes:
+        project: Project data.
+        sna: Complete social network analysis results.
+    """
+    project: dict[str, Any]
+    sna: dict[str, Any]
+
+    model_config = {
+        "arbitrary_types_allowed": True,
+        "extra": "forbid"
+    }
+
 class ABGridReportSchemaOut(BaseModel):
     """Output schema for comprehensive report data.
 
@@ -41,8 +58,8 @@ class ABGridReportSchemaOut(BaseModel):
     Attributes:
         year: Current year when report was generated.
         project_title: Title of the AB-Grid project.
-        question_a: Text of question A from the survey.
-        question_b: Text of question B from the survey.
+        question_a: Text of question A from the project .
+        question_b: Text of question B from the project .
         group: Group identifier.
         group_size: Number of participants in the group.
         sna: Complete social network analysis results.
