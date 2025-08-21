@@ -118,7 +118,7 @@ class CoreExport:
             return str(value)
 
     @staticmethod
-    def to_json_group_and_sna(group_data: dict[str, Any], sna_data: dict[str, Any]) -> dict[str, Any]:
+    def to_json_group_and_sna(data: dict[str, Any]) -> dict[str, Any]:
         """
         Convert AB-Grid group and SNA data to a JSON-serializable format with HMAC signatures.
 
@@ -127,18 +127,17 @@ class CoreExport:
         them into a single dictionary structure.
 
         Args:
-            group_data: The group data dictionary to convert.
-            sna_data: The SNA data dictionary to convert.
+            data: The data dictionary to convert.
 
         Returns:
             A JSON-serializable dictionary containing both group and SNA data with signatures.
         """
-        # Serialize project data and add signature
-        serialized_group_data = CoreExport._to_json_encoders(group_data)
+        # Serialize group data and add signature
+        serialized_group_data = CoreExport._to_json_encoders(data["group_data"])
         serialized_group_data["_signature"] = compute_hmac_signature(serialized_group_data)
 
         # Serialize SNA data and add signature
-        serialized_sna_data = CoreExport._to_json_encoders(sna_data)
+        serialized_sna_data = CoreExport._to_json_encoders(data["sna_data"])
         serialized_sna_data["_signature"] = compute_hmac_signature(serialized_sna_data)
 
         # Init dictionary
@@ -150,7 +149,7 @@ class CoreExport:
         return json_data
 
     @staticmethod
-    def to_json_sociogram(sociogram_data: dict[str, Any]) -> dict[str, Any]:
+    def to_json_sociogram(data: dict[str, Any]) -> dict[str, Any]:
         """
         Convert AB-Grid sociogram data to a JSON-serializable format with HMAC signature.
 
@@ -158,19 +157,21 @@ class CoreExport:
         structure for data integrity verification.
 
         Args:
-            sociogram_data: The sociogram data dictionary to convert.
+            data: The data dictionary to convert.
 
         Returns:
             A JSON-serializable dictionary containing the sociogram data with signature.
         """
         # Serialize project data and add signature
-        serialized_sociogram_data = CoreExport._to_json_encoders(sociogram_data)
-        serialized_sociogram_data["sociogram_data"]["_signature"] = compute_hmac_signature(serialized_sociogram_data["sociogram_data"])
+        serialized_sociogram_data = CoreExport._to_json_encoders(data["sociogram_data"])
+        serialized_sociogram_data["_signature"] = compute_hmac_signature(serialized_sociogram_data)
 
         # Init dictionary
         json_data: dict[str, Any] = serialized_sociogram_data
 
-        return json_data
+        return {
+            "sociogram_data": json_data
+        }
 
     @staticmethod
     def to_json(report_data: dict[str, Any]) -> dict[str, Any]:
