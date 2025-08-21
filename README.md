@@ -3,6 +3,7 @@
 A comprehensive open-source software for sociometric analysis and Social Network Analysis (SNA) designed to optimize peer group dynamics.
 
 [![Ruff](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/ruff/main/assets/badge/v2.json)](https://github.com/astral-sh/ruff)
+[![Mypy](https://img.shields.io/badge/type--checked-mypy-blue?style=flat-square&logo=python)](https://github.com/python/mypy)
 
 ## 🎯 Overview
 
