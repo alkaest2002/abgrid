@@ -36,11 +36,11 @@ class ABGridGroupSchemaOut(BaseModel):
 class ABGridGroupAndSnaSchemaOut(BaseModel):
     """Output schema for Group and SNA data.
 
-    Contains Group data and SNA analysis (first step of multistep report generation).
+    Contains Group data and SNA analysis results for multistep report generation.
 
     Attributes:
-        group: Group data.
-        sna: SNA Social network analysis results.
+        group: Group data as dictionary.
+        sna: Social network analysis results as dictionary.
     """
     group: dict[str, Any]
     sna: dict[str, Any]
@@ -54,10 +54,10 @@ class ABGridGroupAndSnaSchemaOut(BaseModel):
 class ABGridSociogramSchemaOut(BaseModel):
     """Output schema for Sociogram data.
 
-    Contains Group data and SNA analysis (first step of multistep report generation).
+    Contains sociogram analysis results for visualization purposes.
 
     Attributes:
-        sociogram: Sociogram analysis results.
+        sociogram: Sociogram analysis results as dictionary.
     """
     sociogram: dict[str, Any]
 
@@ -70,17 +70,19 @@ class ABGridSociogramSchemaOut(BaseModel):
 class ABGridReportSchemaOut(BaseModel):
     """Output schema for Report data.
 
+    Complete report schema containing all analysis results for AB-Grid project reporting.
+
     Attributes:
         year: Current year when report was generated.
         project_title: Title of the AB-Grid project.
-        question_a: Text of question A from the project .
-        question_b: Text of question B from the project .
+        question_a: Text of question A from the project.
+        question_b: Text of question B from the project.
         group: Group identifier.
         group_size: Number of participants in the group.
-        sna: Complete social network analysis results.
-        sociogram: Sociogram analysis results (None if not requested).
-        relevant_nodes: Relevant nodes from both networks.
-        isolated_nodes: Isolated nodes from both networks.
+        sna: Social network analysis results as dictionary.
+        sociogram: Sociogram analysis results as dictionary (None if not requested).
+        relevant_nodes: Relevant nodes from both networks as dictionary.
+        isolated_nodes: Isolated nodes from both networks as dictionary.
     """
     year: int
     project_title: str
