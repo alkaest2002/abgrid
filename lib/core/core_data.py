@@ -51,11 +51,8 @@ class CoreData:
 
         return group_data_out.model_dump()
 
-
     ##################################################################################################################
-    #
     #   SINGLE STEP REPORT
-    #
     ##################################################################################################################
 
     def get_report_data(self, validated_group_data: ABGridReportSchemaIn, with_sociogram: bool = False) -> dict[str, Any]:
@@ -99,9 +96,7 @@ class CoreData:
         )
 
     ##################################################################################################################
-    #
     #   MULTI STEP REPORT
-    #
     ##################################################################################################################
 
     def get_group_and_sna_data(self, validated_group_data: ABGridReportSchemaIn) -> dict[str, Any]:
@@ -133,7 +128,6 @@ class CoreData:
 
         return group_and_sna_data_out.model_dump()
 
-
     def get_sociogram_data(self, validated_group_data: ABGridReportSchemaIn) -> dict[str, Any]:
         """Generate Sociogram data.
 
@@ -155,7 +149,6 @@ class CoreData:
         sociogram_data_out: ABGridSociogramSchemaOut = ABGridSociogramSchemaOut(**sociogram_data)
 
         return sociogram_data_out.model_dump()
-
 
     def get_multi_step_report_data(self, validated_data: ABGridReportMultiStepSchemaIn, with_sociogram: bool = False) -> dict[str, Any]:
         """Generate comprehensive report data with SNA and optional sociogram analysis.
@@ -190,6 +183,10 @@ class CoreData:
             isolated_and_relevant_nodes,
             with_sociogram
         )
+
+    ##################################################################################################################
+    #   PRIVATE METHODS
+    ##################################################################################################################
 
     def _add_isolated_and_relevant_nodes(
         self,

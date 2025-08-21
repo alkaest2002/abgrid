@@ -23,7 +23,6 @@ from lib.interfaces.fastapi.settings import Settings
 
 settings = Settings.load()
 
-# Type variable for the return type of the function
 T = TypeVar("T")
 
 async def run_in_executor[T](func: Callable[..., T], *args: Any) -> T:
@@ -42,7 +41,6 @@ async def run_in_executor[T](func: Callable[..., T], *args: Any) -> T:
     """
     loop = asyncio.get_event_loop()
     return await loop.run_in_executor(None, func, *args)
-
 
 def unpack_network_edges(packed_edges: list[dict[str, str | None]]) -> list[tuple[str, str]]:
         """
@@ -70,7 +68,6 @@ def unpack_network_edges(packed_edges: list[dict[str, str | None]]) -> list[tupl
             []
         )
 
-
 def unpack_network_nodes(packed_edges: list[dict[str, str | None]]) -> list[str]:
     """
     Extract unique source nodes from packed edge dictionaries.
@@ -82,7 +79,6 @@ def unpack_network_nodes(packed_edges: list[dict[str, str | None]]) -> list[str]
         Sorted list of unique source node identifiers.
     """
     return sorted([node for node_edges in packed_edges for node in node_edges])
-
 
 def figure_to_base64_svg(fig: Figure) -> str:
     """
@@ -117,7 +113,6 @@ def figure_to_base64_svg(fig: Figure) -> str:
     base64_encoded_string = b64encode(buffer.getvalue()).decode()
 
     return f"data:image/svg+xml;base64,{base64_encoded_string}"
-
 
 def compute_descriptives(data: pd.DataFrame) -> pd.DataFrame:
     """
@@ -155,7 +150,6 @@ def compute_descriptives(data: pd.DataFrame) -> pd.DataFrame:
         # Reorder statistics
         .loc[:, ["count", "min", "max", "median", "mean", "std", "cv", "gn", "sk", "kt", "25%", "75%" ]]
     )
-
 
 def gini_coefficient(values: pd.Series) -> float:
     """

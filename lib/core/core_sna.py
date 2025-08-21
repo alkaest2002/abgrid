@@ -77,33 +77,10 @@ class CoreSna:
 
         return validated_data.model_dump()
 
-    def _get_sync(self) -> dict[str, Any] :
-        """
-        Synchronous wrapper for the async get_async method.
 
-        Compute and store comprehensive network analysis for two directed networks.
-
-        Returns:
-            A dictionary containing all network analysis results including nodes, edges,
-            adjacency matrices, statistics, rankings, components, and visualization data
-            for both networks.
-        """
-        self._create_networks()
-
-        # Store edge types, components, macro stats, micro stats, descriptives, rankings and graphs
-        for network_type in ("a", "b"):
-            self.sna[f"edges_types_{network_type}"] = self._compute_edges_types(network_type)
-            self.sna[f"components_{network_type}"] = self._compute_components(network_type)
-            self.sna[f"macro_stats_{network_type}"] = self._compute_macro_stats(network_type)
-            self.sna[f"micro_stats_{network_type}"] = self._compute_micro_stats(network_type)
-            self.sna[f"descriptives_{network_type}"] = self._compute_descriptives(network_type)
-            self.sna[f"rankings_{network_type}"] = self._compute_rankings(network_type)
-            self.sna[f"isolated_nodes_{network_type}"] = self._compute_isolated_nodes(network_type)
-            self.sna[f"relevant_nodes_{network_type}"] = self._compute_relevant_nodes(network_type)
-            self.sna[f"graph_{network_type}"] = self._create_graph(network_type)
-
-        return self.sna
-
+    ##################################################################################################################
+    #   PRIVATE METHODS
+    ##################################################################################################################
 
     async def _get_async(self) -> dict[str, Any]:
         """
@@ -185,6 +162,33 @@ class CoreSna:
         # Store batch 4 results
         for key, task in tasks.items():
             self.sna[key] = task.result()
+
+        return self.sna
+
+    def _get_sync(self) -> dict[str, Any] :
+        """
+        Synchronous wrapper for the async get_async method.
+
+        Compute and store comprehensive network analysis for two directed networks.
+
+        Returns:
+            A dictionary containing all network analysis results including nodes, edges,
+            adjacency matrices, statistics, rankings, components, and visualization data
+            for both networks.
+        """
+        self._create_networks()
+
+        # Store edge types, components, macro stats, micro stats, descriptives, rankings and graphs
+        for network_type in ("a", "b"):
+            self.sna[f"edges_types_{network_type}"] = self._compute_edges_types(network_type)
+            self.sna[f"components_{network_type}"] = self._compute_components(network_type)
+            self.sna[f"macro_stats_{network_type}"] = self._compute_macro_stats(network_type)
+            self.sna[f"micro_stats_{network_type}"] = self._compute_micro_stats(network_type)
+            self.sna[f"descriptives_{network_type}"] = self._compute_descriptives(network_type)
+            self.sna[f"rankings_{network_type}"] = self._compute_rankings(network_type)
+            self.sna[f"isolated_nodes_{network_type}"] = self._compute_isolated_nodes(network_type)
+            self.sna[f"relevant_nodes_{network_type}"] = self._compute_relevant_nodes(network_type)
+            self.sna[f"graph_{network_type}"] = self._create_graph(network_type)
 
         return self.sna
 
@@ -289,7 +293,6 @@ class CoreSna:
             "network_reciprocity": network_reciprocity,
         })
 
-
     def _compute_micro_stats(self, network_type: Literal["a", "b"]) -> pd.DataFrame:
         """
         Calculate node-level (micro) statistics for the specified network.
@@ -367,7 +370,6 @@ class CoreSna:
                 .sort_index()
         )
 
-
     def _compute_descriptives(self, network_type: Literal["a", "b"]) -> pd.DataFrame:
         """
         Compute descriptive statistics for centrality measures.
@@ -398,7 +400,6 @@ class CoreSna:
         sna_numeric_columns: pd.DataFrame = self.sna[f"micro_stats_{network_type}"].loc[:, columns_to_retain]
 
         return compute_descriptives(sna_numeric_columns)
-
 
     def _compute_rankings(self, network_type: Literal["a", "b"]) -> dict[str, pd.Series]:
         """
@@ -435,7 +436,6 @@ class CoreSna:
             rankings[metric_name] = rank_columns[metric_name].sort_values()
 
         return rankings
-
 
     def _compute_edges_types(self, network_type: Literal["a", "b"]) -> Any:
         """
@@ -512,7 +512,6 @@ class CoreSna:
             "type_v": type_v
         }
 
-
     def _compute_components(self, network_type: Literal["a", "b"]) -> dict[str, pd.Series]:
         """
         Identify and extract significant network components.
@@ -571,7 +570,6 @@ class CoreSna:
 
         return components
 
-
     def _compute_isolated_nodes(self, network_type: Literal["a", "b"]) -> Any:
         """
         Identify isolated nodes in both networks.
@@ -589,7 +587,6 @@ class CoreSna:
 
         # Find isolated nodes (degree 0)
         return pd.Index([n for n, d in network.degree() if d == 0])
-
 
     def _compute_relevant_nodes(self, network_type: Literal["a", "b"], threshold: float = 0.05) -> pd.DataFrame:
         """
@@ -667,7 +664,6 @@ class CoreSna:
 
         return relevant_nodes
 
-
     def _compute_network_centralization(self, network: nx.Graph) -> float:  # type: ignore[type-arg]
         """
         Calculate the degree centralization of an undirected network.
@@ -712,7 +708,6 @@ class CoreSna:
         )
 
         return network_centralization
-
 
     def _create_graph(self, network_type: Literal["a","b"]) -> str:
         """
@@ -790,7 +785,6 @@ class CoreSna:
         )
 
         return figure_to_base64_svg(fig)
-
 
     def _handle_isolated_nodes_in_graph(self, network: nx.DiGraph, loc: dict[str, np.ndarray]) -> dict[str, np.ndarray]: # type: ignore[type-arg]
         """

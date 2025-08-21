@@ -117,7 +117,6 @@ class CoreExport:
         except (TypeError, ValueError):
             return str(value)
 
-
     @staticmethod
     def to_json_group_and_sna(group_data: dict[str, Any], sna_data: dict[str, Any]) -> dict[str, Any]:
         """

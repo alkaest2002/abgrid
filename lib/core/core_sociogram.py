@@ -93,31 +93,10 @@ class CoreSociogram:
 
         return validated_data.model_dump()
 
-    def _get_sync(self) -> dict[str, Any]:
-        """
-        Synchronous wrapper for the async get_async method.
 
-        Compute and store comprehensive sociogram analysis from social network data.
-
-        Returns:
-            A dictionary containing complete sociogram analysis with all computed metrics,
-            statistics, rankings, and visualizations.
-
-        """
-        # Create networks first
-        self._create_networks()
-
-        # Compute all sociogram components in sequence
-        self.sociogram["macro_stats"] = self._compute_macro_stats()
-        self.sociogram["micro_stats"] = self._compute_micro_stats()
-        self.sociogram["descriptives"] = self._compute_descriptives()
-        self.sociogram["rankings"] = self._compute_rankings()
-        self.sociogram["relevant_nodes"] = self._compute_relevant_nodes()
-        self.sociogram["graph_ai"] = self._create_graph("ai")
-        self.sociogram["graph_ii"] = self._create_graph("ii")
-
-        return self.sociogram
-
+    ##################################################################################################################
+    #   PRIVATE METHODS
+    ##################################################################################################################
 
     async def _get_async(self) -> dict[str, Any]:
         """
@@ -177,6 +156,31 @@ class CoreSociogram:
 
         # Store batch 3 results
         self.sociogram["relevant_nodes"] = relevant_nodes_task.result()
+
+        return self.sociogram
+
+    def _get_sync(self) -> dict[str, Any]:
+        """
+        Synchronous wrapper for the async get_async method.
+
+        Compute and store comprehensive sociogram analysis from social network data.
+
+        Returns:
+            A dictionary containing complete sociogram analysis with all computed metrics,
+            statistics, rankings, and visualizations.
+
+        """
+        # Create networks first
+        self._create_networks()
+
+        # Compute all sociogram components in sequence
+        self.sociogram["macro_stats"] = self._compute_macro_stats()
+        self.sociogram["micro_stats"] = self._compute_micro_stats()
+        self.sociogram["descriptives"] = self._compute_descriptives()
+        self.sociogram["rankings"] = self._compute_rankings()
+        self.sociogram["relevant_nodes"] = self._compute_relevant_nodes()
+        self.sociogram["graph_ai"] = self._create_graph("ai")
+        self.sociogram["graph_ii"] = self._create_graph("ii")
 
         return self.sociogram
 
@@ -276,7 +280,6 @@ class CoreSociogram:
             "wi_i": conflict_index_type_i,
             "wi_ii": conflict_index_type_ii
         })
-
 
     def _compute_micro_stats(self) -> pd.DataFrame:
         """

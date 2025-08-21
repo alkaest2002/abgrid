@@ -570,6 +570,10 @@ class ABGridReportMultiStepSchemaIn(BaseModel):
         return data
 
 
+##################################################################################################################
+#   PRIVATE METHODS
+##################################################################################################################
+
 def _validate_text_field(field_name: str, value: Any, min_len: int, max_len: int) -> list[dict[str, Any]]:
     """Validate text field with length and character constraints.
 
@@ -626,7 +630,6 @@ def _validate_text_field(field_name: str, value: Any, min_len: int, max_len: int
         })
 
     return errors
-
 
 def _validate_group_field(value: Any) -> list[dict[str, Any]]:
     """Validate group field as integer.

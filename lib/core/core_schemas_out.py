@@ -32,6 +32,7 @@ class ABGridGroupSchemaOut(BaseModel):
         "extra": "forbid"
     }
 
+
 class ABGridGroupAndSnaSchemaOut(BaseModel):
     """Output schema for Group and SNA data.
 
@@ -49,6 +50,7 @@ class ABGridGroupAndSnaSchemaOut(BaseModel):
         "extra": "forbid"
     }
 
+
 class ABGridSociogramSchemaOut(BaseModel):
     """Output schema for Sociogram data.
 
@@ -63,6 +65,7 @@ class ABGridSociogramSchemaOut(BaseModel):
         "arbitrary_types_allowed": True,
         "extra": "forbid"
     }
+
 
 class ABGridReportSchemaOut(BaseModel):
     """Output schema for Report data.
