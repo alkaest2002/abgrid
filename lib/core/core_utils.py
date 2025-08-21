@@ -242,7 +242,7 @@ def verify_hmac_signature(json_data: dict[str, Any]) -> bool:
     provided_signature = json_data.get("_signature", "")
 
     # Create data without signature for verification
-    data_without_signature = {k: v for k, v in json_data.items() if k != "_signature"}
+    data_without_signature = { str(k): v for k, v in json_data.items() if k != "_signature"}
 
     # Compute expected signature
     expected_signature = compute_hmac_signature(data_without_signature)
