@@ -20,14 +20,14 @@ FORBIDDEN_CHARS = re.compile(r"[^A-Za-zÀ-ÖØ-öø-ÿĀ-ſƀ-ɏḀ-ỿЀ-ӿͰ-�
 class ABGridGroupSchemaIn(BaseModel):
     """Input schema for AB-Grid group data.
 
-    Validates group data.
+    Validates group data with comprehensive field validation.
 
     Attributes:
-        project_title: Project title (1-100 characters).
-        question_a: First question text (1-300 characters).
-        question_b: Second question text (1-300 characters).
-        group: Group identifier (integer).
-        members: Number of members per group (8-50).
+        project_title: Project title (1-100 characters, no forbidden chars).
+        question_a: First question text (1-300 characters, no forbidden chars).
+        question_b: Second question text (1-300 characters, no forbidden chars).
+        group: Group identifier (must be integer).
+        members: Number of members per group (8-50 integer range).
 
     Notes:
         All fields are typed as Any to enable custom validation and
@@ -110,23 +110,28 @@ class ABGridGroupSchemaIn(BaseModel):
 class ABGridReportSchemaIn(BaseModel):
     """Input schema for AB-Grid report data.
 
-    Validates report data.
+    Validates report data with comprehensive choice validation.
 
     Attributes:
-        project_title: Project title (1-100 characters).
-        question_a: First question text (1-300 characters).
-        question_b: Second question text (1-300 characters).
-        group: Group identifier (integer).
+        project_title: Project title (1-100 characters, no forbidden chars).
+        question_a: First question text (1-300 characters, no forbidden chars).
+        question_b: Second question text (1-300 characters, no forbidden chars).
+        group: Group identifier (must be integer).
         choices_a: Choice dictionaries for question A (non-empty list).
         choices_b: Choice dictionaries for question B (non-empty list).
 
     Notes:
         - All fields typed as Any for custom validation.
         - Keys in choices_a and choices_b must be identical.
-        - Values must reference valid keys.
-        - Keys and values must be single alphabetic characters.
-        - Maximum 60% of nodes can have no choice.
+        - Keys must be single alphabetic characters (no duplicates).
+        - Keys cannot exceed available SYMBOLS length.
+        - Values must be None, empty strings, or comma-separated single alphabetic chars.
+        - Values must reference valid keys from the combined key set.
+        - Keys cannot self-reference.
+        - No duplicate values within a choice.
         - Value count must be less than total key count.
+        - Maximum 60% of nodes can have empty values per choice set.
+        - Choice values are stripped of extra spaces after validation.
     """
 
     project_title: Any
@@ -144,12 +149,12 @@ class ABGridReportSchemaIn(BaseModel):
         """Validate all fields comprehensively.
 
         Validates all fields including complex choice validation logic:
-        - Basic field validation.
-        - Choice structure correctness.
+        - Basic field validation (text fields and group).
+        - Choice structure correctness (list, non-empty, within symbol limits).
         - Choice key consistency between questions.
-        - Valid value references.
-        - Maximum 60% nodes without choices.
-        - Value count less than key count.
+        - Valid value references to existing keys.
+        - Maximum 60% nodes with empty values per choice set.
+        - Value count less than total key count per choice.
 
         Args:
             data: Raw input data dictionary.
@@ -220,14 +225,14 @@ class ABGridReportSchemaIn(BaseModel):
         """Validate choices structure and format.
 
         Validates:
-        - Choices is non-empty list.
-        - Each choice is single key-value dictionary.
-        - Keys are single alphabetic characters (no duplicates).
-        - Keys don't exceed SYMBOLS length.
-        - Values have correct format.
-        - Keys don't self-reference.
-        - No duplicate values within choice.
-        - Value count less than key count.
+        - Choices is a non-empty list.
+        - Each choice is a single key-value dictionary.
+        - Keys are single alphabetic characters (no duplicates within field).
+        - Total choices don't exceed SYMBOLS length.
+        - Values have correct format (None, empty, or comma-separated alphabetic chars).
+        - Keys don't self-reference in their values.
+        - No duplicate values within a single choice.
+        - Value count is less than total key count for the field.
 
         Args:
             data: Full data dictionary.
@@ -318,15 +323,15 @@ class ABGridReportSchemaIn(BaseModel):
         """Validate choice value format.
 
         Validates values are None, empty strings, or comma-separated single
-        alphabetic characters. Ensures no self-reference, no duplicates,
-        and value count less than key count.
+        alphabetic characters. Ensures no self-reference, no duplicates within
+        the value, and value count less than total key count.
 
         Args:
             field_name: Name of choices field.
             key: Choice key.
             value_str: Value to validate.
             errors: List to append errors to.
-            total_keys: Total number of keys in choice set.
+            total_keys: Total number of keys in the choice set.
         """
         if value_str is None:
             return
@@ -381,8 +386,9 @@ class ABGridReportSchemaIn(BaseModel):
     def _validate_value_references(cls, data: dict[str, Any], all_valid_keys: set[str], errors: list[dict[str, Any]]) -> None:
         """Validate value references point to valid keys.
 
-        Ensures every value in choices references only existing keys from
-        the combined key set of both choices_a and choices_b.
+        Ensures every value in both choices_a and choices_b references only
+        existing keys from the combined key set (which must be identical
+        between both choice sets).
 
         Args:
             data: Full data dictionary.
@@ -418,11 +424,9 @@ class ABGridReportSchemaIn(BaseModel):
     def _validate_minimum_nodes_with_choices(cls, data: dict[str, Any], errors: list[dict[str, Any]]) -> None:
         """Validate choice completion requirements.
 
-        For both choices_a and choices_b, validates:
-        - At least 3 nodes have expressed a choice.
-        - Maximum 60% of nodes have empty values.
-
-        A node has expressed a choice if it has a non-null, non-empty value.
+        For both choices_a and choices_b separately, validates that
+        no more than 60% of nodes have empty values. A node has an empty
+        value if it has None or an empty/whitespace-only string.
 
         Args:
             data: Full data dictionary.
@@ -444,6 +448,9 @@ class ABGridReportSchemaIn(BaseModel):
     @classmethod
     def _validate_single_choice_set(cls, choices: list[dict[str, Any]], field_name: str, errors: list[dict[str, Any]]) -> None:
         """Validate single choice set for completion requirements.
+
+        Ensures that no more than 60% of nodes in the choice set have
+        empty values (None or empty/whitespace-only strings).
 
         Args:
             choices: List of choice dictionaries.
@@ -487,15 +494,17 @@ class ABGridReportSchemaIn(BaseModel):
 class ABGridReportMultiStepSchemaIn(BaseModel):
     """Input schema for AB-Grid report data via multi-step process.
 
-    Validates report data.
+    Validates report data with HMAC signature verification for each component.
 
     Attributes:
-        project: Project dictionary.
-        sna: Social network analysis dictionary.
-        sociogram: Sociogram network analysis.
+        group: Group dictionary with _signature key for HMAC verification.
+        sna: Social network analysis dictionary with _signature key.
+        sociogram: Sociogram network analysis dictionary with _signature key.
 
     Notes:
-        - All fields typed as Any for custom validation.
+        - All fields must be dictionaries containing a '_signature' key.
+        - HMAC signatures are verified for each field using verify_hmac_signature.
+        - All fields are required and must pass signature verification.
     """
 
     group: dict[str, Any]
@@ -506,6 +515,12 @@ class ABGridReportMultiStepSchemaIn(BaseModel):
     @classmethod
     def _validate_all_fields(cls, data: dict[str, Any]) -> dict[str, Any]:
         """Validate all fields comprehensively including HMAC signature verification.
+
+        Validates that each field (group, sna, sociogram):
+        - Exists and is not None.
+        - Is a dictionary.
+        - Contains a '_signature' key.
+        - Passes HMAC signature verification.
 
         Args:
             data: Raw input data dictionary.
@@ -577,8 +592,14 @@ class ABGridReportMultiStepSchemaIn(BaseModel):
 def _validate_text_field(field_name: str, value: Any, min_len: int, max_len: int) -> list[dict[str, Any]]:
     """Validate text field with length and character constraints.
 
-    Validates field is a string within length bounds containing only
-    allowed characters (letters, numbers, safe punctuation).
+    Validates that the field:
+    - Is not None (required).
+    - Is a string.
+    - Has length between min_len and max_len inclusive.
+    - Contains only allowed characters (defined by FORBIDDEN_CHARS regex).
+
+    Allowed characters include: letters (including Unicode), numbers, spaces,
+    apostrophes, periods, commas, hyphens, question marks, and exclamation marks.
 
     Args:
         field_name: Name of field for error reporting.
@@ -632,7 +653,11 @@ def _validate_text_field(field_name: str, value: Any, min_len: int, max_len: int
     return errors
 
 def _validate_group_field(value: Any) -> list[dict[str, Any]]:
-    """Validate group field as integer.
+    """Validate group field as required integer.
+
+    Validates that the group field:
+    - Is not None (required).
+    - Is an integer.
 
     Args:
         value: Value to validate.
