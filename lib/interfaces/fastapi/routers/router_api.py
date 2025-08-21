@@ -28,7 +28,7 @@ _auth = Auth()
 _abgrid_data = CoreData()
 _abgrid_renderer = CoreRenderer()
 
-def get_router_api() -> APIRouter:
+def get_router_api() -> APIRouter:  # noqa: PLR0915
     """
     Create and configure the FastAPI router with API endpoints.
 
@@ -37,14 +37,14 @@ def get_router_api() -> APIRouter:
     All responses are returned as JSON, including error cases.
 
     Returns:
-        APIRouter: Configured router instance with all endpoints registered
+        APIRouter: Configured router instance with all endpoints registered.
 
     Endpoints:
-        POST /api/group: Generate group configuration file
-        POST /api/report: Generate single-step report
-        POST /api/report_step_1: Generate multi-step report, step 1
-        POST /api/report_step_2: Generate multi-step report, step 2
-        POST /api/report_step_3: Generate multi-step report, step 3
+        POST /api/group: Generate group configuration file.
+        POST /api/report: Generate single-step report.
+        POST /api/report/step_1: Generate multi-step report, step 1 (Group and SNA data).
+        POST /api/report/step_2: Generate multi-step report, step 2 (sociogram data).
+        POST /api/report/step_3: Generate multi-step report, step 3 (final HTML report).
 
     Note:
         All endpoints return consistent JSON responses with "detail" field
@@ -69,25 +69,25 @@ def get_router_api() -> APIRouter:
         based on the provided group schema and language template.
 
         Args:
-            request: The HTTP request object (used by rate limiter)
-            model: Group configuration schema containing all group parameters
-            language: Language code for template selection
-            user_data: Authenticated user data from JWT token verification
+            request: The HTTP request object (used by rate limiter).
+            model: Group configuration schema containing all group parameters.
+            language: Language code for template selection.
+            user_data: Authenticated user data from JWT token verification.
 
         Returns:
             JSONResponse: Success response with rendered group configuration and metadata
                          containing "rendered_group" content and "metadata" with filename
-                         and media type information
+                         and media type information.
 
         Status Codes:
-            200: Group configuration generated successfully
-            400: Invalid request data, missing required fields, or template not found
-            401: Authentication token invalid or missing
-            429: Rate limit exceeded (1 request per 5 seconds)
-            500: Template rendering failed or internal server error
+            200: Group configuration generated successfully.
+            400: Invalid request data, missing required fields, or template not found.
+            401: Authentication token invalid or missing.
+            429: Rate limit exceeded (1 request per 5 seconds).
+            500: Template rendering failed or internal server error.
 
         Rate Limiting:
-            Limited to 1 request per 5 seconds per client
+            Rate limited due to computational intensity.
         """
         try:
             # Data computation
@@ -150,26 +150,26 @@ def get_router_api() -> APIRouter:
         formatted reports, optionally including sociogram visualizations.
 
         Args:
-            request: The HTTP request object (used by rate limiter)
-            model: Report schema containing collected survey data
-            language: Language code for report template
-            with_sociogram: Whether to include sociogram visualization in the report
-            user_data: Authenticated user data from JWT token verification
+            request: The HTTP request object (used by rate limiter).
+            model: Report schema containing collected survey data.
+            language: Language code for report template.
+            with_sociogram: Whether to include sociogram visualization in the report.
+            user_data: Authenticated user data from JWT token verification.
 
         Returns:
             JSONResponse: Success response with rendered HTML report and JSON data
                          containing "report_html" with the rendered template and
-                         "report_json" with the structured data
+                         "report_json" with the structured data.
 
         Status Codes:
-            200: Report generated successfully
-            400: Invalid request data, missing fields, or template not found
-            401: Authentication token invalid or missing
-            429: Rate limit exceeded (1 request per 15 seconds)
-            500: Report generation failed or internal server error
+            200: Report generated successfully.
+            400: Invalid request data, missing fields, or template not found.
+            401: Authentication token invalid or missing.
+            429: Rate limit exceeded (1 request per 15 seconds).
+            500: Report generation failed or internal server error.
 
         Rate Limiting:
-            Limited to 1 request per 15 seconds per client due to computational intensity
+            Rate limited due to computational intensity.
         """
         try:
             # Data computation
@@ -228,29 +228,34 @@ def get_router_api() -> APIRouter:
         user_data: dict[str, Any] = Depends(_auth.verify_token)
     ) -> JSONResponse:
         """
-        Generate comprehensive analysis report based on provided data.
+        Generate group and SNA (Social Network Analysis) data for multi-step reporting.
 
-        This endpoint processes the report schema and generates both HTML and JSON
-        formatted reports, optionally including sociogram visualizations.
+        This endpoint is the first step in the multi-step report generation process.
+        It processes the report schema and generates JSON data containing group
+        analysis and social network analysis information.
 
         Args:
-            request: The HTTP request object (used by rate limiter)
-            model: Report schema containing collected survey data
-            user_data: Authenticated user data from JWT token verification
+            request: The HTTP request object (used by rate limiter).
+            model: Report schema containing collected survey data.
+            user_data: Authenticated user data from JWT token verification.
 
         Returns:
-            JSONResponse: Success response with rendered HTML report and JSON data
-                         containing "report_html" with the rendered template and
-                         "report_json" with the structured data
+            JSONResponse: Success response with JSON data containing group and SNA analysis
+                         information structured for further processing steps.
 
         Status Codes:
-            200: Report generated successfully
-            401: Authentication token invalid or missing
-            429: Rate limit exceeded (1 request per 15 seconds)
-            500: Report generation failed or internal server error
+            200: Group and SNA data generated successfully.
+            400: Invalid report data or missing required fields.
+            401: Authentication token invalid or missing.
+            429: Rate limit exceeded (1 request per 15 seconds).
+            500: Data generation failed or internal server error.
 
         Rate Limiting:
-            Limited to 1 request per 15 seconds per client due to computational intensity
+            Rate limited due to computational intensity.
+
+        Note:
+            This is step 1 of a 3-step process. The returned data should be used
+            as input for subsequent steps in the multi-step report generation workflow.
         """
         try:
 
@@ -294,29 +299,34 @@ def get_router_api() -> APIRouter:
         user_data: dict[str, Any] = Depends(_auth.verify_token)
     ) -> JSONResponse:
         """
-        Generate comprehensive analysis report based on provided data.
+        Generate sociogram visualization data for multi-step reporting.
 
-        This endpoint processes the report schema and generates both HTML and JSON
-        formatted reports, optionally including sociogram visualizations.
+        This endpoint is the second step in the multi-step report generation process.
+        It processes the report schema and generates JSON data containing sociogram
+        visualization information and network relationship mappings.
 
         Args:
-            request: The HTTP request object (used by rate limiter)
-            model: Report schema containing collected survey data
-            user_data: Authenticated user data from JWT token verification
+            request: The HTTP request object (used by rate limiter).
+            model: Report schema containing collected survey data.
+            user_data: Authenticated user data from JWT token verification.
 
         Returns:
-            JSONResponse: Success response with rendered HTML report and JSON data
-                        containing "report_html" with the rendered template and
-                        "report_json" with the structured data
+            JSONResponse: Success response with JSON data containing sociogram
+                         visualization data including nodes, edges, and network metrics.
 
         Status Codes:
-            200: Report generated successfully
-            401: Authentication token invalid or missing
-            429: Rate limit exceeded (1 request per 15 seconds)
-            500: Report generation failed or internal server error
+            200: Sociogram data generated successfully.
+            400: Invalid report data or missing required fields.
+            401: Authentication token invalid or missing.
+            429: Rate limit exceeded (1 request per 15 seconds).
+            500: Sociogram generation failed or internal server error.
 
         Rate Limiting:
-            Limited to 1 request per 15 seconds per client due to computational intensity
+            Rate limited due to computational intensity.
+
+        Note:
+            This is step 2 of a 3-step process. The returned sociogram data should be
+            combined with step 1 results for final report generation in step 3.
         """
         try:
 
@@ -356,34 +366,41 @@ def get_router_api() -> APIRouter:
     async def multi_step_create_report(
         request: Request,
         model: ABGridReportMultiStepSchemaIn,
-        language: str = Query(..., description="Language of the group template"),
+        language: str = Query(..., description="Language of the report template"),
         user_data: dict[str, Any] = Depends(_auth.verify_token)
     ) -> JSONResponse:
         """
-        Generate comprehensive analysis report based on provided data.
+        Generate final HTML report for multi-step reporting process.
 
-        This endpoint processes the report schema and generates both HTML and JSON
-        formatted reports, optionally including sociogram visualizations.
+        This endpoint is the final step in the multi-step report generation process.
+        It takes the combined data from previous steps and renders it into a complete
+        HTML report using the specified language template.
 
         Args:
-            request: The HTTP request object (used by rate limiter)
-            model: Report schema containing collected survey data
-            language: Language code for report template
-            user_data: Authenticated user data from JWT token verification
+            request: The HTTP request object (used by rate limiter).
+            model: Multi-step report schema containing data from previous steps.
+            language: Language code for report template selection.
+            user_data: Authenticated user data from JWT token verification.
 
         Returns:
-            JSONResponse: Success response with rendered HTML report and JSON data
-                        containing "report_html" with the rendered template and
-                        "report_json" with the structured data
+            JSONResponse: Success response with rendered HTML report content
+                         ready for display or download.
 
         Status Codes:
-            200: Report generated successfully
-            401: Authentication token invalid or missing
-            429: Rate limit exceeded (1 request per 15 seconds)
-            500: Report generation failed or internal server error
+            200: Final HTML report generated successfully.
+            400: Invalid multi-step report data or missing required fields.
+            401: Authentication token invalid or missing.
+            404: Report template not found for specified language.
+            429: Rate limit exceeded (1 request per 15 seconds).
+            500: Template rendering failed or internal server error.
 
         Rate Limiting:
-            Limited to 1 request per 15 seconds per client due to computational intensity
+            Rate limited due to computational intensity.
+
+        Note:
+            This is the final step (step 3) of the multi-step process. It requires
+            data from both step 1 (group/SNA) and step 2 (sociogram) to generate
+            the complete report.
         """
         try:
 
@@ -408,6 +425,11 @@ def get_router_api() -> APIRouter:
                 }
             )
 
+        except FileNotFoundError:
+            return JSONResponse(
+                status_code=status.HTTP_404_NOT_FOUND,
+                content={"detail": "report_template_not_found_for_language"}
+            )
         except ValueError:
             return JSONResponse(
                 status_code=status.HTTP_400_BAD_REQUEST,
@@ -418,6 +440,5 @@ def get_router_api() -> APIRouter:
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
                 content={"detail": "failed_to_generate_report"}
             )
-
 
     return router
