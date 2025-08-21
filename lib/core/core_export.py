@@ -159,7 +159,7 @@ class CoreExport:
         """
         # Serialize project data and add signature
         serialized_sociogram_data = CoreExport._to_json_encoders(sociogram_data)
-        serialized_sociogram_data["_signature"] = compute_hmac_signature(serialized_sociogram_data)
+        serialized_sociogram_data["sociogram"]["_signature"] = compute_hmac_signature(serialized_sociogram_data["sociogram"])
 
         # Init dictionary
         json_data: dict[str, Any] = serialized_sociogram_data
