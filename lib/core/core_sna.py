@@ -35,7 +35,9 @@ class CoreSna:
     centrality measures, and graph properties.
 
     Attributes:
-        sna (SNADict): Dictionary containing all computed network analysis data for both networks.
+        sna (dict[str, Any]): Dictionary containing all computed network analysis data for both networks.
+        packed_edges_a (list[dict[str, str | None]]): List of packed edges for group A.
+        packed_edges_b (list[dict[str, str | None]]): List of packed edges for group B.
     """
 
     def __init__(self,
@@ -46,10 +48,11 @@ class CoreSna:
 
         Sets up an internal dictionary for storing SNA data
         for both networks A and B, with all values initially set to None.
+        Stores the packed edges for later processing.
 
         Args:
-            packed_edges_a: List of packed edges for group A
-            packed_edges_b: List of packed edges for group B
+            packed_edges_a: List of packed edges for group A.
+            packed_edges_b: List of packed edges for group B.
         """
         # Store packed edges for later use
         self.packed_edges_a = packed_edges_a
@@ -60,14 +63,15 @@ class CoreSna:
 
     def get(self) -> dict[str, Any]:
         """
-        Synchronous wrapper for the async get_async method.
+        Compute and return comprehensive network analysis for two directed networks.
 
-        Compute and store comprehensive network analysis for two directed networks.
+        Runs the asynchronous analysis pipeline and validates the results against
+        the ABGridSNASchema before returning.
 
         Returns:
             A dictionary containing all network analysis results including nodes, edges,
             adjacency matrices, statistics, rankings, components, and visualization data
-            for both networks.
+            for both networks. The data is validated against ABGridSNASchema.
         """
         # Get data
         data = asyncio.run(self._get_async())
@@ -167,9 +171,10 @@ class CoreSna:
 
     def _get_sync(self) -> dict[str, Any] :
         """
-        Synchronous wrapper for the async get_async method.
+        Synchronously compute comprehensive network analysis for two directed networks.
 
-        Compute and store comprehensive network analysis for two directed networks.
+        Performs the same analysis as _get_async() but without concurrent execution.
+        Used as a fallback or for testing purposes.
 
         Returns:
             A dictionary containing all network analysis results including nodes, edges,
@@ -194,10 +199,18 @@ class CoreSna:
 
     def _create_networks(self) -> None:
         """
-        Synchronously create networks with nodes, edges, and adjacency lists.
+        Create networks with nodes, edges, adjacency matrices, and layout positions.
 
-        This performs the actual work of network creation.
+        Unpacks the stored packed edges to create NetworkX directed graphs for both
+        networks A and B. Adds isolated nodes, generates layout positions using
+        Kamada-Kawai algorithm, and creates adjacency matrices.
 
+        Stores the following in self.sna:
+        - nodes_{network_type}: List of all nodes.
+        - edges_{network_type}: List of edges as tuples.
+        - network_{network_type}: NetworkX DiGraph object.
+        - loc_{network_type}: Node layout positions with isolated nodes repositioned.
+        - adjacency_{network_type}: Adjacency matrix as pandas DataFrame.
         """
         # Set network data
         network_edges: list[tuple[Literal["a", "b"], Any]] = [
@@ -248,13 +261,13 @@ class CoreSna:
 
         Returns:
             Series containing macro-level statistics with the following metrics:
-            - network_nodes: Total number of nodes
-            - network_edges: Total number of edges
-            - network_edges_reciprocal: Number of reciprocal edge pairs
-            - network_density: Edge density (0-1 scale)
-            - network_centralization: Degree centralization measure
-            - network_transitivity: Global clustering coefficient
-            - network_reciprocity: Overall reciprocity measure
+            - network_nodes: Total number of nodes.
+            - network_edges: Total number of edges.
+            - network_edges_reciprocal: Number of reciprocal edge pairs.
+            - network_density: Edge density (0-1 scale).
+            - network_centralization: Degree centralization measure.
+            - network_transitivity: Global clustering coefficient.
+            - network_reciprocity: Overall reciprocity measure.
 
         Raises:
             ValueError: If required data is not available.
@@ -305,15 +318,15 @@ class CoreSna:
 
         Returns:
             DataFrame indexed by node identifiers with the following columns:
-            - lns: Comma-separated list of neighbor nodes (out-neighbors)
-            - ic: In-degree centrality
-            - kz: Katz centrality
-            - pr: PageRank score
-            - bt: Betweenness centrality
-            - cl: Closeness centrality
-            - hu: Hubs score (absolute value)
-            - nd: Node degree status (0=normal, 1=no in-degree, 2=no out-degree, 3=isolated)
-            - *_rank: Rank columns for each centrality measure (ic_rank, kz_rank, etc.)
+            - lns: Comma-separated list of neighbor nodes (out-neighbors).
+            - ic: In-degree centrality.
+            - kz: Katz centrality.
+            - pr: PageRank score.
+            - bt: Betweenness centrality.
+            - cl: Closeness centrality.
+            - hu: Hubs score (absolute value).
+            - nd: Node degree status (0=normal, 1=no in-degree, 2=no out-degree, 3=isolated).
+            - *_rank: Rank columns for each centrality measure (ic_rank, kz_rank, etc.).
 
         Raises:
             ValueError: If required network data is not available.
@@ -439,27 +452,27 @@ class CoreSna:
 
     def _compute_edges_types(self, network_type: Literal["a", "b"]) -> Any:
         """
-        Classify edges into five types based on reciprocity and cross-network relationships.
+        Classify edges into five types based on reciprocity patterns within the same network.
 
-        Analyzes edge patterns within the specified network and compares them with
-        the reference network to classify edges into five distinct types.
+        Analyzes edge patterns within the specified network to classify edges into
+        five distinct types based on reciprocity relationships.
 
         Args:
             network_type: Network identifier ('a' or 'b') for selecting the target network.
-                The other network serves as the reference for comparison.
 
         Returns:
             Dictionary containing five edge classifications:
-            - type_i: Non-reciprocal edges (A→B but not B→A in same network)
-            - type_ii: Reciprocal edges (A↔B in same network)
-            - type_iii: Half symmetrical (A→B in both networks, but not B→A)
-            - type_iv: Half reversed symmetrical (A→B in one, B→A in other)
-            - type_v: Fully symmetrical (A↔B in both networks)
+            - type_i: Non-reciprocal edges (A→B but not B→A in same network).
+            - type_ii: Reciprocal edges (A↔B in same network).
+            - type_iii: Half symmetrical (A→B in both networks, but not B→A).
+            - type_iv: Half reversed symmetrical (A→B in one network, B→A in other network).
+            - type_v: Fully symmetrical (A↔B in both networks).
 
         Note:
             Edge classification uses upper triangular matrices to avoid double-counting
-            reciprocal relationships. The reference network is determined automatically
-            (network 'b' is reference for 'a', and vice versa).
+            reciprocal relationships. Currently all type_iii, type_iv, and type_v
+            classifications result in the same reciprocal edges as type_ii due to
+            using the same adjacency matrix for both network and reference.
 
         Raises:
             ValueError: If required adjacency matrix data is not available.
@@ -525,9 +538,9 @@ class CoreSna:
 
         Returns:
             Dictionary containing three types of components:
-            - cliques: Maximal cliques in the undirected version of the graph
-            - strongly_connected: Strongly connected components in the directed graph
-            - weakly_connected: Weakly connected components in the directed graph
+            - cliques: Maximal cliques in the undirected version of the graph.
+            - strongly_connected: Strongly connected components in the directed graph.
+            - weakly_connected: Weakly connected components in the directed graph.
 
             Each Series contains components as concatenated strings of sorted node identifiers.
             Components are sorted by size (largest first).
@@ -572,15 +585,18 @@ class CoreSna:
 
     def _compute_isolated_nodes(self, network_type: Literal["a", "b"]) -> Any:
         """
-        Identify isolated nodes in both networks.
+        Identify isolated nodes in the specified network.
 
-        Isolated nodes are those with no incoming or outgoing edges.
+        Isolated nodes are those with no incoming or outgoing edges (degree 0).
 
         Args:
-            network_type: Type of network ('a' or 'b')
+            network_type: Network identifier ('a' or 'b') for selecting the target network.
 
         Returns:
-            Dictionary with keys 'a' and 'b', each containing an Index of isolated node IDs.
+            pandas Index containing the identifiers of isolated nodes.
+
+        Raises:
+            ValueError: If required network data is not available.
         """
         # Get the network graph
         network = self.sna[f"network_{network_type}"]
@@ -590,30 +606,33 @@ class CoreSna:
 
     def _compute_relevant_nodes(self, network_type: Literal["a", "b"], threshold: float = 0.05) -> pd.DataFrame:
         """
-        Finds nodes that rank highly (indicated by low rank values) for both network A and network B.
+        Find nodes that rank highly in centrality measures for the specified network.
+
+        Identifies nodes that rank in the top percentile for various centrality metrics
+        and computes relevance scores and weights for each node-metric combination.
 
         Args:
-            network_type: Type of network ('a' or 'b')
+            network_type: Network identifier ('a' or 'b') for selecting the target network.
             threshold: Percentile threshold for selecting top nodes (default: 0.05 for top 5%)
 
         Returns:
-            Dictionary with keys 'a' and 'b', each containing a DataFrame of relevant nodes.
-            Each DataFrame has columns:
-            - 'node_id': node identifier
-            - 'metric': metric name without '_rank' suffix
-            - 'rank': re-computed dense rank position
-            - 'value': original metric value from micro_stats
-            - 'weight': computed weight using formula 10 / (rank ** 0.8)
-            - 'evidence_type': always 'sna'
+            DataFrame containing relevant nodes with columns:
+            - 'node_id': node identifier.
+            - 'metric': metric name without '_rank' suffix.
+            - 'original_rank': original rank from rankings data.
+            - 'recomputed_rank': re-computed dense rank position among relevant nodes.
+            - 'value': original metric value from micro_stats.
+            - 'weight': computed weight using formula 10 / (recomputed_rank ** 0.8).
+            - 'evidence_type': always 'sna'.
 
         Note:
-            - Lower rank values indicate higher centrality (rank 1 = most central)
-            - Weight calculation uses formula: 10.0 / (rank ** 0.8)
-            - Only nodes ranking in the top threshold percentile are included
-            - Processes all ranking columns ending with '_rank' from rankings data
+            - Lower rank values indicate higher centrality (rank 1 = most central).
+            - Weight calculation uses formula: 10.0 / (recomputed_rank ** 0.8).
+            - Only nodes ranking in the top threshold percentile are included.
+            - Processes all ranking columns ending with '_rank' from rankings data.
 
         Raises:
-            ValueError: If rankings or micro_stats for both networks are not available.
+            ValueError: If rankings or micro_stats for the specified network are not available.
         """
         # Make sure data is available
         if self.sna[f"rankings_{network_type}"] is None or self.sna[f"micro_stats_{network_type}"] is None:
@@ -678,9 +697,9 @@ class CoreSna:
 
         Returns:
             Network centralization value between 0 and 1, where:
-            - 0 indicates an evenly distributed network (all nodes have equal degree)
-            - 1 indicates a perfectly centralized network (star topology)
-            - Higher values suggest more centralized structure
+            - 0 indicates an evenly distributed network (all nodes have equal degree).
+            - 1 indicates a perfectly centralized network (star topology).
+            - Higher values suggest more centralized structure.
 
         Note:
             This implementation uses degree centrality as the basis for centralization.
@@ -722,17 +741,17 @@ class CoreSna:
         Returns:
             Base64-encoded SVG data URI of the network visualization.
             The visualization includes:
-            - Colored nodes (different colors for networks A and B)
-            - Black nodes for isolated vertices
-            - Reciprocal edges shown as undirected lines
-            - Non-reciprocal edges shown as directed arrows
-            - Node labels with white text
+            - Colored nodes (different colors for networks A and B).
+            - Black nodes for isolated vertices.
+            - Reciprocal edges shown as undirected lines.
+            - Non-reciprocal edges shown as directed arrows.
+            - Node labels with white text.
 
         Note:
-            - Uses Kamada-Kawai layout with special handling for isolated nodes
-            - Network A uses A_COLOR, Network B uses B_COLOR (from lib constants)
-            - Figure size is set to 17cm x 19cm
-            - Isolated nodes are positioned at the periphery using convex hull positioning
+            - Uses Kamada-Kawai layout with special handling for isolated nodes.
+            - Network A uses A_COLOR, Network B uses B_COLOR (from lib constants).
+            - Figure size is set to 17cm x 19cm.
+            - Isolated nodes are positioned at the periphery using convex hull positioning.
 
         Raises:
             KeyError: If the specified network_type is not found in self.sna.
@@ -798,21 +817,21 @@ class CoreSna:
             loc: Dictionary mapping node identifiers to their 2D coordinate positions.
 
         Returns:
-            Updated node layout dictionary with isolated nodes repositioned
+            Updated node layout dictionary with isolated nodes repositioned.
             at the periphery. Connected nodes retain their original positions.
 
         Algorithm:
-            1. Identifies isolated nodes using NetworkX
-            2. Computes convex hull around connected nodes
-            3. Places isolated nodes outside the hull in multiple rounds
-            4. Each round places nodes further from the center
-            5. Adds random offset to prevent overlapping
+            1. Identifies isolated nodes using NetworkX.
+            2. Computes convex hull around connected nodes.
+            3. Places isolated nodes outside the hull in multiple rounds.
+            4. Each round places nodes further from the center.
+            5. Adds random offset to prevent overlapping.
 
         Note:
-            - If no isolated nodes exist, returns the original layout unchanged
-            - Uses multiple rounds to handle cases with more isolated nodes than hull vertices
-            - Distance multiplier increases with each round (0.15 * round_number)
-            - Random offset range: ±0.05 in both x and y directions
+            - If no isolated nodes exist, returns the original layout unchanged.
+            - Uses multiple rounds to handle cases with more isolated nodes than hull vertices.
+            - Distance multiplier increases with each round (0.15 * round_number).
+            - Random offset range: ±0.05 in both x and y directions.
 
         Raises:
             ValueError: If convex hull computation fails (e.g., with < 3 connected nodes).
