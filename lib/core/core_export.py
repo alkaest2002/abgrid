@@ -132,6 +132,9 @@ class CoreExport:
         Returns:
             A JSON-serializable dictionary containing both group and SNA data with signatures.
         """
+        # Init json_data dictionary
+        json_data: dict[str, Any] = {}
+
         # Serialize group data and add signature
         serialized_group_data = CoreExport._to_json_encoders(data["group_data"])
         serialized_group_data["_signature"] = compute_hmac_signature(serialized_group_data)
@@ -140,11 +143,9 @@ class CoreExport:
         serialized_sna_data = CoreExport._to_json_encoders(data["sna_data"])
         serialized_sna_data["_signature"] = compute_hmac_signature(serialized_sna_data)
 
-        # Init dictionary
-        json_data: dict[str, Any] = {
-            "group_data":  serialized_group_data,
-            "sna_data": serialized_sna_data
-        }
+        # Add group and sna data to json_data
+        json_data["group_data"] = serialized_group_data
+        json_data["sna_data"] = serialized_sna_data
 
         return json_data
 
@@ -162,16 +163,17 @@ class CoreExport:
         Returns:
             A JSON-serializable dictionary containing the sociogram data with signature.
         """
+        # Init json_data dictionary
+        json_data: dict[str, Any] = {}
+
         # Serialize project data and add signature
         serialized_sociogram_data = CoreExport._to_json_encoders(data["sociogram_data"])
         serialized_sociogram_data["_signature"] = compute_hmac_signature(serialized_sociogram_data)
 
-        # Init dictionary
-        json_data: dict[str, Any] = serialized_sociogram_data
+        # Add sociogram data to json_data
+        json_data["sociogram_data"] = serialized_sociogram_data
 
-        return {
-            "sociogram_data": json_data
-        }
+        return json_data
 
     @staticmethod
     def to_json(report_data: dict[str, Any]) -> dict[str, Any]:
@@ -194,10 +196,10 @@ class CoreExport:
             A JSON-serializable dictionary with the same structure as the input,
             with all pandas/numpy/networkx objects converted to JSON-compatible formats.
         """
-        # Init dictionary
+        # Init json_datadictionary
         json_data: dict[str, Any] = {}
 
-        # Handle basic metadata fields with defaults
+        # Add group data to json_data
         json_data["year"] = report_data.get("year")
         json_data["project_title"] = report_data.get("project_title")
         json_data["question_a"] = report_data.get("question_a")
@@ -205,20 +207,20 @@ class CoreExport:
         json_data["group"] = report_data.get("group")
         json_data["group_size"] = report_data.get("group_size")
 
-        # Handle SNA data (complex nested structure)
+        # Add sna data to json_data
         json_data["sna"] = CoreExport._to_json_encoders(report_data.get("sna"))
 
-        # Handle sociogram data (optional, can be None)
+        # Add sociogram data
         json_data["sociogram"] = CoreExport._to_json_encoders(report_data.get("sociogram"))
 
-        # Handle relevant nodes data (nested DataFrames)
+        # Add relevant nodes data to json_data
         relevant_nodes = report_data.get("relevant_nodes", {})
         json_data["relevant_nodes"] = {
             "a": CoreExport._to_json_encoders(relevant_nodes.get("a", pd.DataFrame())),
             "b": CoreExport._to_json_encoders(relevant_nodes.get("b", pd.DataFrame()))
         }
 
-        # Handle isolated nodes data (pandas Index objects)
+        # Add isolated nodes data to json_data
         isolated_nodes = report_data.get("isolated_nodes", {})
         json_data["isolated_nodes"] = {
             "a": CoreExport._to_json_encoders(isolated_nodes.get("a", pd.Index([]))),
