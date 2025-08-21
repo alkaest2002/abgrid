@@ -85,17 +85,18 @@ class CoreData:
             # Compute Sociogram results from group choice data
             sociogram_data = abgrid_sociogram.get()
 
-        # Get isolated and relevant nodes
-        isolated_and_relevant_nodes = self._add_isolated_and_relevant_nodes(sna_data, sociogram_data, with_sociogram)
-
-        # Build and return the final report data output
-        return self._build_report_data_out(
+        # Get report data
+        report_data: dict[str, Any] = self._build_report_data_out(
             group_data,
             sna_data,
             sociogram_data,
-            isolated_and_relevant_nodes,
             with_sociogram
         )
+
+        # Validate and convert report data to ABGridReportSchemaOut
+        validated_report_data_out: ABGridReportSchemaOut = ABGridReportSchemaOut(**report_data)
+
+        return validated_report_data_out.model_dump()
 
     ##################################################################################################################
     #   MULTI STEP REPORT
@@ -177,17 +178,18 @@ class CoreData:
         sociogram_data = data["sociogram"]
         sociogram_data.pop("_signature", None)
 
-        # Get isolated and relevant nodes analysis
-        isolated_and_relevant_nodes = self._add_isolated_and_relevant_nodes(sna_data, sociogram_data, with_sociogram)
-
-        # Build and return the final report data output
-        return self._build_report_data_out(
+        # Get report data
+        report_data: dict[str, Any] = self._build_report_data_out(
             group_data,
             sna_data,
             sociogram_data,
-            isolated_and_relevant_nodes,
             with_sociogram
         )
+
+        # Validate and convert report data to ABGridReportSchemaOut
+        validated_report_data_out: ABGridReportSchemaOut = ABGridReportSchemaOut(**report_data)
+
+        return validated_report_data_out.model_dump()
 
     ##################################################################################################################
     #   PRIVATE METHODS
@@ -322,23 +324,21 @@ class CoreData:
             group_data: dict[str, Any],
             sna_data: dict[str, Any],
             sociogram_data: dict[str, Any],
-            isolated_and_relevant_nodes: dict[str, Any],
             with_sociogram: bool
             ) -> dict[str, Any]:
-        """Build and validate the final report data structure.
+        """Build the final report data structure.
 
         Args:
             group_data: Validated group data.
             sna_data: Computed SNA analysis results.
             sociogram_data: The computed sociogram analysis results (may be empty).
-            isolated_and_relevant_nodes: The processed isolated and relevant nodes analysis.
             with_sociogram: Whether to include sociogram data in the final output.
 
         Returns:
-            Dict containing the complete validated report data structure.
+            Dict containing the complete report data structure.
         """
-        # Prepare the comprehensive report data structure
-        report_data = {
+        # Return the comprehensive report data structure
+        return {
             "year": datetime.datetime.now(datetime.UTC).year,
             "project_title": group_data["project_title"],
             "question_a": group_data["question_a"],
@@ -347,10 +347,5 @@ class CoreData:
             "group_size": len(group_data["choices_a"]),
             "sna": sna_data,
             "sociogram": sociogram_data if with_sociogram else None,
-            **isolated_and_relevant_nodes
+            **self._add_isolated_and_relevant_nodes(sna_data, sociogram_data, with_sociogram)
         }
-
-        # Validate and convert report data to ABGridReportSchemaOut
-        validated_report_data_out: ABGridReportSchemaOut = ABGridReportSchemaOut(**report_data)
-
-        return validated_report_data_out.model_dump()
