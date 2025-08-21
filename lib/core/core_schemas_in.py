@@ -542,7 +542,7 @@ class ABGridReportMultiStepSchemaIn(BaseModel):
                 errors.append({
                     "location": field_name,
                     "value_to_blame": None,
-                    "error_message": "required_field_is_missing"
+                    "error_message": "field_is_required"
                 })
                 continue
 
@@ -560,7 +560,7 @@ class ABGridReportMultiStepSchemaIn(BaseModel):
                 errors.append({
                     "location": field_name,
                     "value_to_blame": str(field_value)[:100],
-                    "error_message": "signature_is_missing"
+                    "error_message": "signature_is_required"
                 })
                 continue
 

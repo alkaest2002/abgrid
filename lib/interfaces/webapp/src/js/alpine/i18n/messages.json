@@ -1,7 +1,7 @@
 {
     "it": {
         "common": {
-             "logo": {
+            "logo": {
                 "title": "AB-Grid",
                 "subtitle": "software per la generazione di report"
             }
@@ -32,27 +32,31 @@
             "members": "membri"
         },
         "pydanticErrors": {
-            "choice_must_be_a_single_key_value_pair": "ogni scelta deve essere una singola coppia 'chiave: valori'",
-            "choices_exceeds_availability_of_symbols": "le scelte superano la disponibilità dei simboli",
-            "duplicate_key_found": "chiave duplicata trovata",
+            "choice_must_be_a_single_key_value_pair": "le scelte di alcuni partecipanti non rispettano il formato previsto (- A: B,C)",
+            "choices_exceeds_availability_of_symbols": "numero eccessivo di partecipanti",
+            "duplicate_key_found": "elenco delle lettere (partecipanti) con ripetizioni",
             "field_cannot_be_empty": "il campo non può essere vuoto",
             "field_contains_invalid_characters": "il campo contiene caratteri non validi",
             "field_is_out_of_range": "il campo è fuori dal range consentito",
             "field_is_required": "il campo è obbligatorio",
             "field_is_too_long": "il campo è troppo lungo",
             "field_is_too_short": "il campo è troppo corto",
-            "field_must_be_a_list": "il campo deve essere una lista",
-            "field_must_be_a_string": "il campo deve essere una stringa",
-            "field_must_be_an_integer": "il campo deve essere un intero",
-            "key_cannot_be_present_in_its_own_values": "la chiave non può essere presente nei propri valori",
-            "key_must_be_a_single_alphabetic_character": "la chiave deve essere un singolo carattere alfabetico",
-            "keys_in_a_and_b_must_be_identical": "le chiavi in A e B devono essere identiche",
-            "too_many_nodes_have_empty_values": "scelte insufficienti",
-            "value_must_be_string_or_null": "il valore deve essere una stringa o non deve contenere nulla",
-            "value_must_contain_only_single_alphabetic_characters": "il valore deve contenere solo singoli caratteri alfabetici",
-            "values_contain_duplicates": "i valori contengono duplicati",
-            "values_list_too_long": "la lista dei valori è troppo lunga",
-            "values_reference_invalid_keys": "i valori contengono chiavi non valide"
+            "field_must_be_a_dictionary": "i dati di alcuni partecipanti non sono correttamente formattati",
+            "field_must_be_a_list": "il campo deve essere una lista di valori",
+            "field_must_be_a_string": "il campo contiene caratteri non validi",
+            "field_must_be_an_integer": "il campo deve essere un numero intero",
+            "key_cannot_be_present_in_its_own_values": "uno o più partecipanti hanno indicato sé stessi tra le scelte",
+            "key_must_be_a_single_alphabetic_character": "ogni partecipante deve essere associato a una singola lettera",
+            "keys_in_a_and_b_must_be_identical": "le lettere degli elenchi A e B non sono uguali",
+            "signature_is_invalid": "firma HMAC non valida",
+            "signature_is_missing": "firma HMAC non trovata",
+            "signature_verification_error": "errore nella verifica della firma HMAC",
+            "too_many_nodes_have_empty_values": "un numero eccessivo di partecipanti non ha espresso delle scelte",
+            "value_must_be_string_or_null": "scelte non valide",
+            "value_must_contain_only_single_alphabetic_characters": "scelte non valide",
+            "values_contain_duplicates": "alcune scelte dei partecipanti contengono duplicati",
+            "values_list_too_long": "alcuni partecipanti hanno espresso un numero eccessivo di scelte",
+            "values_reference_invalid_keys": "alcuni partecipanti hanno indicato lettere non valide"
         },
         "server": {
             "down": "server non raggiungibile",
