@@ -72,8 +72,7 @@ class SimpleRateLimiter:
         self.max_cache_size = max_cache_size
         self.skip_options = skip_options
 
-        self._cache: OrderedDict[str, tuple[float, int]] = OrderedDict()
-        # Use asyncio.Lock for FastAPI async compatibility
+        self._cache: OrderedDict[str, list[float]] = OrderedDict()
         self._lock: asyncio.Lock = asyncio.Lock()
 
     def __call__(self, func: Callable[..., Awaitable[Any]]) -> Callable[..., Awaitable[Any]]:
@@ -116,17 +115,19 @@ class SimpleRateLimiter:
         """
         Extract JWT token from request and create a unique cache key.
 
+        Groups all /api/* endpoints under a single rate limit per user.
+
         Args:
             request: HTTP request object with headers and url attributes.
 
         Returns:
-            Unique cache key string in format "rate_limit:{limiter_id}:{token_hash}:{path}".
+            Unique cache key string in format "rate_limit:{limiter_id}:{token_hash}:api" for API endpoints,
+            or "rate_limit:{limiter_id}:{token_hash}:{path}" for other endpoints.
 
         Raises:
             RateLimitError: If Authorization header is missing, malformed,
                                 or doesn't contain a Bearer token.
         """
-        # Set token max size
         # Extract JWT token
         token: str | None = self._extract_jwt_token(request)
 
@@ -150,9 +151,13 @@ class SimpleRateLimiter:
         token_hash: str = hashlib.sha256(token.encode("utf-8")).hexdigest()
 
         # Get request path
-        # path: str = getattr(getattr(request, "url", None), "path", "")  # noqa: ERA001
+        path: str = getattr(getattr(request, "url", None), "path", "")
 
-        return f"rate_limit:{self.limiter_id}:{token_hash}"
+        # Group all /api/* endpoints under a single rate limit
+        cache_path = "api" if path.startswith("/api") else path
+
+        return f"rate_limit:{self.limiter_id}:{token_hash}:{cache_path}"
+
 
     def _extract_jwt_token(self, request: Any) -> str | None:
         """
@@ -176,49 +181,33 @@ class SimpleRateLimiter:
         return token if token else None
 
     async def _check_rate_limit(self, key: str) -> None:
-        """
-        Asynchronously check if request exceeds rate limit and update counters.
-
-        Implements the sliding window algorithm with asyncio lock for thread safety
-        in FastAPI's async environment.
-
-        Args:
-            key: Unique cache key for the request.
-
-        Raises:
-            RateLimitError: When the rate limit is exceeded.
-        """
-        # Get current time
+        """Check if request exceeds rate limit using a true sliding window approach."""
         current_time: float = time.time()
 
-        # Async lock operation - non-blocking for FastAPI
         async with self._lock:
-
-            # User identified by key is found in cache
             if key in self._cache:
-                # Get time and count of found user key
-                window_start, count = self._cache[key]
+                # Get the list of request timestamps
+                timestamps = self._cache[key]
 
-                # If we're still in the same time window
-                if (current_time - window_start) < self.window_seconds:
-                    # If user hits limit
-                    if count >= self.limit:
-                        error_message = "requests_exceeded_rate_limit"
-                        raise RateLimitError(error_message)
+                # Remove timestamps outside the current window
+                cutoff_time = current_time - self.window_seconds
+                timestamps = [ts for ts in timestamps if ts > cutoff_time]
 
-                    # Increment request count for current window
-                    self._cache[key] = (window_start, count + 1)
-                else:
-                    # New time window - reset counter
-                    self._cache[key] = (current_time, 1)
+                # Check if we've exceeded the limit
+                if len(timestamps) >= self.limit:
+                    error_message = "requests_exceeded_rate_limit"
+                    raise RateLimitError(error_message)
 
-                # Move user to end for LRU cache behavior
+                # Add current request timestamp
+                timestamps.append(current_time)
+                self._cache[key] = timestamps
+
+                # Move to end for LRU
                 self._cache.move_to_end(key)
             else:
-                # If cache hits maximum capacity
+                # First request - manage cache size
                 if len(self._cache) >= self.max_cache_size:
-                    # Evict oldest entry (LRU eviction)
                     self._cache.popitem(last=False)
 
-                # First request for user identified by this key
-                self._cache[key] = (current_time, 1)
+                # Store first timestamp
+                self._cache[key] = [current_time]
