@@ -150,9 +150,9 @@ class SimpleRateLimiter:
         token_hash: str = hashlib.sha256(token.encode("utf-8")).hexdigest()
 
         # Get request path
-        path: str = getattr(getattr(request, "url", None), "path", "")
+        # path: str = getattr(getattr(request, "url", None), "path", "")  # noqa: ERA001
 
-        return f"rate_limit:{self.limiter_id}:{token_hash}:{path}"
+        return f"rate_limit:{self.limiter_id}:{token_hash}"
 
     def _extract_jwt_token(self, request: Any) -> str | None:
         """
