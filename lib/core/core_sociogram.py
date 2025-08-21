@@ -447,7 +447,7 @@ class CoreSociogram:
         micro_stats: pd.DataFrame = self.sociogram["micro_stats"]
         rankings: dict[str, pd.Series] = self.sociogram["rankings"]
 
-        # Init dict with empty sub-dicts for storing relevant nodes
+        # Init dicttionary with empty sub-dictionaries for storing relevant nodes
         relevant_nodes: dict[str, pd.DataFrame] = {"a": pd.DataFrame(), "b": pd.DataFrame()}
 
         # Process both positive (a) and negative (b) relevance directions
