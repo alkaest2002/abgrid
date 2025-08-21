@@ -119,24 +119,20 @@ class CoreExport:
 
 
     @staticmethod
-    def to_json_sna(project_data: dict[str, Any], sna_data: dict[str, Any]) -> dict[str, Any]:
+    def to_json_group_and_sna(group_data: dict[str, Any], sna_data: dict[str, Any]) -> dict[str, Any]:
         """
         Convert AB-Grid report data to a JSON-serializable format.
 
         Args:
-            project_data: The project data dictionary to convert
+            group_data: The project data dictionary to convert
             sna_data: The SNA data dictionary to convert
 
         Returns:
             A JSON-serializable dictionary with the same structure as the input
-
-        Note:
-            All keys are treated as optional and missing keys will result in None values
-            or appropriate empty defaults (empty DataFrames, empty lists, etc.)
         """
         # Serialize project data and add signature
-        serialized_project_data = CoreExport._to_json_encoders(project_data)
-        serialized_project_data["_signature"] = compute_hmac_signature(serialized_project_data)
+        serialized_group_data = CoreExport._to_json_encoders(group_data)
+        serialized_group_data["_signature"] = compute_hmac_signature(serialized_group_data)
 
         # Serialize SNA data and add signature
         serialized_sna_data = CoreExport._to_json_encoders(sna_data)
@@ -144,9 +140,29 @@ class CoreExport:
 
         # Init dictionary
         json_data: dict[str, Any] = {
-            "project":  serialized_project_data,
+            "group":  serialized_group_data,
             "sna": serialized_sna_data
         }
+
+        return json_data
+
+    @staticmethod
+    def to_json_sociogram(sociogram_data: dict[str, Any]) -> dict[str, Any]:
+        """
+        Convert AB-Grid report data to a JSON-serializable format.
+
+        Args:
+            sociogram_data: The sociogram data dictionary to convert
+
+        Returns:
+            A JSON-serializable dictionary with the same structure as the input
+        """
+        # Serialize project data and add signature
+        serialized_sociogram_data = CoreExport._to_json_encoders(sociogram_data)
+        serialized_sociogram_data["_signature"] = compute_hmac_signature(serialized_sociogram_data)
+
+        # Init dictionary
+        json_data: dict[str, Any] = serialized_sociogram_data
 
         return json_data
 
@@ -160,10 +176,6 @@ class CoreExport:
 
         Returns:
             A JSON-serializable dictionary with the same structure as the input
-
-        Note:
-            All keys are treated as optional and missing keys will result in None values
-            or appropriate empty defaults (empty DataFrames, empty lists, etc.)
         """
         # Init dictionary
         json_data: dict[str, Any] = {}

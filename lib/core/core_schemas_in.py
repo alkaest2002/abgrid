@@ -121,7 +121,7 @@ class ABGridReportMultiStepSchemaIn(BaseModel):
         - All fields typed as Any for custom validation.
     """
 
-    project: dict[str, Any]
+    group: dict[str, Any]
     sna: dict[str, Any]
     sociogram: dict[str, Any]
 
@@ -142,7 +142,7 @@ class ABGridReportMultiStepSchemaIn(BaseModel):
         errors = []
 
         # Validate each field
-        for field_name in ["project", "sna", "sociogram"]:
+        for field_name in ["group", "sna", "sociogram"]:
             field_value = data.get(field_name)
 
             # Check if field exists

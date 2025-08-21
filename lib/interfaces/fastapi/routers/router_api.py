@@ -130,9 +130,9 @@ def get_router_api() -> APIRouter:
             )
 
 
-    @router.post("/sna")
+    @router.post("/group_and_sna")
     @SimpleRateLimiter(limit=1, window_seconds=15)
-    async def create_sna(
+    async def create_group_and_sna(
         request: Request,
         model: ABGridReportSchemaIn,
         user_data: dict[str, Any] = Depends(_auth.verify_token)
@@ -145,7 +145,7 @@ def get_router_api() -> APIRouter:
 
         Args:
             request: The HTTP request object (used by rate limiter)
-            model: Report data schema containing all analysis parameters
+            model: Report schema containing collected survey data
             user_data: Authenticated user data from JWT token verification
 
         Returns:
@@ -166,14 +166,14 @@ def get_router_api() -> APIRouter:
 
             # Data computation
             project_sna_data: dict[str, Any] = await asyncio.to_thread(
-                _abgrid_data.get_project_sna_data,
+                _abgrid_data.get_group_and_sna_data,
                 model,
             )
 
             # JSON serialization
             project_sna_json = await asyncio.to_thread(
-                CoreExport.to_json_sna,
-                project_sna_data["project"],
+                CoreExport.to_json_group_and_sna,
+                project_sna_data["group"],
                 project_sna_data["sna"]
             )
 
@@ -181,6 +181,71 @@ def get_router_api() -> APIRouter:
                 status_code=status.HTTP_200_OK,
                 content={
                     "detail": project_sna_json
+                }
+            )
+
+        except ValueError:
+            return JSONResponse(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                content={"detail": "invalid_report_data"}
+            )
+        except Exception:
+            return JSONResponse(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                content={"detail": "failed_to_generate_report"}
+            )
+
+
+    @router.post("/sociogram")
+    @SimpleRateLimiter(limit=1, window_seconds=15)
+    async def create_sociogram(
+        request: Request,
+        model: ABGridReportSchemaIn,
+        user_data: dict[str, Any] = Depends(_auth.verify_token)
+    ) -> JSONResponse:
+        """
+        Generate comprehensive analysis report based on provided data.
+
+        This endpoint processes the report schema and generates both HTML and JSON
+        formatted reports, optionally including sociogram visualizations.
+
+        Args:
+            request: The HTTP request object (used by rate limiter)
+            model: Report schema containing collected survey data
+            user_data: Authenticated user data from JWT token verification
+
+        Returns:
+            JSONResponse: Success response with rendered HTML report and JSON data
+                        containing "report_html" with the rendered template and
+                        "report_json" with the structured data
+
+        Status Codes:
+            200: Report generated successfully
+            401: Authentication token invalid or missing
+            429: Rate limit exceeded (1 request per 15 seconds)
+            500: Report generation failed or internal server error
+
+        Rate Limiting:
+            Limited to 1 request per 15 seconds per client due to computational intensity
+        """
+        try:
+
+            # Data computation
+            sociogram_data: dict[str, Any] = await asyncio.to_thread(
+                _abgrid_data.get_sociogram_data,
+                model,
+            )
+
+            # JSON serialization
+            sociogram_json = await asyncio.to_thread(
+                CoreExport.to_json_sociogram,
+                sociogram_data
+            )
+
+            return JSONResponse(
+                status_code=status.HTTP_200_OK,
+                content={
+                    "detail": sociogram_json
                 }
             )
 
@@ -213,7 +278,7 @@ def get_router_api() -> APIRouter:
 
         Args:
             request: The HTTP request object (used by rate limiter)
-            model: Report data schema containing all analysis parameters
+            model: Report schema containing collected survey data
             language: Language code for report template
             with_sociogram: Whether to include sociogram visualization in the report
             user_data: Authenticated user data from JWT token verification

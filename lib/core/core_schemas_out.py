@@ -10,15 +10,15 @@ from pydantic import BaseModel
 
 
 class ABGridGroupSchemaOut(BaseModel):
-    """Output schema for group data.
+    """Output schema for Group data.
 
     Contains basic group information extracted from ABGridGroupSchemaIn
     with processed member symbols for display and validation.
 
     Attributes:
-        project_title: Title of the AB-Grid project.
-        question_a: Text of question A from the project .
-        question_b: Text of question B from the project .
+        project_title: Title of the project.
+        question_a: Text of question A from the project.
+        question_b: Text of question B from the project.
         group: Group identifier.
         members: List of member symbols (A, B, C, etc.) based on group size.
     """
@@ -32,16 +32,16 @@ class ABGridGroupSchemaOut(BaseModel):
         "extra": "forbid"
     }
 
-class ABGridSnaSchemaOut(BaseModel):
-    """Output schema for comprehensive report data.
+class ABGridGroupAndSnaSchemaOut(BaseModel):
+    """Output schema for Group and SNA data.
 
-    Contains Project data and SNA analys (first step of multistep report generation).
+    Contains Group data and SNA analysis (first step of multistep report generation).
 
     Attributes:
-        project: Project data.
-        sna: Complete social network analysis results.
+        group: Group data.
+        sna: SNA Social network analysis results.
     """
-    project: dict[str, Any]
+    group: dict[str, Any]
     sna: dict[str, Any]
 
     model_config = {
@@ -49,11 +49,23 @@ class ABGridSnaSchemaOut(BaseModel):
         "extra": "forbid"
     }
 
-class ABGridReportSchemaOut(BaseModel):
-    """Output schema for comprehensive report data.
+class ABGridSociogramSchemaOut(BaseModel):
+    """Output schema for Sociogram data.
 
-    Contains complete analysis results including project metadata, network
-    analysis, sociogram data (optional), relevant nodes, and isolated nodes.
+    Contains Group data and SNA analysis (first step of multistep report generation).
+
+    Attributes:
+        sociogram: Sociogram analysis results.
+    """
+    sociogram: dict[str, Any]
+
+    model_config = {
+        "arbitrary_types_allowed": True,
+        "extra": "forbid"
+    }
+
+class ABGridReportSchemaOut(BaseModel):
+    """Output schema for Report data.
 
     Attributes:
         year: Current year when report was generated.
