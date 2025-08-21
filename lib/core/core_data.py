@@ -70,7 +70,7 @@ class CoreData:
         abgrid_sna: CoreSna = CoreSna(validated_survey_data.choices_a, validated_survey_data.choices_b)
 
         # Compute SNA results from group choice data
-        sna_results: dict[str, Any] = abgrid_sna.get()
+        sna_data: dict[str, Any] = abgrid_sna.get()
 
         # Compute Sociogram results if requested
         if with_sociogram:
@@ -79,41 +79,41 @@ class CoreData:
             abgrid_sociogram: CoreSociogram = CoreSociogram(validated_survey_data.choices_a, validated_survey_data.choices_b)
 
             # Compute Sociogram results from group choice data
-            sociogram_results: dict[str, Any] = abgrid_sociogram.get()
+            sociogram_data: dict[str, Any] = abgrid_sociogram.get()
 
         # Get isolated and relevat nodes
-        isolated_and_relevant_nodes = self._add_isolated_and_relevant_nodes(sna_results, sociogram_results, with_sociogram)
+        isolated_and_relevant_nodes = self._add_isolated_and_relevant_nodes(sna_data, sociogram_data, with_sociogram)
 
         # Build and return the final report data output
         return self._build_report_data_out(
             survey_data,
-            sna_results,
-            sociogram_results,
+            sna_data,
+            sociogram_data,
             isolated_and_relevant_nodes,
             with_sociogram
         )
 
     def _add_isolated_and_relevant_nodes(
         self,
-        sna_results: dict[str, Any],
-        sociogram_results: dict[str, Any],
+        sna_data: dict[str, Any],
+        sociogram_data: dict[str, Any],
         with_sociogram: bool
     ) -> dict[str, Any]:
         """Prepare the final report output with isolated nodes, relevant nodes, and validation.
 
         Args:
-            sna_results: Results from SNA analysis
-            sociogram_results: Results from Sociogram analysis
+            sna_data: Results from SNA analysis
+            sociogram_data: Results from Sociogram analysis
             with_sociogram: Whether to include sociogram analysis
 
         Returns:
             Dict containing the validated report data output
         """
         # Extract data from SNA results
-        sna_isolated_a = sna_results["isolated_nodes_a"]
-        sna_isolated_b = sna_results["isolated_nodes_b"]
-        sna_relevant_a = sna_results["relevant_nodes_a"]
-        sna_relevant_b = sna_results["relevant_nodes_b"]
+        sna_isolated_a = sna_data["isolated_nodes_a"]
+        sna_isolated_b = sna_data["isolated_nodes_b"]
+        sna_relevant_a = sna_data["relevant_nodes_a"]
+        sna_relevant_b = sna_data["relevant_nodes_b"]
 
         # Prepare isolated nodes
         isolated_nodes_model: ABGridIsolatedNodesSchema = ABGridIsolatedNodesSchema(
@@ -138,7 +138,7 @@ class CoreData:
         # If sociogram analysis is included
         if with_sociogram:
             # Extract relevant nodes from sociogram results
-            sociogram_relevant = sociogram_results["relevant_nodes"]
+            sociogram_relevant = sociogram_data["relevant_nodes"]
             sociogram_relevant_a = sociogram_relevant["a"]
             sociogram_relevant_b = sociogram_relevant["b"]
 
@@ -213,8 +213,8 @@ class CoreData:
 
     def _build_report_data_out(self,
             survey_data: dict[str, Any],
-            sna_results: dict[str, Any],
-            sociogram_results: dict[str, Any],
+            sna_data: dict[str, Any],
+            sociogram_data: dict[str, Any],
             isolated_and_relevant_nodes: dict[str, Any],
             with_sociogram: bool
             ) -> dict[str, pd.DataFrame]:
@@ -222,8 +222,8 @@ class CoreData:
 
         Args:
             survey_data: The survey data.
-            sna_results: The SNA results.
-            sociogram_results: The sociogram results.
+            sna_data: The SNA results.
+            sociogram_data: The sociogram results.
             isolated_and_relevant_nodes: The isolated and relevant nodes.
             with_sociogram: Whether to include sociogram data.
 
@@ -238,8 +238,8 @@ class CoreData:
             "question_b": survey_data["question_b"],
             "group": survey_data["group"],
             "group_size": len(survey_data["choices_a"]),
-            "sna": sna_results,
-            "sociogram": sociogram_results if with_sociogram else None,
+            "sna": sna_data,
+            "sociogram": sociogram_data if with_sociogram else None,
             **isolated_and_relevant_nodes
         }
 
