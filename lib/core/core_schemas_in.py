@@ -192,6 +192,7 @@ class ABGridReportMultiStepSchemaIn(BaseModel):
 
         return data
 
+
 class ABGridReportSchemaIn(BaseModel):
     """Input schema for AB-Grid report data.
 
