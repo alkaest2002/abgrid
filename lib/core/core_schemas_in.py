@@ -158,7 +158,7 @@ class ABGridReportMultiStepSchemaIn(BaseModel):
             if not isinstance(field_value, dict):
                 errors.append({
                     "location": field_name,
-                    "value_to_blame": str(field_value)[:10],
+                    "value_to_blame": str(field_value)[:100],
                     "error_message": "field_must_be_a_dictionary"
                 })
                 continue
@@ -167,7 +167,7 @@ class ABGridReportMultiStepSchemaIn(BaseModel):
             if "_signature" not in field_value:
                 errors.append({
                     "location": field_name,
-                    "value_to_blame": str(field_value)[:10],
+                    "value_to_blame": str(field_value)[:100],
                     "error_message": "signature_is_missing"
                 })
                 continue
@@ -183,7 +183,7 @@ class ABGridReportMultiStepSchemaIn(BaseModel):
             except Exception:
                 errors.append({
                     "location": field_name,
-                    "value_to_blame": str(field_value),
+                    "value_to_blame": str(field_value)[:100],
                     "error_message": "signature_verification_error"
                 })
 
