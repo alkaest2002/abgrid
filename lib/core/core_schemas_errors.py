@@ -21,7 +21,8 @@ class PydanticValidationError(Exception):
 
         Args:
             errors: List of validation error dictionaries. Each dictionary
-                contains 'location', 'value_to_blame', and 'error_message' keys.
+                should contain 'location', 'value_to_blame', and 'error_message' keys.
+                Only 'location' and 'error_message' are used for the exception message.
         """
         self.errors = errors
         error_message = [f"{error['location']}: {error['error_message']}" for error in errors]
