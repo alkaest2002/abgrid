@@ -31,16 +31,18 @@ if TYPE_CHECKING:
 
 class CoreSociogram:
     """
-    Analyzes and visualizes social networks by constructing sociometric components including macro/micro statistics,node rankings, and polar graph visualizations.
+    Analyzes and visualizes social networks by constructing sociometric components including macro/micro statistics, node rankings, and circular polar graph visualizations.
 
     This class provides comprehensive sociometric analysis capabilities including:
     - Macro-level network statistics (cohesion and conflict indices)
     - Micro-level node statistics (centrality measures, sociometric status classification)
     - Node rankings based on various centrality metrics and status
     - Identification of most/least relevant nodes for positive/negative outcomes
-    - Polar visualization of activity and integration index distributions
+    - Circular polar visualization of activity and integration index distributions with radial arrangement
 
     Attributes:
+        packed_edges_a: List of packed edge data for positive relationships (network A).
+        packed_edges_b: List of packed edge data for negative relationships (network B).
         sna: Social network analysis data containing NetworkX graphs and adjacency matrices.
         sociogram: Dictionary containing all computed sociogram data and visualizations.
     """
@@ -48,15 +50,13 @@ class CoreSociogram:
             packed_edges_a: list[dict[str, str | None]],
             packed_edges_b: list[dict[str, str | None]]) -> None:
         """
-        Initialize the CoreSociogram instance.
-
-        Sets up internal data structures for storing social network analysis data
-        and computed sociogram results.
+        Initialize the CoreSociogram instance with packed edge data for both networks.
 
         Args:
-            packed_edges_a: List of packed edges for group A
-            packed_edges_b: List of packed edges for group B
-
+            packed_edges_a: List of dictionaries containing edge data for positive relationships.
+                Each dictionary should contain source and target node identifiers.
+            packed_edges_b: List of dictionaries containing edge data for negative relationships.
+                Each dictionary should contain source and target node identifiers.
         """
         # Store packed edges for later use
         self.packed_edges_a = packed_edges_a
@@ -70,12 +70,13 @@ class CoreSociogram:
 
     def get(self) -> dict[str, Any]:
         """
-        Synchronous wrapper for the async get_async method.
+        Compute comprehensive sociogram analysis and return validated results.
 
-        Compute and store comprehensive sociogram analysis from social network data.
+        Runs the complete sociogram analysis pipeline asynchronously, then validates
+        the results using Pydantic schema validation before returning.
 
         Returns:
-            A dictionary containing complete sociogram analysis with the following structure:
+            A validated dictionary containing complete sociogram analysis with the following structure:
                 - "macro_stats": Series of network-level cohesion and conflict indices
                 - "micro_stats": DataFrame of individual-level statistics and ranks for each node
                 - "descriptives": DataFrame with aggregated descriptive statistics
@@ -83,7 +84,6 @@ class CoreSociogram:
                 - "graph_ii": Base64-encoded SVG string of integration index polar visualization
                 - "graph_ai": Base64-encoded SVG string of activity index polar visualization
                 - "relevant_nodes": Dictionary with most/least relevant nodes for positive/negative outcomes
-
         """
         # Get data
         data = asyncio.run(self._get_async())
@@ -161,14 +161,14 @@ class CoreSociogram:
 
     def _get_sync(self) -> dict[str, Any]:
         """
-        Synchronous wrapper for the async get_async method.
+        Synchronously compute comprehensive sociogram analysis from social network data.
 
-        Compute and store comprehensive sociogram analysis from social network data.
+        Executes all computation steps sequentially without async concurrency.
+        Used internally as a fallback synchronous implementation.
 
         Returns:
             A dictionary containing complete sociogram analysis with all computed metrics,
             statistics, rankings, and visualizations.
-
         """
         # Create networks first
         self._create_networks()
@@ -186,9 +186,11 @@ class CoreSociogram:
 
     def _create_networks(self) -> None:
         """
-        Create networks with nodes, edges, and adjacency matrices.
+        Create NetworkX directed graphs from packed edge data and generate adjacency matrices.
 
-        Performs the actual work of network creation from the packed edges data.
+        Unpacks the stored edge data to create separate networks for positive (A) and negative (B)
+        relationships, adds any isolated nodes, and generates pandas adjacency matrices for
+        mathematical operations.
         """
         # Set network data
         network_edges: list[tuple[Literal["a", "b"], Any]] = [
@@ -304,7 +306,6 @@ class CoreSociogram:
                 - "ii": Integration index (rp + mp)
                 - "st": Sociometric status classification (categorical)
                 - "*_rank": Dense ranking for each numeric metric and status (lower rank = better)
-
         """
         # Retrieve network graphs and adjacency matrices
         network_a: nx.DiGraph = self.sna["network_a"]  # type: ignore[type-arg]
@@ -365,7 +366,6 @@ class CoreSociogram:
         Returns:
             A DataFrame containing descriptive statistics (median, mean, std, IQR, sum, etc.)
             for all numeric columns in the micro-level statistics DataFrame.
-
         """
         # Select only non-rank numeric columns for statistical aggregation
         sociogram_numeric_columns: pd.DataFrame = (
@@ -432,17 +432,16 @@ class CoreSociogram:
             Each DataFrame has columns:
             - 'node_id': node identifier
             - 'metric': metric name without '_rank' suffix
-            - 'rank': re-computed dense rank position, ascending for 'a', descending for 'b'
+            - 'original_rank': original rank position from micro_stats rankings
+            - 'recomputed_rank': re-computed dense rank position, ascending for 'a', descending for 'b'
             - 'value': original metric value from micro_stats
-            - 'weight': computed weight using formula 10 / (rank ** 0.8)
+            - 'weight': computed weight using formula 10 / (recomputed_rank ** 0.8)
             - 'evidence_type': always 'sociogram'
 
         Note:
             - For valence 'a': selects nodes with ranks <= threshold quantile (best performers)
             - For valence 'b': selects nodes with ranks >= (1-threshold) quantile (worst performers)
-            - Weight calculation uses formula: 10.0 / (rank ** 0.8)
             - Processes all ranking columns ending with '_rank' from sociogram rankings
-
         """
         # Select micro_stats and rankings to use
         micro_stats: pd.DataFrame = self.sociogram["micro_stats"]
@@ -665,11 +664,11 @@ class CoreSociogram:
 
     def _create_graph(self, coefficient: Literal["ai", "ii"]) -> str:
         """
-        Generate a polar visualization of node distribution based on centrality coefficients.
+        Generate a circular polar visualization of node distribution based on centrality coefficients.
 
-        Creates a circular (polar) plot showing the spatial distribution of nodes based on their
-        scores in the specified centrality coefficient. Nodes are arranged in concentric circles
-        with groups determined by coefficient values, and jitter is applied to reduce overlap.
+        Creates a polar plot showing nodes arranged radially by their centrality scores. Values are
+        normalized to [0,1] and inverted so high-scoring nodes appear near the center. Nodes are
+        grouped by coefficient value and distributed angularly with jitter to reduce overlap.
 
         Args:
             coefficient: The centrality coefficient to visualize. Must be either:
@@ -678,9 +677,9 @@ class CoreSociogram:
 
         Returns:
             A base64-encoded SVG string representing the polar sociogram visualization.
-            The plot shows nodes as scatter points with labels, arranged radially with
-            groups organized by score levels and angular jitter applied to reduce overlap.
-
+            The plot shows nodes as labeled scatter points arranged in concentric circles,
+            with high-value nodes near the center and groups organized radially with
+            angular jitter applied to reduce overlap.
         """
         # Extract values for the specified centrality coefficient
         data: pd.DataFrame = self.sociogram["micro_stats"].loc[:, [coefficient]].copy()
