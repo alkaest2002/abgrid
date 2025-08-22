@@ -18,8 +18,7 @@ settings: Settings = Settings.load()
 
 
 class RequestProtectionMiddleware(BaseHTTPMiddleware):
-    """
-    Middleware to protect against request-based attacks and resource exhaustion.
+    """Middleware to protect against request-based attacks and resource exhaustion.
 
     This middleware provides comprehensive request protection by implementing:
     - Request timeout enforcement for all incoming requests

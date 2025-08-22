@@ -17,8 +17,7 @@ from fastapi.responses import JSONResponse
 
 
 class QueryParamLimitMiddleware(BaseHTTPMiddleware):
-    """
-    Aggressive middleware for closed API server query parameter validation.
+    """Aggressive middleware for closed API server query parameter validation.
 
     This middleware provides strict validation for a closed API that only accepts:
     - language: Always required (e.g., 'it' for Italian)

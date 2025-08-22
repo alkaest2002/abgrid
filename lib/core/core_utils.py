@@ -26,8 +26,7 @@ settings = Settings.load()
 T = TypeVar("T")
 
 async def run_in_executor[T](func: Callable[..., T], *args: Any) -> T:
-    """
-    Run a synchronous function in a thread pool executor.
+    """Run a synchronous function in a thread pool executor.
 
     This allows CPU-bound synchronous functions to run without blocking
     the asyncio event loop.
@@ -43,8 +42,7 @@ async def run_in_executor[T](func: Callable[..., T], *args: Any) -> T:
     return await loop.run_in_executor(None, func, *args)
 
 def unpack_network_edges(packed_edges: list[dict[str, str | None]]) -> list[tuple[str, str]]:
-    """
-    Unpack edge dictionaries into a list of directed edge tuples.
+    """Unpack edge dictionaries into a list of directed edge tuples.
 
     Takes a list of dictionaries where each dictionary represents outgoing edges
     from source nodes, and converts them into a flat list of (source, target) tuples.
@@ -70,8 +68,7 @@ def unpack_network_edges(packed_edges: list[dict[str, str | None]]) -> list[tupl
     )
 
 def unpack_network_nodes(packed_edges: list[dict[str, str | None]]) -> list[str]:
-    """
-    Extract unique source nodes from packed edge dictionaries.
+    """Extract unique source nodes from packed edge dictionaries.
 
     Args:
         packed_edges: List of dictionaries where keys represent source nodes.
@@ -82,8 +79,7 @@ def unpack_network_nodes(packed_edges: list[dict[str, str | None]]) -> list[str]
     return sorted([node for node_edges in packed_edges for node in node_edges])
 
 def figure_to_base64_svg(fig: Figure) -> str:
-    """
-    Convert a matplotlib figure to a base64-encoded SVG string for web embedding.
+    """Convert a matplotlib figure to a base64-encoded SVG string for web embedding.
 
     Takes a matplotlib figure object and converts it to a base64-encoded SVG format
     suitable for embedding in HTML documents or web applications. The figure is
@@ -116,8 +112,7 @@ def figure_to_base64_svg(fig: Figure) -> str:
     return f"data:image/svg+xml;base64,{base64_encoded_string}"
 
 def compute_descriptives(data: pd.DataFrame) -> pd.DataFrame:
-    """
-    Compute comprehensive descriptive statistics for numerical data.
+    """Compute comprehensive descriptive statistics for numerical data.
 
     Calculates a wide range of descriptive statistics including central tendency,
     dispersion, distribution shape, and inequality measures. Extends pandas'
@@ -156,8 +151,7 @@ def compute_descriptives(data: pd.DataFrame) -> pd.DataFrame:
     )
 
 def gini_coefficient(values: pd.Series) -> float:
-    """
-    Calculate the Gini coefficient for measuring inequality in a distribution.
+    """Calculate the Gini coefficient for measuring inequality in a distribution.
 
     Computes the Gini coefficient, a measure of inequality ranging from 0 (perfect equality)
     to 1 (maximum inequality). The calculation uses the standard formula and handles
@@ -202,8 +196,7 @@ def gini_coefficient(values: pd.Series) -> float:
     return gini
 
 def compute_hmac_signature(json_data: dict[str, Any]) -> str:
-    """
-    Compute an HMAC-SHA256 signature for JSON data using the application secret key.
+    """Compute an HMAC-SHA256 signature for JSON data using the application secret key.
 
     Creates a cryptographic signature for integrity verification and authentication.
     The JSON data is serialized with sorted keys for consistent signing across
@@ -232,8 +225,7 @@ def compute_hmac_signature(json_data: dict[str, Any]) -> str:
     ).hexdigest()
 
 def verify_hmac_signature(json_data: dict[str, Any]) -> bool:
-    """
-    Verify the HMAC signature of JSON data against the expected signature.
+    """Verify the HMAC signature of JSON data against the expected signature.
 
     Extracts the signature from the "_signature" key, recomputes the expected
     signature for the remaining data, and performs a secure comparison.

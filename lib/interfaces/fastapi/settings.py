@@ -11,8 +11,7 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
 class Settings(BaseSettings):
-    """
-    Application settings configuration using Pydantic BaseSettings.
+    """Application settings configuration using Pydantic BaseSettings.
 
     This class manages application configuration by loading settings from
     environment variables and .env files. It provides type validation,

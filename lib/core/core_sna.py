@@ -26,8 +26,7 @@ from lib.core.core_utils import (
 
 
 class CoreSna:
-    """
-    A class for comprehensive social network analysis on directed graphs.
+    """A class for comprehensive social network analysis on directed graphs.
 
     Provides functionality to analyze two directed networks (A and B) simultaneously,
     computing various network metrics, statistics, and visualizations. Supports comparative
@@ -43,8 +42,7 @@ class CoreSna:
     def __init__(self,
             packed_edges_a: list[dict[str, str | None]],
             packed_edges_b: list[dict[str, str | None]]) -> None:
-        """
-        Initialize the social network analysis object.
+        """Initialize the social network analysis object.
 
         Sets up an internal dictionary for storing SNA data
         for both networks A and B, with all values initially set to None.
@@ -62,8 +60,7 @@ class CoreSna:
         self.sna: dict[str, Any] = {}
 
     def get(self) -> dict[str, Any]:
-        """
-        Compute and return comprehensive network analysis for two directed networks.
+        """Compute and return comprehensive network analysis for two directed networks.
 
         Runs the asynchronous analysis pipeline and validates the results against
         the ABGridSNASchema before returning.
@@ -87,8 +84,7 @@ class CoreSna:
     ##################################################################################################################
 
     async def _get_async(self) -> dict[str, Any]:
-        """
-        Asynchronously compute and store comprehensive network analysis for two directed networks.
+        """Asynchronously compute and store comprehensive network analysis for two directed networks.
 
         Performs a complete social network analysis on input networks using concurrent execution
         where possible, including graph construction, statistical analysis, centrality measures,
@@ -170,8 +166,7 @@ class CoreSna:
         return self.sna
 
     def _get_sync(self) -> dict[str, Any] :
-        """
-        Synchronously compute comprehensive network analysis for two directed networks.
+        """Synchronously compute comprehensive network analysis for two directed networks.
 
         Performs the same analysis as _get_async() but without concurrent execution.
         Used as a fallback or for testing purposes.
@@ -198,8 +193,7 @@ class CoreSna:
         return self.sna
 
     def _create_networks(self) -> None:
-        """
-        Create networks with nodes, edges, adjacency matrices, and layout positions.
+        """Create networks with nodes, edges, adjacency matrices, and layout positions.
 
         Unpacks the stored packed edges to create NetworkX directed graphs for both
         networks A and B. Adds isolated nodes, generates layout positions using
@@ -250,8 +244,7 @@ class CoreSna:
             self.sna[f"adjacency_{network_type}"] = nx.to_pandas_adjacency(network, nodelist=nodes)
 
     def _compute_macro_stats(self, network_type: Literal["a", "b"]) -> pd.Series:
-        """
-        Calculate macro-level network statistics.
+        """Calculate macro-level network statistics.
 
         Computes network-wide metrics including structural properties, centralization,
         and relationship patterns for the specified network.
@@ -307,8 +300,7 @@ class CoreSna:
         })
 
     def _compute_micro_stats(self, network_type: Literal["a", "b"]) -> pd.DataFrame:
-        """
-        Calculate node-level (micro) statistics for the specified network.
+        """Calculate node-level (micro) statistics for the specified network.
 
         Computes various centrality measures and node properties for each node
         in the network, including degree-based and path-based centralities.
@@ -384,8 +376,7 @@ class CoreSna:
         )
 
     def _compute_descriptives(self, network_type: Literal["a", "b"]) -> pd.DataFrame:
-        """
-        Compute descriptive statistics for centrality measures.
+        """Compute descriptive statistics for centrality measures.
 
         Generates summary statistics (mean, std, min, max, etc.) for the main
         centrality measures of the specified network.
@@ -415,8 +406,7 @@ class CoreSna:
         return compute_descriptives(sna_numeric_columns)
 
     def _compute_rankings(self, network_type: Literal["a", "b"]) -> dict[str, pd.Series]:
-        """
-        Generate node rankings based on centrality measures.
+        """Generate node rankings based on centrality measures.
 
         Creates ordered rankings of nodes for each centrality metric, where
         nodes are sorted by their rank scores in ascending order.
@@ -451,8 +441,7 @@ class CoreSna:
         return rankings
 
     def _compute_edges_types(self, network_type: Literal["a", "b"]) -> Any:
-        """
-        Classify edges into five types based on reciprocity patterns within the same network.
+        """Classify edges into five types based on reciprocity patterns within the same network.
 
         Analyzes edge patterns within the specified network to classify edges into
         five distinct types based on reciprocity relationships.
@@ -526,8 +515,7 @@ class CoreSna:
         }
 
     def _compute_components(self, network_type: Literal["a", "b"]) -> dict[str, pd.Series]:
-        """
-        Identify and extract significant network components.
+        """Identify and extract significant network components.
 
         Finds various types of network components (cliques, strongly connected components,
         weakly connected components) and returns them as concatenated node strings.
@@ -584,8 +572,7 @@ class CoreSna:
         return components
 
     def _compute_isolated_nodes(self, network_type: Literal["a", "b"]) -> Any:
-        """
-        Identify isolated nodes in the specified network.
+        """Identify isolated nodes in the specified network.
 
         Isolated nodes are those with no incoming or outgoing edges (degree 0).
 
@@ -605,8 +592,7 @@ class CoreSna:
         return pd.Index([n for n, d in network.degree() if d == 0])
 
     def _compute_relevant_nodes(self, network_type: Literal["a", "b"], threshold: float = 0.05) -> pd.DataFrame:
-        """
-        Find nodes that rank highly in centrality measures for the specified network.
+        """Find nodes that rank highly in centrality measures for the specified network.
 
         Identifies nodes that rank in the top percentile for various centrality metrics
         and computes relevance scores and weights for each node-metric combination.
@@ -684,8 +670,7 @@ class CoreSna:
         return relevant_nodes
 
     def _compute_network_centralization(self, network: nx.Graph) -> float:  # type: ignore[type-arg]
-        """
-        Calculate the degree centralization of an undirected network.
+        """Calculate the degree centralization of an undirected network.
 
         Centralization measures how concentrated the network structure is around
         its most central node, comparing the actual network to a perfect star network.
@@ -729,8 +714,7 @@ class CoreSna:
         return network_centralization
 
     def _create_graph(self, network_type: Literal["a","b"]) -> str:
-        """
-        Generate an SVG visualization of the specified network.
+        """Generate an SVG visualization of the specified network.
 
         Creates a matplotlib-based network visualization with nodes, edges, and labels,
         then converts it to a base64-encoded SVG string for web display.
@@ -806,8 +790,7 @@ class CoreSna:
         return figure_to_base64_svg(fig)
 
     def _handle_isolated_nodes_in_graph(self, network: nx.DiGraph, loc: dict[str, np.ndarray]) -> dict[str, np.ndarray]: # type: ignore[type-arg]
-        """
-        Position isolated nodes at the periphery of the network layout.
+        """Position isolated nodes at the periphery of the network layout.
 
         Adjusts the positions of isolated nodes to appear outside the convex hull
         of connected nodes, making them visually distinct and marginal in the layout.

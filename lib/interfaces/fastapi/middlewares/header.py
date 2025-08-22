@@ -15,8 +15,7 @@ from fastapi.responses import JSONResponse
 
 
 class HeaderSizeLimitMiddleware(BaseHTTPMiddleware):
-    """
-    Middleware to limit HTTP header sizes and ensure JSON content for POST requests.
+    """Middleware to limit HTTP header sizes and ensure JSON content for POST requests.
 
     This middleware inspects all incoming request headers and:
     1. Rejects requests where any individual header value exceeds the size limit

@@ -19,8 +19,7 @@ class CoreExport:
 
     @staticmethod
     def _to_json_encoders(value: Any) -> Any:  # noqa: PLR0911
-        """
-        Convert various Python/scientific computing types to JSON-serializable format.
+        """Convert various Python/scientific computing types to JSON-serializable format.
 
         This function provides encoders for common data types used in scientific computing
         and data analysis, including pandas DataFrames/Series, NetworkX graphs, numpy arrays,
@@ -119,8 +118,7 @@ class CoreExport:
 
     @staticmethod
     def to_json_group_and_sna(data: dict[str, Any]) -> dict[str, Any]:
-        """
-        Convert AB-Grid group and SNA data to a JSON-serializable format with HMAC signatures.
+        """Convert AB-Grid group and SNA data to a JSON-serializable format with HMAC signatures.
 
         Serializes both group data and SNA (Social Network Analysis) data separately,
         adds HMAC signatures to each for data integrity verification, and combines
@@ -151,8 +149,7 @@ class CoreExport:
 
     @staticmethod
     def to_json_sociogram(data: dict[str, Any]) -> dict[str, Any]:
-        """
-        Convert AB-Grid sociogram data to a JSON-serializable format with HMAC signature.
+        """Convert AB-Grid sociogram data to a JSON-serializable format with HMAC signature.
 
         Serializes sociogram data and adds an HMAC signature to the nested sociogram
         structure for data integrity verification.
@@ -177,8 +174,7 @@ class CoreExport:
 
     @staticmethod
     def to_json(report_data: dict[str, Any]) -> dict[str, Any]:
-        """
-        Convert complete AB-Grid report data to a JSON-serializable format.
+        """Convert complete AB-Grid report data to a JSON-serializable format.
 
         Handles the full AB-Grid report structure including metadata (year, project title,
         questions), group information, SNA analysis results, sociogram data, relevant nodes

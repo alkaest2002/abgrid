@@ -30,8 +30,7 @@ if TYPE_CHECKING:
 
 
 class CoreSociogram:
-    """
-    Analyzes and visualizes social networks by constructing sociometric components including macro/micro statistics, node rankings, and circular polar graph visualizations.
+    """Analyzes and visualizes social networks by constructing sociometric components including macro/micro statistics, node rankings, and circular polar graph visualizations.
 
     This class provides comprehensive sociometric analysis capabilities including:
     - Macro-level network statistics (cohesion and conflict indices)
@@ -69,8 +68,7 @@ class CoreSociogram:
         self.sociogram: dict[str, Any] = {}
 
     def get(self) -> dict[str, Any]:
-        """
-        Compute comprehensive sociogram analysis and return validated results.
+        """Compute comprehensive sociogram analysis and return validated results.
 
         Runs the complete sociogram analysis pipeline asynchronously, then validates
         the results using Pydantic schema validation before returning.
@@ -99,8 +97,7 @@ class CoreSociogram:
     ##################################################################################################################
 
     async def _get_async(self) -> dict[str, Any]:
-        """
-        Asynchronously compute and store comprehensive sociogram analysis from social network data.
+        """Asynchronously compute and store comprehensive sociogram analysis from social network data.
 
         Uses concurrent execution where possible to optimize performance while respecting
         data dependencies between different computations.
@@ -160,8 +157,7 @@ class CoreSociogram:
         return self.sociogram
 
     def _get_sync(self) -> dict[str, Any]:
-        """
-        Synchronously compute comprehensive sociogram analysis from social network data.
+        """Synchronously compute comprehensive sociogram analysis from social network data.
 
         Executes all computation steps sequentially without async concurrency.
         Used internally as a fallback synchronous implementation.
@@ -185,8 +181,7 @@ class CoreSociogram:
         return self.sociogram
 
     def _create_networks(self) -> None:
-        """
-        Create NetworkX directed graphs from packed edge data and generate adjacency matrices.
+        """Create NetworkX directed graphs from packed edge data and generate adjacency matrices.
 
         Unpacks the stored edge data to create separate networks for positive (A) and negative (B)
         relationships, adds any isolated nodes, and generates pandas adjacency matrices for
@@ -221,8 +216,7 @@ class CoreSociogram:
             self.sna[f"adjacency_{network_type}"] = nx.to_pandas_adjacency(network, nodelist=nodes)
 
     def _compute_macro_stats(self) -> pd.Series:
-        """
-        Compute macro-level sociogram statistics including cohesion and conflict indices.
+        """Compute macro-level sociogram statistics including cohesion and conflict indices.
 
         Calculates network-level metrics that summarize the overall structure and
         dynamics of positive and negative relationships in the network using
@@ -284,8 +278,7 @@ class CoreSociogram:
         })
 
     def _compute_micro_stats(self) -> pd.DataFrame:
-        """
-        Compute comprehensive micro-level sociogram statistics for individual nodes.
+        """Compute comprehensive micro-level sociogram statistics for individual nodes.
 
         Calculates node-level metrics including basic degree measures, mutual connections,
         derived centrality indices, sociometric status classification, and rankings
@@ -356,8 +349,7 @@ class CoreSociogram:
         return sociogram_micro_stats.sort_index()
 
     def _compute_descriptives(self) -> pd.DataFrame:
-        """
-        Compute macro-level descriptive statistics by aggregating micro-level node statistics.
+        """Compute macro-level descriptive statistics by aggregating micro-level node statistics.
 
         Aggregates individual node statistics to provide network-level summaries
         including measures of central tendency, dispersion, and distribution
@@ -377,8 +369,7 @@ class CoreSociogram:
         return compute_descriptives(sociogram_numeric_columns)
 
     def _compute_rankings(self) -> dict[str, pd.Series]:
-        """
-        Generate sorted node rankings based on centrality metrics and sociometric status.
+        """Generate sorted node rankings based on centrality metrics and sociometric status.
 
         Creates ordinal rankings for nodes based on their scores in various centrality
         measures and their sociometric status categories. All rankings are sorted
@@ -414,8 +405,7 @@ class CoreSociogram:
         return rankings
 
     def _compute_relevant_nodes(self, threshold: float = 0.05) -> dict[str, pd.DataFrame]:
-        """
-        Identify most and least relevant nodes for positive and negative outcomes.
+        """Identify most and least relevant nodes for positive and negative outcomes.
 
         Analyzes node rankings across all sociometric centrality metrics to identify nodes that
         consistently perform well (positive relevance) or poorly (negative relevance).
@@ -511,8 +501,7 @@ class CoreSociogram:
         return relevant_nodes
 
     def _compute_status(self, sociogram_micro_stats: pd.DataFrame) -> pd.Series:
-        """
-        Determine sociometric status for each node based on relationship patterns.
+        """Determine sociometric status for each node based on relationship patterns.
 
         Classifies nodes into sociometric status categories using adaptive quantile-based
         thresholds that account for impact level (total received nominations) and
@@ -539,8 +528,7 @@ class CoreSociogram:
         """
 
         def _select_best_quantiles(series: pd.Series) -> tuple[float, float]:
-            """
-            Select quantile thresholds that best match theoretical proportions for classification.
+            """Select quantile thresholds that best match theoretical proportions for classification.
 
             Tests multiple quantile pairs to find the first one where actual
             proportions are within epsilon tolerance of theoretical values,
@@ -663,8 +651,7 @@ class CoreSociogram:
         return status
 
     def _create_graph(self, coefficient: Literal["ai", "ii"]) -> str:
-        """
-        Generate a circular polar visualization of node distribution based on centrality coefficients.
+        """Generate a circular polar visualization of node distribution based on centrality coefficients.
 
         Creates a polar plot showing nodes arranged radially by their centrality scores. Values are
         normalized to [0,1] and inverted so high-scoring nodes appear near the center. Nodes are

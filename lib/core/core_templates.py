@@ -24,8 +24,7 @@ from jinja2.exceptions import (
 TEMPLATE_CACHE_DIR = "./lib/core/templates/.cache"
 
 def universal_iter_rows(data: Any) -> Any:
-    """
-    Universal iterator filter that works with both DataFrames and Python objects.
+    """Universal iterator filter that works with both DataFrames and Python objects.
 
     Returns an iterator of (key, value) tuples:
     - For DataFrames: uses iterrows() -> (index, Series)
@@ -88,8 +87,7 @@ class TemplateRenderError(Exception):
 
 
 class CoreRenderer:
-    """
-    Renders Jinja2 templates using the configured AB-Grid environment.
+    """Renders Jinja2 templates using the configured AB-Grid environment.
 
     Provides template rendering capabilities with comprehensive error handling
     for template loading and rendering operations.

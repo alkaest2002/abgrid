@@ -59,8 +59,7 @@ app.include_router(get_router_fake())
 @app.get("/")
 @app.get("/health")
 def server_check() -> JSONResponse:
-    """
-    Public endpoint that can be accessed without authentication.
+    """Public endpoint that can be accessed without authentication.
 
     Returns:
         JSONResponse: A message indicating the endpoint is publicly accessible.

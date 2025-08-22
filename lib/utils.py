@@ -29,8 +29,7 @@ def check_python_version() -> None:
         sys.exit(1)
 
 def to_snake_case(text: str) -> str:
-    """
-    Convert text to snake_case.
+    """Convert text to snake_case.
 
     This function replaces spaces and other separators with underscores,
     converts the text to lowercase, and removes leading/trailing underscores.

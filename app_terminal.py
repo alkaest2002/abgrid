@@ -29,8 +29,7 @@ EXIT_USER_INTERRUPT: int = 130
 
 @dataclass
 class Config:
-    """
-    Application configuration settings container.
+    """Application configuration settings container.
 
     Defines default values and constraints for AB-Grid application settings
     including supported languages, group size limits, and file system paths.
@@ -40,9 +39,9 @@ class Config:
     min_members: int = 8
     max_members: int = 50
 
+
 class Command(ABC):
-    """
-    Abstract base class for all AB-Grid commands with shared functionality.
+    """Abstract base class for all AB-Grid commands with shared functionality.
 
     Provides common utilities for path management, folder validation,
     and configuration access. All concrete command classes must inherit
@@ -65,8 +64,7 @@ class Command(ABC):
 
     @abstractmethod
     def execute(self) -> None:
-        """
-        Execute the command with specific implementation logic.
+        """Execute the command with specific implementation logic.
 
         Abstract method that must be implemented by all concrete command
         classes to define their specific behavior and operations.
@@ -80,8 +78,7 @@ class Command(ABC):
 
 
     def get_user_path(self) -> Path:
-        """
-        Get the file system path for the current user's data folder.
+        """Get the file system path for the current user's data folder.
 
         Constructs the path by combining the configured data directory
         with the user name from command line arguments.
@@ -92,8 +89,7 @@ class Command(ABC):
         return self.config.data_path / Path(str(self.args.user))
 
     def get_project_path(self) -> Path:
-        """
-        Get the file system path for the current project folder.
+        """Get the file system path for the current project folder.
 
         Constructs the full project path by combining user path
         with the project name from command line arguments.
@@ -104,8 +100,7 @@ class Command(ABC):
         return self.get_user_path() / Path(str(self.args.project))
 
     def ensure_folder_exists(self, path: Path) -> None:
-        """
-        Validate that the specified folder exists on the file system.
+        """Validate that the specified folder exists on the file system.
 
         Performs existence check and raises appropriate exception if
         the folder is not found, providing clear error messaging.
@@ -124,8 +119,7 @@ class Command(ABC):
             raise FolderNotFoundError(error_message)
 
     def ensure_folder_not_exists(self, path: Path) -> None:
-        """
-        Validate that the specified folder doesn't exist on the file system.
+        """Validate that the specified folder doesn't exist on the file system.
 
         Prevents accidental overwriting by checking for existing folders
         and raising an exception if a conflict is detected.
@@ -143,9 +137,9 @@ class Command(ABC):
             error_message = f"Project '{path.name}' already exists at {path}"
             raise FolderAlreadyExistsError(error_message)
 
+
 class InitCommand(Command):
-    """
-    Command for initializing new AB-Grid projects.
+    """Command for initializing new AB-Grid projects.
 
     Creates the directory structure and initial configuration files
     required for a new AB-Grid project, ensuring no conflicts with
@@ -173,9 +167,9 @@ class InitCommand(Command):
         terminal_main.init_project()
         print(f"Project '{self.args.project}' initialized successfully")
 
+
 class GroupCommand(Command):
-    """
-    Command for generating group configuration files.
+    """Command for generating group configuration files.
 
     Creates YAML configuration files for new groups within an existing
     AB-Grid project, using language-specific templates and ensuring
@@ -203,9 +197,9 @@ class GroupCommand(Command):
         terminal_main.generate_group()
         print(f"Generated group for project '{self.args.project}'")
 
+
 class ReportCommand(Command):
-    """
-    Command for generating comprehensive project reports.
+    """Command for generating comprehensive project reports.
 
     Processes group data files to create detailed PDF reports with
     statistical analysis, social network metrics, and optional
@@ -236,9 +230,9 @@ class ReportCommand(Command):
         sociogram_text = " with sociogram" if self.args.with_sociogram else ""
         print(f"Generated report{sociogram_text} for project '{self.args.project}'")
 
+
 class BatchCommand(Command):
-    """
-    Command for processing multiple projects in batch mode.
+    """Command for processing multiple projects in batch mode.
 
     Automatically discovers and processes all projects within a user's
     directory, generating reports for each project with error handling
@@ -296,9 +290,10 @@ class BatchCommand(Command):
         print(f"Batch processing complete. Processed {processed_count} project(s){sociogram_text}")
         if failed_count > 0:
             print(f"Failed to process {failed_count} project(s)")
+
+
 class ABGridTerminalApp:
-    """
-    Main application class for AB-Grid terminal interface.
+    """Main application class for AB-Grid terminal interface.
 
     Orchestrates the entire command-line application workflow including
     argument parsing, validation, command dispatch, and comprehensive
@@ -306,8 +301,7 @@ class ABGridTerminalApp:
     """
 
     def __init__(self, config: Config | None = None) -> None:
-        """
-        Initialize the AB-Grid terminal application.
+        """Initialize the AB-Grid terminal application.
 
         Sets up the application configuration and command registry,
         mapping action names to their corresponding command classes.
@@ -327,8 +321,7 @@ class ABGridTerminalApp:
         }
 
     def run(self) -> int:
-        """
-        Main application entry point with comprehensive error handling.
+        """Main application entry point with comprehensive error handling.
 
         Executes the complete application workflow including Python version
         checking, argument parsing and validation, command execution, and
@@ -367,8 +360,7 @@ class ABGridTerminalApp:
             return EXIT_SUCCESS
 
     def _parse_args(self) -> argparse.Namespace:
-        """
-        Parse and structure command line arguments.
+        """Parse and structure command line arguments.
 
         Defines the complete command-line interface including all arguments,
         their types, constraints, and help documentation. Handles argument
@@ -403,8 +395,7 @@ class ABGridTerminalApp:
         return parser.parse_args()
 
     def _validate_args(self, args: argparse.Namespace) -> None:
-        """
-        Validate parsed command line arguments for consistency and requirements.
+        """Validate parsed command line arguments for consistency and requirements.
 
         Performs additional validation beyond basic argument parsing,
         checking for required argument combinations, character constraints,
@@ -432,9 +423,9 @@ class ABGridTerminalApp:
             error_message = "User name must be alphanumeric with hyphens/underscores only"
             raise InvalidArgumentError(error_message)
 
+
 def main() -> int:
-    """
-    Entry point for the AB-Grid terminal application.
+    """Entry point for the AB-Grid terminal application.
 
     Creates and runs the main application instance, providing the
     standard entry point for command-line execution with proper

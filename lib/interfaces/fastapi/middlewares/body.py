@@ -16,8 +16,7 @@ from fastapi.responses import JSONResponse
 
 
 class BodySizeLimitMiddleware(BaseHTTPMiddleware):
-    """
-    ASGI middleware to enforce request body size limits and prevent memory exhaustion attacks.
+    """ASGI middleware to enforce request body size limits and prevent memory exhaustion attacks.
 
     This middleware provides protection against oversized request bodies by implementing two-tier validation:
     1. Pre-validation using Content-Length header when available

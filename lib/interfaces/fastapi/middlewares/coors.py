@@ -13,8 +13,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 
 def add_cors_middleware(app: FastAPI) -> None:
-    """
-    Add CORS middleware to the FastAPI application.
+    """Add CORS middleware to the FastAPI application.
 
     Args:
         app (FastAPI): The FastAPI application instance

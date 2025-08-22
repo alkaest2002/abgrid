@@ -27,8 +27,7 @@ def logger_decorator[F: Callable[..., Any]](func: F) -> F:
 
 
 def logger_decorator[F: Callable[..., Any]](func: F | None = None) -> F | Callable[[F], F]:
-    """
-    Create a logging decorator that wraps functions with error handling.
+    """Create a logging decorator that wraps functions with error handling.
 
     This decorator provides comprehensive error handling for function execution,
     catching common exceptions and formatting them for user-friendly display.
@@ -53,8 +52,7 @@ def logger_decorator[F: Callable[..., Any]](func: F | None = None) -> F | Callab
 
         @wraps(function)
         def _wrapper(*args: Any, **kwargs: Any) -> Any:  # noqa: PLR0911
-            """
-            Wrapper function that executes the decorated function with error handling.
+            """Wrapper function that executes the decorated function with error handling.
 
             Returns:
                 Result of the decorated function execution, or None if an exception occurs
@@ -110,8 +108,7 @@ def logger_decorator[F: Callable[..., Any]](func: F | None = None) -> F | Callab
 
 
 def extract_traceback_info(error: Exception, exclude_files: set[str] | None = None) -> str:
-    """
-    Extract and format traceback information from an exception.
+    """Extract and format traceback information from an exception.
 
     Processes the exception"s traceback to create a readable string representation,
     filtering out specified files to focus on relevant code locations.
@@ -152,8 +149,7 @@ def extract_traceback_info(error: Exception, exclude_files: set[str] | None = No
     return f"Error: {error_header}"
 
 def extract_pydantic_errors(pydantic_validation_exception: PydanticValidationError) -> str:
-    """
-    Format Pydantic validation errors into human-readable error messages.
+    """Format Pydantic validation errors into human-readable error messages.
 
     Converts PydanticValidationError objects into formatted strings that provide
     clear information about field locations and error descriptions.

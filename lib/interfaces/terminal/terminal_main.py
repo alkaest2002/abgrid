@@ -23,8 +23,7 @@ from lib.interfaces.terminal.terminal_logger import logger_decorator
 
 
 class TerminalMain:
-    """
-    Main class for AB-Grid project management and document generation.
+    """Main class for AB-Grid project management and document generation.
 
     This class provides comprehensive functionality for managing AB-Grid projects
     including initialization, group file generation, and
@@ -32,8 +31,7 @@ class TerminalMain:
     """
 
     def __init__(self, args: argparse.Namespace) -> None:
-        """
-        Initialize TerminalMain instance with project configuration from args.
+        """Initialize TerminalMain instance with project configuration from args.
 
         Args:
             args: Parsed command line arguments containing project configuration
@@ -66,8 +64,7 @@ class TerminalMain:
 
     @logger_decorator
     def init_project(self) -> None:
-        """
-        Initialize a new AB-Grid project with directory structure.
+        """Initialize a new AB-Grid project with directory structure.
 
         Creates the project directory structure including subdirectories for reports.
 
@@ -85,8 +82,7 @@ class TerminalMain:
 
     @logger_decorator
     def generate_group(self) -> None:
-        """
-        Generate group configuration files for the next available group.
+        """Generate group configuration files for the next available group.
 
         Creates a YAML configuration file for the next group using the
         language-specific template.
@@ -136,8 +132,7 @@ class TerminalMain:
 
     @logger_decorator
     def generate_report(self) -> None:
-        """
-        Generate comprehensive PDF report with optional sociograms.
+        """Generate comprehensive PDF report with optional sociograms.
 
         Creates detailed reports for each group including social network analysis,
         statistics, and optional sociogram visualizations. Also exports aggregated
@@ -208,8 +203,7 @@ class TerminalMain:
                 if re.search(r"_g\d+\.\w+$", path.name)]
 
     def _load_yaml_data(self, yaml_file_path: Path) -> Any:
-        """
-        Load and parse YAML data from file with error handling.
+        """Load and parse YAML data from file with error handling.
 
         Safely loads YAML configuration files and handles common errors such as
         missing files and parsing issues. Returns structured data or None with
