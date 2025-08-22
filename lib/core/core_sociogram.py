@@ -48,8 +48,7 @@ class CoreSociogram:
     def __init__(self,
             packed_edges_a: list[dict[str, str | None]],
             packed_edges_b: list[dict[str, str | None]]) -> None:
-        """
-        Initialize the CoreSociogram instance with packed edge data for both networks.
+        """Initialize the CoreSociogram instance with packed edge data for both networks.
 
         Args:
             packed_edges_a: List of dictionaries containing edge data for positive relationships.

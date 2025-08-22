@@ -64,8 +64,7 @@ class Settings(BaseSettings):
     @classmethod
     @lru_cache
     def load(cls) -> "Settings":
-        """
-        Load and cache application settings.
+        """Load and cache application settings.
 
         This method creates and returns a Settings instance, loading configuration
         from environment variables and .env file. The result is cached using

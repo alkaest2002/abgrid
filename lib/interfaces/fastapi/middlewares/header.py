@@ -36,8 +36,7 @@ class HeaderSizeLimitMiddleware(BaseHTTPMiddleware):
     """
 
     def __init__(self, app: ASGIApp, max_header_size: int = 8 * 1024) -> None:
-        """
-        Initialize the middleware with header size limit configuration.
+        """Initialize the middleware with header size limit configuration.
 
         Args:
             app: The ASGI application instance
@@ -48,8 +47,7 @@ class HeaderSizeLimitMiddleware(BaseHTTPMiddleware):
         self.max_header_size = max_header_size
 
     async def dispatch(self, request: Request, call_next: Callable[[Request], Awaitable[Response]]) -> Response:
-        """
-        Process incoming request and enforce header validations.
+        """Process incoming request and enforce header validations.
 
         Validates header sizes and ensures POST requests have JSON content type.
 

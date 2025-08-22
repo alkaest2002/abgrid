@@ -34,12 +34,8 @@ class RequestProtectionMiddleware(BaseHTTPMiddleware):
         semaphore (asyncio.Semaphore): Controls concurrent request limits for API routes
     """
 
-    def __init__(
-        self,
-        app: ASGIApp,
-    ) -> None:
-        """
-        Initialize the middleware with validation and protection settings.
+    def __init__(self, app: ASGIApp) -> None:
+        """Initialize the middleware with validation and protection settings.
 
         Sets up the middleware with timeout and concurrency controls based on
         application settings. The semaphore limit is loaded from settings to
@@ -61,8 +57,7 @@ class RequestProtectionMiddleware(BaseHTTPMiddleware):
         request: Request,
         call_next: Callable[[Request], Awaitable[Response]]
     ) -> Response:
-        """
-        Process incoming requests with appropriate protection measures.
+        """Process incoming requests with appropriate protection measures.
 
         Routes requests to different protection handlers based on the URL path:
         - API routes (/api/*): Apply both timeout and concurrency limiting
@@ -88,8 +83,7 @@ class RequestProtectionMiddleware(BaseHTTPMiddleware):
         request: Request,
         call_next: Callable[[Request], Awaitable[Response]]
     ) -> Response:
-        """
-        Handle API requests with concurrency limiting protection.
+        """Handle API requests with concurrency limiting protection.
 
         Checks if the concurrent request limit has been reached and either
         processes the request or returns a 429 Too Many Requests response.
@@ -122,8 +116,7 @@ class RequestProtectionMiddleware(BaseHTTPMiddleware):
         request: Request,
         call_next: Callable[[Request], Awaitable[Response]]
     ) -> Response:
-        """
-        Execute request processing with timeout protection.
+        """Execute request processing with timeout protection.
 
         Wraps the request processing in an asyncio timeout to prevent
         long-running requests from consuming resources indefinitely.

@@ -31,8 +31,7 @@ class BodySizeLimitMiddleware(BaseHTTPMiddleware):
     """
 
     def __init__(self, app: ASGIApp, max_body_size: int = 300 * 1024) -> None:
-        """
-        Initialize the body size limit middleware.
+        """Initialize the body size limit middleware.
 
         Sets up the middleware with the specified maximum body size limit.
         The default limit is set to 300KB to provide reasonable protection
@@ -48,8 +47,7 @@ class BodySizeLimitMiddleware(BaseHTTPMiddleware):
         self.max_body_size = max_body_size
 
     async def dispatch(self, request: Request, call_next: Callable[[Request], Awaitable[Response]]) -> Response:
-        """
-        Process incoming HTTP requests and enforce body size limits.
+        """Process incoming HTTP requests and enforce body size limits.
 
         This method implements a two-phase approach to body size validation:
 
@@ -108,8 +106,7 @@ class BodySizeLimitMiddleware(BaseHTTPMiddleware):
         return await call_next(request)
 
     async def _wrap_request_body(self, request: Request) -> Request:
-        """
-        Create a size-monitored wrapper around the request's body stream.
+        """Create a size-monitored wrapper around the request's body stream.
 
         This method creates a new request object with an intercepted receive callable
         that monitors the cumulative size of body chunks as they are consumed by

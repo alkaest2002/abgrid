@@ -49,8 +49,7 @@ class Command(ABC):
     """
 
     def __init__(self, args: argparse.Namespace, config: Config) -> None:
-        """
-        Initialize command with parsed arguments and configuration.
+        """Initialize command with parsed arguments and configuration.
 
         Args:
             args: Parsed command line arguments containing user input
@@ -147,8 +146,7 @@ class InitCommand(Command):
     """
 
     def execute(self) -> None:
-        """
-        Execute project initialization with directory structure creation.
+        """Execute project initialization with directory structure creation.
 
         Validates that the project doesn't already exist, then creates
         the necessary folder structure and configuration files for a
@@ -177,8 +175,7 @@ class GroupCommand(Command):
     """
 
     def execute(self) -> None:
-        """
-        Execute group generation for the specified project.
+        """Execute group generation for the specified project.
 
         Validates that the target project exists, then generates
         a new group configuration file with appropriate numbering
@@ -207,8 +204,7 @@ class ReportCommand(Command):
     """
 
     def execute(self) -> None:
-        """
-        Execute report generation for the specified project.
+        """Execute report generation for the specified project.
 
         Validates project existence, processes all group files,
         and generates comprehensive reports with optional sociograms
@@ -240,8 +236,7 @@ class BatchCommand(Command):
     """
 
     def execute(self) -> None:
-        """
-        Execute batch processing for all projects in the user directory.
+        """Execute batch processing for all projects in the user directory.
 
         Discovers all project folders, processes each one individually
         with error handling, and provides summary statistics of the
