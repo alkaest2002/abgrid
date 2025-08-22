@@ -315,10 +315,10 @@ class CoreSociogram:
 
         # Initialize DataFrame with basic degree measures
         sociogram_micro_stats = pd.DataFrame({
-            "rp": dict(network_a.in_degree()),  # type: ignore[arg-type]
-            "rr": dict(network_b.in_degree()),  # type: ignore[arg-type]
-            "gp": dict(network_a.out_degree()), # type: ignore[arg-type]
-            "gr": dict(network_b.out_degree()), # type: ignore[arg-type]
+            "rp": dict(network_a.in_degree()),  # type: ignore[call-overload]
+            "rr": dict(network_b.in_degree()),  # type: ignore[call-overload]
+            "gp": dict(network_a.out_degree()), # type: ignore[call-overload]
+            "gr": dict(network_b.out_degree()), # type: ignore[call-overload]
         })
 
         # Compute mutual connections using matrix multiplication
