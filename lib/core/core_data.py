@@ -224,7 +224,7 @@ class CoreData:
         sna_relevant_a = sna_data["relevant_nodes_a"]
         sna_relevant_b = sna_data["relevant_nodes_b"]
 
-        # Prepare isolated nodes schema
+        # Prepare isolated nodes schema (convert to pandas Index if needed)
         isolated_nodes_model: ABGridIsolatedNodesSchema = ABGridIsolatedNodesSchema(
             a=sna_isolated_a.copy()
                 if isinstance(sna_isolated_a, pd.Index)
