@@ -39,8 +39,8 @@ class ABGridGroupAndSnaSchemaOut(BaseModel):
     Contains Group data and SNA analysis results for multistep report generation.
 
     Attributes:
-        group: Group data as dictionary.
-        sna: Social network analysis results as dictionary.
+        group_data: Group data as dictionary.
+        sna_data: Social network analysis results as dictionary.
     """
     group_data: dict[str, Any]
     sna_data: dict[str, Any]
@@ -57,7 +57,7 @@ class ABGridSociogramSchemaOut(BaseModel):
     Contains sociogram analysis results for visualization purposes.
 
     Attributes:
-        sociogram: Sociogram analysis results as dictionary.
+        sociogram_data: Sociogram analysis results as dictionary.
     """
     sociogram_data: dict[str, Any]
 
