@@ -44,8 +44,7 @@ def get_router_fake() -> APIRouter:
     # Add endpoints
     @router.get("/error")
     async def get_error(error_type: str = Query(..., description="Error type to simulate")) -> JSONResponse:
-        """
-        Simulate an error response based on the provided error type.
+        """Simulate an error response based on the provided error type.
 
         Args:
             error_type: The error type key that matches one of the predefined error codes

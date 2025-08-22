@@ -44,8 +44,7 @@ api_limiter_10s = SimpleRateLimiter(
 )
 
 def get_router_api() -> APIRouter:  # noqa: PLR0915
-    """
-    Create and configure the FastAPI router with API endpoints.
+    """Create and configure the FastAPI router with API endpoints.
 
     This function creates a FastAPI router with all the application endpoints
     configured with proper authentication, rate limiting, and error handling.
@@ -77,8 +76,7 @@ def get_router_api() -> APIRouter:  # noqa: PLR0915
         language: str = Query(..., description="Language of the group template"),
         user_data: dict[str, Any] = Depends(_auth.verify_token)
     ) -> JSONResponse:
-        """
-        Generate group configuration file based on provided schema.
+        """Generate group configuration file based on provided schema.
 
         This endpoint creates a YAML configuration file for a group analysis
         based on the provided group schema and language template.
@@ -158,8 +156,7 @@ def get_router_api() -> APIRouter:  # noqa: PLR0915
         with_sociogram: bool = Query(..., description="Include sociogram visualization"),
         user_data: dict[str, Any] = Depends(_auth.verify_token)
     ) -> JSONResponse:
-        """
-        Generate comprehensive analysis report based on provided data.
+        """Generate comprehensive analysis report based on provided data.
 
         This endpoint processes the report schema and generates both HTML and JSON
         formatted reports, optionally including sociogram visualizations.
@@ -242,8 +239,7 @@ def get_router_api() -> APIRouter:  # noqa: PLR0915
         model: ABGridReportSchemaIn,
         user_data: dict[str, Any] = Depends(_auth.verify_token)
     ) -> JSONResponse:
-        """
-        Generate group and SNA (Social Network Analysis) data for multi-step reporting.
+        """Generate group and SNA (Social Network Analysis) data for multi-step reporting.
 
         This endpoint is the first step in the multi-step report generation process.
         It processes the report schema and generates JSON data containing group
@@ -312,8 +308,7 @@ def get_router_api() -> APIRouter:  # noqa: PLR0915
         model: ABGridReportSchemaIn,
         user_data: dict[str, Any] = Depends(_auth.verify_token)
     ) -> JSONResponse:
-        """
-        Generate sociogram visualization data for multi-step reporting.
+        """Generate sociogram visualization data for multi-step reporting.
 
         This endpoint is the second step in the multi-step report generation process.
         It processes the report schema and generates JSON data containing sociogram
@@ -383,8 +378,7 @@ def get_router_api() -> APIRouter:  # noqa: PLR0915
         language: str = Query(..., description="Language of the report template"),
         user_data: dict[str, Any] = Depends(_auth.verify_token)
     ) -> JSONResponse:
-        """
-        Generate final HTML report for multi-step reporting process.
+        """Generate final HTML report for multi-step reporting process.
 
         This endpoint is the final step in the multi-step report generation process.
         It takes the combined data from previous steps and renders it into a complete
