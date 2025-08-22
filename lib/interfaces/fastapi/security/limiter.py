@@ -150,13 +150,7 @@ class SimpleRateLimiter:
         # Hash the token for security
         token_hash: str = hashlib.sha256(token.encode("utf-8")).hexdigest()
 
-        # Get request path
-        path: str = getattr(getattr(request, "url", None), "path", "")
-
-        # Group all /api/* endpoints under a single rate limit
-        cache_path = "api" if path.startswith("/api") else path
-
-        return f"rate_limit:{self.limiter_id}:{token_hash}:{cache_path}"
+        return f"rate_limit:{self.limiter_id}:{token_hash}"
 
 
     def _extract_jwt_token(self, request: Any) -> str | None:
