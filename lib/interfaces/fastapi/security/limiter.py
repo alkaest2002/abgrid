@@ -14,33 +14,35 @@ from typing import Any
 
 
 class RateLimitError(Exception):
-    """
-    Exception raised when the rate limit is exceeded.
+    """Exception raised when the rate limit is exceeded.
 
     Attributes:
         message: The error message describing the rate limit violation.
     """
+
     def __init__(self, message: str = "Rate limit exceeded") -> None:
-        """Initialize a RateLimitError with a default error message."""
+        """Initialize a RateLimitError with a default error message.
+
+        Args:
+            message: The error message describing the rate limit violation.
+        """
         self.message = message
         super().__init__(message)
 
+
 class SimpleRateLimiter:
-    """
-    JWT-based rate limiter using a sliding window approach with LRU cache.
+    """JWT-based rate limiter using a sliding window approach with LRU cache.
 
     This rate limiter extracts JWT tokens from Authorization headers and
     applies rate limiting per token per endpoint using asyncio for FastAPI compatibility.
     OPTIONS requests (CORS preflight) bypass rate limiting entirely.
 
-    Args:
+    Attributes:
+        limiter_id: Unique identifier for this limiter instance.
         limit: Maximum number of requests allowed per window.
         window_seconds: Time window duration in seconds.
         max_cache_size: Maximum number of entries to keep in cache.
-        skip_options: Whether to skip rate limiting for OPTIONS requests (default: True).
-
-    Raises:
-        ValueError: If any numeric parameter is <= 0.
+        skip_options: Whether to skip rate limiting for OPTIONS requests.
     """
 
     def __init__(
@@ -50,14 +52,16 @@ class SimpleRateLimiter:
         max_cache_size: int = 10000,
         skip_options: bool = True
     ) -> None:
-        """
-        Initialize the rate limiter with asyncio lock for FastAPI compatibility.
+        """Initialize the rate limiter with asyncio lock for FastAPI compatibility.
 
         Args:
-            limit: Maximum requests allowed per window (default 1).
-            window_seconds: Duration of rate limit window in seconds (default 15).
-            max_cache_size: Maximum cache entries to prevent memory leaks (default 10000).
-            skip_options: Skip rate limiting for OPTIONS requests (CORS preflight).
+            limit: Maximum requests allowed per window. Defaults to 1.
+            window_seconds: Duration of rate limit window in seconds. Defaults to 15.
+            max_cache_size: Maximum cache entries to prevent memory leaks. Defaults to 10000.
+            skip_options: Skip rate limiting for OPTIONS requests (CORS preflight). Defaults to True.
+
+        Raises:
+            ValueError: If any numeric parameter is <= 0.
         """
         if limit <= 0 or window_seconds <= 0 or max_cache_size <= 0:
             error_message = "rate_limiter_all_parameters_must_be_positive_integers"
@@ -76,8 +80,7 @@ class SimpleRateLimiter:
         self._lock: asyncio.Lock = asyncio.Lock()
 
     def __call__(self, func: Callable[..., Awaitable[Any]]) -> Callable[..., Awaitable[Any]]:
-        """
-        Decorator that applies rate limiting to an async function.
+        """Decorator that applies rate limiting to an async function.
 
         The decorated function must accept a 'request' parameter that contains
         the HTTP request object with headers. OPTIONS requests bypass rate limiting
@@ -112,8 +115,7 @@ class SimpleRateLimiter:
         return wrapper
 
     def _get_cache_key(self, request: Any) -> str:
-        """
-        Extract JWT token from request and create a unique cache key.
+        """Extract JWT token from request and create a unique cache key.
 
         Groups all /api/* endpoints under a single rate limit per user.
 
@@ -121,12 +123,11 @@ class SimpleRateLimiter:
             request: HTTP request object with headers and url attributes.
 
         Returns:
-            Unique cache key string in format "rate_limit:{limiter_id}:{token_hash}:api" for API endpoints,
-            or "rate_limit:{limiter_id}:{token_hash}:{path}" for other endpoints.
+            Unique cache key string in format "rate_limit:{limiter_id}:{token_hash}".
 
         Raises:
             RateLimitError: If Authorization header is missing, malformed,
-                                or doesn't contain a Bearer token.
+                          or doesn't contain a Bearer token.
         """
         # Extract JWT token
         token: str | None = self._extract_jwt_token(request)
@@ -152,10 +153,8 @@ class SimpleRateLimiter:
 
         return f"rate_limit:{self.limiter_id}:{token_hash}"
 
-
     def _extract_jwt_token(self, request: Any) -> str | None:
-        """
-        Safely extract JWT token from Authorization header.
+        """Safely extract JWT token from Authorization header.
 
         Args:
             request: HTTP request object with headers.
@@ -175,7 +174,14 @@ class SimpleRateLimiter:
         return token if token else None
 
     async def _check_rate_limit(self, key: str) -> None:
-        """Check if request exceeds rate limit using a true sliding window approach."""
+        """Check if request exceeds rate limit using a true sliding window approach.
+
+        Args:
+            key: Cache key for the specific user/endpoint combination.
+
+        Raises:
+            RateLimitError: When rate limit is exceeded.
+        """
         current_time: float = time.time()
 
         async with self._lock:

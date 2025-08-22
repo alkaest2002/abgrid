@@ -27,8 +27,7 @@ class AnonymousJWT:
         self.token_lifetime = timedelta(hours=720)
 
     def generate_token(self) -> str:
-        """
-        Generate a new anonymous JWT token with a unique identifier.
+        """Generate a new anonymous JWT token with a unique identifier.
 
         Returns:
             A string representing the encoded JWT token containing a UUID as subject,
@@ -46,8 +45,7 @@ class AnonymousJWT:
 
 
     def verify_token(self, token: str) -> Any:
-        """
-        Verify and decode a JWT token.
+        """Verify and decode a JWT token.
 
         Args:
             token: The JWT token to verify.
