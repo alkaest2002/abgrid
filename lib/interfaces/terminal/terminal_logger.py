@@ -32,15 +32,6 @@ def logger_decorator[F: Callable[..., Any]](func: F | None = None) -> F | Callab
     This decorator provides comprehensive error handling for function execution,
     catching common exceptions and formatting them for user-friendly display.
 
-    Usage:
-        @logger_decorator
-        def my_function(): pass
-
-        # or
-
-        @logger_decorator()
-        def my_function(): pass
-
     Notes:
         - Returns None for handled exceptions (doesn"t re-raise them)
         - Uses print for consistent message formatting
