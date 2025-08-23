@@ -304,7 +304,7 @@ class GenerateCommand(Command):
 
         # Display summary
         print(f"Generated UUID: {final_uuid}")
-        print("\nJWT TOKEN GENERATION SUMMARY")
+        print("JWT TOKEN GENERATION SUMMARY")
         print("=" * 50)
         print(f"Email: {self.args.email}")
         print(f"UUID: {final_uuid}")
