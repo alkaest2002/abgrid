@@ -29,7 +29,7 @@ DEFAULT_OUTPUT_DIR = Path("./licenser/licenses")
 MIN_SECRET_LENGTH = 32
 DATE_FORMATS = [
     "%Y-%m-%d", "%Y-%m-%d %H:%M",
-    "%Y/%m/%d", "%Y/%m/%d %H:%M"
+    "%Y/%m/%d", "%Y/%m/%d %H:%M",
 ]
 
 class JWTGenerator:
@@ -80,7 +80,7 @@ class JWTGenerator:
             "is_strong": len(self.secret_key) >= MIN_SECRET_LENGTH,
         }
 
-    def generate_token(self, expiration_date: datetime,) -> tuple[str, str]:
+    def generate_token(self, expiration_date: datetime) -> tuple[str, str]:
         """Generate a JWT token.
 
         Args:
@@ -109,7 +109,7 @@ class JWTGenerator:
             "sub": user_uuid,
             "iat": now,
             "exp": expiration_date,
-            "iss": "ab-grid",  # Add issuer for better security
+            "iss": "ab-grid",
         }
 
         try:
@@ -193,6 +193,7 @@ def save_token_data(
     user_uuid: str,
     email: str,
     output_path: Path,
+    token: str,
     generator: JWTGenerator
 ) -> None:
     """Save JWT token metadata to YAML file (without the JWT token itself).
@@ -202,6 +203,7 @@ def save_token_data(
         user_uuid: User UUID.
         email: User email address.
         output_path: Output file path.
+        token: Token string.
         generator: JWTGenerator instance for additional info.
     """
     secret_info = generator.get_secret_info()
@@ -214,11 +216,90 @@ def save_token_data(
         "generated_at": datetime.now(timezone.utc).isoformat(),
         "algorithm": generator.algorithm,
         "secret_strength": "strong" if secret_info["is_strong"] else "weak",
+        "token": token
     }
 
     output_path.parent.mkdir(parents=True, exist_ok=True)
     output_path.write_text(yaml.dump(data, default_flow_style=False, indent=2))
     print(f"✅ Token data saved to: {output_path}")
+
+def email_to_safe_filename(email: str) -> str:
+    """Convert email to safe filename format.
+
+    Args:
+        email: Email address to convert.
+
+    Returns:
+        Safe filename string.
+    """
+    return email.replace("@", "_at_").replace(".", "_")
+
+def safe_filename_to_email(filename: str) -> str:
+    """Convert safe filename back to email format.
+
+    Args:
+        filename: Safe filename string.
+
+    Returns:
+        Email address string.
+    """
+    # Remove the .yaml suffix and convert back
+    base_name = filename.replace(".yaml", "")
+    return base_name.replace("_at_", "@").replace("_", ".")
+
+def search_token_by_email(email: str) -> None:
+    """Search for token data file by email and display contents.
+
+    Args:
+        email: Email address to search for.
+    """
+    search_dir = DEFAULT_OUTPUT_DIR
+
+    # Convert email to safe filename format
+    safe_email = email_to_safe_filename(email)
+    expected_filename = f"{safe_email}.yaml"
+    file_path = search_dir / expected_filename
+
+    # Check if the exact file exists
+    if file_path.exists():
+        try:
+            with file_path.open("r") as f:
+                data = yaml.safe_load(f)
+
+            print("✅ FOUND TOKEN DATA")
+            print("-" * 30)
+
+            # Display the data in a formatted way
+            print(f"📧 Email: {data.get('email', 'Not found')}")
+            print(f"🆔 UUID: {data.get('uuid', 'Not found')}")
+
+            # Handle expiration date
+            exp_date = data.get("expiration_date", "Not found")
+            if exp_date != "Not found":
+                try:
+                    exp_datetime = datetime.fromisoformat(exp_date.replace("Z", "+00:00"))
+                    is_expired = exp_datetime <= datetime.now(timezone.utc)
+                    status = "❌ EXPIRED" if is_expired else "✅ VALID"
+                    print(f"📅 Expiration: {exp_date} ({status})")
+                except Exception:
+                    print(f"📅 Expiration: {exp_date} (Could not parse)")
+            else:
+                print(f"📅 Expiration: {exp_date}")
+
+            # Handle generation date
+            gen_date = data.get("generated_at", "Not found")
+            print(f"🕒 Generated: {gen_date}")
+
+            # Additional info
+            print(f"🔐 Algorithm: {data.get('algorithm', 'Not found')} | Strength: {data.get('secret_strength')}")
+            print(f"🔑 Token: {data.get('token', 'Not found')}")
+
+        except yaml.YAMLError:
+            print("❌ ERROR: File exists but contains invalid YAML")
+        except Exception as e:
+            print(f"❌ ERROR: Could not read file: {e}")
+    else:
+        print("❌ NO FILE FOUND for this email")
 
 def create_parser() -> argparse.ArgumentParser:
     """Create and return argument parser.
@@ -229,9 +310,10 @@ def create_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
         description="Generate JWT token with expiration and UUID. Requires AUTH_SECRET to be configured.",
         epilog="Examples:\n"
-               "  python create_jwt.py -e user@example.com -x '2024-12-31'\n"
-               "  python create_jwt.py --email user@example.com --expiration '2024-12-31'\n"
-               "  python create_jwt.py --verify 'your.jwt.token.here'",
+               "  python create_license.py --generate -e user@example.com -x '2024-12-31'\n"
+               "  python create_license.py --email user@example.com --expiration '2024-12-31'\n"
+               "  python create_license.py --verify 'your.jwt.token.here'\n"
+               "  python create_license.py --search user@example.com",
         formatter_class=argparse.RawDescriptionHelpFormatter
     )
 
@@ -246,17 +328,25 @@ def create_parser() -> argparse.ArgumentParser:
     group.add_argument("--verify",
                       help="Verify an existing JWT token")
 
+    # Token search argument
+    group.add_argument("--search",
+                      help="Search for token data by email address")
+
     # Required arguments for token generation
     parser.add_argument("-e", "--email",
                        help="Email address (required for token generation)")
     parser.add_argument("-x", "--expiration",
                        help="Expiration date (required for token generation)")
-
     return parser
 
 def main() -> None:  # noqa: PLR0915
     """Main entry point for JWT token generation CLI."""
     args = create_parser().parse_args()
+
+    # Handle token search
+    if args.search:
+        search_token_by_email(args.search)
+        return
 
     # Handle token verification
     if args.verify:
@@ -273,7 +363,6 @@ def main() -> None:  # noqa: PLR0915
                 exp_timestamp = decoded.get("exp", 0)
                 exp_datetime = datetime.fromtimestamp(exp_timestamp, tz=timezone.utc)
                 print(f"Expires At: {exp_datetime.isoformat()}")
-                print(f"Issuer: {decoded.get('iss', 'Not set')}")
 
             except jwt.InvalidTokenError as e:
                 print(f"❌ Token is INVALID: {e}")
@@ -285,6 +374,7 @@ def main() -> None:  # noqa: PLR0915
                         options={"verify_signature": False, "verify_exp": False}
                     )
                     print("\nToken Information (Unverified):")
+                    print(f"Email: {unverified_payload.get('email', 'Not set')}")
                     print(f"Subject: {unverified_payload.get('sub')}")
                     exp_timestamp = unverified_payload.get("exp", 0)
                     exp_datetime = datetime.fromtimestamp(exp_timestamp, tz=timezone.utc)
@@ -301,12 +391,10 @@ def main() -> None:  # noqa: PLR0915
     # Validate required arguments for token generation
     if not args.email:
         print("❌ Error: Email address required for token generation.")
-        print("   Use --help for usage information.")
         sys.exit(1)
 
     if not args.expiration:
         print("❌ Error: Expiration date required for token generation.")
-        print("   Use --help for usage information.")
         sys.exit(1)
 
     # Parse and validate expiration date
@@ -326,24 +414,20 @@ def main() -> None:  # noqa: PLR0915
         sys.exit(1)
 
     # Create filename with email prefix
-    safe_email = args.email.replace("@", "_at_").replace(".", "_")
-    output_filename = f"{safe_email}_jwt_token.yaml"
+    safe_email = email_to_safe_filename(args.email)
+    output_filename = f"{safe_email}.yaml"
     output_path = DEFAULT_OUTPUT_DIR / output_filename
 
-    # Save to file (without the JWT token itself)
-    save_token_data(expiration_date, final_uuid, args.email, output_path, generator)
+    # Save to file
+    save_token_data(expiration_date, final_uuid, args.email, output_path, token, generator)
 
     # Display summary
-    secret_info = generator.get_secret_info()
     print("\nJWT TOKEN GENERATION SUMMARY")
     print("=" * 50)
     print(f"Email: {args.email}")
     print(f"UUID: {final_uuid}")
     print(f"Expiration: {expiration_date}")
     print(f"Algorithm: {generator.algorithm}")
-    print(f"Secret Strength: {'Strong' if secret_info['is_strong'] else 'Weak'}")
-    print(f"Output: {output_path}")
-    print(f"Token Length: {len(token)} characters")
     print(f"Token: {token}")
     print("=" * 50)
 
