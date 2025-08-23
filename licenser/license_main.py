@@ -191,15 +191,17 @@ class Command(ABC):
     and email filename conversion utilities.
     """
 
-    def __init__(self, args: argparse.Namespace, config: Config) -> None:
-        """Initialize command with parsed CLI arguments and application configuration.
+    def __init__(self, args: argparse.Namespace, config: Config, jwt_generator: JWTGenerator) -> None:
+        """Initialize command with parsed CLI arguments, configuration, and JWT generator.
 
         Args:
             args: Parsed command line arguments.
             config: Application configuration settings.
+            jwt_generator: Shared JWT generator instance.
         """
         self.args = args
         self.config = config
+        self.jwt_generator = jwt_generator
 
     @abstractmethod
     def execute(self) -> None:
@@ -281,9 +283,8 @@ class GenerateCommand(Command):
             error_message = "Expiration date is in the past"
             raise LicenseError(error_message)
 
-        # Generate token
-        generator = JWTGenerator(self.config)
-        token, final_uuid = generator.generate_token(expiration_date)
+        # Generate token using shared JWT generator
+        token, final_uuid = self.jwt_generator.generate_token(expiration_date)
 
         # Create filename and save
         safe_email = self.email_to_safe_filename(self.args.email)
@@ -291,7 +292,7 @@ class GenerateCommand(Command):
         output_path = self.config.output_dir / output_filename
 
         self.save_token_data(expiration_date, final_uuid, self.args.email,
-                             output_path, token, generator)
+                             output_path, token)
 
         # Display summary
         print(f"Generated UUID: {final_uuid}")
@@ -300,13 +301,12 @@ class GenerateCommand(Command):
         print(f"Email: {self.args.email}")
         print(f"UUID: {final_uuid}")
         print(f"Expiration: {expiration_date}")
-        print(f"Algorithm: {generator.algorithm}")
+        print(f"Algorithm: {self.jwt_generator.algorithm}")
         print(f"Token: {token}")
         print("=" * 50)
 
     def save_token_data(self, expiration_date: datetime, user_uuid: str,
-                        email: str, output_path: Path, token: str,
-                        generator: JWTGenerator) -> None:
+                        email: str, output_path: Path, token: str) -> None:
         """Save JWT token metadata to YAML file with comprehensive information.
 
         Creates output directory if needed and saves token data including
@@ -319,9 +319,8 @@ class GenerateCommand(Command):
             email: Email address associated with the token.
             output_path: Path where YAML file should be saved.
             token: Generated JWT token string.
-            generator: JWT generator instance for accessing configuration.
         """
-        secret_info = generator.get_secret_info()
+        secret_info = self.jwt_generator.get_secret_info()
 
         data = {
             "uuid": user_uuid,
@@ -329,7 +328,7 @@ class GenerateCommand(Command):
             "expiration_date": expiration_date.isoformat(),
             "expiration_timestamp": int(expiration_date.timestamp()),
             "generated_at": datetime.now(timezone.utc).isoformat(),
-            "algorithm": generator.algorithm,
+            "algorithm": self.jwt_generator.algorithm,
             "secret_strength": "strong" if secret_info["is_strong"] else "weak",
             "token": token
         }
@@ -352,13 +351,12 @@ class VerifyCommand(Command):
         Verifies the token and displays validation status, subject UUID, and expiration.
         For invalid tokens, attempts to display unverified payload information.
         """
-        generator = JWTGenerator(self.config)
-
         print("\nTOKEN VERIFICATION")
         print("=" * 50)
 
         try:
-            decoded = generator.verify_token(self.args.verify)
+            # Use shared JWT generator for verification
+            decoded = self.jwt_generator.verify_token(self.args.verify)
             print("Token is VALID")
             print(f"Subject UUID: {decoded.get('sub')}")
             exp_timestamp = decoded.get("exp", 0)
@@ -406,7 +404,7 @@ class SearchCommand(Command):
         file_path = self.config.output_dir / expected_filename
 
         if not file_path.exists():
-            print("❌ NO FILE FOUND for this email")
+            print("NO FILE FOUND for this email")
             return
 
         try:
@@ -458,8 +456,16 @@ class LicenseApp:
     """
 
     def __init__(self) -> None:
-        """Initialize the license application with configuration and available commands."""
+        """Initialize the license application with configuration and shared JWT generator.
+
+        Creates configuration and JWT generator once, to be shared across all commands.
+        This ensures consistent secret key validation and reduces object creation overhead.
+
+        Raises:
+            SecretKeyError: If AUTH_SECRET environment variable is not set or invalid.
+        """
         self.config = Config()
+        self.jwt_generator = JWTGenerator(self.config)
         self.commands: dict[str, type[Command]] = {
             "generate": GenerateCommand,
             "verify": VerifyCommand,
@@ -483,17 +489,18 @@ class LicenseApp:
             # Determine action based on arguments
             action = self.determine_action(args)
 
-            command = self.commands[action](args, self.config)
+            # Create command with shared JWT generator
+            command = self.commands[action](args, self.config, self.jwt_generator)
             command.execute()
 
         except KeyboardInterrupt:
             print("\nOperation cancelled by user")
             return EXIT_USER_INTERRUPT
         except LicenseError as error:
-            print(f"❌ Error: {error}")
+            print(f"Error: {error}")
             return EXIT_APP_ERROR
         except Exception as error:
-            print(f"❌ Unexpected error: {error}")
+            print(f"Unexpected error: {error}")
             return EXIT_SYSTEM_ERROR
         else:
             return EXIT_SUCCESS
