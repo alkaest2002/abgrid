@@ -48,20 +48,26 @@ class Config:
         "%Y/%m/%d", "%Y/%m/%d %H:%M",
     ])
 
+
 class LicenseError(Exception):
     """Base exception for all license-related errors."""
+
 
 class SecretKeyError(LicenseError):
     """Raised when secret key is missing, invalid, or not configured properly."""
 
+
 class TokenGenerationError(LicenseError):
     """Raised when JWT token generation fails due to encoding or validation errors."""
+
 
 class TokenVerificationError(LicenseError):
     """Raised when JWT token verification fails due to expiration, invalid signature, or malformed token."""
 
+
 class DateParsingError(LicenseError):
     """Raised when date string cannot be parsed using any of the supported date formats."""
+
 
 class JWTGenerator:
     """Handles JWT token generation, verification, and secret key management.
@@ -184,6 +190,7 @@ class JWTGenerator:
             error_message = f"Token verification failed: {e}"
             raise TokenVerificationError(error_message) from e
 
+
 class Command(ABC):
     """Abstract base class for all license management commands.
 
@@ -250,6 +257,7 @@ class Command(ABC):
         """
         base_name = filename.replace(".yaml", "")
         return urllib.parse.unquote(base_name)
+
 
 class GenerateCommand(Command):
     """Command for generating new JWT tokens and saving metadata to YAML files.
@@ -337,6 +345,7 @@ class GenerateCommand(Command):
         output_path.write_text(yaml.dump(data, default_flow_style=False, indent=2))
         print(f"Token data saved to: {output_path}")
 
+
 class VerifyCommand(Command):
     """Command for verifying JWT token validity and displaying token information.
 
@@ -380,6 +389,7 @@ class VerifyCommand(Command):
                 print(f"Expires At: {exp_datetime.isoformat()}")
             except Exception:
                 print("Could not decode token structure")
+
 
 class SearchCommand(Command):
     """Command for searching and displaying stored token data by email address.
@@ -446,6 +456,7 @@ class SearchCommand(Command):
         except Exception as e:
             error_message = f"Could not read file: {e}"
             raise LicenseError(error_message) from e
+
 
 class LicenseApp:
     """Main application class for JWT license management with command-line interface.
