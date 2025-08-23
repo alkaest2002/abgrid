@@ -101,8 +101,8 @@ class JWTGenerator:
         Does not raise an exception to allow operation with weak keys if necessary.
         """
         if len(self.secret_key) < self.config.min_secret_length:
-            print(f"⚠️  Security Warning: Secret key should be at least {self.config.min_secret_length} characters.")
-            print(f"   Current length: {len(self.secret_key)} characters")
+            print(f"Security Warning: Secret key should be at least {self.config.min_secret_length} characters.")
+            print(f"Current length: {len(self.secret_key)} characters")
 
     def get_secret_info(self) -> dict[str, Any]:
         """Get information about the current secret key configuration.
@@ -294,7 +294,7 @@ class GenerateCommand(Command):
                              output_path, token, generator)
 
         # Display summary
-        print(f"🔑 Generated UUID: {final_uuid}")
+        print(f"Generated UUID: {final_uuid}")
         print("\nJWT TOKEN GENERATION SUMMARY")
         print("=" * 50)
         print(f"Email: {self.args.email}")
@@ -336,7 +336,7 @@ class GenerateCommand(Command):
 
         output_path.parent.mkdir(parents=True, exist_ok=True)
         output_path.write_text(yaml.dump(data, default_flow_style=False, indent=2))
-        print(f"✅ Token data saved to: {output_path}")
+        print(f"Token data saved to: {output_path}")
 
 class VerifyCommand(Command):
     """Command for verifying JWT token validity and displaying token information.
@@ -359,14 +359,14 @@ class VerifyCommand(Command):
 
         try:
             decoded = generator.verify_token(self.args.verify)
-            print("✅ Token is VALID")
+            print("Token is VALID")
             print(f"Subject UUID: {decoded.get('sub')}")
             exp_timestamp = decoded.get("exp", 0)
             exp_datetime = datetime.fromtimestamp(exp_timestamp, tz=timezone.utc)
             print(f"Expires At: {exp_datetime.isoformat()}")
 
         except TokenVerificationError as e:
-            print(f"❌ Token is INVALID: {e}")
+            print(f"Token is INVALID: {e}")
 
             # Try to show basic info even for invalid tokens
             try:
@@ -413,12 +413,12 @@ class SearchCommand(Command):
             with file_path.open("r") as f:
                 data = yaml.safe_load(f)
 
-            print("✅ FOUND TOKEN DATA")
+            print("FOUND TOKEN DATA")
             print("-" * 30)
 
             # Display the data in a formatted way
-            print(f"📧 Email: {data.get('email', 'Not found')}")
-            print(f"🆔 UUID: {data.get('uuid', 'Not found')}")
+            print(f"Email: {data.get('email', 'Not found')}")
+            print(f"UUID: {data.get('uuid', 'Not found')}")
 
             # Handle expiration date
             exp_date = data.get("expiration_date", "Not found")
@@ -426,21 +426,21 @@ class SearchCommand(Command):
                 try:
                     exp_datetime = datetime.fromisoformat(exp_date.replace("Z", "+00:00"))
                     is_expired = exp_datetime <= datetime.now(timezone.utc)
-                    status = "❌ EXPIRED" if is_expired else "✅ VALID"
-                    print(f"📅 Expiration: {exp_date} ({status})")
+                    status = "EXPIRED" if is_expired else "VALID"
+                    print(f"Expiration: {exp_date} ({status})")
                 except Exception:
-                    print(f"📅 Expiration: {exp_date} (Could not parse)")
+                    print(f"Expiration: {exp_date} (Could not parse)")
             else:
-                print(f"📅 Expiration: {exp_date}")
+                print(f"Expiration: {exp_date}")
 
             # Handle generation date
             gen_date = data.get("generated_at", "Not found")
-            print(f"🕒 Generated: {gen_date}")
+            print(f"Generated: {gen_date}")
 
             # Additional info
-            print(f"🔐 Algorithm: {data.get('algorithm', 'Not found')} | "
-                  f"Strength: {data.get('secret_strength')}")
-            print(f"🔑 Token: {data.get('token', 'Not found')}")
+            print(f"Algorithm: {data.get('algorithm', 'Not found')} | "
+                f"Strength: {data.get('secret_strength')}")
+            print(f"Token: {data.get('token', 'Not found')}")
 
         except yaml.YAMLError as e:
             error_message = f"Failed to parse YAML file: {e}"
@@ -457,13 +457,9 @@ class LicenseApp:
     and comprehensive error handling with appropriate exit codes.
     """
 
-    def __init__(self, config: Config | None = None) -> None:
-        """Initialize the license application with configuration and available commands.
-
-        Args:
-            config: Application configuration. Uses default Config() if not provided.
-        """
-        self.config = config or Config()
+    def __init__(self) -> None:
+        """Initialize the license application with configuration and available commands."""
+        self.config = Config()
         self.commands: dict[str, type[Command]] = {
             "generate": GenerateCommand,
             "verify": VerifyCommand,
@@ -480,6 +476,7 @@ class LicenseApp:
             Exit code: 0 for success, 1 for application errors, 2 for system errors, 130 for user interrupt.
         """
         try:
+            # Parse and validate arguments
             args = self.parse_args()
             self.validate_args(args)
 
