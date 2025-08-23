@@ -336,8 +336,8 @@ class ABGridTerminalApp:
         """
         try:
             check_python_version()
-            args = self._parse_args()
-            self._validate_args(args)
+            args = self.parse_args()
+            self.validate_args(args)
 
             command = self.commands[args.action](args, self.config)
             command.execute()
@@ -354,7 +354,7 @@ class ABGridTerminalApp:
         else:
             return EXIT_SUCCESS
 
-    def _parse_args(self) -> argparse.Namespace:
+    def parse_args(self) -> argparse.Namespace:
         """Parse and structure command line arguments.
 
         Defines the complete command-line interface including all arguments,
@@ -389,7 +389,7 @@ class ABGridTerminalApp:
 
         return parser.parse_args()
 
-    def _validate_args(self, args: argparse.Namespace) -> None:
+    def validate_args(self, args: argparse.Namespace) -> None:
         """Validate parsed command line arguments for consistency and requirements.
 
         Performs additional validation beyond basic argument parsing,
