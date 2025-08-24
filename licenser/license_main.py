@@ -295,7 +295,7 @@ class GenerateCommand(Command):
         output_filename = f"{safe_email}.yaml"
         output_path = self.config.output_dir / output_filename
 
-        self.save_token_data(expiration_date, final_uuid, self.args.email,
+        self._save_token_data(expiration_date, final_uuid, self.args.email,
                              output_path, token)
 
         # Display summary
@@ -309,7 +309,11 @@ class GenerateCommand(Command):
         print(f"Token: {token}")
         print("=" * 50)
 
-    def save_token_data(self, expiration_date: datetime, user_uuid: str,
+    ##################################################################################################################
+    #   PRIVATE METHODS
+    ##################################################################################################################
+
+    def _save_token_data(self, expiration_date: datetime, user_uuid: str,
                         email: str, output_path: Path, token: str) -> None:
         """Save JWT token metadata to YAML file with comprehensive information.
 
