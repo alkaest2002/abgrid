@@ -542,12 +542,13 @@ class LicenseApp:
             Parsed command line arguments namespace.
         """
         parser = argparse.ArgumentParser(
+            prog="ABGrid",
             description="Generate JWT token with expiration and UUID. Requires AUTH_SECRET to be configured.",
             epilog="Examples:\n"
-                   "  python create_license.py --generate -e user@example.com -x '2024-12-31'\n"
-                   "  python create_license.py --email user@example.com --expiration '2024-12-31'\n"
-                   "  python create_license.py --verify 'your.jwt.token.here'\n"
-                   "  python create_license.py --search user@example.com",
+               "  python app_terminal.py -u researcher1 -p study2024 -a init\n"
+               "  python app_terminal.py -u researcher1 -p study2024 -a group -m 12 -l en\n"
+               "  python app_terminal.py -u researcher1 -p study2024 -a report -s\n"
+               "  python app_terminal.py -u researcher1 -a batch -s -l it",
             formatter_class=argparse.RawDescriptionHelpFormatter
         )
 

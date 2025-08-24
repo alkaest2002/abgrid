@@ -376,7 +376,16 @@ class TerminalApp:
             - Enforces type checking and value constraints
             - Supports both short and long argument forms where appropriate
         """
-        parser = argparse.ArgumentParser(prog="ABGrid")
+        parser = argparse.ArgumentParser(
+            prog="ABGrid",
+            description="ABGrid terminal app command line interface",
+            epilog="Examples:\n"
+                "  abgrid -u user1 -p project1 -a init\n"
+                "  abgrid -u user1 -p project1 -m 5 -a group\n"
+                "  abgrid -u user1 -p project1 -a report -l en -s\n"
+                "  abgrid -u user1 -a batch -l en -s\n",
+            formatter_class=argparse.RawDescriptionHelpFormatter
+        )
 
         parser.add_argument("-u", "--user", type=str, required=True,
                           help="Base folder where data is stored.")
