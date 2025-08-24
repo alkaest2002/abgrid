@@ -30,7 +30,7 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
     FONTCONFIG_PATH=/etc/fonts
 
 # Install minimal runtime dependencies
-RUN apk add --no-cache fontconfig wget && \
+RUN apk add --no-cache fontconfig wget libstdc++ libgcc && \
     adduser -D -s /bin/sh appuser && \
     rm -rf /var/cache/apk/*
 
@@ -49,6 +49,7 @@ RUN fc-cache -f && \
 COPY --chown=appuser:appuser app_api.py .
 COPY --chown=appuser:appuser lib/ ./lib/
 COPY --chown=appuser:appuser lib/interfaces/docker/gunicorn.conf.py .
+COPY --chown=appuser:appuser .env .env
 
 RUN mkdir -p logs && chown appuser:appuser logs
 
