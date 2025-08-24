@@ -75,8 +75,11 @@ class Command(ABC):
             NotImplementedError: If called on abstract base class
         """
 
+    ##################################################################################################################
+    #   PRIVATE METHODS
+    ##################################################################################################################
 
-    def get_user_path(self) -> Path:
+    def _get_user_path(self) -> Path:
         """Get the file system path for the current user's data folder.
 
         Constructs the path by combining the configured data directory
@@ -87,7 +90,7 @@ class Command(ABC):
         """
         return self.config.data_path / Path(str(self.args.user))
 
-    def get_project_path(self) -> Path:
+    def _get_project_path(self) -> Path:
         """Get the file system path for the current project folder.
 
         Constructs the full project path by combining user path
@@ -96,9 +99,9 @@ class Command(ABC):
         Returns:
             Path object pointing to the specific project directory
         """
-        return self.get_user_path() / Path(str(self.args.project))
+        return self._get_user_path() / Path(str(self.args.project))
 
-    def ensure_folder_exists(self, path: Path) -> None:
+    def _ensure_folder_exists(self, path: Path) -> None:
         """Validate that the specified folder exists on the file system.
 
         Performs existence check and raises appropriate exception if
@@ -117,7 +120,7 @@ class Command(ABC):
             error_message = f"Folder '{path.name}' not found at {path}"
             raise FolderNotFoundError(error_message)
 
-    def ensure_folder_not_exists(self, path: Path) -> None:
+    def _ensure_folder_not_exists(self, path: Path) -> None:
         """Validate that the specified folder doesn't exist on the file system.
 
         Prevents accidental overwriting by checking for existing folders
@@ -158,8 +161,8 @@ class InitCommand(Command):
         Raises:
             FolderAlreadyExistsError: If project already exists
         """
-        project_path = self.get_project_path()
-        self.ensure_folder_not_exists(project_path)
+        project_path = self._get_project_path()
+        self._ensure_folder_not_exists(project_path)
 
         terminal_main = TerminalMain(self.args)
         terminal_main.init_project()
@@ -187,8 +190,8 @@ class GroupCommand(Command):
         Raises:
             FolderNotFoundError: If the target project doesn't exist
         """
-        project_path = self.get_project_path()
-        self.ensure_folder_exists(project_path)
+        project_path = self._get_project_path()
+        self._ensure_folder_exists(project_path)
 
         terminal_main = TerminalMain(self.args)
         terminal_main.generate_group()
@@ -217,8 +220,8 @@ class ReportCommand(Command):
             FolderNotFoundError: If the target project doesn't exist
             ABGridError: If no group files are found in the project
         """
-        project_path = self.get_project_path()
-        self.ensure_folder_exists(project_path)
+        project_path = self._get_project_path()
+        self._ensure_folder_exists(project_path)
 
         terminal_main = TerminalMain(self.args)
         terminal_main.generate_report()
@@ -253,8 +256,8 @@ class BatchCommand(Command):
         Raises:
             FolderNotFoundError: If the user directory doesn't exist
         """
-        user_path = self.get_user_path()
-        self.ensure_folder_exists(user_path)
+        user_path = self._get_user_path()
+        self._ensure_folder_exists(user_path)
 
         project_folders = [path for path in user_path.glob("*") if path.is_dir()]
         if not project_folders:
@@ -287,7 +290,7 @@ class BatchCommand(Command):
             print(f"Failed to process {failed_count} project(s)")
 
 
-class ABGridTerminalApp:
+class TerminalApp:
     """Main application class for AB-Grid terminal interface.
 
     Orchestrates the entire command-line application workflow including
@@ -336,8 +339,8 @@ class ABGridTerminalApp:
         """
         try:
             check_python_version()
-            args = self.parse_args()
-            self.validate_args(args)
+            args = self._parse_args()
+            self._validate_args(args)
 
             command = self.commands[args.action](args, self.config)
             command.execute()
@@ -354,7 +357,11 @@ class ABGridTerminalApp:
         else:
             return EXIT_SUCCESS
 
-    def parse_args(self) -> argparse.Namespace:
+    ##################################################################################################################
+    #   PRIVATE METHODS
+    ##################################################################################################################
+
+    def _parse_args(self) -> argparse.Namespace:
         """Parse and structure command line arguments.
 
         Defines the complete command-line interface including all arguments,
@@ -389,7 +396,7 @@ class ABGridTerminalApp:
 
         return parser.parse_args()
 
-    def validate_args(self, args: argparse.Namespace) -> None:
+    def _validate_args(self, args: argparse.Namespace) -> None:
         """Validate parsed command line arguments for consistency and requirements.
 
         Performs additional validation beyond basic argument parsing,
@@ -434,7 +441,7 @@ def main() -> int:
         - Exit codes follow standard Unix conventions
         - Can be imported and called programmatically if needed
     """
-    app = ABGridTerminalApp()
+    app = TerminalApp()
     return app.run()
 
 if __name__ == "__main__":

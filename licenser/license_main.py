@@ -98,29 +98,7 @@ class JWTGenerator:
         self.algorithm = config.algorithm
 
         # Validate secret key strength
-        self.validate_secret_strength()
-
-    def validate_secret_strength(self) -> None:
-        """Validate secret key meets minimum security requirements.
-
-        Prints a warning if the secret key is shorter than the configured minimum length.
-        Does not raise an exception to allow operation with weak keys if necessary.
-        """
-        if len(self.secret_key) < self.config.min_secret_length:
-            print(f"Security Warning: Secret key should be at least {self.config.min_secret_length} characters.")
-            print(f"Current length: {len(self.secret_key)} characters")
-
-    def get_secret_info(self) -> dict[str, Any]:
-        """Get information about the current secret key configuration.
-
-        Returns:
-            Dictionary containing secret key length, algorithm, and strength assessment.
-        """
-        return {
-            "length": len(self.secret_key),
-            "algorithm": self.algorithm,
-            "is_strong": len(self.secret_key) >= self.config.min_secret_length,
-        }
+        self._validate_secret_strength()
 
     def generate_token(self, expiration_date: datetime) -> tuple[str, str]:
         """Generate a JWT token with UUID subject and expiration validation.
@@ -190,6 +168,32 @@ class JWTGenerator:
             error_message = f"Token verification failed: {e}"
             raise TokenVerificationError(error_message) from e
 
+    def get_secret_info(self) -> dict[str, Any]:
+        """Get information about the current secret key configuration.
+
+        Returns:
+            Dictionary containing secret key length, algorithm, and strength assessment.
+        """
+        return {
+            "length": len(self.secret_key),
+            "algorithm": self.algorithm,
+            "is_strong": len(self.secret_key) >= self.config.min_secret_length,
+        }
+
+    ##################################################################################################################
+    #   PRIVATE METHODS
+    ##################################################################################################################
+
+    def _validate_secret_strength(self) -> None:
+        """Validate secret key meets minimum security requirements.
+
+        Prints a warning if the secret key is shorter than the configured minimum length.
+        Does not raise an exception to allow operation with weak keys if necessary.
+        """
+        if len(self.secret_key) < self.config.min_secret_length:
+            print(f"Security Warning: Secret key should be at least {self.config.min_secret_length} characters.")
+            print(f"Current length: {len(self.secret_key)} characters")
+
 
 class Command(ABC):
     """Abstract base class for all license management commands.
@@ -214,7 +218,11 @@ class Command(ABC):
     def execute(self) -> None:
         """Execute the specific command logic. Must be implemented by subclasses."""
 
-    def parse_expiration_date(self, date_string: str) -> datetime:
+    ##################################################################################################################
+    #   PRIVATE METHODS
+    ##################################################################################################################
+
+    def _parse_expiration_date(self, date_string: str) -> datetime:
         """Parse date string using configured formats, returning UTC datetime.
 
         Args:
@@ -235,7 +243,7 @@ class Command(ABC):
         error_message = f"Could not parse date '{date_string}'. Supported formats: {', '.join(self.config.date_formats[:3])}, etc."
         raise DateParsingError(error_message)
 
-    def email_to_safe_filename(self, email: str) -> str:
+    def _email_to_safe_filename(self, email: str) -> str:
         """Convert email address to URL-encoded safe filename.
 
         Args:
@@ -245,18 +253,6 @@ class Command(ABC):
             URL-encoded string safe for use as filename.
         """
         return urllib.parse.quote(email, safe="")
-
-    def safe_filename_to_email(self, filename: str) -> str:
-        """Convert URL-encoded filename back to original email address.
-
-        Args:
-            filename: URL-encoded filename (with or without .yaml extension).
-
-        Returns:
-            Original email address.
-        """
-        base_name = filename.replace(".yaml", "")
-        return urllib.parse.unquote(base_name)
 
 
 class GenerateCommand(Command):
@@ -286,7 +282,7 @@ class GenerateCommand(Command):
             raise LicenseError(error_message)
 
         # Parse and validate expiration date
-        expiration_date = self.parse_expiration_date(self.args.expiration)
+        expiration_date = self._parse_expiration_date(self.args.expiration)
         if expiration_date <= datetime.now(timezone.utc):
             error_message = "Expiration date is in the past"
             raise LicenseError(error_message)
@@ -295,7 +291,7 @@ class GenerateCommand(Command):
         token, final_uuid = self.jwt_generator.generate_token(expiration_date)
 
         # Create filename and save
-        safe_email = self.email_to_safe_filename(self.args.email)
+        safe_email = self._email_to_safe_filename(self.args.email)
         output_filename = f"{safe_email}.yaml"
         output_path = self.config.output_dir / output_filename
 
@@ -409,7 +405,7 @@ class SearchCommand(Command):
             LicenseError: If YAML parsing fails or file cannot be read.
         """
         email = self.args.search
-        safe_email = self.email_to_safe_filename(email)
+        safe_email = self._email_to_safe_filename(email)
         expected_filename = f"{safe_email}.yaml"
         file_path = self.config.output_dir / expected_filename
 
@@ -494,11 +490,11 @@ class LicenseApp:
         """
         try:
             # Parse and validate arguments
-            args = self.parse_args()
-            self.validate_args(args)
+            args = self._parse_args()
+            self._validate_args(args)
 
             # Determine action based on arguments
-            action = self.determine_action(args)
+            action = self._determine_action(args)
 
             # Create command with shared JWT generator
             command = self.commands[action](args, self.config, self.jwt_generator)
@@ -516,7 +512,11 @@ class LicenseApp:
         else:
             return EXIT_SUCCESS
 
-    def determine_action(self, args: argparse.Namespace) -> str:
+    ##################################################################################################################
+    #   PRIVATE METHODS
+    ##################################################################################################################
+
+    def _determine_action(self, args: argparse.Namespace) -> str:
         """Determine which command action to execute based on parsed arguments.
 
         Args:
@@ -531,7 +531,7 @@ class LicenseApp:
             return "search"
         return "generate"
 
-    def parse_args(self) -> argparse.Namespace:
+    def _parse_args(self) -> argparse.Namespace:
         """Parse and structure command line arguments with mutually exclusive operations.
 
         Sets up argument parser with generate (default), verify, and search operations
@@ -574,7 +574,7 @@ class LicenseApp:
 
         return parser.parse_args()
 
-    def validate_args(self, args: argparse.Namespace) -> None:
+    def _validate_args(self, args: argparse.Namespace) -> None:
         """Validate parsed command line arguments for required fields.
 
         Ensures that token generation operations have required email and expiration arguments.
