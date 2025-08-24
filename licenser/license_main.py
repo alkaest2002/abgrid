@@ -500,7 +500,7 @@ class LicenseApp:
             # Determine action based on arguments
             action = self._determine_action(args)
 
-            # Create command with shared JWT generator
+            # Create command and execute it
             command = self.commands[action](args, self.config, self.jwt_generator)
             command.execute()
 
