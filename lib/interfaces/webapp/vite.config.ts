@@ -24,14 +24,6 @@ export default defineConfig({
         }
     },
     plugins: [
-        tailwindcss(),
-        basicSsl({
-            /** name of certification */
-            name: "abgrid",
-            /** custom trust domains */
-            domains: [],
-            /** custom certification directory */
-            certDir: ".devServer/cert"
-        }),
+        tailwindcss()
     ],
 })
