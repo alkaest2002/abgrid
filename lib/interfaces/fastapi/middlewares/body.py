@@ -42,7 +42,7 @@ class BodySizeLimitMiddleware(BaseHTTPMiddleware):
             max_body_size (int, optional): Maximum allowed request body size in bytes.
                 Defaults to 102,400 bytes (300KB). Must be a positive integer.
 
-        Return:
+        Returns:
             None.
         """
         super().__init__(app)
@@ -179,7 +179,7 @@ class BodySizeLimitMiddleware(BaseHTTPMiddleware):
                     max_size: Maximum allowed cumulative body size in bytes. Must be
                         a positive integer representing the size limit.
 
-                Return:
+                Returns:
                     None.
                 """
                 self.original_receive = original_receive

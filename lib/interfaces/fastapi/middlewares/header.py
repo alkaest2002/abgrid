@@ -43,7 +43,7 @@ class HeaderSizeLimitMiddleware(BaseHTTPMiddleware):
             max_header_size: Maximum allowed size for any individual header value
                            in bytes (default: 8KB).
 
-        Return:
+        Returns:
             None.
         """
         super().__init__(app)

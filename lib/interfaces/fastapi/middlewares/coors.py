@@ -18,7 +18,7 @@ def add_cors_middleware(app: FastAPI) -> None:
     Args:
         app (FastAPI): The FastAPI application instance
 
-    Return:
+    Returns:
         None.
     """
     # List of ports

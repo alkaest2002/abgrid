@@ -26,7 +26,7 @@ class RateLimitError(Exception):
         Args:
             message: The error message describing the rate limit violation.
 
-        Return:
+        Returns:
             None.
         """
         self.message = message
@@ -63,7 +63,7 @@ class SimpleRateLimiter:
             max_cache_size: Maximum cache entries to prevent memory leaks. Defaults to 10000.
             skip_options: Skip rate limiting for OPTIONS requests (CORS preflight). Defaults to True.
 
-        Return:
+        Returns:
             None.
 
         Raises:
@@ -185,7 +185,7 @@ class SimpleRateLimiter:
         Args:
             key: Cache key for the specific user/endpoint combination.
 
-        Return:
+        Returns:
             None.
 
         Raises:

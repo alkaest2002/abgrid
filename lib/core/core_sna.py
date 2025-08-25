@@ -51,6 +51,9 @@ class CoreSna:
         Args:
             packed_edges_a: List of packed edges for group A.
             packed_edges_b: List of packed edges for group B.
+
+        Returns:
+            None.
         """
         # Store packed edges for later use
         self.packed_edges_a = packed_edges_a

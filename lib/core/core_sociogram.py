@@ -56,7 +56,7 @@ class CoreSociogram:
             packed_edges_b: List of dictionaries containing edge data for negative relationships.
                 Each dictionary should contain source and target node identifiers.
 
-        Return:
+        Returns:
             None.
         """
         # Store packed edges for later use

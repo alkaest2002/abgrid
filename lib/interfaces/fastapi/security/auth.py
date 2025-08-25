@@ -17,7 +17,11 @@ class Auth:
     """Simple JWT token verification for anonymous users."""
 
     def __init__(self) -> None:
-        """Initialize an Auth instance with an AnonymousJWT handler."""
+        """Initialize an Auth instance with an AnonymousJWT handler.
+
+        Returns:
+            None.
+        """
         self.jwt_handler = AnonymousJWT()
 
     async def verify_token(

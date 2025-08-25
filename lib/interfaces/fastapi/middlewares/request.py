@@ -44,6 +44,9 @@ class RequestProtectionMiddleware(BaseHTTPMiddleware):
         Args:
             app (ASGIApp): The ASGI application instance to wrap with protection.
 
+        Returns:
+            None.
+
         Notes:
             The request timeout is hardcoded to 60 seconds, while max concurrent
             requests is loaded from the Settings configuration.

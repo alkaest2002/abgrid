@@ -83,7 +83,7 @@ class JWTGenerator:
         Args:
             config: Application configuration containing algorithm and security settings.
 
-        Return:
+        Returns:
             None.
 
         Raises:
@@ -213,7 +213,7 @@ class Command(ABC):
             config: Application configuration settings.
             jwt_generator: Shared JWT generator instance.
 
-        Return:
+        Returns:
             None.
         """
         self.args = args
@@ -334,7 +334,7 @@ class GenerateCommand(Command):
             output_path: Path where YAML file should be saved.
             token: Generated JWT token string.
 
-        Return:
+        Returns:
             None.
         """
         secret_info = self.jwt_generator.get_secret_info()
@@ -481,6 +481,9 @@ class LicenseApp:
         Creates configuration and JWT generator once, to be shared across all commands.
         This ensures consistent secret key validation and reduces object creation overhead.
 
+        Returns:
+            None.
+
         Raises:
             SecretKeyError: If AUTH_SECRET environment variable is not set or invalid.
         """
@@ -595,6 +598,9 @@ class LicenseApp:
 
         Args:
             args: Parsed command line arguments.
+
+        Returns:
+            None.
 
         Raises:
             LicenseError: If required arguments are missing for token generation.

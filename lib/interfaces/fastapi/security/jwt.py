@@ -21,7 +21,11 @@ class AnonymousJWT:
     """Simple JWT handler for anonymous user tracking."""
 
     def __init__(self) -> None:
-        """Initializes an AnonymousJWT instance."""
+        """Initializes an AnonymousJWT instance.
+
+        Returns:
+            None.
+        """
         self.secret_key = settings.auth_secret
         self.algorithm = "HS256"
         self.token_lifetime = timedelta(hours=720)

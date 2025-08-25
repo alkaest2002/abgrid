@@ -333,7 +333,7 @@ class ABGridReportSchemaIn(BaseModel):
             errors: List to append errors to.
             total_keys: Total number of keys in the choice set.
 
-        Return:
+        Returns:
             None.
         """
         if value_str is None:
@@ -398,7 +398,7 @@ class ABGridReportSchemaIn(BaseModel):
             all_valid_keys: Set of all valid keys from both choices.
             errors: List to append errors to.
 
-        Return:
+        Returns:
             None.
         """
         for field_name in ["choices_a", "choices_b"]:
@@ -438,7 +438,7 @@ class ABGridReportSchemaIn(BaseModel):
             data: Full data dictionary.
             errors: List to append errors to.
 
-        Return:
+        Returns:
             None.
         """
         choices_a = data.get("choices_a")
@@ -466,7 +466,7 @@ class ABGridReportSchemaIn(BaseModel):
             field_name: Name of choice field for error reporting.
             errors: List to append errors to.
 
-        Return:
+        Returns:
             None.
         """
         if len(choices) == 0:

@@ -56,7 +56,14 @@ class QueryParamLimitMiddleware(BaseHTTPMiddleware):
     MAX_PARAMS_COUNT: ClassVar[int] = 2           # Only 2 possible parameters
 
     def __init__(self, app: ASGIApp) -> None:
-        """Initialize the aggressive query parameter validation middleware."""
+        """Initialize the aggressive query parameter validation middleware.
+
+        Args:
+            app: The ASGI application instance.
+
+        Returns:
+            None.
+        """
         super().__init__(app)
 
     async def dispatch(self, request: Request, call_next: Callable[[Request], Awaitable[Response]]) -> Response:  # noqa: PLR0911, PLR0912
