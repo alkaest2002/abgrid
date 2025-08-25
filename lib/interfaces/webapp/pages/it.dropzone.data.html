@@ -55,7 +55,10 @@
                                 </div>
                                 <div class="flex items-end justify-end gap-1">
                                     <!-- sociogram -->
-                                    <div class="h-8 flex p-3 text-sm bg-gray-300 rounded-lg relative select-none cursor-pointer">
+                                    <div
+                                        x-show="showDropzoneDataWithSociogram" 
+                                        class="h-8 flex p-3 text-sm bg-gray-300 rounded-lg relative select-none cursor-pointer"
+                                    >
                                         <div 
                                             x-data="{}" x-show="$store.api.apiRequestIsPending"
                                             class="absolute top-0 left-0 h-full w-full bg-gray-300 opacity-75 rounded-lg cursor-not-allowed">
