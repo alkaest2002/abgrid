@@ -42,9 +42,9 @@ class RequestProtectionMiddleware(BaseHTTPMiddleware):
         control maximum concurrent API requests.
 
         Args:
-            app (ASGIApp): The ASGI application instance to wrap with protection
+            app (ASGIApp): The ASGI application instance to wrap with protection.
 
-        Note:
+        Notes:
             The request timeout is hardcoded to 60 seconds, while max concurrent
             requests is loaded from the Settings configuration.
         """
@@ -64,11 +64,11 @@ class RequestProtectionMiddleware(BaseHTTPMiddleware):
         - Other routes: Apply timeout protection only
 
         Args:
-            request (Request): The incoming HTTP request object
-            call_next (Callable): The next middleware or route handler in the chain
+            request (Request): The incoming HTTP request object.
+            call_next (Callable): The next middleware or route handler in the chain.
 
         Returns:
-            Response: HTTP response from the protected request processing
+            Response: HTTP response from the protected request processing.
 
         Raises:
             The method handles exceptions internally and returns appropriate
@@ -90,15 +90,15 @@ class RequestProtectionMiddleware(BaseHTTPMiddleware):
         Uses a semaphore to control concurrent access to API endpoints.
 
         Args:
-            request (Request): The API request to process
-            call_next (Callable): The next handler in the processing chain
+            request (Request): The API request to process.
+            call_next (Callable): The next handler in the processing chain.
 
         Returns:
             Response: Either the processed request response or a 429 error response
-                - 200-5xx: Normal response from successful request processing
-                - 429: Too many concurrent requests error with JSON detail
+                - 200-5xx: Normal response from successful request processing.
+                - 429: Too many concurrent requests error with JSON detail.
 
-        Note:
+        Notes:
             The semaphore.locked() check provides immediate rejection without
             waiting, preventing request queuing when at capacity.
         """
@@ -122,18 +122,18 @@ class RequestProtectionMiddleware(BaseHTTPMiddleware):
         long-running requests from consuming resources indefinitely.
 
         Args:
-            request (Request): The request to process with timeout protection
-            call_next (Callable): The next handler in the processing chain
+            request (Request): The request to process with timeout protection.
+            call_next (Callable): The next handler in the processing chain.
 
         Returns:
             Response: Either the processed request response or a timeout error
-                - 200-5xx: Normal response from successful request processing
-                - 408: Request timeout error with JSON detail
+                - 200-5xx: Normal response from successful request processing.
+                - 408: Request timeout error with JSON detail.
 
         Raises:
-            TimeoutError: Caught internally and converted to 408 HTTP response
+            TimeoutError: Caught internally and converted to 408 HTTP response.
 
-        Note:
+        Notes:
             The timeout value is configured in self.request_timeout (60 seconds).
             This prevents both malicious and accidental resource exhaustion from
             long-running requests.

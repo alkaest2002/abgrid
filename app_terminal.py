@@ -52,11 +52,11 @@ class Command(ABC):
         """Initialize command with parsed arguments and configuration.
 
         Args:
-            args: Parsed command line arguments containing user input
-            config: Application configuration with settings and constraints
+            args: Parsed command line arguments containing user input.
+            config: Application configuration with settings and constraints.
 
         Returns:
-            None
+            None.
         """
         self.args = args
         self.config = config
@@ -69,10 +69,10 @@ class Command(ABC):
         classes to define their specific behavior and operations.
 
         Returns:
-            None
+            None.
 
         Raises:
-            NotImplementedError: If called on abstract base class
+            NotImplementedError: If called on abstract base class.
         """
 
     ##################################################################################################################
@@ -108,13 +108,13 @@ class Command(ABC):
         the folder is not found, providing clear error messaging.
 
         Args:
-            path: Path object to validate for existence
+            path: Path object to validate for existence.
 
         Returns:
-            None
+            None.
 
         Raises:
-            FolderNotFoundError: If the specified folder doesn't exist
+            FolderNotFoundError: If the specified folder doesn't exist.
         """
         if not path.exists():
             error_message = f"Folder '{path.name}' not found at {path}"
@@ -127,13 +127,13 @@ class Command(ABC):
         and raising an exception if a conflict is detected.
 
         Args:
-            path: Path object to validate for non-existence
+            path: Path object to validate for non-existence.
 
         Returns:
-            None
+            None.
 
         Raises:
-            FolderAlreadyExistsError: If the specified folder already exists
+            FolderAlreadyExistsError: If the specified folder already exists.
         """
         if path.exists():
             error_message = f"Project '{path.name}' already exists at {path}"
@@ -156,10 +156,10 @@ class InitCommand(Command):
         new AB-Grid project.
 
         Returns:
-            None
+            None.
 
         Raises:
-            FolderAlreadyExistsError: If project already exists
+            FolderAlreadyExistsError: If project already exists.
         """
         project_path = self._get_project_path()
         self._ensure_folder_not_exists(project_path)
@@ -185,10 +185,10 @@ class GroupCommand(Command):
         and template data.
 
         Returns:
-            None
+            None.
 
         Raises:
-            FolderNotFoundError: If the target project doesn't exist
+            FolderNotFoundError: If the target project doesn't exist.
         """
         project_path = self._get_project_path()
         self._ensure_folder_exists(project_path)
@@ -214,11 +214,11 @@ class ReportCommand(Command):
         and JSON data exports.
 
         Returns:
-            None
+            None.
 
         Raises:
-            FolderNotFoundError: If the target project doesn't exist
-            ABGridError: If no group files are found in the project
+            - FolderNotFoundError: If the target project doesn't exist.
+            - ABGridError: If no group files are found in the project.
         """
         project_path = self._get_project_path()
         self._ensure_folder_exists(project_path)
@@ -246,15 +246,15 @@ class BatchCommand(Command):
         batch operation results.
 
         Returns:
-            None
+            None.
 
         Notes:
-            - Continues processing remaining projects if individual failures occur
-            - Provides detailed progress feedback and error reporting
-            - Summarizes total processed and failed project counts
+            - Continues processing remaining projects if individual failures occur.
+            - Provides detailed progress feedback and error reporting.
+            - Summarizes total processed and failed project counts.
 
         Raises:
-            FolderNotFoundError: If the user directory doesn't exist
+            FolderNotFoundError: If the user directory doesn't exist.
         """
         user_path = self._get_user_path()
         self._ensure_folder_exists(user_path)
@@ -305,10 +305,10 @@ class TerminalApp:
         mapping action names to their corresponding command classes.
 
         Args:
-            config: Optional custom configuration. If None, uses default Config()
+            config: Optional custom configuration. If None, uses default Config().
 
         Returns:
-            None
+            None.
         """
         self.config = config or Config()
         self.commands: dict[str, type[Command]] = {
@@ -327,15 +327,15 @@ class TerminalApp:
 
         Returns:
             Integer exit code:
-            - EXIT_SUCCESS (0): Successful execution
-            - EXIT_APP_ERROR (1): Application-specific error
-            - EXIT_SYSTEM_ERROR (2): Unexpected system error
-            - EXIT_USER_INTERRUPT (130): User cancelled operation
+            - EXIT_SUCCESS (0): Successful execution.
+            - EXIT_APP_ERROR (1): Application-specific error.
+            - EXIT_SYSTEM_ERROR (2): Unexpected system error.
+            - EXIT_USER_INTERRUPT (130): User cancelled operation.
 
         Notes:
-            - Handles all exception types with appropriate user feedback
-            - Provides clean exit codes for shell script integration
-            - Supports keyboard interrupt (Ctrl+C) handling
+            - Handles all exception types with appropriate user feedback.
+            - Provides clean exit codes for shell script integration.
+            - Supports keyboard interrupt (Ctrl+C) handling.
         """
         try:
             check_python_version()
@@ -372,9 +372,9 @@ class TerminalApp:
             Namespace object containing parsed command line arguments
 
         Notes:
-            - Includes comprehensive help text for each argument
-            - Enforces type checking and value constraints
-            - Supports both short and long argument forms where appropriate
+            - Includes comprehensive help text for each argument.
+            - Enforces type checking and value constraints.
+            - Supports both short and long argument forms where appropriate.
         """
         parser = argparse.ArgumentParser(
             prog="ABGrid",
@@ -413,18 +413,18 @@ class TerminalApp:
         and logical consistency between different arguments.
 
         Args:
-            args: Parsed command line arguments to validate
+            args: Parsed command line arguments to validate.
 
         Returns:
-            None
+            None.
 
         Raises:
-            InvalidArgumentError: If arguments fail validation checks
+            InvalidArgumentError: If arguments fail validation checks.
 
         Notes:
-            - Ensures project name is provided for actions that require it
-            - Validates user name character constraints for file system safety
-            - Can be extended for additional business logic validation
+            - Ensures project name is provided for actions that require it.
+            - Validates user name character constraints for file system safety.
+            - Can be extended for additional business logic validation.
         """
         if args.action in ["init", "group", "report"] and not args.project:
             error_message = f"Project name required for {args.action} action"
@@ -446,9 +446,9 @@ def main() -> int:
         Integer exit code from application execution
 
     Notes:
-        - Designed to be called from command line or shell scripts
-        - Exit codes follow standard Unix conventions
-        - Can be imported and called programmatically if needed
+        - Designed to be called from command line or shell scripts.
+        - Exit codes follow standard Unix conventions.
+        - Can be imported and called programmatically if needed.
     """
     app = TerminalApp()
     return app.run()

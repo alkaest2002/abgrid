@@ -332,6 +332,9 @@ class ABGridReportSchemaIn(BaseModel):
             value_str: Value to validate.
             errors: List to append errors to.
             total_keys: Total number of keys in the choice set.
+
+        Return:
+            None.
         """
         if value_str is None:
             return
@@ -394,6 +397,9 @@ class ABGridReportSchemaIn(BaseModel):
             data: Full data dictionary.
             all_valid_keys: Set of all valid keys from both choices.
             errors: List to append errors to.
+
+        Return:
+            None.
         """
         for field_name in ["choices_a", "choices_b"]:
             choices = data.get(field_name)
@@ -431,6 +437,9 @@ class ABGridReportSchemaIn(BaseModel):
         Args:
             data: Full data dictionary.
             errors: List to append errors to.
+
+        Return:
+            None.
         """
         choices_a = data.get("choices_a")
         choices_b = data.get("choices_b")
@@ -456,6 +465,9 @@ class ABGridReportSchemaIn(BaseModel):
             choices: List of choice dictionaries.
             field_name: Name of choice field for error reporting.
             errors: List to append errors to.
+
+        Return:
+            None.
         """
         if len(choices) == 0:
             return  # No choices to validate

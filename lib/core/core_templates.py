@@ -34,10 +34,10 @@ def universal_iter_rows(data: Any) -> Any:
     - For single values: wraps in list as [(0, value)]
 
     Args:
-        data: Input data to iterate over
+        data: Input data to iterate over.
 
     Returns:
-        Iterator of (key, value) tuples
+        Iterator of (key, value) tuples.
     """
    # Pandas DataFrame
     if hasattr(data, "iterrows"):
@@ -97,16 +97,16 @@ class CoreRenderer:
         """Render Jinja2 template with provided template_data.
 
         Args:
-            template_path_str: Path (as string) to the Jinja2 template file relative to template directory
-            template_data: Dictionary containing template context variables and data
+            template_path_str: Path (as string) to the Jinja2 template file relative to template directory.
+            template_data: Dictionary containing template context variables and data.
 
         Returns:
-            Rendered template as string
+            Rendered template as string.
 
         Raises:
-            FileNotFoundError: If template file is not found
-            TemplateRenderError: If template rendering fails due to syntax or runtime errors
-            ValueError: If input parameters are invalid
+            - FileNotFoundError: If template file is not found.
+            - TemplateRenderError: If template rendering fails due to syntax or runtime errors.
+            - ValueError: If input parameters are invalid.
         """
         # Ensure template_path
         if not template_path_str:

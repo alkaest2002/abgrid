@@ -83,6 +83,9 @@ class JWTGenerator:
         Args:
             config: Application configuration containing algorithm and security settings.
 
+        Return:
+            None.
+
         Raises:
             SecretKeyError: If AUTH_SECRET environment variable is not set.
         """
@@ -209,6 +212,9 @@ class Command(ABC):
             args: Parsed command line arguments.
             config: Application configuration settings.
             jwt_generator: Shared JWT generator instance.
+
+        Return:
+            None.
         """
         self.args = args
         self.config = config
@@ -327,6 +333,9 @@ class GenerateCommand(Command):
             email: Email address associated with the token.
             output_path: Path where YAML file should be saved.
             token: Generated JWT token string.
+
+        Return:
+            None.
         """
         secret_info = self.jwt_generator.get_secret_info()
 

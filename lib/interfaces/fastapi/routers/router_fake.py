@@ -47,10 +47,10 @@ def get_router_fake() -> APIRouter:
         """Simulate an error response based on the provided error type.
 
         Args:
-            error_type: The error type key that matches one of the predefined error codes
+            error_type: The error type key that matches one of the predefined error codes.
 
         Returns:
-            JSONResponse: Error response with appropriate status code and detail message
+            JSONResponse: Error response with appropriate status code and detail message.
 
         Status Codes:
             Various: Depends on the error_type parameter

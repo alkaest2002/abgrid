@@ -17,6 +17,9 @@ def add_cors_middleware(app: FastAPI) -> None:
 
     Args:
         app (FastAPI): The FastAPI application instance
+
+    Return:
+        None.
     """
     # List of ports
     fancy_ports: list[str] = ["53472", "53247", "53274", "53427", "53724", "53742"]

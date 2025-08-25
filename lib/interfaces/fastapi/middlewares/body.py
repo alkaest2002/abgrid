@@ -25,7 +25,7 @@ class BodySizeLimitMiddleware(BaseHTTPMiddleware):
     Attributes:
         max_body_size (int): Maximum allowed request body size in bytes
 
-    Note:
+    Notes:
         This middleware should be added early in the middleware stack to prevent
         processing of oversized requests before they consume significant resources.
     """
@@ -42,6 +42,8 @@ class BodySizeLimitMiddleware(BaseHTTPMiddleware):
             max_body_size (int, optional): Maximum allowed request body size in bytes.
                 Defaults to 102,400 bytes (300KB). Must be a positive integer.
 
+        Return:
+            None.
         """
         super().__init__(app)
         self.max_body_size = max_body_size
@@ -68,9 +70,9 @@ class BodySizeLimitMiddleware(BaseHTTPMiddleware):
 
         Returns:
             Response: One of the following:
-                - JSONResponse with 413 status if body exceeds size limit
-                - JSONResponse with 400 status if Content-Length header is malformed
-                - Response from the next handler if body size is acceptable
+                - JSONResponse with 413 status if body exceeds size limit.
+                - JSONResponse with 400 status if Content-Length header is malformed.
+                - Response from the next handler if body size is acceptable.
 
         Raises:
             No exceptions are raised directly. All error conditions are converted
@@ -130,7 +132,7 @@ class BodySizeLimitMiddleware(BaseHTTPMiddleware):
                 during stream processing. This exception is caught by the dispatch
                 method and converted to an HTTP 413 response.
 
-        Technical Details:
+        Notes:
             - Creates a SizeLimitedBody wrapper around the original receive callable
             - Preserves all original request metadata (headers, method, path, etc.)
             - Monitors only 'http.request' message types for body content
@@ -176,6 +178,9 @@ class BodySizeLimitMiddleware(BaseHTTPMiddleware):
                         MutableMapping[str, Any] representing ASGI messages.
                     max_size: Maximum allowed cumulative body size in bytes. Must be
                         a positive integer representing the size limit.
+
+                Return:
+                    None.
                 """
                 self.original_receive = original_receive
                 self.max_size = max_size

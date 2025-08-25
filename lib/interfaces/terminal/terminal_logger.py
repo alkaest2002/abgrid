@@ -33,9 +33,9 @@ def logger_decorator[F: Callable[..., Any]](func: F | None = None) -> F | Callab
     catching common exceptions and formatting them for user-friendly display.
 
     Notes:
-        - Returns None for handled exceptions (doesn"t re-raise them)
-        - Uses print for consistent message formatting
-        - Handles different exception types with appropriate formatting
+        - Returns None for handled exceptions (doesn"t re-raise them).
+        - Uses print for consistent message formatting.
+        - Handles different exception types with appropriate formatting.
     """
 
     def _decorator(function: F) -> F:
@@ -105,16 +105,16 @@ def extract_traceback_info(error: Exception, exclude_files: set[str] | None = No
     filtering out specified files to focus on relevant code locations.
 
     Args:
-        error: Exception object containing traceback information
-        exclude_files: Set of filenames to exclude from traceback output
+        error: Exception object containing traceback information.
+        exclude_files: Set of filenames to exclude from traceback output.
 
     Returns:
-        Formatted string containing traceback information
+        Formatted string containing traceback information.
 
     Notes:
-        - Defaults to excluding "terminal_logger.py" from traceback
-        - Formats each frame as "filename:line_number in function_name()"
-        - Includes the original error message
+        - Defaults to excluding "terminal_logger.py" from traceback.
+        - Formats each frame as "filename:line_number in function_name()".
+        - Includes the original error message.
     """
     if exclude_files is None:
         exclude_files = {"terminal_logger.py"}
@@ -146,10 +146,10 @@ def extract_pydantic_errors(pydantic_validation_exception: PydanticValidationErr
     clear information about field locations and error descriptions.
 
     Args:
-        pydantic_validation_exception: PydanticValidationError containing error details
+        pydantic_validation_exception: PydanticValidationError containing error details.
 
     Returns:
-        Formatted string containing all validation errors
+        Formatted string containing all validation errors.
     """
     formatted_errors = [
         "Pydantic validation errors:",

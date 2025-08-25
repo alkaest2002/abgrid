@@ -119,20 +119,20 @@ def compute_descriptives(data: pd.DataFrame) -> pd.DataFrame:
     basic describe() function with additional metrics useful for social network analysis.
 
     Args:
-        data: DataFrame containing numerical data for statistical analysis
+        data: DataFrame containing numerical data for statistical analysis.
 
     Returns:
         DataFrame with comprehensive descriptive statistics for each column,
         including: count, min, max, median, mean, std, cv (coefficient of variation),
-        gn (Gini coefficient), sk (skewness), kt (kurtosis), 25%, 75%
+        gn (Gini coefficient), sk (skewness), kt (kurtosis), 25%, 75%.
 
     Notes:
-        - Includes standard statistics: count, min, max, mean, std, quartiles
-        - Adds coefficient of variation (cv) for relative variability
-        - Calculates skewness (sk) and kurtosis (kt) for distribution shape
-        - Computes Gini coefficient (gn) for inequality measurement
-        - Reorders columns for logical statistical interpretation
-        - Renames "50%" to "median" for clarity
+        - Includes standard statistics: count, min, max, mean, std, quartiles.
+        - Adds coefficient of variation (cv) for relative variability.
+        - Calculates skewness (sk) and kurtosis (kt) for distribution shape.
+        - Computes Gini coefficient (gn) for inequality measurement.
+        - Reorders columns for logical statistical interpretation.
+        - Renames "50%" to "median" for clarity.
     """
     # Compute descriptive statistics with pandas descrive
     descriptives = data.describe().T

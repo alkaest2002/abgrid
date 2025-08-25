@@ -35,12 +35,12 @@ class QueryParamLimitMiddleware(BaseHTTPMiddleware):
     - Excessive parameter counts
 
     Args:
-        app: The ASGI application instance
+        app: The ASGI application instance.
 
     Raises:
-        JSONResponse: Returns 400 status for various validation failures
+        JSONResponse: Returns 400 status for various validation failures.
 
-    Note:
+    Notes:
         This middleware is designed for maximum efficiency and security in a
         controlled API environment where parameter specifications are strict.
         Empty query strings bypass all validation.
@@ -74,11 +74,11 @@ class QueryParamLimitMiddleware(BaseHTTPMiddleware):
         6. Business logic validation (required params, valid values)
 
         Args:
-            request: The incoming HTTP request
-            call_next: The next middleware or route handler
+            request: The incoming HTTP request.
+            call_next: The next middleware or route handler.
 
         Returns:
-            Response: Error response for violations or result from next handler
+            Response: Error response for violations or result from next handler.
         """
         query_string = str(request.url.query)
 

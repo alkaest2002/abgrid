@@ -20,7 +20,7 @@ class PydanticValidationError(Exception):
         """Initialize exception with validation errors.
 
         Args:
-            errors: List of validation error dictionaries. Each dictionary
+            errors: List of validation error dictionaries. Each dictionary:
                 should contain 'location', 'value_to_blame', and 'error_message' keys.
                 Only 'location' and 'error_message' are used for the exception message.
         """

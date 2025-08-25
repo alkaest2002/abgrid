@@ -36,7 +36,7 @@ class Settings(BaseSettings):
         MAX_CONCURRENT_REQUESTS_FOR_GROUP: Optional concurrent request limit for group endpoint (default: 15)
         MAX_CONCURRENT_REQUESTS_FOR_REPORT: Optional concurrent request limit for report endpoints (default: 5)
 
-    Note:
+    Notes:
         Settings are cached using @lru_cache() for performance. The same instance
         is returned on subsequent calls to load().
     """
@@ -72,13 +72,13 @@ class Settings(BaseSettings):
         improving performance and ensuring consistency.
 
         Returns:
-            Settings: A configured Settings instance with all values loaded and validated
+            Settings: A configured Settings instance with all values loaded and validated.
 
         Raises:
-            ValidationError: If required settings are missing or invalid
-            FileNotFoundError: If .env file is specified but not found (non-fatal)
+            - ValidationError: If required settings are missing or invalid.
+            - FileNotFoundError: If .env file is specified but not found (non-fatal).
 
-        Note:
+        Notes:
             The @lru_cache() decorator ensures this method returns the same instance
             across multiple calls, making it safe to call Settings.load() anywhere
             in the application without performance concerns.

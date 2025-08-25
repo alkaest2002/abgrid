@@ -35,11 +35,11 @@ class TerminalMain:
 
         Args:
             args: Parsed command line arguments containing project configuration
-                 Must have: user, project, language, action
-                 May have: members_per_group, with_sociogram
+                 Must have: user, project, language, action.
+                 May have: members_per_group, with_sociogram.
 
         Returns:
-            None
+            None.
         """
         # Store args and extract properties
         self.args = args
@@ -69,11 +69,11 @@ class TerminalMain:
         Creates the project directory structure including subdirectories for reports.
 
         Returns:
-            None
+            None.
 
         Notes:
-            - Fails if project directory already exists
-            - Creates 'reports' subdirectory
+            - Fails if project directory already exists.
+            - Creates 'reports' subdirectory.
         """
         # Create the main project directory structure
         # Fail if project already exists
@@ -88,7 +88,7 @@ class TerminalMain:
         language-specific template.
 
         Returns:
-            None
+            None.
 
         Notes:
             - Maximum supported group size is limited by available SYMBOLS
@@ -139,12 +139,12 @@ class TerminalMain:
         data in JSON format for further analysis.
 
         Returns:
-            None
+            None.
 
         Notes:
-            - Reports are saved in the 'reports' subdirectory
-            - JSON export includes filtered data for macro/micro statistics
-            - Sociogram generation requires additional computational resources
+            - Reports are saved in the 'reports' subdirectory.
+            - JSON export includes filtered data for macro/micro statistics.
+            - Sociogram generation requires additional computational resources.
         """
         # Validate that group files exist
         if not self.groups_filepaths:
@@ -210,14 +210,14 @@ class TerminalMain:
         appropriate error information.
 
         Args:
-            yaml_file_path: Path to the YAML file to load
+            yaml_file_path: Path to the YAML file to load.
 
         Returns:
-            Dictionary containing parsed YAML data, or None if loading failed
+            Dictionary containing parsed YAML data, or None if loading failed.
 
         Notes:
-            - Handles FileNotFoundError and YAMLError exceptions gracefully
-            - Returns error messages for debugging purposes
+            - Handles FileNotFoundError and YAMLError exceptions gracefully.
+            - Returns error messages for debugging purposes.
         """
         try:
             with Path.open(yaml_file_path) as file:
@@ -231,13 +231,16 @@ class TerminalMain:
         """Convert HTML template to PDF and save to output directory.
 
         Args:
-            rendered_template: HTML content as string
-            suffix: Suffix used in filename
-            output_directory: Directory to save the PDF file
+            rendered_template: HTML content as string.
+            suffix: Suffix used in filename.
+            output_directory: Directory to save the PDF file.
+
+        Return:
+            None.
 
         Notes:
-            Filename format: {template_type}_{suffix}.pdf
-            Leading/trailing underscores are automatically removed from filename
+            Filename format: {template_type}_{suffix}.pdf.
+            Leading/trailing underscores are automatically removed from filename.
         """
         # Build file path
         file_path = output_directory / f"report_{suffix}.pdf"

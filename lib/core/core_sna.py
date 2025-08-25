@@ -321,8 +321,8 @@ class CoreSna:
             - *_rank: Rank columns for each centrality measure (ic_rank, kz_rank, etc.).
 
         Raises:
-            ValueError: If required network data is not available.
-            nx.NetworkXError: If centrality computations fail to converge.
+            - ValueError: If required network data is not available.
+            - nx.NetworkXError: If centrality computations fail to converge.
         """
         # Check if required data is available
         if self.sna[f"network_{network_type}"] is None:
@@ -457,7 +457,7 @@ class CoreSna:
             - type_iv: Half reversed symmetrical (A→B in one network, B→A in other network).
             - type_v: Fully symmetrical (A↔B in both networks).
 
-        Note:
+        Notes:
             Edge classification uses upper triangular matrices to avoid double-counting
             reciprocal relationships. Currently all type_iii, type_iv, and type_v
             classifications result in the same reciprocal edges as type_ii due to
@@ -611,7 +611,7 @@ class CoreSna:
             - 'weight': computed weight using formula 10 / (recomputed_rank ** 0.8).
             - 'evidence_type': always 'sna'.
 
-        Note:
+        Notes:
             - Lower rank values indicate higher centrality (rank 1 = most central).
             - Weight calculation uses formula: 10.0 / (recomputed_rank ** 0.8).
             - Only nodes ranking in the top threshold percentile are included.
@@ -686,13 +686,13 @@ class CoreSna:
             - 1 indicates a perfectly centralized network (star topology).
             - Higher values suggest more centralized structure.
 
-        Note:
-            This implementation uses degree centrality as the basis for centralization.
-            The network should have at least 3 nodes for meaningful centralization values.
+        Notes:
+            - This implementation uses degree centrality as the basis for centralization.
+            - The network should have at least 3 nodes for meaningful centralization values.
 
         Raises:
-            ZeroDivisionError: If the network has fewer than 3 nodes.
-            nx.NetworkXError: If the network is empty or invalid.
+            - ZeroDivisionError: If the network has fewer than 3 nodes.
+            - nx.NetworkXError: If the network is empty or invalid.
         """
         # Get number of nodes
         number_of_nodes: int = network.number_of_nodes()
@@ -731,15 +731,15 @@ class CoreSna:
             - Non-reciprocal edges shown as directed arrows.
             - Node labels with white text.
 
-        Note:
+        Notes:
             - Uses Kamada-Kawai layout with special handling for isolated nodes.
             - Network A uses A_COLOR, Network B uses B_COLOR (from lib constants).
             - Figure size is set to 17cm x 19cm.
             - Isolated nodes are positioned at the periphery using convex hull positioning.
 
         Raises:
-            KeyError: If the specified network_type is not found in self.sna.
-            ValueError: If the network layout computation fails.
+            - KeyError: If the specified network_type is not found in self.sna.
+            - ValueError: If the network layout computation fails.
         """
         # Get network
         network: nx.DiGraph = self.sna[f"network_{network_type}"] # type: ignore[type-arg]
@@ -810,7 +810,7 @@ class CoreSna:
             4. Each round places nodes further from the center.
             5. Adds random offset to prevent overlapping.
 
-        Note:
+        Notes:
             - If no isolated nodes exist, returns the original layout unchanged.
             - Uses multiple rounds to handle cases with more isolated nodes than hull vertices.
             - Distance multiplier increases with each round (0.15 * round_number).

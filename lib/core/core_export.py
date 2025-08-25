@@ -31,7 +31,7 @@ class CoreExport:
         Returns:
             A JSON-serializable representation of the input value.
 
-        Note:
+        Notes:
             - DataFrames are converted to dict format with index preservation.
             - NetworkX graphs are converted to node/edge lists.
             - Numpy arrays become Python lists.

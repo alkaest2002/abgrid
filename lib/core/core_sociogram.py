@@ -55,6 +55,9 @@ class CoreSociogram:
                 Each dictionary should contain source and target node identifiers.
             packed_edges_b: List of dictionaries containing edge data for negative relationships.
                 Each dictionary should contain source and target node identifiers.
+
+        Return:
+            None.
         """
         # Store packed edges for later use
         self.packed_edges_a = packed_edges_a
@@ -419,18 +422,18 @@ class CoreSociogram:
             Dictionary with keys 'a' (positive relevance) and 'b' (negative relevance),
             each containing a DataFrame of relevant nodes.
             Each DataFrame has columns:
-            - 'node_id': node identifier
-            - 'metric': metric name without '_rank' suffix
-            - 'original_rank': original rank position from micro_stats rankings
-            - 'recomputed_rank': re-computed dense rank position, ascending for 'a', descending for 'b'
-            - 'value': original metric value from micro_stats
-            - 'weight': computed weight using formula 10 / (recomputed_rank ** 0.8)
-            - 'evidence_type': always 'sociogram'
+            - 'node_id': node identifier.
+            - 'metric': metric name without '_rank' suffix.
+            - 'original_rank': original rank position from micro_stats rankings.
+            - 'recomputed_rank': re-computed dense rank position, ascending for 'a', descending for 'b'.
+            - 'value': original metric value from micro_stats.
+            - 'weight': computed weight using formula 10 / (recomputed_rank ** 0.8).
+            - 'evidence_type': always 'sociogram'.
 
-        Note:
-            - For valence 'a': selects nodes with ranks <= threshold quantile (best performers)
-            - For valence 'b': selects nodes with ranks >= (1-threshold) quantile (worst performers)
-            - Processes all ranking columns ending with '_rank' from sociogram rankings
+        Notes:
+            - For valence 'a': selects nodes with ranks <= threshold quantile (best performers).
+            - For valence 'b': selects nodes with ranks >= (1-threshold) quantile (worst performers).
+            - Processes all ranking columns ending with '_rank' from sociogram rankings.
         """
         # Select micro_stats and rankings to use
         micro_stats: pd.DataFrame = self.sociogram["micro_stats"]
@@ -512,16 +515,16 @@ class CoreSociogram:
 
         Returns:
             A pandas Series with sociometric status labels for each node:
-                - "isolated": No incoming or outgoing relationships at all
-                - "marginal": Low overall social impact (below low impact threshold)
-                - "popular": High positive impact with strong positive dominance or medium impact with positive dominance
-                - "appreciated": High or medium positive impact with positive prevalence (but not dominance)
-                - "rejected": High or medium negative impact with strong negative dominance
-                - "disliked": High or medium negative impact with negative prevalence (but not dominance)
-                - "controversial": High impact with balanced or neutral relationship patterns
-                - "ambitendent": Medium impact with balanced or neutral relationship patterns
+                - "isolated": No incoming or outgoing relationships at all.
+                - "marginal": Low overall social impact (below low impact threshold).
+                - "popular": High positive impact with strong positive dominance or medium impact with positive dominance.
+                - "appreciated": High or medium positive impact with positive prevalence (but not dominance).
+                - "rejected": High or medium negative impact with strong negative dominance.
+                - "disliked": High or medium negative impact with negative prevalence (but not dominance).
+                - "controversial": High impact with balanced or neutral relationship patterns.
+                - "ambitendent": Medium impact with balanced or neutral relationship patterns.
 
-        Note:
+        Notes:
             Uses adaptive quantile selection that tests multiple quantile pairs
             to find thresholds matching theoretical proportions within epsilon tolerance.
         """
@@ -658,8 +661,8 @@ class CoreSociogram:
 
         Args:
             coefficient: The centrality coefficient to visualize. Must be either:
-                - "ai": Activity index (balance + orientation indices)
-                - "ii": Integration index (received positive + mutual positive connections)
+                - "ai": Activity index (balance + orientation indices).
+                - "ii": Integration index (received positive + mutual positive connections).
 
         Returns:
             A base64-encoded SVG string representing the polar sociogram visualization.

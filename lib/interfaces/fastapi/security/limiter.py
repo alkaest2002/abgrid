@@ -25,6 +25,9 @@ class RateLimitError(Exception):
 
         Args:
             message: The error message describing the rate limit violation.
+
+        Return:
+            None.
         """
         self.message = message
         super().__init__(message)
@@ -59,6 +62,9 @@ class SimpleRateLimiter:
             window_seconds: Duration of rate limit window in seconds. Defaults to 15.
             max_cache_size: Maximum cache entries to prevent memory leaks. Defaults to 10000.
             skip_options: Skip rate limiting for OPTIONS requests (CORS preflight). Defaults to True.
+
+        Return:
+            None.
 
         Raises:
             ValueError: If any numeric parameter is <= 0.
@@ -178,6 +184,9 @@ class SimpleRateLimiter:
 
         Args:
             key: Cache key for the specific user/endpoint combination.
+
+        Return:
+            None.
 
         Raises:
             RateLimitError: When rate limit is exceeded.

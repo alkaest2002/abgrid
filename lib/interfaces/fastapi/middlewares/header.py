@@ -24,13 +24,13 @@ class HeaderSizeLimitMiddleware(BaseHTTPMiddleware):
     Args:
         app: The ASGI application instance
         max_header_size: Maximum allowed size for any individual header value
-                        in bytes (default: 8KB)
+                        in bytes (default: 8KB).
 
     Raises:
-        JSONResponse: Returns 413 status for headers exceeding the size limit
-        JSONResponse: Returns 415 status for POST requests without JSON content type
+        - JSONResponse: Returns 413 status for headers exceeding the size limit.
+        - JSONResponse: Returns 415 status for POST requests without JSON content type.
 
-    Note:
+    Notes:
         This middleware checks individual header values, not the total size
         of all headers combined. Each header value must be within the limit.
     """
@@ -39,9 +39,12 @@ class HeaderSizeLimitMiddleware(BaseHTTPMiddleware):
         """Initialize the middleware with header size limit configuration.
 
         Args:
-            app: The ASGI application instance
+            app: The ASGI application instance.
             max_header_size: Maximum allowed size for any individual header value
-                           in bytes (default: 8KB)
+                           in bytes (default: 8KB).
+
+        Return:
+            None.
         """
         super().__init__(app)
         self.max_header_size = max_header_size
@@ -52,16 +55,16 @@ class HeaderSizeLimitMiddleware(BaseHTTPMiddleware):
         Validates header sizes and ensures POST requests have JSON content type.
 
         Args:
-            request: The incoming HTTP request with headers to validate
-            call_next: The next middleware or route handler in the chain
+            request: The incoming HTTP request with headers to validate.
+            call_next: The next middleware or route handler in the chain.
 
         Returns:
             Response: Either an error response for validation failures or the result
-                     from the next handler in the chain
+                     from the next handler in the chain.
 
         Raises:
-            JSONResponse: 413 status if any header value exceeds the size limit
-            JSONResponse: 415 status if POST request doesn't have JSON content type
+            - JSONResponse: 413 status if any header value exceeds the size limit.
+            - JSONResponse: 415 status if POST request doesn't have JSON content type.
         """
         # Check header sizes
         for header_value in request.headers.values():
