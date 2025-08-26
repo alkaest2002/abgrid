@@ -132,7 +132,7 @@ class CoreExport:
         # Initialize dictionary
         json_data: dict[str, Any] = {}
 
-        # Serialize group data
+        # Serialize Group data
         group_data = data.get("group_data")
         json_data["group_data"] = CoreExport._to_json_encoders(group_data)
 
@@ -161,7 +161,7 @@ class CoreExport:
         # Initialize dictionary
         json_data: dict[str, Any] = {}
 
-        # Add following data as is (they have already been JSON-serialized in step 1)
+        # Add following data 'as is' (already JSON-serialized in step 1)
         json_data["year"] = data.get("year")
         json_data["project_title"] = data.get("project_title")
         json_data["question_a"] = data.get("question_a")
@@ -175,12 +175,18 @@ class CoreExport:
         json_data["sociogram"] = CoreExport._to_json_encoders(sociogram)
 
         # Serialize Isolated nodes data
-        isolated_nodes = data.get("isolated_nodes")
-        json_data["isolated_nodes"] = CoreExport._to_json_encoders(isolated_nodes)
+        isolated_nodes = data.get("isolated_nodes", {})
+        json_data["isolated_nodes"] = {
+            "a": CoreExport._to_json_encoders(isolated_nodes.get("a", pd.Index([]))),
+            "b": CoreExport._to_json_encoders(isolated_nodes.get("b", pd.Index([])))
+        }
 
         # Serialize Relevant nodes data
-        relevant_nodes = data.get("relevant_nodes")
-        json_data["relevant_nodes"] = CoreExport._to_json_encoders(relevant_nodes)
+        relevant_nodes = data.get("relevant_nodes", {})
+        json_data["relevant_nodes"] = {
+            "a": CoreExport._to_json_encoders(relevant_nodes.get("a", pd.DataFrame())),
+            "b": CoreExport._to_json_encoders(relevant_nodes.get("b", pd.DataFrame()))
+        }
 
         # Add signature
         json_data["signature"] = compute_hmac_signature(json_data)
@@ -196,12 +202,7 @@ class CoreExport:
         analysis, and isolated nodes identification.
 
         Args:
-            data: The complete AB-Grid report data dictionary containing:
-                - Basic group data (year, project_title, question_a, question_b, group, group_size).
-                - SNA analysis results (complex nested structure).
-                - Sociogram data (optional network visualization data).
-                - Relevant nodes data (DataFrames for questions A and B).
-                - Isolated nodes data (Index objects for questions A and B).
+            data: The data dictionary to convert and sign.
 
         Returns:
             A JSON-serializable dictionary with the same structure as the input,
@@ -210,7 +211,7 @@ class CoreExport:
         # Initialize dictionary
         json_data: dict[str, Any] = {}
 
-        # Add group data to json_data
+        # Add following data 'as is'
         json_data["year"] = data.get("year")
         json_data["project_title"] = data.get("project_title")
         json_data["question_a"] = data.get("question_a")
@@ -226,18 +227,18 @@ class CoreExport:
         sociogram = data.get("sociogram")
         json_data["sociogram"] = CoreExport._to_json_encoders(sociogram)
 
-        # Add relevant nodes data to json_data
-        relevant_nodes = data.get("relevant_nodes", {})
-        json_data["relevant_nodes"] = {
-            "a": CoreExport._to_json_encoders(relevant_nodes.get("a", pd.DataFrame())),
-            "b": CoreExport._to_json_encoders(relevant_nodes.get("b", pd.DataFrame()))
-        }
-
         # Add isolated nodes data to json_data
         isolated_nodes = data.get("isolated_nodes", {})
         json_data["isolated_nodes"] = {
             "a": CoreExport._to_json_encoders(isolated_nodes.get("a", pd.Index([]))),
             "b": CoreExport._to_json_encoders(isolated_nodes.get("b", pd.Index([])))
+        }
+
+        # Add relevant nodes data to json_data
+        relevant_nodes = data.get("relevant_nodes", {})
+        json_data["relevant_nodes"] = {
+            "a": CoreExport._to_json_encoders(relevant_nodes.get("a", pd.DataFrame())),
+            "b": CoreExport._to_json_encoders(relevant_nodes.get("b", pd.DataFrame()))
         }
 
         # Add signature
