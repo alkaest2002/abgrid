@@ -24,6 +24,8 @@ from lib.core.core_schemas_out import (
     ABGridGroupSchemaOut,
     ABGridReportSchemaOut,
     ABGridReportStep1SchemaOut,
+    ABGridReportStep2SchemaOut,
+    ABGridReportStep3SchemaOut,
 )
 from lib.core.core_sna import CoreSna
 from lib.core.core_sociogram import CoreSociogram
@@ -173,7 +175,7 @@ class CoreData:
         )
 
         # Validate and convert final data
-        final_data_out: ABGridReportSchemaOut = ABGridReportSchemaOut(**final_data)
+        final_data_out: ABGridReportStep2SchemaOut = ABGridReportStep2SchemaOut(**final_data)
 
         return final_data_out.model_dump()
 
@@ -194,7 +196,7 @@ class CoreData:
         data.pop("signature", None)
 
         # Validate and convert report data
-        final_data_out: ABGridReportSchemaOut = ABGridReportSchemaOut(**data)
+        final_data_out: ABGridReportStep3SchemaOut = ABGridReportStep3SchemaOut(**data)
 
         return final_data_out.model_dump()
 

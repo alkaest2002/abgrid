@@ -32,48 +32,9 @@ class ABGridGroupSchemaOut(BaseModel):
         "extra": "forbid"
     }
 
-
-class ABGridReportStep1SchemaOut(BaseModel):
-    """Output schema for Group and SNA data.
-
-    Contains Group data and SNA analysis results for multistep report generation.
-
-    Attributes:
-        group_data: Group data as dictionary.
-        sna_data: Social network analysis results as dictionary.
-    """
-    group_data: dict[str, Any]
-    sna_data: dict[str, Any]
-
-    model_config = {
-        "arbitrary_types_allowed": True,
-        "extra": "forbid"
-    }
-
-
-class ABGridReportStep2SchemaOut(BaseModel):
-    """Output schema for Sociogram data.
-
-    Contains sociogram analysis results for visualization purposes.
-
-    Attributes:
-        group_data: Group data as dictionary.
-        sna_data: SNA analysis results as dictionary.
-        sociogram_data: Sociogram analysis results as dictionary.
-        isolated_nodes_data: Isolated nodes from both networks as dictionary.
-        relevant_nodes_data: Relevant nodes from both networks as dictionary.
-    """
-    group_data: dict[str, Any]
-    sna_data: dict[str, Any]
-    sociogram_data: dict[str, Any]
-    isolated_nodes_data: dict[str, Any]
-    relevant_nodes_data: dict[str, Any]
-
-    model_config = {
-        "arbitrary_types_allowed": True,
-        "extra": "forbid"
-    }
-
+#########################################################################################
+#   SINGLE STEP REPORT GENERATION
+#########################################################################################
 
 class ABGridReportSchemaOut(BaseModel):
     """Output schema for Report data.
@@ -107,3 +68,32 @@ class ABGridReportSchemaOut(BaseModel):
         "arbitrary_types_allowed": True,
         "extra": "forbid"
     }
+
+
+#########################################################################################
+#   MULTI STEP REPORT GENERATION
+#########################################################################################
+
+class ABGridReportStep1SchemaOut(BaseModel):
+    """Output schema for step 1 data in multi-step report generation.
+
+    Contains Group data and SNA analysis results for multistep report generation.
+
+    Attributes:
+        group_data: Group data as dictionary.
+        sna_data: Social network analysis results as dictionary.
+    """
+    group_data: dict[str, Any]
+    sna_data: dict[str, Any]
+
+    model_config = {
+        "arbitrary_types_allowed": True,
+        "extra": "forbid"
+    }
+
+
+class ABGridReportStep2SchemaOut(ABGridReportSchemaOut):
+    """Output schema for AB-Grid step 2 data via multi-step process"""
+
+class ABGridReportStep3SchemaOut(ABGridReportSchemaOut):
+    """Output schema for AB-Grid step 3 data via multi-step process"""
