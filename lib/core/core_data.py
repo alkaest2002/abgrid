@@ -72,7 +72,7 @@ class CoreData:
         # Initialize SNA analysis class
         abgrid_sna: CoreSna = CoreSna(validated_data.choices_a, validated_data.choices_b)
 
-        # Compute SNA results from group choice data
+        # Compute SNA results
         sna_data: dict[str, Any] = abgrid_sna.get()
 
         # Initialize Sociogram data
@@ -83,7 +83,7 @@ class CoreData:
             # Initialize Sociogram analysis class
             abgrid_sociogram: CoreSociogram = CoreSociogram(validated_data.choices_a, validated_data.choices_b)
 
-            # Compute Sociogram results from group choice data
+            # Compute Sociogram results
             sociogram_data = abgrid_sociogram.get()
 
         # Build final data
@@ -145,7 +145,7 @@ class CoreData:
         # Get validated data model dump
         data: dict[str, Any] = validated_data.model_dump()
 
-        # Remove priovious signature
+        # Remove previous signature
         data.pop("signature", None)
 
         # Extract group data
