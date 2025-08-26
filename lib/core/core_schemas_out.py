@@ -32,6 +32,7 @@ class ABGridGroupSchemaOut(BaseModel):
         "extra": "forbid"
     }
 
+
 #########################################################################################
 #   SINGLE STEP REPORT GENERATION
 #########################################################################################
@@ -94,6 +95,7 @@ class ABGridReportStep1SchemaOut(BaseModel):
 
 class ABGridReportStep2SchemaOut(ABGridReportSchemaOut):
     """Output schema for AB-Grid step 2 data via multi-step process"""
+
 
 class ABGridReportStep3SchemaOut(ABGridReportSchemaOut):
     """Output schema for AB-Grid step 3 data via multi-step process"""
