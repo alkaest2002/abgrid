@@ -116,90 +116,17 @@ class CoreExport:
         except (TypeError, ValueError):
             return str(value)
 
-    @staticmethod
-    def to_json_report_step_1(data: dict[str, Any]) -> dict[str, Any]:
-        """Convert AB-Grid step 1 data to a JSON-serializable format with HMAC signature.
-
-        Serializes data, combines them into a single dictionary structure,
-        and adds HMAC signature for data integrity verification.
-
-        Args:
-            data: The data dictionary to convert and sign.
-
-        Returns:
-            A JSON-serializable dictionary containing both group and SNA data with signature.
-        """
-        # Initialize dictionary
-        json_data: dict[str, Any] = {}
-
-        # Serialize Group data
-        group_data = data.get("group_data")
-        json_data["group_data"] = CoreExport._to_json_encoders(group_data)
-
-        # Serialize SNA data
-        sna_data = data.get("sna_data")
-        json_data["sna_data"] = CoreExport._to_json_encoders(sna_data)
-
-        # Add signature
-        json_data["signature"] = compute_hmac_signature(json_data)
-
-        return json_data
-
-    @staticmethod
-    def to_json_report_step_2(data: dict[str, Any]) -> dict[str, Any]:
-        """Convert AB-Grid step 2 data to a JSON-serializable format with HMAC signature.
-
-        Serializes data, combines them into a single dictionary structure,
-        and adds HMAC signature for data integrity verification.
-
-        Args:
-            data: The data dictionary to convert and sign.
-
-        Returns:
-            A JSON-serializable dictionary containing both group and SNA data with signatures.
-        """
-        # Initialize dictionary
-        json_data: dict[str, Any] = {}
-
-        # Add following data 'as is' (already JSON-serialized in step 1)
-        json_data["year"] = data.get("year")
-        json_data["project_title"] = data.get("project_title")
-        json_data["question_a"] = data.get("question_a")
-        json_data["question_b"] = data.get("question_b")
-        json_data["group"] = data.get("group")
-        json_data["group_size"] = data.get("group_size")
-        json_data["sna"] = data.get("sna")
-
-        # Serialize Sociogram data
-        sociogram = data.get("sociogram")
-        json_data["sociogram"] = CoreExport._to_json_encoders(sociogram)
-
-        # Serialize Isolated nodes data
-        isolated_nodes = data.get("isolated_nodes", {})
-        json_data["isolated_nodes"] = {
-            "a": CoreExport._to_json_encoders(isolated_nodes.get("a", pd.Index([]))),
-            "b": CoreExport._to_json_encoders(isolated_nodes.get("b", pd.Index([])))
-        }
-
-        # Serialize Relevant nodes data
-        relevant_nodes = data.get("relevant_nodes", {})
-        json_data["relevant_nodes"] = {
-            "a": CoreExport._to_json_encoders(relevant_nodes.get("a", pd.DataFrame())),
-            "b": CoreExport._to_json_encoders(relevant_nodes.get("b", pd.DataFrame()))
-        }
-
-        # Add signature
-        json_data["signature"] = compute_hmac_signature(json_data)
-
-        return json_data
+    #########################################################################################
+    #   SINGLE STEP REPORT GENERATION
+    #########################################################################################
 
     @staticmethod
     def to_json(data: dict[str, Any]) -> dict[str, Any]:
         """Convert complete AB-Grid report data to a JSON-serializable format with HMAC signature.
 
         Handles the full AB-Grid report structure including metadata (year, project title,
-        questions), group information, SNA analysis results, sociogram data, relevant nodes
-        analysis, and isolated nodes identification.
+        questions), Group information, SNA analysis results, Sociogram data, Relevant nodes
+        analysis, and Isolated nodes identification.
 
         Args:
             data: The data dictionary to convert and sign.
@@ -207,6 +134,10 @@ class CoreExport:
         Returns:
             A JSON-serializable dictionary with the same structure as the input,
             with all pandas/numpy/networkx objects converted to JSON-compatible formats.
+
+        Notes:
+            this encoding process ensures that all data is properly serialized
+            and ready for JSON output when single step report generation is used.
         """
         # Initialize dictionary
         json_data: dict[str, Any] = {}
@@ -245,3 +176,94 @@ class CoreExport:
         json_data["signature"] = compute_hmac_signature(json_data)
 
         return json_data
+
+
+    #########################################################################################
+    #   MULTI STEP REPORT GENERATION
+    #########################################################################################
+
+    @staticmethod
+    def to_json_report_step_1(data: dict[str, Any]) -> dict[str, Any]:
+        """Convert AB-Grid step 1 data to a JSON-serializable format with HMAC signature.
+
+        Serializes data, combines them into a single dictionary structure,
+        and adds HMAC signature for data integrity verification.
+
+        Args:
+            data: The data dictionary to convert and sign.
+
+        Returns:
+            A JSON-serializable dictionary containing both group and SNA data with signature.
+
+        Notes:
+            this encoding process ensures that all data is properly serialized
+            and ready for JSON output when multi-step report generation is used.
+        """
+        # Initialize dictionary
+        json_data: dict[str, Any] = {}
+
+        # Serialize Group data
+        group_data = data.get("group_data")
+        json_data["group_data"] = CoreExport._to_json_encoders(group_data)
+
+        # Serialize SNA data
+        sna_data = data.get("sna_data")
+        json_data["sna_data"] = CoreExport._to_json_encoders(sna_data)
+
+        # Add signature
+        json_data["signature"] = compute_hmac_signature(json_data)
+
+        return json_data
+
+    @staticmethod
+    def to_json_report_step_2(data: dict[str, Any]) -> dict[str, Any]:
+        """Convert AB-Grid step 2 data to a JSON-serializable format with HMAC signature.
+
+        Serializes data, combines them into a single dictionary structure,
+        and adds HMAC signature for data integrity verification.
+
+        Args:
+            data: The data dictionary to convert and sign.
+
+        Returns:
+            A JSON-serializable dictionary containing both group and SNA data with signatures.
+
+        Notes:
+            this encoding process ensures that all data is properly serialized
+            and ready for JSON output when multi-step report generation is used.
+        """
+        # Initialize dictionary
+        json_data: dict[str, Any] = {}
+
+        # Add following data 'as is' (already JSON-serialized in step 1)
+        json_data["year"] = data.get("year")
+        json_data["project_title"] = data.get("project_title")
+        json_data["question_a"] = data.get("question_a")
+        json_data["question_b"] = data.get("question_b")
+        json_data["group"] = data.get("group")
+        json_data["group_size"] = data.get("group_size")
+        json_data["sna"] = data.get("sna")
+
+        # Serialize Sociogram data
+        sociogram = data.get("sociogram")
+        json_data["sociogram"] = CoreExport._to_json_encoders(sociogram)
+
+        # Serialize Isolated nodes data
+        isolated_nodes = data.get("isolated_nodes", {})
+        json_data["isolated_nodes"] = {
+            "a": CoreExport._to_json_encoders(isolated_nodes.get("a", pd.Index([]))),
+            "b": CoreExport._to_json_encoders(isolated_nodes.get("b", pd.Index([])))
+        }
+
+        # Serialize Relevant nodes data
+        relevant_nodes = data.get("relevant_nodes", {})
+        json_data["relevant_nodes"] = {
+            "a": CoreExport._to_json_encoders(relevant_nodes.get("a", pd.DataFrame())),
+            "b": CoreExport._to_json_encoders(relevant_nodes.get("b", pd.DataFrame()))
+        }
+
+        # Add signature
+        json_data["signature"] = compute_hmac_signature(json_data)
+
+        return json_data
+
