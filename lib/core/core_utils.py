@@ -227,26 +227,26 @@ def compute_hmac_signature(json_data: dict[str, Any]) -> str:
 def verify_hmac_signature(json_data: dict[str, Any]) -> bool:
     """Verify the HMAC signature of JSON data against the expected signature.
 
-    Extracts the signature from the "_signature" key, recomputes the expected
+    Extracts the signature from the "signature" key, recomputes the expected
     signature for the remaining data, and performs a secure comparison.
 
     Args:
-        json_data: Dictionary containing data and a "_signature" key with the signature to verify.
+        json_data: Dictionary containing data and a "signature" key with the signature to verify.
 
     Returns:
         True if the signature is valid and matches the expected signature, False otherwise.
 
     Notes:
-        - Expects the signature to be stored in the "_signature" key.
+        - Expects the signature to be stored in the "signature" key.
         - Uses secure comparison (hmac.compare_digest) to prevent timing attacks.
-        - Returns False if "_signature" key is missing.
-        - Signature verification is performed on all data excluding the "_signature" key.
+        - Returns False if "signature" key is missing.
+        - Signature verification is performed on all data excluding the "signature" key.
     """
     # Extract signature from data
-    provided_signature = json_data.get("_signature", "")
+    provided_signature = json_data.get("signature", "")
 
     # Create data without signature for verification
-    data_without_signature = { str(k): v for k, v in json_data.items() if k != "_signature"}
+    data_without_signature = { str(k): v for k, v in json_data.items() if k != "signature"}
 
     # Compute expected signature
     expected_signature = compute_hmac_signature(data_without_signature)

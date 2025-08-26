@@ -632,7 +632,7 @@ class CoreSna:
         micro_stats: pd.DataFrame =  self.sna[f"micro_stats_{network_type}"]
         rankings: dict[str, pd.Series] = self.sna[f"rankings_{network_type}"]
 
-        # Init dictionary
+        # Initialize dictionary
         relevant_nodes: pd.DataFrame = pd.DataFrame()
 
         # Loop through metrics and associated ranks

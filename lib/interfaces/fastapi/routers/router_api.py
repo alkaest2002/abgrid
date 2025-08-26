@@ -15,8 +15,10 @@ from lib.core.core_data import CoreData
 from lib.core.core_export import CoreExport
 from lib.core.core_schemas_in import (
     ABGridGroupSchemaIn,
-    ABGridReportMultiStepSchemaIn,
     ABGridReportSchemaIn,
+    ABGridReportStep1SchemaIn,
+    ABGridReportStep2SchemaIn,
+    ABGridReportStep3SchemaIn,
 )
 from lib.core.core_templates import CoreRenderer
 from lib.interfaces.fastapi.security.auth import Auth
@@ -56,13 +58,12 @@ def get_router_api() -> APIRouter:  # noqa: PLR0915
     Endpoints:
         POST /api/group: Generate group configuration file.
         POST /api/report: Generate single-step report.
-        POST /api/report/step_1: Generate multi-step report, step 1 (Group and SNA data).
-        POST /api/report/step_2: Generate multi-step report, step 2 (sociogram data).
-        POST /api/report/step_3: Generate multi-step report, step 3 (final HTML report).
+        POST /api/report/step_1: Generate multi-step report, step 1.
+        POST /api/report/step_2: Generate multi-step report, step 2.
+        POST /api/report/step_3: Generate multi-step report, step 3.
 
     Notes:
         All endpoints return consistent JSON responses with "detail" field
-        containing either success data or error information.
     """
     # Initialize router
     router = APIRouter(prefix="/api")
@@ -76,24 +77,23 @@ def get_router_api() -> APIRouter:  # noqa: PLR0915
         language: str = Query(..., description="Language of the group template"),
         user_data: dict[str, Any] = Depends(_auth.verify_token)
     ) -> JSONResponse:
-        """Generate group configuration file based on provided schema.
+        """Generate group configuration file based on provided data.
 
         This endpoint creates a YAML configuration file for a group analysis
-        based on the provided group schema and language template.
 
         Args:
             request: The HTTP request object (used by rate limiter).
-            model: Group configuration schema containing all group parameters.
+            model: Group schema containing all group parameters.
             language: Language code for template selection.
             user_data: Authenticated user data from JWT token verification.
 
         Returns:
-            JSONResponse: Success response with rendered group configuration and metadata
+            JSONResponse: Success response with rendered group and metadata
                          containing "rendered_group" content and "metadata" with filename
                          and media type information.
 
         Status Codes:
-            - 200: Group configuration generated successfully.
+            - 200: Group generated successfully.
             - 400: Invalid request data, missing required fields, or template not found.
             - 401: Authentication token invalid or missing.
             - 429: Rate limit exceeded (1 request per 5 seconds).
@@ -104,7 +104,7 @@ def get_router_api() -> APIRouter:  # noqa: PLR0915
         """
         try:
             # Data computation
-            group_data: dict[str, Any] = await asyncio.to_thread(
+            data: dict[str, Any] = await asyncio.to_thread(
                 _abgrid_data.get_group_data,
                 model
             )
@@ -114,7 +114,7 @@ def get_router_api() -> APIRouter:  # noqa: PLR0915
             rendered_group = await asyncio.to_thread(
                 _abgrid_renderer.render,
                 template_path,
-                group_data
+                data
             )
 
             # Generate safe filename
@@ -156,14 +156,14 @@ def get_router_api() -> APIRouter:  # noqa: PLR0915
         with_sociogram: bool = Query(..., description="Include sociogram visualization"),
         user_data: dict[str, Any] = Depends(_auth.verify_token)
     ) -> JSONResponse:
-        """Generate comprehensive analysis report based on provided data.
+        """Generate analysis report based on provided data.
 
         This endpoint processes the report schema and generates both HTML and JSON
-        formatted reports, optionally including sociogram visualizations.
+        formatted reports.
 
         Args:
             request: The HTTP request object (used by rate limiter).
-            model: Report schema containing collected survey data.
+            model: Report schema containing collected data.
             language: Language code for report template.
             with_sociogram: Whether to include sociogram visualization in the report.
             user_data: Authenticated user data from JWT token verification.
@@ -185,7 +185,7 @@ def get_router_api() -> APIRouter:  # noqa: PLR0915
         """
         try:
             # Data computation
-            report_data: dict[str, Any] = await asyncio.to_thread(
+            data: dict[str, Any] = await asyncio.to_thread(
                 _abgrid_data.get_report_data,
                 model,
                 with_sociogram
@@ -196,13 +196,13 @@ def get_router_api() -> APIRouter:  # noqa: PLR0915
             rendered_report = await asyncio.to_thread(
                 _abgrid_renderer.render,
                 template_path,
-                report_data
+                data
             )
 
             # JSON serialization
-            report_json = await asyncio.to_thread(
+            data_json = await asyncio.to_thread(
                 CoreExport.to_json,
-                report_data
+                data
             )
 
             return JSONResponse(
@@ -210,7 +210,7 @@ def get_router_api() -> APIRouter:  # noqa: PLR0915
                 content={
                     "detail": {
                         "report_html": rendered_report,
-                        "report_json": report_json
+                        "report_json": data_json
                     }
                 }
             )
@@ -234,12 +234,12 @@ def get_router_api() -> APIRouter:  # noqa: PLR0915
 
     @router.post("/report/step_1")
     @api_limiter_3s
-    async def multi_step_create_group_and_sna(
+    async def multi_step_step_1(
         request: Request,
-        model: ABGridReportSchemaIn,
+        model: ABGridReportStep1SchemaIn,
         user_data: dict[str, Any] = Depends(_auth.verify_token)
     ) -> JSONResponse:
-        """Generate group and SNA (Social Network Analysis) data for multi-step reporting.
+        """Generate step 1 data for multi-step report generation.
 
         This endpoint is the first step in the multi-step report generation process.
         It processes the report schema and generates JSON data containing group
@@ -251,8 +251,7 @@ def get_router_api() -> APIRouter:  # noqa: PLR0915
             user_data: Authenticated user data from JWT token verification.
 
         Returns:
-            JSONResponse: Success response with JSON data containing group and SNA analysis
-                         information structured for further processing steps.
+            JSONResponse: Success response with JSON data.
 
         Status Codes:
             - 200: Group and SNA data generated successfully.
@@ -269,23 +268,22 @@ def get_router_api() -> APIRouter:  # noqa: PLR0915
             as input for subsequent steps in the multi-step report generation workflow.
         """
         try:
-
             # Data computation
-            group_sna_data: dict[str, Any] = await asyncio.to_thread(
-                _abgrid_data.get_group_and_sna_data,
+            data: dict[str, Any] = await asyncio.to_thread(
+                _abgrid_data.get_multistep_step1,
                 model,
             )
 
             # JSON serialization
-            project_sna_json = await asyncio.to_thread(
-                CoreExport.to_json_group_and_sna,
-                group_sna_data,
+            data_json = await asyncio.to_thread(
+                CoreExport.to_json_report_step_1,
+                data,
             )
 
             return JSONResponse(
                 status_code=status.HTTP_200_OK,
                 content={
-                    "detail": project_sna_json
+                    "detail": data_json
                 }
             )
 
@@ -303,25 +301,26 @@ def get_router_api() -> APIRouter:  # noqa: PLR0915
 
     @router.post("/report/step_2")
     @api_limiter_3s
-    async def multi_step_create_sociogram(
+    async def multi_step_step_2(
         request: Request,
-        model: ABGridReportSchemaIn,
+        model: ABGridReportStep2SchemaIn,
+        with_sociogram: bool = Query(..., description="Include sociogram visualization"),
         user_data: dict[str, Any] = Depends(_auth.verify_token)
     ) -> JSONResponse:
-        """Generate sociogram visualization data for multi-step reporting.
+        """Generate step 2 data for multi-step report generation.
 
         This endpoint is the second step in the multi-step report generation process.
-        It processes the report schema and generates JSON data containing sociogram
-        visualization information and network relationship mappings.
+        It processes the report schema and generates JSON data containing group related
+        data, sna, sociogra, isolated nodes and relevant nodes.
 
         Args:
             request: The HTTP request object (used by rate limiter).
-            model: Report schema containing collected survey data.
+            model: Report schema containing collected data.
+            with_sociogram: Whether to include sociogram visualization in the report.
             user_data: Authenticated user data from JWT token verification.
 
         Returns:
-            JSONResponse: Success response with JSON data containing sociogram
-                         visualization data including nodes, edges, and network metrics.
+            JSONResponse: Success response with JSON data.
 
         Status Codes:
             - 200: Sociogram data generated successfully.
@@ -340,21 +339,22 @@ def get_router_api() -> APIRouter:  # noqa: PLR0915
         try:
 
             # Data computation
-            sociogram_data: dict[str, Any] = await asyncio.to_thread(
-                _abgrid_data.get_sociogram_data,
+            data: dict[str, Any] = await asyncio.to_thread(
+                _abgrid_data.get_multistep_step2,
                 model,
+                with_sociogram
             )
 
             # JSON serialization
-            sociogram_json = await asyncio.to_thread(
-                CoreExport.to_json_sociogram,
-                sociogram_data
+            data_json = await asyncio.to_thread(
+                CoreExport.to_json_report_step_2,
+                data
             )
 
             return JSONResponse(
                 status_code=status.HTTP_200_OK,
                 content={
-                    "detail": sociogram_json
+                    "detail": data_json
                 }
             )
 
@@ -372,13 +372,13 @@ def get_router_api() -> APIRouter:  # noqa: PLR0915
 
     @router.post("/report/step_3")
     @api_limiter_3s
-    async def multi_step_create_report(
+    async def multi_step_step_3(
         request: Request,
-        model: ABGridReportMultiStepSchemaIn,
+        model: ABGridReportStep3SchemaIn,
         language: str = Query(..., description="Language of the report template"),
         user_data: dict[str, Any] = Depends(_auth.verify_token)
     ) -> JSONResponse:
-        """Generate final HTML report for multi-step reporting process.
+        """Generate HTML report.
 
         This endpoint is the final step in the multi-step report generation process.
         It takes the combined data from previous steps and renders it into a complete
@@ -391,8 +391,7 @@ def get_router_api() -> APIRouter:  # noqa: PLR0915
             user_data: Authenticated user data from JWT token verification.
 
         Returns:
-            JSONResponse: Success response with rendered HTML report content
-                         ready for display or download.
+            JSONResponse: Success response with rendered HTML report content.
 
         Status Codes:
             - 200: Final HTML report generated successfully.
@@ -413,8 +412,8 @@ def get_router_api() -> APIRouter:  # noqa: PLR0915
         try:
 
             # Data computation
-            report_data: dict[str, Any] = await asyncio.to_thread(
-                _abgrid_data.get_multi_step_report_data,
+            data: dict[str, Any] = await asyncio.to_thread(
+                _abgrid_data.get_multistep_step3,
                 model,
             )
 
@@ -423,7 +422,7 @@ def get_router_api() -> APIRouter:  # noqa: PLR0915
             rendered_report = await asyncio.to_thread(
                 _abgrid_renderer.render,
                 template_path,
-                report_data
+                data
             )
 
             return JSONResponse(

@@ -7,7 +7,7 @@ The code is part of the AB-Grid project and is licensed under the MIT License.
 import re
 from typing import Any
 
-from pydantic import BaseModel, model_validator
+from pydantic import BaseModel, Field, model_validator
 
 from lib.core import SYMBOLS
 from lib.core.core_schemas_errors import PydanticValidationError
@@ -20,7 +20,7 @@ FORBIDDEN_CHARS = re.compile(r"[^A-Za-zÀ-ÖØ-öø-ÿĀ-ſƀ-ɏḀ-ỿЀ-ӿͰ-�
 class ABGridGroupSchemaIn(BaseModel):
     """Input schema for AB-Grid group data.
 
-    Validates group data with comprehensive field validation.
+    Validates incoming data with comprehensive field validation.
 
     Attributes:
         project_title: Project title (1-100 characters, no forbidden chars).
@@ -34,11 +34,11 @@ class ABGridGroupSchemaIn(BaseModel):
         error collection in a single pass.
     """
 
-    project_title: Any
-    question_a: Any
-    question_b: Any
-    group: Any
-    members: Any
+    project_title: Any = Field(...)
+    question_a: Any = Field(...)
+    question_b: Any = Field(...)
+    group: Any = Field(...)
+    members: Any = Field(...)
 
     model_config = {
         "extra": "forbid"
@@ -67,7 +67,7 @@ class ABGridGroupSchemaIn(BaseModel):
         errors.extend(_validate_text_field("project_title", data.get("project_title"), 1, 100))
         errors.extend(_validate_text_field("question_a", data.get("question_a"), 1, 300))
         errors.extend(_validate_text_field("question_b", data.get("question_b"), 1, 300))
-        errors.extend(_validate_group_field(data.get("group")))
+        errors.extend(_validate_int_field("group", data.get("group")))
         cls._validate_members_field(data.get("members"), errors)
 
         if errors:
@@ -107,10 +107,20 @@ class ABGridGroupSchemaIn(BaseModel):
             })
 
 
+#########################################################################################
+#   SINGLE STEP REPORT GENERATION CLASS
+#########################################################################################
+#
+#   This class handles the report generation process in a single request
+#   For high specs servers or terminal apps
+#
+#########################################################################################
+
+
 class ABGridReportSchemaIn(BaseModel):
     """Input schema for AB-Grid report data.
 
-    Validates report data with comprehensive choice validation.
+    Validates incoming data with comprehensive choice validation.
 
     Attributes:
         project_title: Project title (1-100 characters, no forbidden chars).
@@ -134,12 +144,12 @@ class ABGridReportSchemaIn(BaseModel):
         - Choice values are stripped of extra spaces after validation.
     """
 
-    project_title: Any
-    question_a: Any
-    question_b: Any
-    group: Any
-    choices_a: Any
-    choices_b: Any
+    project_title: Any = Field(...)
+    question_a: Any = Field(...)
+    question_b: Any = Field(...)
+    group: Any = Field(...)
+    choices_a: Any = Field(...)
+    choices_b: Any = Field(...)
 
     model_config = {"extra": "forbid"}
 
@@ -171,7 +181,7 @@ class ABGridReportSchemaIn(BaseModel):
         errors.extend(_validate_text_field("project_title", data.get("project_title"), 1, 100))
         errors.extend(_validate_text_field("question_a", data.get("question_a"), 1, 300))
         errors.extend(_validate_text_field("question_b", data.get("question_b"), 1, 300))
-        errors.extend(_validate_group_field(data.get("group")))
+        errors.extend(_validate_int_field("group", data.get("group")))
 
         # Validate choices structure and collect keys
         choices_a_keys = cls._validate_choices_structure(data, "choices_a", errors)
@@ -196,8 +206,10 @@ class ABGridReportSchemaIn(BaseModel):
         # Check minimum nodes with choices
         cls._validate_minimum_nodes_with_choices(data, errors)
 
+        # On errors
         if errors:
             raise PydanticValidationError(errors)
+
         return data
 
     @model_validator(mode="after")
@@ -502,37 +514,42 @@ class ABGridReportSchemaIn(BaseModel):
                 "error_message": "too_many_nodes_have_empty_values"
             })
 
+#########################################################################################
+#   MULTIPLE STEP REPORT GENERATION CLASSES
+#########################################################################################
+#
+#   These classes split the report generation process into three requests steps
+#   For low specs servers
+#
+#########################################################################################
 
-class ABGridReportMultiStepSchemaIn(BaseModel):
-    """Input schema for AB-Grid report data via multi-step process.
 
-    Validates report data with HMAC signature verification for each component.
+class ABGridReportStep1SchemaIn(ABGridReportSchemaIn):
+    """Input schema for AB-Grid step 1 data via multi-step process"""
+
+class ABGridReportStep2SchemaIn(BaseModel):
+    """Input schema for AB-Grid step 2 data via multi-step process.
+
+    Validates step 2 incoming data with HMAC signature verification.
 
     Attributes:
-        group: Group dictionary with _signature key for HMAC verification.
-        sna: Social network analysis dictionary with _signature key.
-        sociogram: Sociogram network analysis dictionary with _signature key.
+        group_data: Group dictionary.
+        sna_data: Social network analysis dictionary.
+        signature: HMAC signature
 
     Notes:
-        - All fields must be dictionaries containing a '_signature' key.
-        - HMAC signatures are verified for each field using verify_hmac_signature.
-        - All fields are required and must pass signature verification.
+        - All fields are required and must be dictionaries.
+        - HMAC signature is verified for data integrity.
     """
 
-    group_data: dict[str, Any]
-    sna_data: dict[str, Any]
-    sociogram_data: dict[str, Any]
+    group_data: dict[str, Any] = Field(...)
+    sna_data: dict[str, Any] = Field(...)
+    signature: str = Field(..., alias="signature")
 
     @model_validator(mode="before")
     @classmethod
     def _validate_all_fields(cls, data: dict[str, Any]) -> dict[str, Any]:
         """Validate all fields comprehensively including HMAC signature verification.
-
-        Validates that each field (group, sna, sociogram):
-        - Exists and is not None.
-        - Is a dictionary.
-        - Contains a '_signature' key.
-        - Passes HMAC signature verification.
 
         Args:
             data: Raw input data dictionary.
@@ -546,51 +563,65 @@ class ABGridReportMultiStepSchemaIn(BaseModel):
         errors = []
 
         # Validate each field
-        for field_name in ["group_data", "sna_data", "sociogram_data"]:
-            field_value = data.get(field_name)
+        errors.extend(_validate_hmac_signedd_field("step_1_data", data))
 
-            # Check if field exists
-            if field_value is None:
-                errors.append({
-                    "location": field_name,
-                    "value_to_blame": None,
-                    "error_message": "field_is_required"
-                })
-                continue
+        # On error
+        if errors:
+            raise PydanticValidationError(errors)
 
-            # Check if field is a dictionary
-            if not isinstance(field_value, dict):
-                errors.append({
-                    "location": field_name,
-                    "value_to_blame": str(field_value)[:100],
-                    "error_message": "field_must_be_a_dictionary"
-                })
-                continue
+        return data
 
-            # Check for mandatory _signature key
-            if "_signature" not in field_value:
-                errors.append({
-                    "location": field_name,
-                    "value_to_blame": str(field_value)[:100],
-                    "error_message": "signature_is_required"
-                })
-                continue
+class ABGridReportStep3SchemaIn(BaseModel):
+    """Input schema for AB-Grid step 3 data via multi-step process.
 
-            try:
-                # Verify HMAC signature
-                if not verify_hmac_signature(field_value):
-                    errors.append({
-                        "location": field_name,
-                        "value_to_blame": field_value.get("_signature"),
-                        "error_message": "signature_is_invalid"
-                    })
-            except Exception:
-                errors.append({
-                    "location": field_name,
-                    "value_to_blame": str(field_value)[:100],
-                    "error_message": "signature_verification_error"
-                })
+    Validates step 3 incoming data with HMAC signature verification.
 
+    Attributes:
+        year: Year of the report.
+        project_title: Project title.
+        question_a: First question text.
+        question_b: Second question text.
+        group: Group identifier.
+        group_size: Group size.
+        sna: Social network analysis.
+        sociogram: Sociogram analysis.
+        isolated_nodes: Isolated nodes.
+        relevant_nodes: Relevant nodes.
+        signature: HMAC signature.
+    """
+
+    year: int = Field(...)
+    project_title: str = Field(...)
+    question_a: str = Field(...)
+    question_b: str = Field(...)
+    group: int = Field(...)
+    group_size: int = Field(...)
+    sna: dict[str, Any] = Field(...)
+    sociogram: dict[str, Any] = Field(...)
+    relevant_nodes: dict[str, Any] = Field(...)
+    isolated_nodes: dict[str, Any] = Field(...)
+    signature: str = Field(..., alias="signature")
+
+    @model_validator(mode="before")
+    @classmethod
+    def _validate_all_fields(cls, data: dict[str, Any]) -> dict[str, Any]:
+        """Validate all fields comprehensively including HMAC signature verification.
+
+        Args:
+            data: Raw input data dictionary.
+
+        Returns:
+            Validated data dictionary.
+
+        Raises:
+            PydanticValidationError: If validation errors are found.
+        """
+        errors = []
+
+        # Validate data
+        errors.extend(_validate_hmac_signedd_field("step_2_data", data))
+
+        # On error
         if errors:
             raise PydanticValidationError(errors)
 
@@ -601,7 +632,64 @@ class ABGridReportMultiStepSchemaIn(BaseModel):
 #   PRIVATE METHODS
 ##################################################################################################################
 
-def _validate_text_field(field_name: str, value: Any, min_len: int, max_len: int) -> list[dict[str, Any]]:
+def _validate_hmac_signedd_field(field_name: str, field_value: Any) -> list[dict[str, Any]]:
+    """Validate signature field for presence and format.
+
+    Args:
+        field_name: Name of field for error reporting.
+        field_value: Value to validate.
+
+    Returns:
+        List of error dictionaries. Empty if validation passes.
+    """
+    errors = []
+
+    # Check if field exists
+    if field_value is None:
+        errors.append({
+            "location": field_name,
+            "value_to_blame": None,
+            "error_message": "field_is_required"
+        })
+        return errors
+
+    # Check if field is a dictionary
+    if not isinstance(field_value, dict):
+        errors.append({
+            "location": field_name,
+            "value_to_blame": str(field_value)[:100],
+            "error_message": "field_must_be_a_dictionary"
+        })
+        return errors
+
+    # Check for mandatory signature key
+    if "signature" not in field_value:
+        errors.append({
+            "location": field_name,
+            "value_to_blame": str(field_value)[:100],
+            "error_message": "signature_is_required"
+        })
+        return errors
+
+    try:
+        # Verify HMAC signature
+        if not verify_hmac_signature(field_value):
+            errors.append({
+                "location": field_name,
+                "value_to_blame": field_value.get("signature"),
+                "error_message": "signature_is_invalid"
+            })
+
+    except Exception:
+        errors.append({
+            "location": field_name,
+            "value_to_blame": str(field_value)[:100],
+            "error_message": "signature_verification_error"
+        })
+    finally:
+        return errors  # noqa: B012
+
+def _validate_text_field(field_name: str, field_value: Any, min_len: int, max_len: int) -> list[dict[str, Any]]:
     """Validate text field with length and character constraints.
 
     Validates that the field:
@@ -615,7 +703,7 @@ def _validate_text_field(field_name: str, value: Any, min_len: int, max_len: int
 
     Args:
         field_name: Name of field for error reporting.
-        value: Value to validate.
+        field_value: Value to validate.
         min_len: Minimum allowed string length.
         max_len: Maximum allowed string length.
 
@@ -624,7 +712,7 @@ def _validate_text_field(field_name: str, value: Any, min_len: int, max_len: int
     """
     errors = []
 
-    if value is None:
+    if field_value is None:
         errors.append({
             "location": field_name,
             "value_to_blame": None,
@@ -632,63 +720,64 @@ def _validate_text_field(field_name: str, value: Any, min_len: int, max_len: int
         })
         return errors
 
-    if not isinstance(value, str):
+    if not isinstance(field_value, str):
         errors.append({
             "location": field_name,
-            "value_to_blame": value,
+            "value_to_blame": field_value,
             "error_message": "field_must_be_a_string"
         })
         return errors
 
-    if len(value) < min_len:
+    if len(field_value) < min_len:
         errors.append({
             "location": field_name,
-            "value_to_blame": value,
+            "value_to_blame": field_value,
             "error_message": "field_is_too_short"
         })
 
-    if len(value) > max_len:
+    if len(field_value) > max_len:
         errors.append({
             "location": field_name,
-            "value_to_blame": value,
+            "value_to_blame": field_value,
             "error_message": "field_is_too_long"
         })
 
     # Check for forbidden characters
-    if FORBIDDEN_CHARS.findall(value):
+    if FORBIDDEN_CHARS.findall(field_value):
         errors.append({
             "location": field_name,
-            "value_to_blame": value,
+            "value_to_blame": field_value,
             "error_message": "field_contains_invalid_characters"
         })
 
     return errors
 
-def _validate_group_field(value: Any) -> list[dict[str, Any]]:
-    """Validate group field as required integer.
+def _validate_int_field(field_name: str, field_value: Any) -> list[dict[str, Any]]:
+    """Validate integer field for presence and format.
 
-    Validates that the group field:
+    Validates that the integer field:
     - Is not None (required).
     - Is an integer.
 
     Args:
-        value: Value to validate.
+        field_name: Name of the field being validated.
+        field_value: Value to validate.
 
     Returns:
         List of error dictionaries. Empty if validation passes.
     """
     errors = []
 
-    if value is None:
+    if field_value is None:
         errors.append({
-            "location": "group",
+            "location": field_name,
             "value_to_blame": None,
             "error_message": "field_is_required"
         })
-    elif not isinstance(value, int):
+    elif not isinstance(field_value, int):
         errors.append({
-            "location": "group",
-            "value_to_blame": value,
+            "location": field_name,
+            "value_to_blame": field_value,
             "error_message": "field_must_be_an_integer"
         })
 

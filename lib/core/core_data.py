@@ -15,14 +15,15 @@ from lib.core.core_schemas import (
 )
 from lib.core.core_schemas_in import (
     ABGridGroupSchemaIn,
-    ABGridReportMultiStepSchemaIn,
     ABGridReportSchemaIn,
+    ABGridReportStep1SchemaIn,
+    ABGridReportStep2SchemaIn,
+    ABGridReportStep3SchemaIn,
 )
 from lib.core.core_schemas_out import (
-    ABGridGroupAndSnaSchemaOut,
     ABGridGroupSchemaOut,
     ABGridReportSchemaOut,
-    ABGridSociogramSchemaOut,
+    ABGridReportStep1SchemaOut,
 )
 from lib.core.core_sna import CoreSna
 from lib.core.core_sociogram import CoreSociogram
@@ -31,22 +32,22 @@ from lib.core.core_sociogram import CoreSociogram
 class CoreData:
     """Processes AB-Grid data for report generation."""
 
-    def get_group_data(self, validated_group_data: ABGridGroupSchemaIn) -> dict[str, Any]:
-        """Generate and validate group data with member symbols.
+    def get_group_data(self, validated_data: ABGridGroupSchemaIn) -> dict[str, Any]:
+        """Generate and validate group data.
 
         Args:
-            validated_group_data: Validated Group data schema instance.
+            validated_data: Validated data schema instance.
 
         Returns:
-            Dict containing the validated group data with added member symbols.
+            Dict containing the group data with added member symbols.
         """
-        # Extract group data from the validated model
-        group_data: dict[str, Any] = validated_group_data.model_dump()
+        # Get validated data model dumps
+        group_data: dict[str, Any] = validated_data.model_dump()
 
         # Add members list to group data, using SYMBOLS for members
         group_data["members"] = SYMBOLS[:group_data["members"]]
 
-        # Validate and convert group data to ABGridGroupSchemaOut
+        # Validate and convert group data
         group_data_out: ABGridGroupSchemaOut = ABGridGroupSchemaOut(**group_data)
 
         return group_data_out.model_dump()
@@ -55,46 +56,46 @@ class CoreData:
     #   SINGLE STEP REPORT
     ##################################################################################################################
 
-    def get_report_data(self, validated_group_data: ABGridReportSchemaIn, with_sociogram: bool = False) -> dict[str, Any]:
-        """Generate comprehensive report data with SNA and optional sociogram analysis.
+    def get_report_data(self, validated_data: ABGridReportSchemaIn, with_sociogram: bool = False) -> dict[str, Any]:
+        """Generate report data.
 
         Args:
-            validated_group_data: Validated Group data schema instance.
+            validated_data: Validated data schema instance.
             with_sociogram: Whether to include sociogram analysis.
 
         Returns:
             Dict containing complete report data with SNA analysis and optional sociogram results.
         """
-        # Extract group data from the validated model
-        group_data = validated_group_data.model_dump()
+        # Get validated data model dump
+        group_data: dict[str, Any] = validated_data.model_dump()
 
         # Initialize SNA analysis class
-        abgrid_sna: CoreSna = CoreSna(validated_group_data.choices_a, validated_group_data.choices_b)
+        abgrid_sna: CoreSna = CoreSna(validated_data.choices_a, validated_data.choices_b)
 
         # Compute SNA results from group choice data
         sna_data: dict[str, Any] = abgrid_sna.get()
 
-        # Initialize sociogram data as empty dict
+        # Initialize Sociogram data
         sociogram_data: dict[str, Any] = {}
 
         # Compute Sociogram results if requested
         if with_sociogram:
             # Initialize Sociogram analysis class
-            abgrid_sociogram: CoreSociogram = CoreSociogram(validated_group_data.choices_a, validated_group_data.choices_b)
+            abgrid_sociogram: CoreSociogram = CoreSociogram(validated_data.choices_a, validated_data.choices_b)
 
             # Compute Sociogram results from group choice data
             sociogram_data = abgrid_sociogram.get()
 
-        # Get report data
-        report_data: dict[str, Any] = self._build_report_data_out(
+        # Build final data
+        final_data: dict[str, Any] = self._build_report_data_out(
             group_data,
             sna_data,
             sociogram_data,
             with_sociogram
         )
 
-        # Validate and convert report data to ABGridReportSchemaOut
-        validated_report_data_out: ABGridReportSchemaOut = ABGridReportSchemaOut(**report_data)
+        # Validate and convert final data
+        validated_report_data_out: ABGridReportSchemaOut = ABGridReportSchemaOut(**final_data)
 
         return validated_report_data_out.model_dump()
 
@@ -102,59 +103,82 @@ class CoreData:
     #   MULTI STEP REPORT
     ##################################################################################################################
 
-    def get_group_and_sna_data(self, validated_group_data: ABGridReportSchemaIn) -> dict[str, Any]:
-        """Generate combined group and SNA data.
+    def get_multistep_step1(self, validated_data: ABGridReportStep1SchemaIn) -> dict[str, Any]:
+        """Generate step 1 data for multi-step report generation.
 
         Args:
-            validated_group_data: Validated Group data schema instance.
+            validated_data: Validated data schema instance.
 
         Returns:
-            Dict containing combined group and SNA analysis data.
+            Dict containing group and SNA analysis data.
         """
-        # Extract group data from the validated model
-        group_data = validated_group_data.model_dump()
+        # Get validated data model dump
+        group_data: dict[str, Any] = validated_data.model_dump()
 
         # Initialize SNA analysis class
-        abgrid_sna: CoreSna = CoreSna(validated_group_data.choices_a, validated_group_data.choices_b)
+        abgrid_sna: CoreSna = CoreSna(validated_data.choices_a, validated_data.choices_b)
 
         # Compute SNA data
         sna_data: dict[str, Any] = abgrid_sna.get()
 
-        # Build group and SNA data
-        group_and_sna_data  = {
+        # Build final data
+        final_data: dict[str, Any]  = {
             "group_data": group_data,
             "sna_data": sna_data
         }
 
-        # Validate and convert group and SNA data to ABGridGroupAndSnaSchemaOut
-        group_and_sna_data_out: ABGridGroupAndSnaSchemaOut = ABGridGroupAndSnaSchemaOut(**group_and_sna_data)
+        # Validate and convert fianl data
+        final_data_out: ABGridReportStep1SchemaOut = ABGridReportStep1SchemaOut(**final_data)
 
-        return group_and_sna_data_out.model_dump()
+        return final_data_out.model_dump()
 
-    def get_sociogram_data(self, validated_group_data: ABGridReportSchemaIn) -> dict[str, Any]:
-        """Generate sociogram analysis data.
+    def get_multistep_step2(self, validated_data: ABGridReportStep2SchemaIn, with_sociogram: bool = False) -> dict[str, Any]:
+        """Generate step 2 data for multi-step report generation.
 
         Args:
-            validated_group_data: Validated Group data schema instance.
+            validated_data: Validated Group data schema instance.
+            with_sociogram: Whether to include sociogram analysis.
 
         Returns:
-            Dict containing sociogram analysis data wrapped in a 'sociogram' key.
+            Dict containing project related data, sna, sociogra, isolated nodes and relevant nodes.
         """
-        # Initialize Sociogram analysis class
-        abgrid_sociogram: CoreSociogram = CoreSociogram(validated_group_data.choices_a, validated_group_data.choices_b)
+        # Get validated data model dump
+        data: dict[str, Any] = validated_data.model_dump()
 
-        # Compute Sociogram data and wrap in sociogram key
-        sociogram_data: dict[str, Any] = {
-           "sociogram_data": abgrid_sociogram.get()
-        }
+        # Remove priovious signature
+        data.pop("signature", None)
 
-        # Validate and convert sociogram data to ABGridSociogramSchemaOut
-        sociogram_data_out: ABGridSociogramSchemaOut = ABGridSociogramSchemaOut(**sociogram_data)
+        # Extract group data
+        group_data = data["group_data"]
 
-        return sociogram_data_out.model_dump()
+        # Extract SNA data
+        sna_data = data["sna_data"]
 
-    def get_multi_step_report_data(self, validated_data: ABGridReportMultiStepSchemaIn, with_sociogram: bool = False) -> dict[str, Any]:
-        """Generate comprehensive report data from pre-computed group, SNA, and optional sociogram data.
+        # Initialize Sociogram data
+        sociogram_data: dict[str, Any] = {}
+
+        if with_sociogram:
+            # Initialize Sociogram analysis class
+            abgrid_sociogram: CoreSociogram = CoreSociogram(group_data["choices_a"], group_data["choices_b"])
+
+            # Get Sociogram data
+            sociogram_data = abgrid_sociogram.get()
+
+        # Build final data
+        final_data: dict[str, Any] = self._build_report_data_out(
+            group_data,
+            sna_data,
+            sociogram_data,
+            with_sociogram
+        )
+
+        # Validate and convert final data
+        final_data_out: ABGridReportSchemaOut = ABGridReportSchemaOut(**final_data)
+
+        return final_data_out.model_dump()
+
+    def get_multistep_step3(self, validated_data: ABGridReportStep3SchemaIn) -> dict[str, Any]:
+        """Generate comprehensive report data.
 
         Args:
             validated_data: Validated ABGrid multi-step report data schema instance.
@@ -163,33 +187,16 @@ class CoreData:
         Returns:
             Dict containing complete report data with isolated and relevant nodes analysis.
         """
-        # Extract data from the validated model
-        data = validated_data.model_dump()
+        # Get validated data model dump
+        data: dict[str, Any] = validated_data.model_dump()
 
-        # Extract and clean group data (remove internal signature)
-        group_data = data["group_data"]
-        group_data.pop("_signature", None)
+        # Remove signature
+        data.pop("signature", None)
 
-        # Extract and clean SNA data (remove internal signature)
-        sna_data = data["sna_data"]
-        sna_data.pop("_signature", None)
+        # Validate and convert report data
+        final_data_out: ABGridReportSchemaOut = ABGridReportSchemaOut(**data)
 
-        # Extract and clean sociogram data (remove internal signature)
-        sociogram_data = data["sociogram_data"]
-        sociogram_data.pop("_signature", None)
-
-        # Get report data
-        report_data: dict[str, Any] = self._build_report_data_out(
-            group_data,
-            sna_data,
-            sociogram_data,
-            with_sociogram
-        )
-
-        # Validate and convert report data to ABGridReportSchemaOut
-        validated_report_data_out: ABGridReportSchemaOut = ABGridReportSchemaOut(**report_data)
-
-        return validated_report_data_out.model_dump()
+        return final_data_out.model_dump()
 
     ##################################################################################################################
     #   PRIVATE METHODS
