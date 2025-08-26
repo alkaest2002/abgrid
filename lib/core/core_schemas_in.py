@@ -64,10 +64,10 @@ class ABGridGroupSchemaIn(BaseModel):
         errors = []
 
         # Validate fields
-        errors.extend(_validate_text_field("project_title", data.get("project_title"), 1, 100))
-        errors.extend(_validate_text_field("question_a", data.get("question_a"), 1, 300))
-        errors.extend(_validate_text_field("question_b", data.get("question_b"), 1, 300))
-        errors.extend(_validate_int_field("group", data.get("group")))
+        errors.extend(_validate_required_text_field("project_title", data.get("project_title"), 1, 100))
+        errors.extend(_validate_required_text_field("question_a", data.get("question_a"), 1, 300))
+        errors.extend(_validate_required_text_field("question_b", data.get("question_b"), 1, 300))
+        errors.extend(_validate_required_int_field("group", data.get("group")))
         cls._validate_members_field(data.get("members"), errors)
 
         if errors:
@@ -115,7 +115,6 @@ class ABGridGroupSchemaIn(BaseModel):
 #   For high specs servers or terminal apps
 #
 #########################################################################################
-
 
 class ABGridReportSchemaIn(BaseModel):
     """Input schema for AB-Grid report data.
@@ -178,10 +177,10 @@ class ABGridReportSchemaIn(BaseModel):
         errors = []
 
         # Validate basic fields
-        errors.extend(_validate_text_field("project_title", data.get("project_title"), 1, 100))
-        errors.extend(_validate_text_field("question_a", data.get("question_a"), 1, 300))
-        errors.extend(_validate_text_field("question_b", data.get("question_b"), 1, 300))
-        errors.extend(_validate_int_field("group", data.get("group")))
+        errors.extend(_validate_required_text_field("project_title", data.get("project_title"), 1, 100))
+        errors.extend(_validate_required_text_field("question_a", data.get("question_a"), 1, 300))
+        errors.extend(_validate_required_text_field("question_b", data.get("question_b"), 1, 300))
+        errors.extend(_validate_required_int_field("group", data.get("group")))
 
         # Validate choices structure and collect keys
         choices_a_keys = cls._validate_choices_structure(data, "choices_a", errors)
@@ -514,6 +513,7 @@ class ABGridReportSchemaIn(BaseModel):
                 "error_message": "too_many_nodes_have_empty_values"
             })
 
+
 #########################################################################################
 #   MULTIPLE STEP REPORT GENERATION CLASSES
 #########################################################################################
@@ -522,7 +522,6 @@ class ABGridReportSchemaIn(BaseModel):
 #   For low specs servers
 #
 #########################################################################################
-
 
 class ABGridReportStep1SchemaIn(ABGridReportSchemaIn):
     """Input schema for AB-Grid step 1 data via multi-step process"""
@@ -544,7 +543,7 @@ class ABGridReportStep2SchemaIn(BaseModel):
 
     group_data: dict[str, Any] = Field(...)
     sna_data: dict[str, Any] = Field(...)
-    signature: str = Field(..., alias="signature")
+    signature: str = Field(...)
 
     @model_validator(mode="before")
     @classmethod
@@ -562,8 +561,8 @@ class ABGridReportStep2SchemaIn(BaseModel):
         """
         errors = []
 
-        # Validate each field
-        errors.extend(_validate_hmac_signedd_field("step_1_data", data))
+        # Validate data
+        errors.extend(_validate_hmac_signed_field("step_1_data", data))
 
         # On error
         if errors:
@@ -600,7 +599,7 @@ class ABGridReportStep3SchemaIn(BaseModel):
     sociogram: dict[str, Any] = Field(...)
     relevant_nodes: dict[str, Any] = Field(...)
     isolated_nodes: dict[str, Any] = Field(...)
-    signature: str = Field(..., alias="signature")
+    signature: str = Field(...)
 
     @model_validator(mode="before")
     @classmethod
@@ -619,7 +618,7 @@ class ABGridReportStep3SchemaIn(BaseModel):
         errors = []
 
         # Validate data
-        errors.extend(_validate_hmac_signedd_field("step_2_data", data))
+        errors.extend(_validate_hmac_signed_field("step_2_data", data))
 
         # On error
         if errors:
@@ -632,7 +631,7 @@ class ABGridReportStep3SchemaIn(BaseModel):
 #   PRIVATE METHODS
 ##################################################################################################################
 
-def _validate_hmac_signedd_field(field_name: str, field_value: Any) -> list[dict[str, Any]]:
+def _validate_hmac_signed_field(field_name: str, field_value: Any) -> list[dict[str, Any]]:
     """Validate signature field for presence and format.
 
     Args:
@@ -644,7 +643,6 @@ def _validate_hmac_signedd_field(field_name: str, field_value: Any) -> list[dict
     """
     errors = []
 
-    # Check if field exists
     if field_value is None:
         errors.append({
             "location": field_name,
@@ -653,7 +651,6 @@ def _validate_hmac_signedd_field(field_name: str, field_value: Any) -> list[dict
         })
         return errors
 
-    # Check if field is a dictionary
     if not isinstance(field_value, dict):
         errors.append({
             "location": field_name,
@@ -662,7 +659,6 @@ def _validate_hmac_signedd_field(field_name: str, field_value: Any) -> list[dict
         })
         return errors
 
-    # Check for mandatory signature key
     if "signature" not in field_value:
         errors.append({
             "location": field_name,
@@ -672,7 +668,6 @@ def _validate_hmac_signedd_field(field_name: str, field_value: Any) -> list[dict
         return errors
 
     try:
-        # Verify HMAC signature
         if not verify_hmac_signature(field_value):
             errors.append({
                 "location": field_name,
@@ -689,7 +684,7 @@ def _validate_hmac_signedd_field(field_name: str, field_value: Any) -> list[dict
     finally:
         return errors  # noqa: B012
 
-def _validate_text_field(field_name: str, field_value: Any, min_len: int, max_len: int) -> list[dict[str, Any]]:
+def _validate_required_text_field(field_name: str, field_value: Any, min_len: int, max_len: int) -> list[dict[str, Any]]:
     """Validate text field with length and character constraints.
 
     Validates that the field:
@@ -742,7 +737,6 @@ def _validate_text_field(field_name: str, field_value: Any, min_len: int, max_le
             "error_message": "field_is_too_long"
         })
 
-    # Check for forbidden characters
     if FORBIDDEN_CHARS.findall(field_value):
         errors.append({
             "location": field_name,
@@ -752,7 +746,7 @@ def _validate_text_field(field_name: str, field_value: Any, min_len: int, max_le
 
     return errors
 
-def _validate_int_field(field_name: str, field_value: Any) -> list[dict[str, Any]]:
+def _validate_required_int_field(field_name: str, field_value: Any) -> list[dict[str, Any]]:
     """Validate integer field for presence and format.
 
     Validates that the integer field:
