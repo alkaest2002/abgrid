@@ -29,10 +29,10 @@
 {% endmacro %}
 
 <!-- Macro: render_relevant_nodes -->
-{% macro render_relevant_nodes(valence_type, relevant_nodes) %}
+{% macro render_relevant_nodes(network_type, relevant_nodes) %}
 <div class="relevant-nodes-container mt-xl">
     <div class="relevant-nodes-main">
-        <div class="relevant-nodes-list list-{{valence_type}}">
+        <div class="relevant-nodes-list list-{{network_type}}">
             {% for node_id, node in relevant_nodes | universal_iter_rows %}
                 <div class="node">
                     <div class="node-id">

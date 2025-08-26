@@ -411,8 +411,8 @@ class CoreSociogram:
 
         Analyzes node rankings across all sociometric centrality metrics to identify nodes that
         consistently perform well (positive relevance) or poorly (negative relevance).
-        Processes sociogram rankings to find top performers (valence 'a') and bottom
-        performers (valence 'b') across different sociometric measures.
+        Processes sociogram rankings to find top performers (network 'a') and bottom
+        performers (network 'b') across different sociometric measures.
 
         Args:
             threshold: Quantile threshold for selecting top/bottom performing nodes
@@ -431,8 +431,8 @@ class CoreSociogram:
             - 'evidence_type': always 'sociogram'.
 
         Notes:
-            - For valence 'a': selects nodes with ranks <= threshold quantile (best performers).
-            - For valence 'b': selects nodes with ranks >= (1-threshold) quantile (worst performers).
+            - For network 'a': selects nodes with ranks <= threshold quantile (best performers).
+            - For network 'b': selects nodes with ranks >= (1-threshold) quantile (worst performers).
             - Processes all ranking columns ending with '_rank' from sociogram rankings.
         """
         # Select micro_stats and rankings to use
@@ -443,7 +443,7 @@ class CoreSociogram:
         relevant_nodes: dict[str, pd.DataFrame] = {"a": pd.DataFrame(), "b": pd.DataFrame()}
 
         # Process both positive (a) and negative (b) relevance directions
-        for valence_type in ["a", "b"]:
+        for network_type in ["a", "b"]:
 
             # Loop through metrics and associated ranks
             for metric_rank_name, ranks_series in rankings.items():
@@ -457,7 +457,7 @@ class CoreSociogram:
                 metric_name: str = re.sub("_rank", "", metric_rank_name)
 
                 # Select strategy: a = best performers, b = worst performers
-                if valence_type == "a":
+                if network_type == "a":
                     # Get threshold for top performers (lower quantile = better ranks)
                     threshold_value = ranks_series.quantile(threshold)
 
@@ -495,8 +495,8 @@ class CoreSociogram:
                 )
 
                 # Add relevant nodes to dataframe
-                relevant_nodes[valence_type] = pd.concat([
-                    relevant_nodes[valence_type],
+                relevant_nodes[network_type] = pd.concat([
+                    relevant_nodes[network_type],
                     current_relevant_nodes
                 ], ignore_index=True)
 
