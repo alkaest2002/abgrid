@@ -105,7 +105,7 @@ class CoreData:
     #   MULTI STEP REPORT
     ##################################################################################################################
 
-    def get_multistep_step1(self, validated_data: ABGridReportStep1SchemaIn) -> dict[str, Any]:
+    def get_multistep_step_1(self, validated_data: ABGridReportStep1SchemaIn) -> dict[str, Any]:
         """Generate step 1 data for multi-step report generation.
 
         Args:
@@ -134,7 +134,7 @@ class CoreData:
 
         return final_data_out.model_dump()
 
-    def get_multistep_step2(self, validated_data: ABGridReportStep2SchemaIn, with_sociogram: bool = False) -> dict[str, Any]:
+    def get_multistep_step_2(self, validated_data: ABGridReportStep2SchemaIn, with_sociogram: bool = False) -> dict[str, Any]:
         """Generate step 2 data for multi-step report generation.
 
         Args:

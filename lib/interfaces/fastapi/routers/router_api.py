@@ -270,7 +270,7 @@ def get_router_api() -> APIRouter:  # noqa: PLR0915
         try:
             # Data computation
             data: dict[str, Any] = await asyncio.to_thread(
-                _abgrid_data.get_multistep_step1,
+                _abgrid_data.get_multistep_step_1,
                 model,
             )
 
@@ -340,7 +340,7 @@ def get_router_api() -> APIRouter:  # noqa: PLR0915
 
             # Data computation
             data: dict[str, Any] = await asyncio.to_thread(
-                _abgrid_data.get_multistep_step2,
+                _abgrid_data.get_multistep_step_2,
                 model,
                 with_sociogram
             )
