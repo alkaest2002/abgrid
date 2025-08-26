@@ -384,21 +384,6 @@ class VerifyCommand(Command):
         except TokenVerificationError as e:
             print(f"Token is INVALID: {e}")
 
-            # Try to show basic info even for invalid tokens
-            try:
-                unverified_payload = jwt.decode(
-                    self.args.verify,
-                    options={"verify_signature": False, "verify_exp": False}
-                )
-                print("\nToken Information (Unverified):")
-                print(f"Email: {unverified_payload.get('email', 'Not set')}")
-                print(f"Subject: {unverified_payload.get('sub')}")
-                exp_timestamp = unverified_payload.get("exp", 0)
-                exp_datetime = datetime.fromtimestamp(exp_timestamp, tz=timezone.utc)
-                print(f"Expires At: {exp_datetime.isoformat()}")
-            except Exception:
-                print("Could not decode token structure")
-
 
 class SearchCommand(Command):
     """Command for searching and displaying stored token data by email address.
