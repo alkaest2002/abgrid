@@ -147,7 +147,7 @@ class CoreData:
         # Get validated data model dump
         data: dict[str, Any] = validated_data.model_dump()
 
-        # Remove previous signature
+        # Remove signature added in step 1
         data.pop("signature", None)
 
         # Extract group data
@@ -192,7 +192,7 @@ class CoreData:
         # Get validated data model dump
         data: dict[str, Any] = validated_data.model_dump()
 
-        # Remove signature
+        # Remove signature added in step 2
         data.pop("signature", None)
 
         # Validate and convert report data
