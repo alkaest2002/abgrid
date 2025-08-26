@@ -171,12 +171,5 @@ class QueryParamLimitMiddleware(BaseHTTPMiddleware):
                         content={"detail": "invalid_language_code"}
                     )
 
-        # Check required parameters (only when query parameters are present)
-        if "language" not in query_params:
-            return JSONResponse(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                content={"detail": "missing_required_language_parameter"}
-            )
-
         # All validations passed, proceed to next handler
         return await call_next(request)
