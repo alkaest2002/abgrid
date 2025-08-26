@@ -133,10 +133,12 @@ class CoreExport:
         json_data: dict[str, Any] = {}
 
         # Serialize group data
-        json_data["group_data"] = CoreExport._to_json_encoders(data["group_data"])
+        group_data = data.get("group_data")
+        json_data["group_data"] = CoreExport._to_json_encoders(group_data)
 
         # Serialize SNA data
-        json_data["sna_data"] = CoreExport._to_json_encoders(data["sna_data"])
+        sna_data = data.get("sna_data")
+        json_data["sna_data"] = CoreExport._to_json_encoders(sna_data)
 
         # Add signature
         json_data["signature"] = compute_hmac_signature(json_data)
@@ -157,19 +159,31 @@ class CoreExport:
             A JSON-serializable dictionary containing both group and SNA data with signatures.
         """
         # Initialize dictionary
-        json_data: dict[str, Any] = data
+        json_data: dict[str, Any] = {}
+
+        # Add following data as is (they have already been JSON-serialized in step 1)
+        json_data["year"] = data.get("year")
+        json_data["project_title"] = data.get("project_title")
+        json_data["question_a"] = data.get("question_a")
+        json_data["question_b"] = data.get("question_b")
+        json_data["group"] = data.get("group")
+        json_data["group_size"] = data.get("group_size")
+        json_data["sna"] = data.get("sna")
 
         # Serialize Sociogram data
-        json_data["sociogram"] = CoreExport._to_json_encoders(data["sociogram"])
+        sociogram = data.get("sociogram")
+        json_data["sociogram"] = CoreExport._to_json_encoders(sociogram)
 
         # Serialize Isolated nodes data
-        json_data["isolated_nodes"] = CoreExport._to_json_encoders(data["isolated_nodes"])
+        isolated_nodes = data.get("isolated_nodes")
+        json_data["isolated_nodes"] = CoreExport._to_json_encoders(isolated_nodes)
 
         # Serialize Relevant nodes data
-        json_data["relevant_nodes"] = CoreExport._to_json_encoders(data["relevant_nodes"])
+        relevant_nodes = data.get("relevant_nodes")
+        json_data["relevant_nodes"] = CoreExport._to_json_encoders(relevant_nodes)
 
         # Add signature
-        json_data["signature"] = compute_hmac_signature(data)
+        json_data["signature"] = compute_hmac_signature(json_data)
 
         return json_data
 
@@ -205,10 +219,12 @@ class CoreExport:
         json_data["group_size"] = data.get("group_size")
 
         # Add SNA data to json_data
-        json_data["sna"] = CoreExport._to_json_encoders(data.get("sna"))
+        sna = data.get("sna")
+        json_data["sna"] = CoreExport._to_json_encoders(sna)
 
         # Add Sociogram data
-        json_data["sociogram"] = CoreExport._to_json_encoders(data.get("sociogram"))
+        sociogram = data.get("sociogram")
+        json_data["sociogram"] = CoreExport._to_json_encoders(sociogram)
 
         # Add relevant nodes data to json_data
         relevant_nodes = data.get("relevant_nodes", {})
