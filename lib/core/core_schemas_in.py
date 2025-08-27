@@ -564,7 +564,7 @@ class ABGridReportStep2SchemaIn(BaseModel):
         # Validate data
         errors.extend(_validate_hmac_signed_field("step_1_data", data))
 
-        # On error
+        # On errors
         if errors:
             raise PydanticValidationError(errors)
 
@@ -620,7 +620,7 @@ class ABGridReportStep3SchemaIn(BaseModel):
         # Validate data
         errors.extend(_validate_hmac_signed_field("step_2_data", data))
 
-        # On error
+        # On errors
         if errors:
             raise PydanticValidationError(errors)
 
