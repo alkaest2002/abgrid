@@ -3,10 +3,8 @@ Author: Pierpaolo Calanna
 
 The code is part of the AB-Grid project and is licensed under the MIT License.
 """
-import base64
 import datetime
-import json
-from typing import Any, cast
+from typing import Any
 
 import pandas as pd
 
@@ -149,17 +147,14 @@ class CoreData:
         # Get validated model dump
         data: dict[str, Any] = validated_data.model_dump()
 
-        # Get data to decode
-        data_to_decode: str = cast("str", data.get("encoded_data"))
-
-        # Decode and json parse data
-        decoded_data = json.loads(base64.b64decode(data_to_decode).decode("utf-8"))
+        # Remove signature added in step 1
+        data.pop("signature", None)
 
         # Extract group data
-        group_data = decoded_data["group_data"]
+        group_data = data["group_data"]
 
         # Extract SNA data
-        sna_data = decoded_data["sna_data"]
+        sna_data = data["sna_data"]
 
         # Initialize Sociogram data
         sociogram_data: dict[str, Any] = {}
@@ -198,14 +193,11 @@ class CoreData:
         # Get validated model dump
         data: dict[str, Any] = validated_data.model_dump()
 
-        # Get data to decode
-        data_to_decode: str = cast("str", data.get("encoded_data"))
-
-        # Decode and json parse data
-        decoded_data = json.loads(base64.b64decode(data_to_decode).decode("utf-8"))
+        # Remove signature added in step 2
+        data.pop("signature", None)
 
         # Validate and convert report data
-        final_data_out: ABGridReportStep3SchemaOut = ABGridReportStep3SchemaOut(**decoded_data)
+        final_data_out: ABGridReportStep3SchemaOut = ABGridReportStep3SchemaOut(**data)
 
         return final_data_out.model_dump()
 

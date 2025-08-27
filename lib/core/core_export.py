@@ -3,7 +3,6 @@ Author: Pierpaolo Calanna
 
 The code is part of the AB-Grid project and is licensed under the MIT License.
 """
-import base64
 import datetime
 import json
 from typing import Any
@@ -173,6 +172,9 @@ class CoreExport:
             "b": CoreExport._to_json_encoders(relevant_nodes.get("b", pd.DataFrame()))
         }
 
+        # Add signature to json data
+        json_data["signature"] = compute_hmac_signature(json_data)
+
         return json_data
 
 
@@ -208,19 +210,10 @@ class CoreExport:
         sna_data = data.get("sna_data")
         json_data["sna_data"] = CoreExport._to_json_encoders(sna_data)
 
-        # Create data to sign
-        data_to_sign = json.dumps(json_data, sort_keys=True, separators=(",", ":"))
+        # Add signature to json data
+        json_data["signature"] = compute_hmac_signature(json_data)
 
-        # Base encode data
-        encoded_data = base64.b64encode(data_to_sign.encode("utf-8")).decode("utf-8")
-
-        # Add signature to data
-        signature = compute_hmac_signature(encoded_data)
-
-        return {
-            "encoded_data": encoded_data,
-            "signature": signature
-        }
+        return json_data
 
     @staticmethod
     def to_json_report_step_2(data: dict[str, Any]) -> dict[str, Any]:
@@ -270,17 +263,8 @@ class CoreExport:
             "b": CoreExport._to_json_encoders(relevant_nodes.get("b", pd.DataFrame()))
         }
 
-        # Create data to sign
-        data_to_sign = json.dumps(json_data, sort_keys=True, separators=(",", ":"))
-
-        # Base encode data
-        encoded_data = base64.b64encode(data_to_sign.encode("utf-8")).decode("utf-8")
-
         # Add signature to json data
-        signature = compute_hmac_signature(encoded_data)
+        json_data["signature"] = compute_hmac_signature(json_data)
 
-        return {
-            "encoded_data": encoded_data,
-            "signature": signature
-        }
+        return json_data
 

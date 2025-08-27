@@ -5,7 +5,7 @@ The code is part of the AB-Grid project and is licensed under the MIT License.
 """
 
 import re
-from typing import Any, cast
+from typing import Any
 
 from pydantic import BaseModel, Field, model_validator
 
@@ -532,7 +532,8 @@ class ABGridReportStep2SchemaIn(BaseModel):
     Validates step 2 incoming data with HMAC signature verification.
 
     Attributes:
-        encoded_data: base encoded data.
+        group_data: Group dictionary.
+        sna_data: Social network analysis dictionary.
         signature: HMAC signature
 
     Notes:
@@ -540,7 +541,8 @@ class ABGridReportStep2SchemaIn(BaseModel):
         - HMAC signature is verified for data integrity.
     """
 
-    encoded_data: str = Field(...)
+    group_data: dict[str, Any] = Field(...)
+    sna_data: dict[str, Any] = Field(...)
     signature: str = Field(...)
 
     @model_validator(mode="before")
@@ -568,8 +570,61 @@ class ABGridReportStep2SchemaIn(BaseModel):
 
         return data
 
-class ABGridReportStep3SchemaIn(ABGridReportStep2SchemaIn):
-    """Input schema for AB-Grid step 3 data via multi-step process."""
+class ABGridReportStep3SchemaIn(BaseModel):
+    """Input schema for AB-Grid step 3 data via multi-step process.
+
+    Validates step 3 incoming data with HMAC signature verification.
+
+    Attributes:
+        year: Year of the report.
+        project_title: Project title.
+        question_a: First question text.
+        question_b: Second question text.
+        group: Group identifier.
+        group_size: Group size.
+        sna: Social network analysis.
+        sociogram: Sociogram analysis.
+        isolated_nodes: Isolated nodes.
+        relevant_nodes: Relevant nodes.
+        signature: HMAC signature.
+    """
+
+    year: int = Field(...)
+    project_title: str = Field(...)
+    question_a: str = Field(...)
+    question_b: str = Field(...)
+    group: int = Field(...)
+    group_size: int = Field(...)
+    sna: dict[str, Any] = Field(...)
+    sociogram: dict[str, Any] = Field(...)
+    relevant_nodes: dict[str, Any] = Field(...)
+    isolated_nodes: dict[str, Any] = Field(...)
+    signature: str = Field(...)
+
+    @model_validator(mode="before")
+    @classmethod
+    def _validate_all_fields(cls, data: dict[str, Any]) -> dict[str, Any]:
+        """Validate all fields comprehensively including HMAC signature verification.
+
+        Args:
+            data: Raw input data dictionary.
+
+        Returns:
+            Validated data dictionary.
+
+        Raises:
+            PydanticValidationError: If validation errors are found.
+        """
+        errors = []
+
+        # Validate data
+        errors.extend(_validate_hmac_signed_field("step_2_data", data))
+
+        # On errors
+        if errors:
+            raise PydanticValidationError(errors)
+
+        return data
 
 
 ##################################################################################################################
@@ -613,12 +668,7 @@ def _validate_hmac_signed_field(field_name: str, field_value: Any) -> list[dict[
         return errors
 
     try:
-        # Extract encoded data and signature
-        encoded_data: str = cast("str", field_value.get("encoded_data"))
-        provided_signature: str = cast("str", field_value.get("signature"))
-
-        # Verify data
-        if not verify_hmac_signature(encoded_data, provided_signature):
+        if not verify_hmac_signature(field_value):
             errors.append({
                 "location": field_name,
                 "value_to_blame": field_value.get("signature"),

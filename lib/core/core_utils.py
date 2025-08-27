@@ -8,6 +8,7 @@ import asyncio
 import hashlib
 import hmac
 import io
+import json
 from base64 import b64encode
 from collections.abc import Callable
 from functools import reduce
@@ -194,7 +195,7 @@ def gini_coefficient(values: pd.Series) -> float:
 
     return gini
 
-def compute_hmac_signature(encoded_data: str) -> str:
+def compute_hmac_signature(json_data: dict[str, Any]) -> str:
     """Compute an HMAC-SHA256 signature for JSON data using the application secret key.
 
     Creates a cryptographic signature for integrity verification and authentication.
@@ -202,7 +203,7 @@ def compute_hmac_signature(encoded_data: str) -> str:
     different platforms and Python versions.
 
     Args:
-        encoded_data: stringified data to sign.
+        json_data: Dictionary to sign (should not contain signature keys).
 
     Returns:
         Hexadecimal string representation of the HMAC-SHA256 signature.
@@ -213,21 +214,24 @@ def compute_hmac_signature(encoded_data: str) -> str:
         - Uses the application's auth_secret from settings as the signing key.
         - Provides tamper detection and authentication capabilities.
     """
+    # Convert to JSON string with sorted keys for consistent signing
+    json_string = json.dumps(json_data, sort_keys=True, separators=(",", ":"))
+
+    # Compute HMAC-SHA256
     return hmac.new(
         settings.auth_secret.encode("utf-8"),
-        encoded_data.encode("utf-8"),
+        json_string.encode("utf-8"),
         hashlib.sha256
     ).hexdigest()
 
-def verify_hmac_signature(encoded_data: str, provided_signature: str) -> bool:
+def verify_hmac_signature(json_data: dict[str, Any]) -> bool:
     """Verify the HMAC signature of JSON data against the expected signature.
 
     Extracts the signature from the "signature" key, recomputes the expected
     signature for the remaining data, and performs a secure comparison.
 
     Args:
-        encoded_data: encoded data to verify.
-        provided_signature: provided signature to use for verification.
+        json_data: Dictionary containing data and a "signature" key with the signature to verify.
 
     Returns:
         True if the signature is valid and matches the expected signature, False otherwise.
@@ -238,8 +242,14 @@ def verify_hmac_signature(encoded_data: str, provided_signature: str) -> bool:
         - Returns False if "signature" key is missing.
         - Signature verification is performed on all data excluding the "signature" key.
     """
+    # Make a copy of data
+    cloned_data = json_data.copy()
+
+    # Extract signature from data
+    provided_signature = cloned_data.pop("signature", "")
+
     # Compute expected signature
-    expected_signature = compute_hmac_signature(encoded_data)
+    expected_signature = compute_hmac_signature(cloned_data)
 
     # Compare signatures
     return hmac.compare_digest(provided_signature, expected_signature)
