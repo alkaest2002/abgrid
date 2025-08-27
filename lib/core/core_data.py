@@ -43,7 +43,7 @@ class CoreData:
         Returns:
             Dict containing the group data with added member symbols.
         """
-        # Get validated data model dumps
+        # Get validated model dump
         group_data: dict[str, Any] = validated_data.model_dump()
 
         # Add members list to group data, using SYMBOLS for members
@@ -68,7 +68,7 @@ class CoreData:
         Returns:
             Dict containing complete report data with SNA analysis and optional sociogram results.
         """
-        # Get validated data model dump
+        # Get validated model dump
         group_data: dict[str, Any] = validated_data.model_dump()
 
         # Initialize SNA analysis class
@@ -77,7 +77,7 @@ class CoreData:
         # Compute SNA results
         sna_data: dict[str, Any] = abgrid_sna.get()
 
-        # Initialize Sociogram data
+        # Initialize Sociogram dictionary data
         sociogram_data: dict[str, Any] = {}
 
         # Compute Sociogram results if requested
@@ -114,7 +114,7 @@ class CoreData:
         Returns:
             Dict containing group and SNA analysis data.
         """
-        # Get validated data model dump
+        # Get validated model dump
         group_data: dict[str, Any] = validated_data.model_dump()
 
         # Initialize SNA analysis class
@@ -129,7 +129,7 @@ class CoreData:
             "sna_data": sna_data
         }
 
-        # Validate and convert fianl data
+        # Validate and convert final data
         final_data_out: ABGridReportStep1SchemaOut = ABGridReportStep1SchemaOut(**final_data)
 
         return final_data_out.model_dump()
@@ -144,7 +144,7 @@ class CoreData:
         Returns:
             Dict containing project related data, sna, sociogra, isolated nodes and relevant nodes.
         """
-        # Get validated data model dump
+        # Get validated model dump
         data: dict[str, Any] = validated_data.model_dump()
 
         # Remove signature added in step 1
@@ -159,6 +159,7 @@ class CoreData:
         # Initialize Sociogram data
         sociogram_data: dict[str, Any] = {}
 
+        # Compute Sociogram results if requested
         if with_sociogram:
             # Initialize Sociogram analysis class
             abgrid_sociogram: CoreSociogram = CoreSociogram(group_data["choices_a"], group_data["choices_b"])
@@ -189,7 +190,7 @@ class CoreData:
         Returns:
             Dict containing complete report data with isolated and relevant nodes analysis.
         """
-        # Get validated data model dump
+        # Get validated model dump
         data: dict[str, Any] = validated_data.model_dump()
 
         # Remove signature added in step 2
@@ -243,7 +244,7 @@ class CoreData:
                 else pd.Index(sna_isolated_b)
         )
 
-        # Prepare relevant nodes from SNA (convert to DataFrame if needed)
+        # Prepare relevant nodes from SNA (convert to pandas DataFrame if needed)
         relevant_nodes_sna: dict[str, pd.DataFrame] = {
             "a": sna_relevant_a.copy()
                 if isinstance(sna_relevant_a, pd.DataFrame)
