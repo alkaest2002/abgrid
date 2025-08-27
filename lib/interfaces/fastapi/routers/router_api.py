@@ -158,8 +158,8 @@ def get_router_api() -> APIRouter:  # noqa: PLR0915
     ) -> JSONResponse:
         """Generate analysis report based on provided data.
 
-        This endpoint processes the report schema and generates both HTML and JSON
-        formatted reports.
+        This endpoint processes the report schema and generates both JSON data and
+        an HTML formatted report.
 
         Args:
             request: The HTTP request object (used by rate limiter).
@@ -311,7 +311,7 @@ def get_router_api() -> APIRouter:  # noqa: PLR0915
 
         This endpoint is the second step in the multi-step report generation process.
         It processes the report schema and generates JSON data containing group related
-        data, sna, sociogra, isolated nodes and relevant nodes.
+        data, SNA, sociogram, isolated nodes and relevant nodes.
 
         Args:
             request: The HTTP request object (used by rate limiter).
@@ -381,7 +381,7 @@ def get_router_api() -> APIRouter:  # noqa: PLR0915
         """Generate HTML report.
 
         This endpoint is the final step in the multi-step report generation process.
-        It takes the combined data from previous steps and renders it into a complete
+        It takes the combined data from previous steps (1, 2) and renders it into a complete
         HTML report using the specified language template.
 
         Args:
@@ -406,8 +406,7 @@ def get_router_api() -> APIRouter:  # noqa: PLR0915
 
         Notes:
             This is the final step (step 3) of the multi-step process. It requires
-            data from both step 1 (group/SNA) and step 2 (sociogram) to generate
-            the complete report.
+            data from both step 1 and step 2 to generate the complete report.
         """
         try:
 
