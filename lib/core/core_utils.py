@@ -48,7 +48,7 @@ def unpack_network_edges(packed_edges: list[dict[str, str | None]]) -> list[tupl
     Safely handles None values in edge lists.
 
     Args:
-        packed_edges: List of dictionaries where keys are source nodes and values are.
+        packed_edges: List of dictionaries where keys are source nodes and values are
             comma-separated strings of target nodes. None values are ignored.
 
     Returns:
@@ -195,23 +195,25 @@ def gini_coefficient(values: pd.Series) -> float:
     return gini
 
 def compute_hmac_signature(json_data: dict[str, Any]) -> str:
-    """Compute an HMAC-SHA256 signature for JSON data using the application secret key.
+    """Compute an HMAC-SHA256 signature based on recursively collected JSON keys.
 
-    Creates a cryptographic signature for integrity verification and authentication.
-    The JSON data is serialized with sorted keys for consistent signing across
-    different platforms and Python versions.
+    Creates a cryptographic signature by traversing the JSON object recursively,
+    collecting all keys (including duplicates), sorting them, and signing the
+    resulting key string. Used for data integrity verification.
 
     Args:
-        json_data: Dictionary to sign (should not contain signature keys).
+        json_data: Dictionary to traverse and sign based on its key structure.
 
     Returns:
         Hexadecimal string representation of the HMAC-SHA256 signature.
 
     Notes:
-        - Uses HMAC-SHA256 for cryptographic integrity and authentication.
-        - JSON is serialized with sorted keys and compact formatting for consistency.
-        - Uses the application's auth_secret from settings as the signing key.
-        - Provides tamper detection and authentication capabilities.
+        - Recursively collects ALL keys from nested objects and arrays.
+        - Preserves duplicate keys from different levels/objects.
+        - Keys are sorted alphabetically before signing.
+        - Uses recursive depth limit of 25 to prevent infinite recursion.
+        - Signs the concatenated key string (no separators) with auth_secret.
+        - Only considers key structure, not values, for signature generation.
     """
     # Function to collect JSON keys recursively
     def _collect_json_keys_recursive(obj: dict[str, Any]) -> str:
@@ -224,8 +226,13 @@ def compute_hmac_signature(json_data: dict[str, Any]) -> str:
         Returns:
             str: Sorted keys joined without spaces (duplicates allowed)
         """
+        # Init list for keys
         keys: list[str] = []
+
+        # Max recursion depth
         max_depth = 25
+
+        # Recursive key collection
         def _collect(current: dict[str, Any] | list[Any], depth: int = 0) -> None:
             if depth > max_depth:
                 return
@@ -236,7 +243,10 @@ def compute_hmac_signature(json_data: dict[str, Any]) -> str:
             elif isinstance(current, list):
                 for item in current:
                     _collect(item, depth + 1)
+
+        # Start recursive collection
         _collect(obj)
+
         return "".join(sorted(keys))
 
     # Compute HMAC-SHA256
@@ -249,8 +259,9 @@ def compute_hmac_signature(json_data: dict[str, Any]) -> str:
 def verify_hmac_signature(json_data: dict[str, Any]) -> bool:
     """Verify the HMAC signature of JSON data against the expected signature.
 
-    Extracts the signature from the "signature" key, recomputes the expected
-    signature for the remaining data, and performs a secure comparison.
+    Extracts the signature from the "signature" key, removes it from the data,
+    recomputes the expected signature based on the remaining key structure,
+    and performs a secure comparison.
 
     Args:
         json_data: Dictionary containing data and a "signature" key with the signature to verify.
@@ -259,10 +270,12 @@ def verify_hmac_signature(json_data: dict[str, Any]) -> bool:
         True if the signature is valid and matches the expected signature, False otherwise.
 
     Notes:
+        - Creates a copy of the input data to avoid modifying the original.
         - Expects the signature to be stored in the "signature" key.
         - Uses secure comparison (hmac.compare_digest) to prevent timing attacks.
-        - Returns False if "signature" key is missing.
-        - Signature verification is performed on all data excluding the "signature" key.
+        - Returns False if "signature" key is missing (empty string used as fallback).
+        - Signature verification is based on key structure, not data values.
+        - Uses the same recursive key collection logic as compute_hmac_signature.
     """
     # Make a copy of data
     cloned_data = json_data.copy()
