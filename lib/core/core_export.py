@@ -110,7 +110,6 @@ class CoreExport:
             return {k: CoreExport._to_json_encoders(v) for k, v in value.items()}
         if isinstance(value, list | tuple):
             return [CoreExport._to_json_encoders(item) for item in value]
-        # Fallback: try to serialize directly, otherwise convert to string
         try:
             return json.dumps(value)
         except (TypeError, ValueError):
