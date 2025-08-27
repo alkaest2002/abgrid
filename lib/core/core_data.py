@@ -356,6 +356,6 @@ class CoreData:
             "group": group_data["group"],
             "group_size": len(group_data["choices_a"]),
             "sna": sna_data,
-            "sociogram": sociogram_data if with_sociogram else None,
+            "sociogram": sociogram_data,
             **self._add_isolated_and_relevant_nodes(sna_data, sociogram_data, with_sociogram)
         }
