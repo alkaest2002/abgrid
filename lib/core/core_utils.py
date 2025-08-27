@@ -242,14 +242,14 @@ def verify_hmac_signature(json_data: dict[str, Any]) -> bool:
         - Returns False if "signature" key is missing.
         - Signature verification is performed on all data excluding the "signature" key.
     """
-    # Extract signature from data
-    provided_signature = json_data.get("signature", "")
+    # Make a copy of data
+    cloned_data = json_data.copy()
 
-    # Create data without signature for verification
-    data_without_signature = { str(k): v for k, v in json_data.items() if k != "signature"}
+    # Extract signature from data
+    provided_signature = cloned_data.pop("signature", "")
 
     # Compute expected signature
-    expected_signature = compute_hmac_signature(data_without_signature)
+    expected_signature = compute_hmac_signature(cloned_data)
 
     # Compare signatures
     return hmac.compare_digest(provided_signature, expected_signature)
