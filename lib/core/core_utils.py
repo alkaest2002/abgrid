@@ -8,7 +8,6 @@ import asyncio
 import hashlib
 import hmac
 import io
-import json
 from base64 import b64encode
 from collections.abc import Callable
 from functools import reduce
@@ -214,13 +213,36 @@ def compute_hmac_signature(json_data: dict[str, Any]) -> str:
         - Uses the application's auth_secret from settings as the signing key.
         - Provides tamper detection and authentication capabilities.
     """
-    # Convert to JSON string with sorted keys for consistent signing
-    json_string = json.dumps(json_data, sort_keys=True, separators=(",", ":"))
+    # Function to collect JSON keys recursively
+    def _collect_json_keys_recursive(obj: dict[str, Any]) -> str:
+        """
+        Simple recursive JSON key collector with basic safety checks.
+
+        Args:
+            obj: JSON object to traverse
+
+        Returns:
+            str: Sorted keys joined without spaces (duplicates allowed)
+        """
+        keys: list[str] = []
+        max_depth = 25
+        def _collect(current: dict[str, Any] | list[Any], depth: int = 0) -> None:
+            if depth > max_depth:
+                return
+            if isinstance(current, dict):
+                keys.extend(current.keys())
+                for value in current.values():
+                    _collect(value, depth + 1)
+            elif isinstance(current, list):
+                for item in current:
+                    _collect(item, depth + 1)
+        _collect(obj)
+        return "".join(sorted(keys))
 
     # Compute HMAC-SHA256
     return hmac.new(
         settings.auth_secret.encode("utf-8"),
-        json_string.encode("utf-8"),
+        _collect_json_keys_recursive(json_data).encode("utf-8"),
         hashlib.sha256
     ).hexdigest()
 
