@@ -19,6 +19,9 @@ export default defineConfig({
                 itNotifyErrorYaml: resolve(fileURLToPath(new URL('.', import.meta.url)), 'pages/it.notify.error.yaml.html'),
                 itNotifyErrorApi: resolve(fileURLToPath(new URL('.', import.meta.url)), 'pages/it.notify.error.api.html'),
                 itNotifyQueue: resolve(fileURLToPath(new URL('.', import.meta.url)), 'pages/it.notify.queue.html'),
+                itMultistepSociogram: resolve(fileURLToPath(new URL('.', import.meta.url)), 'pages/it.multistep.sociogram.html'),
+                itMultistepData: resolve(fileURLToPath(new URL('.', import.meta.url)), 'pages/it.multistep.data.html'),
+                itMultistepReport: resolve(fileURLToPath(new URL('.', import.meta.url)), 'pages/it.multistep.report.html'),
             }
         }
     },
