@@ -206,13 +206,10 @@ class CoreExport:
         sna_data = data.get("sna_data")
         json_data["sna_data"] = CoreExport._to_json_encoders(sna_data)
 
-        # Create data to sign
-        data_to_sign = json.dumps(json_data, sort_keys=True, separators=(",", ":"))
+        # Serialize data to be signed
+        encoded_data = json.dumps(json_data, sort_keys=True, separators=(",", ":"))
 
-        # Base encode data
-        encoded_data = data_to_sign
-
-        # Add signature to data
+        # Compute signature of serialized data
         signature = compute_hmac_signature(encoded_data)
 
         return {
@@ -268,13 +265,10 @@ class CoreExport:
             "b": CoreExport._to_json_encoders(relevant_nodes.get("b", pd.DataFrame()))
         }
 
-        # Create data to sign
-        data_to_sign = json.dumps(json_data, sort_keys=True, separators=(",", ":"))
+        # Serialize data to be signed
+        encoded_data = json.dumps(json_data, sort_keys=True, separators=(",", ":"))
 
-        # Base encode data
-        encoded_data = data_to_sign
-
-        # Add signature to json data
+        # Compute signature of serialized data
         signature = compute_hmac_signature(encoded_data)
 
         return {
