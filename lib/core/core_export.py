@@ -3,7 +3,6 @@ Author: Pierpaolo Calanna
 
 The code is part of the AB-Grid project and is licensed under the MIT License.
 """
-import base64
 import datetime
 import json
 from typing import Any
@@ -211,7 +210,7 @@ class CoreExport:
         data_to_sign = json.dumps(json_data, sort_keys=True, separators=(",", ":"))
 
         # Base encode data
-        encoded_data = base64.b64encode(data_to_sign.encode("utf-8")).decode("utf-8")
+        encoded_data = data_to_sign
 
         # Add signature to data
         signature = compute_hmac_signature(encoded_data)
@@ -273,7 +272,7 @@ class CoreExport:
         data_to_sign = json.dumps(json_data, sort_keys=True, separators=(",", ":"))
 
         # Base encode data
-        encoded_data = base64.b64encode(data_to_sign.encode("utf-8")).decode("utf-8")
+        encoded_data = data_to_sign
 
         # Add signature to json data
         signature = compute_hmac_signature(encoded_data)

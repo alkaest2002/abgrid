@@ -3,7 +3,6 @@ Author: Pierpaolo Calanna
 
 The code is part of the AB-Grid project and is licensed under the MIT License.
 """
-import base64
 import datetime
 import json
 from typing import Any, cast
@@ -153,7 +152,7 @@ class CoreData:
         data_to_decode: str = cast("str", data.get("encoded_data"))
 
         # Decode and json-parse data
-        decoded_data = json.loads(base64.b64decode(data_to_decode).decode("utf-8"))
+        decoded_data = json.loads(data_to_decode)
 
         # Extract group data
         group_data = decoded_data["group_data"]
@@ -202,7 +201,7 @@ class CoreData:
         data_to_decode: str = cast("str", data.get("encoded_data"))
 
         # Decode and json-parse data
-        decoded_data = json.loads(base64.b64decode(data_to_decode).decode("utf-8"))
+        decoded_data = json.loads(data_to_decode)
 
         # Validate and convert report data
         final_data_out: ABGridReportStep3SchemaOut = ABGridReportStep3SchemaOut(**decoded_data)
