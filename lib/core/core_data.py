@@ -149,13 +149,10 @@ class CoreData:
         # Get validated model dump
         data: dict[str, Any] = validated_data.model_dump()
 
-        # Remove signature added in step 1
-        data.pop("signature", None)
-
-        # Get data to decode
+        # Get encoded data to decode
         data_to_decode: str = cast("str", data.get("encoded_data"))
 
-        # Decode and json parse data
+        # Decode and json-parse data
         decoded_data = json.loads(base64.b64decode(data_to_decode).decode("utf-8"))
 
         # Extract group data
@@ -204,7 +201,7 @@ class CoreData:
         # Get data to decode
         data_to_decode: str = cast("str", data.get("encoded_data"))
 
-        # Decode and json parse data
+        # Decode and json-parse data
         decoded_data = json.loads(base64.b64decode(data_to_decode).decode("utf-8"))
 
         # Validate and convert report data

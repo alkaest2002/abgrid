@@ -613,7 +613,7 @@ def _validate_hmac_signed_field(field_name: str, field_value: Any) -> list[dict[
 
     try:
         encoded_data: str = cast("str", field_value.get("encoded_data"))
-        provided_signature: str = cast("str",field_value.get("signature"))
+        provided_signature: str = cast("str", field_value.get("signature"))
         if not verify_hmac_signature(encoded_data, provided_signature):
             errors.append({
                 "location": field_name,
