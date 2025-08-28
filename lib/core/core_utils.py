@@ -8,6 +8,7 @@ import asyncio
 import hashlib
 import hmac
 import io
+import json
 from base64 import b64encode
 from collections.abc import Callable
 from functools import reduce
@@ -195,64 +196,31 @@ def gini_coefficient(values: pd.Series) -> float:
     return gini
 
 def compute_hmac_signature(json_data: dict[str, Any]) -> str:
-    """Compute an HMAC-SHA256 signature based on recursively collected JSON keys.
+    """Compute an HMAC-SHA256 signature for JSON data using the application secret key.
 
     Creates a cryptographic signature by traversing the JSON object recursively,
     collecting all keys (including duplicates), sorting them, and signing the
     resulting key string. Used for data integrity verification.
 
     Args:
-        json_data: Dictionary to traverse and sign based on its key structure.
+        json_data: Dictionary to sign (should not contain signature keys).
 
     Returns:
         Hexadecimal string representation of the HMAC-SHA256 signature.
 
     Notes:
-        - Recursively collects ALL keys from nested objects and arrays.
-        - Preserves duplicate keys from different levels/objects.
-        - Keys are sorted alphabetically before signing.
-        - Uses recursive depth limit of 25 to prevent infinite recursion.
-        - Signs the concatenated key string (no separators) with auth_secret.
-        - Only considers key structure, not values, for signature generation.
+        - Uses HMAC-SHA256 for cryptographic integrity and authentication.
+        - JSON is serialized with sorted keys and compact formatting for consistency.
+        - Uses the application's auth_secret from settings as the signing key.
+        - Provides tamper detection and authentication capabilities.
     """
-    # Function to collect JSON keys recursively
-    def _collect_json_keys_recursive(obj: dict[str, Any]) -> str:
-        """
-        Simple recursive JSON key collector with basic safety checks.
-
-        Args:
-            obj: JSON object to traverse
-
-        Returns:
-            str: Sorted keys joined without spaces (duplicates allowed)
-        """
-        # Init list for keys
-        keys: list[str] = []
-
-        # Max recursion depth
-        max_depth = 25
-
-        # Recursive key collection
-        def _collect(current: dict[str, Any] | list[Any], depth: int = 0) -> None:
-            if depth > max_depth:
-                return
-            if isinstance(current, dict):
-                keys.extend(current.keys())
-                for value in current.values():
-                    _collect(value, depth + 1)
-            elif isinstance(current, list):
-                for item in current:
-                    _collect(item, depth + 1)
-
-        # Start recursive collection
-        _collect(obj)
-
-        return "".join(sorted(keys))
+    # Convert to JSON string with sorted keys for consistent signing
+    json_string = json.dumps(json_data, sort_keys=True, separators=(",", ":"))
 
     # Compute HMAC-SHA256
     return hmac.new(
         settings.auth_secret.encode("utf-8"),
-        _collect_json_keys_recursive(json_data).encode("utf-8"),
+        json_string.encode("utf-8"),
         hashlib.sha256
     ).hexdigest()
 
@@ -273,9 +241,8 @@ def verify_hmac_signature(json_data: dict[str, Any]) -> bool:
         - Creates a copy of the input data to avoid modifying the original.
         - Expects the signature to be stored in the "signature" key.
         - Uses secure comparison (hmac.compare_digest) to prevent timing attacks.
-        - Returns False if "signature" key is missing (empty string used as fallback).
-        - Signature verification is based on key structure, not data values.
-        - Uses the same recursive key collection logic as compute_hmac_signature.
+        - Returns False if "signature" key is missing.
+        - Signature verification is performed on all data excluding the "signature" key.
     """
     # Make a copy of data
     cloned_data = json_data.copy()
