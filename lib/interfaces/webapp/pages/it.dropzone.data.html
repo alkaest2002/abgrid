@@ -63,54 +63,35 @@
                                             x-data="{}" x-show="$store.api.apiRequestIsPending"
                                             class="absolute top-0 left-0 h-full w-full bg-gray-300 opacity-75 rounded-lg cursor-not-allowed">
                                         </div>
-                                        <div class="flex items-center cursor-pointer">
+                                        <div class="flex items-center cursor-pointer" x-cloak>
                                             <input 
                                                 id="sociogram" 
                                                 type="checkbox" 
                                                 x-model="dropzoneDataWithSociogram"
+                                                :disabled="$store.api.apiRequestIsPending"
                                                 class="w-4 h-4 text-blue-700 bg-gray-100 border-gray-300 rounded-sm focus:ring-blue-500"
                                                 aria-describedby="report with sociogram"
                                             >
-                                            <label for="sociogram" class="ms-2 font-medium text-gray-500 cursor-pointer">includi
-                                                sociogramma</label>
+                                            <label for="sociogram" class="ms-2 font-medium text-gray-500 cursor-pointer">
+                                                includi sociogramma
+                                            </label>
                                         </div>
                                     </div>
                                     <!-- download -->
-                                    <div class="h-8 flex p-3 text-sm bg-gray-300 rounded-lg relative">
-                                        <div 
-                                            x-data="{}"
-                                            x-show="$store.api.apiRequestIsPending"
-                                            class="absolute top-0 left-0 h-full w-full bg-gray-300 opacity-75 rounded-lg cursor-not-allowed">
-                                        </div>
-                                        <div class="flex items-center justify-center">
-                                            <a x-bind="dropzoneDataDownloadLink"
-                                                class="inline-flex gap-1 items-center text-blue-700 font-semibold cursor-pointer">
-                                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 fill-blue-700"
-                                                    viewBox="0 0 640 512"><!--!Font Awesome Free 6.7.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2025 Fonticons, Inc.-->
-                                                    <path
-                                                        d="M144 480C64.5 480 0 415.5 0 336c0-62.8 40.2-116.2 96.2-135.9c-.1-2.7-.2-5.4-.2-8.1c0-88.4 71.6-160 160-160c59.3 0 111 32.2 138.7 80.2C409.9 102 428.3 96 448 96c53 0 96 43 96 96c0 12.2-2.3 23.8-6.4 34.6C596 238.4 640 290.1 640 352c0 70.7-57.3 128-128 128l-368 0zm79-167l80 80c9.4 9.4 24.6 9.4 33.9 0l80-80c9.4-9.4 9.4-24.6 0-33.9s-24.6-9.4-33.9 0l-39 39L344 184c0-13.3-10.7-24-24-24s-24 10.7-24 24l0 134.1-39-39c-9.4-9.4-24.6-9.4-33.9 0s-9.4 24.6 0 33.9z" />
-                                                </svg>
-                                            </a>
-                                        </div>
+                                    <div class="h-8 w-12 flex justify-center items-center p-3 text-sm bg-gray-300 rounded-lg cursor-pointer" x-bind="dropzoneDataDownloadLink" >
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 fill-blue-700"
+                                            viewBox="0 0 640 512"><!--!Font Awesome Free 6.7.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2025 Fonticons, Inc.-->
+                                            <path
+                                                d="M144 480C64.5 480 0 415.5 0 336c0-62.8 40.2-116.2 96.2-135.9c-.1-2.7-.2-5.4-.2-8.1c0-88.4 71.6-160 160-160c59.3 0 111 32.2 138.7 80.2C409.9 102 428.3 96 448 96c53 0 96 43 96 96c0 12.2-2.3 23.8-6.4 34.6C596 238.4 640 290.1 640 352c0 70.7-57.3 128-128 128l-368 0zm79-167l80 80c9.4 9.4 24.6 9.4 33.9 0l80-80c9.4-9.4 9.4-24.6 0-33.9s-24.6-9.4-33.9 0l-39 39L344 184c0-13.3-10.7-24-24-24s-24 10.7-24 24l0 134.1-39-39c-9.4-9.4-24.6-9.4-33.9 0s-9.4 24.6 0 33.9z" />
+                                        </svg>
                                     </div>
                                     <!-- trash -->
-                                    <div class="h-8 flex p-3 text-sm bg-gray-300 rounded-lg relative">
-                                        <div 
-                                            x-data="{}" 
-                                            x-show="$store.api.apiRequestIsPending" 
-                                            class="absolute top-0 left-0 h-full w-full bg-gray-300 opacity-75 rounded-lg cursor-not-allowed"
-                                        >
-                                        </div>
-                                        <div class="flex items-center justify-center">
-                                            <a x-bind="dropzoneDataResetLink"
-                                                class="inline-flex gap-1 items-center text-blue-700 font-semibold cursor-pointer">
-                                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 fill-blue-700"
-                                                    viewBox="0 0 448 512"><!--!Font Awesome Free 6.7.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2025 Fonticons, Inc.-->
-                                                    <path
-                                                        d="M135.2 17.7L128 32 32 32C14.3 32 0 46.3 0 64S14.3 96 32 96l384 0c17.7 0 32-14.3 32-32s-14.3-32-32-32l-96 0-7.2-14.3C307.4 6.8 296.3 0 284.2 0L163.8 0c-12.1 0-23.2 6.8-28.6 17.7zM416 128L32 128 53.2 467c1.6 25.3 22.6 45 47.9 45l245.8 0c25.3 0 46.3-19.7 47.9-45L416 128z" />
-                                                </svg>
-                                            </a>
-                                        </div>
+                                    <div class="h-8 w-12 flex justify-center items-center p-3 text-sm bg-gray-300 rounded-lg cursor-pointer" x-bind="dropzoneDataResetLink" >
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 fill-blue-700"
+                                            viewBox="0 0 448 512"><!--!Font Awesome Free 6.7.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2025 Fonticons, Inc.-->
+                                            <path
+                                                d="M135.2 17.7L128 32 32 32C14.3 32 0 46.3 0 64S14.3 96 32 96l384 0c17.7 0 32-14.3 32-32s-14.3-32-32-32l-96 0-7.2-14.3C307.4 6.8 296.3 0 284.2 0L163.8 0c-12.1 0-23.2 6.8-28.6 17.7zM416 128L32 128 53.2 467c1.6 25.3 22.6 45 47.9 45l245.8 0c25.3 0 46.3-19.7 47.9-45L416 128z" />
+                                        </svg>
                                     </div>
                                 </div>
                             </div>
