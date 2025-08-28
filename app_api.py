@@ -14,6 +14,7 @@ from lib.interfaces.fastapi.middlewares.body import BodySizeLimitMiddleware
 from lib.interfaces.fastapi.middlewares.coors import (
     add_cors_middleware,  # Import the CORS function
 )
+from lib.interfaces.fastapi.middlewares.gzip import GzipCompressionMiddleware
 from lib.interfaces.fastapi.middlewares.header import HeaderSizeLimitMiddleware
 from lib.interfaces.fastapi.middlewares.query import QueryParamLimitMiddleware
 from lib.interfaces.fastapi.middlewares.request import RequestProtectionMiddleware
@@ -33,16 +34,19 @@ app = FastAPI()
 # 1. CORS
 add_cors_middleware(app)
 
-# 2. Request limits protection
+# 2. Gzip compression
+app.add_middleware(GzipCompressionMiddleware)
+
+# 3. Request limits protection
 app.add_middleware(RequestProtectionMiddleware)
 
-# 3. Header limits protection
+# 4. Header limits protection
 app.add_middleware(HeaderSizeLimitMiddleware)
 
-# 4. Query parameters limits protection
+# 5. Query parameters limits protection
 app.add_middleware(QueryParamLimitMiddleware)
 
-# 5. Body limits protection
+# 6. Body limits protection
 app.add_middleware(BodySizeLimitMiddleware)
 
 #######################################################################################

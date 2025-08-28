@@ -61,6 +61,22 @@ class Settings(BaseSettings):
         le=1000  # Reasonable upper limit
     )
 
+    gzip_minimum_size: int = Field(
+        default=1000,
+        description="Minimum response size in bytes to trigger gzip compression",
+        validation_alias="GZIP_MINIMUM_SIZE",
+        ge=100,
+        le=10000
+    )
+
+    gzip_compression_level: int = Field(
+        default=6,
+        description="Gzip compression level (1-9, higher = better compression)",
+        validation_alias="GZIP_COMPRESSION_LEVEL",
+        ge=1,
+        le=9
+    )
+
     @classmethod
     @lru_cache
     def load(cls) -> "Settings":
