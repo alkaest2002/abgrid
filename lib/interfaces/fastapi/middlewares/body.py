@@ -30,17 +30,17 @@ class BodySizeLimitMiddleware(BaseHTTPMiddleware):
         processing of oversized requests before they consume significant resources.
     """
 
-    def __init__(self, app: ASGIApp, max_body_size: int = 300 * 1024) -> None:
+    def __init__(self, app: ASGIApp, max_body_size: int = 500 * 1024) -> None:
         """Initialize the body size limit middleware.
 
         Sets up the middleware with the specified maximum body size limit.
-        The default limit is set to 300KB to provide reasonable protection
+        The default limit is set to 500KB to provide reasonable protection
         while accommodating typical API request sizes.
 
         Args:
             app: The ASGI application instance to wrap
             max_body_size (int, optional): Maximum allowed request body size in bytes.
-                Defaults to 102,400 bytes (300KB). Must be a positive integer.
+                Defaults to 102,400 bytes (500KB). Must be a positive integer.
 
         Returns:
             None.
