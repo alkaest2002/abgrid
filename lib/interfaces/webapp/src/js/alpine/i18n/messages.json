@@ -76,6 +76,7 @@
             "up": "server raggiungibile"
         },
         "toast": {
+            "download_success": "download riuscito",
             "download_aborted": "download annullato",
             "download_failure": "download non riuscito",
             "error": "si è verificato un errore",
