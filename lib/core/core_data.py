@@ -3,8 +3,10 @@ Author: Pierpaolo Calanna
 
 The code is part of the AB-Grid project and is licensed under the MIT License.
 """
+import base64
 import datetime
-from typing import Any
+import json
+from typing import Any, cast
 
 import pandas as pd
 
@@ -150,11 +152,17 @@ class CoreData:
         # Remove signature added in step 1
         data.pop("signature", None)
 
+        # Get data to decode
+        data_to_decode: str = cast("str", data.get("encoded_data"))
+
+        # Decode and json parse data
+        decoded_data = json.loads(base64.b64decode(data_to_decode).decode("utf-8"))
+
         # Extract group data
-        group_data = data["group_data"]
+        group_data = decoded_data["group_data"]
 
         # Extract SNA data
-        sna_data = data["sna_data"]
+        sna_data = decoded_data["sna_data"]
 
         # Initialize Sociogram data
         sociogram_data: dict[str, Any] = {}
@@ -193,11 +201,14 @@ class CoreData:
         # Get validated model dump
         data: dict[str, Any] = validated_data.model_dump()
 
-        # Remove signature added in step 2
-        data.pop("signature", None)
+        # Get data to decode
+        data_to_decode: str = cast("str", data.get("encoded_data"))
+
+        # Decode and json parse data
+        decoded_data = json.loads(base64.b64decode(data_to_decode).decode("utf-8"))
 
         # Validate and convert report data
-        final_data_out: ABGridReportStep3SchemaOut = ABGridReportStep3SchemaOut(**data)
+        final_data_out: ABGridReportStep3SchemaOut = ABGridReportStep3SchemaOut(**decoded_data)
 
         return final_data_out.model_dump()
 
