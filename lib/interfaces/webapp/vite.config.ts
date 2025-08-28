@@ -20,7 +20,7 @@ export default defineConfig({
                 itNotifyErrorApi: resolve(fileURLToPath(new URL('.', import.meta.url)), 'pages/it.notify.error.api.html'),
                 itNotifyQueue: resolve(fileURLToPath(new URL('.', import.meta.url)), 'pages/it.notify.queue.html'),
                 itMultistepSociogram: resolve(fileURLToPath(new URL('.', import.meta.url)), 'pages/it.multistep.sociogram.html'),
-                itMultistepData: resolve(fileURLToPath(new URL('.', import.meta.url)), 'pages/it.multistep.data.html'),
+                itMultistepJson: resolve(fileURLToPath(new URL('.', import.meta.url)), 'pages/it.multistep.json.html'),
                 itMultistepReport: resolve(fileURLToPath(new URL('.', import.meta.url)), 'pages/it.multistep.report.html'),
             }
         }
