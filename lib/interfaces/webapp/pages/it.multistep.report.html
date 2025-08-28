@@ -51,10 +51,10 @@
                                         Ti consigliamo di scaricalo insieme al file JSON dei dati statistici.
                                     </p>
                                 </div>
-                                <div class="flex flex-col gap-12 mt-6">
+                                <div class="flex flex-col gap-6 mt-6">
                                     <!-- Report HTML or PDF -->
                                     <div class="flex items-center gap-9">
-                                        <div class="w-36 h-48 shrink-0 relative cursor-pointer"
+                                        <div class="w-48 h-64 shrink-0 relative cursor-pointer"
                                             x-bind="multistepDownloadLinkFactoryPDF">
                                             <!-- Shadow -->
                                             <div
@@ -79,7 +79,7 @@
                                                     class="absolute inset-0 flex flex-col items-center justify-center">
                                                     <template x-if="!$store.app.appIsElectron">
                                                         <span
-                                                            class="text-4xl text-red-700 font-bold tracking-wider drop-shadow-sm">HTML
+                                                            class="text-5xl text-red-700 font-bold tracking-wider drop-shadow-sm">HTML
                                                         </span>
                                                     </template>
                                                     <template x-if="$store.app.appIsElectron">
@@ -100,6 +100,9 @@
                                                 </div>
                                             </div>
                                         </div>
+                                    </div>
+                                    <div>
+                                        <p class="text-sm text-gray-500">Scarica il file per passare alla schermata successiva</p>
                                     </div>
                                 </div>
                             </div>
