@@ -33,6 +33,7 @@ networkx==3.5
 numpy==2.3.2
 numpy-typing-compat==20250818.2.3
 optype==0.13.4
+orjson==3.11.3
 packaging==25.0
 pandas==2.3.2
 pandas-stubs==2.3.0.250703

@@ -4,9 +4,9 @@ Author: Pierpaolo Calanna
 The code is part of the AB-Grid project and is licensed under the MIT License.
 """
 import datetime
-import json
 from typing import Any, cast
 
+import orjson
 import pandas as pd
 
 from lib.core import SYMBOLS
@@ -162,7 +162,7 @@ class CoreData:
         data_to_decode: str = cast("str", data.get("encoded_data"))
 
         # Decode and json-parse data
-        decoded_data = json.loads(data_to_decode)
+        decoded_data = orjson.loads(data_to_decode)
 
         # Extract group data
         group_data = decoded_data.get("group_data", {})
@@ -214,7 +214,7 @@ class CoreData:
         data_to_decode: str = cast("str", data.get("encoded_data"))
 
         # Decode and json-parse data
-        decoded_data = json.loads(data_to_decode)
+        decoded_data = orjson.loads(data_to_decode)
 
         # Validate and convert report data
         final_data_out: ABGridReportStep3SchemaOut = ABGridReportStep3SchemaOut(**decoded_data)

@@ -5,11 +5,11 @@ The code is part of the AB-Grid project and is licensed under the MIT License.
 """
 
 import argparse
-import json
 import re
 from pathlib import Path
 from typing import Any
 
+import orjson
 import yaml
 from weasyprint import HTML  # type: ignore[import-untyped]
 
@@ -193,7 +193,7 @@ class TerminalMain:
 
         # Persist json file to disk
         with json_export_path.open("w", encoding="utf-8") as fout:
-            json.dump(all_groups_data, fout, indent=4, ensure_ascii=False)
+            fout.write(orjson.dumps(all_groups_data).decode("utf-8"))
 
     def _get_group_filepaths(self) -> list[Path]:
         """Get list of group file paths matching the pattern."""

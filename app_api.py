@@ -4,10 +4,9 @@ Author: Pierpaolo Calanna
 The code is part of the AB-Grid project and is licensed under the MIT License.
 """
 # ruff: noqa: ARG001
-
 from fastapi import FastAPI, HTTPException, Request, status
 from fastapi.exceptions import RequestValidationError
-from fastapi.responses import JSONResponse
+from fastapi.responses import JSONResponse, ORJSONResponse
 
 from lib.core.core_schemas_errors import PydanticValidationError
 from lib.interfaces.fastapi.middlewares.body import BodySizeLimitMiddleware
@@ -25,7 +24,7 @@ from lib.utils import to_snake_case
 
 
 # Initialization of FastAPI application
-app = FastAPI()
+app = FastAPI(default_response_class=ORJSONResponse)
 
 #######################################################################################
 # Middlewares

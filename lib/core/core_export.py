@@ -4,10 +4,10 @@ Author: Pierpaolo Calanna
 The code is part of the AB-Grid project and is licensed under the MIT License.
 """
 import datetime
-import json
 from typing import Any
 
 import numpy as np
+import orjson
 import pandas as pd
 from networkx import DiGraph
 
@@ -111,7 +111,7 @@ class CoreExport:
         if isinstance(value, list | tuple):
             return [CoreExport._to_json_encoders(item) for item in value]
         try:
-            return json.dumps(value)
+            return orjson.dumps(value)
         except (TypeError, ValueError):
             return str(value)
 
@@ -216,7 +216,7 @@ class CoreExport:
         json_data["sna_data"] = CoreExport._to_json_encoders(sna_data)
 
         # Serialize data to be signed
-        encoded_data = json.dumps(json_data, sort_keys=True, separators=(",", ":"))
+        encoded_data = orjson.dumps(json_data).decode("utf-8")
 
         # Compute signature of serialized data
         signature = compute_hmac_signature(encoded_data)
@@ -275,7 +275,7 @@ class CoreExport:
         }
 
         # Serialize data to be signed
-        encoded_data = json.dumps(json_data, sort_keys=True, separators=(",", ":"))
+        encoded_data = orjson.dumps(json_data).decode("utf-8")
 
         # Compute signature of serialized data
         signature = compute_hmac_signature(encoded_data)
