@@ -43,9 +43,14 @@
                         <!-- Main content goes here -->
                         <div class="h-full flex flex-col justify-start items-start">
                             <div class="w-full h-full flex flex-col justify-start items-start">
-                                <p class="mb-2 text-3xl font-bold text-center text-gray-800">Urrà!</p>
-                                <p class="text-center font-semibold">Il report è stato generato correttamente.</p>
-                                <p class="mb-3 text-xs text-center">Clicca sull'icona per scaricarlo.</p>
+                                <div class="mb-3">
+                                    <p class="mb-3">
+                                        Il report AB-Grid è pensato per una fruizione visivamente ricca dei dati AB-Grid. Il documento contiene analisi approfondite sui diversi aspetti delle dinamiche di gruppo (nodi rilevanti e isolati, social network analysis, sociogramma, ecc.).
+                                    </p>
+                                     <p class="mb-3">
+                                        Ti consigliamo di scaricalo insieme al file JSON dei dati statistici.
+                                    </p>
+                                </div>
                                 <div class="flex flex-col gap-12 mt-6">
                                     <!-- Report HTML or PDF -->
                                     <div class="flex items-center gap-9">
@@ -94,25 +99,6 @@
                                                     <div class="h-0.5 bg-red-400 w-2/3"></div>
                                                 </div>
                                             </div>
-                                        </div>
-                                        <div>
-                                            <p class="text-xl font-semibold mb-2">Avvertenze</p>
-                                            <template x-if="!$store.app.appIsElectron">
-                                                <p>
-                                                    Il file HTML è visualizzabile con i browser più comuni.
-                                                    Inoltre, è possibile generare un PDF tramite la funzione di
-                                                    stampa del browser stesso. Consigliamo di utilizzare l'ultima versione
-                                                    di <a href="https://www.google.com/intl/it_it/chrome/"
-                                                        class="text-blue-700 font-semibold" target="_blank">Google
-                                                        Chrome</a>.
-                                                </p>
-                                            </template>
-                                            <template x-if="$store.app.appIsElectron">
-                                                <p>
-                                                    Il report PDF è pensato per una fruizione visivamente ricca dei
-                                                    dati AB-Grid. Conservalo insieme al file JSON dei dati statistici.
-                                                </p>
-                                            </template>
                                         </div>
                                     </div>
                                 </div>
