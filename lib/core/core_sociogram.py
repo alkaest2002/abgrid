@@ -443,7 +443,7 @@ class CoreSociogram:
         relevant_nodes: dict[str, pd.DataFrame] = {"a": pd.DataFrame(), "b": pd.DataFrame()}
 
         # Process both positive (a) and negative (b) relevance directions
-        for network_type in ["a", "b"]:
+        for network_type in ("a", "b"):
 
             # Loop through metrics and associated ranks
             for metric_rank_name, ranks_series in rankings.items():

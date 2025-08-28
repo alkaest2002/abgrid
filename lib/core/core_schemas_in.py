@@ -5,7 +5,7 @@ The code is part of the AB-Grid project and is licensed under the MIT License.
 """
 
 import re
-from typing import Any, cast
+from typing import Any
 
 from pydantic import BaseModel, Field, model_validator
 
@@ -412,7 +412,7 @@ class ABGridReportSchemaIn(BaseModel):
         Returns:
             None.
         """
-        for field_name in ["choices_a", "choices_b"]:
+        for field_name in ("choices_a", "choices_b"):
             choices = data.get(field_name)
             if not isinstance(choices, list):
                 continue
@@ -612,8 +612,8 @@ def _validate_hmac_signed_field(field_name: str, field_value: Any) -> list[dict[
         return errors
 
     try:
-        encoded_data: str = cast("str", field_value.get("encoded_data"))
-        provided_signature: str = cast("str", field_value.get("signature"))
+        encoded_data: str = field_value.get("encoded_data", "")
+        provided_signature: str = field_value.get("signature", "")
         if not verify_hmac_signature(encoded_data, provided_signature):
             errors.append({
                 "location": field_name,

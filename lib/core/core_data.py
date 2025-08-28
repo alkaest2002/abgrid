@@ -48,7 +48,7 @@ class CoreData:
         group_data: dict[str, Any] = validated_data.model_dump()
 
         # Add members list to group data, using SYMBOLS for members
-        group_data["members"] = SYMBOLS[:group_data["members"]]
+        group_data["members"] = SYMBOLS[:group_data.get("members", 8)]
 
         # Validate and convert group data
         group_data_out: ABGridGroupSchemaOut = ABGridGroupSchemaOut(**group_data)
@@ -155,10 +155,10 @@ class CoreData:
         decoded_data = json.loads(data_to_decode)
 
         # Extract group data
-        group_data = decoded_data["group_data"]
+        group_data = decoded_data.get("group_data", {})
 
         # Extract SNA data
-        sna_data = decoded_data["sna_data"]
+        sna_data = decoded_data.get("sna_data", {})
 
         # Initialize Sociogram data
         sociogram_data: dict[str, Any] = {}
@@ -166,7 +166,10 @@ class CoreData:
         # Compute Sociogram results if requested
         if with_sociogram:
             # Initialize Sociogram analysis class
-            abgrid_sociogram: CoreSociogram = CoreSociogram(group_data["choices_a"], group_data["choices_b"])
+            abgrid_sociogram: CoreSociogram = CoreSociogram(
+                group_data.get("choices_a", []),
+                group_data.get("choices_b", [])
+            )
 
             # Get Sociogram data
             sociogram_data = abgrid_sociogram.get()
@@ -236,10 +239,10 @@ class CoreData:
             - relevant_nodes: Nodes with multiple metrics, weighted by evidence strength.
         """
         # Extract isolated nodes data from SNA results
-        sna_isolated_a = sna_data["isolated_nodes_a"]
-        sna_isolated_b = sna_data["isolated_nodes_b"]
-        sna_relevant_a = sna_data["relevant_nodes_a"]
-        sna_relevant_b = sna_data["relevant_nodes_b"]
+        sna_isolated_a = sna_data.get("isolated_nodes_a", {})
+        sna_isolated_b = sna_data.get("isolated_nodes_b", {})
+        sna_relevant_a = sna_data.get("relevant_nodes_a", {})
+        sna_relevant_b = sna_data.get("relevant_nodes_b", {})
 
         # Prepare isolated nodes schema (convert to pandas Index if needed)
         isolated_nodes_model: ABGridIsolatedNodesSchema = ABGridIsolatedNodesSchema(
@@ -264,9 +267,9 @@ class CoreData:
         # Process sociogram relevant nodes if included
         if with_sociogram:
             # Extract relevant nodes from sociogram results
-            sociogram_relevant = sociogram_data["relevant_nodes"]
-            sociogram_relevant_a = sociogram_relevant["a"]
-            sociogram_relevant_b = sociogram_relevant["b"]
+            sociogram_relevant = sociogram_data.get("relevant_nodes", {})
+            sociogram_relevant_a = sociogram_relevant.get("a", {})
+            sociogram_relevant_b = sociogram_relevant.get("b", {})
 
             # Prepare relevant nodes from sociogram (convert to DataFrame if needed)
             relevant_nodes_sociogram: dict[str, pd.DataFrame] = (
@@ -297,8 +300,8 @@ class CoreData:
             relevant_nodes_combo: pd.DataFrame = (
                 pd.concat(
                     [
-                        relevant_nodes_sna[network_type],
-                        relevant_nodes_sociogram[network_type]
+                        relevant_nodes_sna.get(network_type, pd.DataFrame()),
+                        relevant_nodes_sociogram.get(network_type, pd.DataFrame())
                     ]
                 )
             )
@@ -357,11 +360,11 @@ class CoreData:
         # Return the comprehensive report data structure
         return {
             "year": datetime.datetime.now(datetime.UTC).year,
-            "project_title": group_data["project_title"],
-            "question_a": group_data["question_a"],
-            "question_b": group_data["question_b"],
-            "group": group_data["group"],
-            "group_size": len(group_data["choices_a"]),
+            "project_title": group_data.get("project_title", ""),
+            "question_a": group_data.get("question_a", ""),
+            "question_b": group_data.get("question_b", ""),
+            "group": group_data.get("group", ""),
+            "group_size": len(group_data.get("choices_a", [])),
             "sna": sna_data,
             "sociogram": sociogram_data,
             **self._add_isolated_and_relevant_nodes(sna_data, sociogram_data, with_sociogram)
