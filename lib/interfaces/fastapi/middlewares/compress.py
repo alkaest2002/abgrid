@@ -17,7 +17,7 @@ from lib.interfaces.fastapi.settings import Settings
 settings: Settings = Settings.load()
 
 
-class GzipCompressionMiddleware(BaseHTTPMiddleware):
+class CompressMiddleware(BaseHTTPMiddleware):
     """Middleware to provide gzip compression for HTTP responses.
 
     This middleware provides response compression by implementing:

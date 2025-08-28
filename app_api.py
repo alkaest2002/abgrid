@@ -10,10 +10,11 @@ from fastapi.responses import JSONResponse, ORJSONResponse
 
 from lib.core.core_schemas_errors import PydanticValidationError
 from lib.interfaces.fastapi.middlewares.body import BodySizeLimitMiddleware
+from lib.interfaces.fastapi.middlewares.compress import CompressMiddleware
 from lib.interfaces.fastapi.middlewares.coors import (
     add_cors_middleware,  # Import the CORS function
 )
-from lib.interfaces.fastapi.middlewares.gzip import GzipCompressionMiddleware
+from lib.interfaces.fastapi.middlewares.decompress import DecompressionMiddleware
 from lib.interfaces.fastapi.middlewares.header import HeaderSizeLimitMiddleware
 from lib.interfaces.fastapi.middlewares.query import QueryParamLimitMiddleware
 from lib.interfaces.fastapi.middlewares.request import RequestProtectionMiddleware
@@ -30,22 +31,21 @@ app = FastAPI(default_response_class=ORJSONResponse)
 # Middlewares
 #######################################################################################
 
-# 1. CORS
+# 1. CORS (handles preflight and origin validation)
 add_cors_middleware(app)
 
-# 2. Gzip compression
-app.add_middleware(GzipCompressionMiddleware)
+# 2. Compression (processes responses - applied last in response chain)
+app.add_middleware(CompressMiddleware)
 
-# 3. Request limits protection
+# 3. Request protection middlewares (before body processing)
 app.add_middleware(RequestProtectionMiddleware)
-
-# 4. Header limits protection
 app.add_middleware(HeaderSizeLimitMiddleware)
-
-# 5. Query parameters limits protection
 app.add_middleware(QueryParamLimitMiddleware)
 
-# 6. Body limits protection
+# 4. Decompression (processes request bodies - should be after size limits)
+app.add_middleware(DecompressionMiddleware)
+
+# 5. Body size limit (applied after decompression to check actual size)
 app.add_middleware(BodySizeLimitMiddleware)
 
 #######################################################################################
