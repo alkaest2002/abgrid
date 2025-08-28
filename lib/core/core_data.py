@@ -58,6 +58,11 @@ class CoreData:
     ##################################################################################################################
     #   SINGLE STEP REPORT
     ##################################################################################################################
+    #
+    #   This method handles the report generation process in a single request
+    #   For high specs servers or terminal apps
+    #
+    ##################################################################################################################
 
     def get_report_data(self, validated_data: ABGridReportSchemaIn, with_sociogram: bool = False) -> dict[str, Any]:
         """Generate report data.
@@ -104,6 +109,11 @@ class CoreData:
 
     ##################################################################################################################
     #   MULTI STEP REPORT
+    ##################################################################################################################
+    #
+    #   These methods split the report generation process into three steps
+    #   For low specs servers
+    #
     ##################################################################################################################
 
     def get_multistep_step_1(self, validated_data: ABGridReportStep1SchemaIn) -> dict[str, Any]:
