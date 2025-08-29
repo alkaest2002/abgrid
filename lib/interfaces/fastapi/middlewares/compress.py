@@ -57,8 +57,8 @@ class CompressMiddleware(BaseHTTPMiddleware):
             Only text-based content types are compressed by default.
         """
         super().__init__(app)
-        self.minimum_size = getattr(settings, "gzip_minimum_size", 1000)
-        self.compression_level = getattr(settings, "gzip_compression_level", 6)
+        self.minimum_size = settings.gzip_minimum_size
+        self.compression_level = settings.gzip_compression_level
         self.compressible_types = {
             "text/html",
             "text/plain",

@@ -97,6 +97,7 @@ class DecompressionMiddleware(BaseHTTPMiddleware):
         try:
             compressed_body = await request.body()
 
+            # Check if body is empty
             if not compressed_body:
                 return await call_next(request)
 
