@@ -26,8 +26,6 @@ class CompressMiddleware:
         "text/xml"
     }  # Compressible MIME types
 
-
-
     def __init__(self, app: ASGIApp) -> None:
         """Initialize the compression middleware.
 
