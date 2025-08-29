@@ -81,7 +81,7 @@ def get_router_api() -> APIRouter:  # noqa: PLR0915
     ) -> JSONResponse:
         """Generate group configuration file based on provided data.
 
-        This endpoint creates a YAML configuration file for a group analysis
+        This endpoint creates a YAML configuration file for a group analysis.
 
         Args:
             request: The HTTP request object (used by rate limiter).
