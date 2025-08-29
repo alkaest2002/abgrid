@@ -28,7 +28,7 @@ class Auth:
         self,
         token: HTTPAuthorizationCredentials | None = Depends(HTTPBearer(auto_error=False))
     ) -> Any:
-        """"Verify JWT token.
+        """Verify JWT token.
 
         Args:
             token: JWT token from Authorization header, automatically handled by FastAPI.

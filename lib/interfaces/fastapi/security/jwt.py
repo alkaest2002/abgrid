@@ -58,7 +58,7 @@ class AnonymousJWT:
             A dictionary containing the decoded token payload.
 
         Raises:
-            HTTPException: If the token is expired or invalid.
+            HTTPException: 401 Status if the token is expired or invalid.
         """
         try:
             return jwt.decode(token, self.secret_key, algorithms=[self.algorithm])
