@@ -17,10 +17,10 @@ from fastapi import Request
 from fastapi.responses import JSONResponse, Response
 
 
-class DecompressionError(Exception):
+class DecompressError(Exception):
     """Raised when decompression fails or exceeds size limits."""
 
-class DecompressionMiddleware(BaseHTTPMiddleware):
+class DecompressMiddleware(BaseHTTPMiddleware):
     """Middleware to decompress gzip/deflate compressed request bodies.
 
     Attributes:
@@ -96,7 +96,7 @@ class DecompressionMiddleware(BaseHTTPMiddleware):
             # Update request with decompressed content
             self._update_request(request, decompressed_body)
 
-        except DecompressionError:
+        except DecompressError:
             return JSONResponse(
                 status_code=413,
                 content={"detail": "decompressed_data_too_large"}
@@ -124,7 +124,7 @@ class DecompressionMiddleware(BaseHTTPMiddleware):
             The decompressed request body data.
 
         Raises:
-            DecompressionError: If decompressed data exceeds size limit.
+            DecompressError: If decompressed data exceeds size limit.
             Exception: Other decompression errors are propagated to the caller
                       for appropriate error response handling.
 
@@ -163,7 +163,7 @@ class DecompressionMiddleware(BaseHTTPMiddleware):
                 # If total size exceeds limit, raise error
                 if total_size > self.MAX_DECOMPRESSED_SIZE:
                     error_message = "decompressed_data_exceeds_size_limit"
-                    raise DecompressionError(error_message)
+                    raise DecompressError(error_message)
 
                 # Write the decompressed chunk to the output
                 decompressed_data.write(chunk)
@@ -197,7 +197,7 @@ class DecompressionMiddleware(BaseHTTPMiddleware):
             # If total size exceeds limit, raise error
             if total_size > self.MAX_DECOMPRESSED_SIZE:
                 error_message = "Decompressed data exceeds size limit"
-                raise DecompressionError(error_message)
+                raise DecompressError(error_message)
 
             # Write the decompressed chunk to the output
             decompressed_data.write(decompressed_chunk)
@@ -211,7 +211,7 @@ class DecompressionMiddleware(BaseHTTPMiddleware):
         # If total size exceeds limit, raise error
         if total_size > self.MAX_DECOMPRESSED_SIZE:
             error_message = "Decompressed data exceeds size limit"
-            raise DecompressionError(error_message)
+            raise DecompressError(error_message)
 
         # Write the final chunk to the output
         decompressed_data.write(final_chunk)

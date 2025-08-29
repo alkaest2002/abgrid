@@ -16,7 +16,7 @@ from fastapi import Request, status
 from fastapi.responses import JSONResponse
 
 
-class QueryParamLimitMiddleware(BaseHTTPMiddleware):
+class QueryMiddleware(BaseHTTPMiddleware):
     """Aggressive middleware for closed API server query parameter validation.
 
     Attributes:

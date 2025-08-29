@@ -17,7 +17,7 @@ from lib.interfaces.fastapi.settings import Settings
 
 settings: Settings = Settings.load()
 
-class RequestProtectionMiddleware(BaseHTTPMiddleware):
+class RequestMiddleware(BaseHTTPMiddleware):
     """Middleware to protect against request-based attacks and resource exhaustion.
 
     Attributes:

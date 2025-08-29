@@ -9,15 +9,15 @@ from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse, ORJSONResponse
 
 from lib.core.core_schemas_errors import PydanticValidationError
-from lib.interfaces.fastapi.middlewares.body import BodySizeLimitMiddleware
+from lib.interfaces.fastapi.middlewares.body import BodyMiddleware
 from lib.interfaces.fastapi.middlewares.compress import CompressMiddleware
 from lib.interfaces.fastapi.middlewares.coors import (
     add_cors_middleware,  # Import the CORS function
 )
-from lib.interfaces.fastapi.middlewares.decompress import DecompressionMiddleware
-from lib.interfaces.fastapi.middlewares.header import HeaderSizeLimitMiddleware
-from lib.interfaces.fastapi.middlewares.query import QueryParamLimitMiddleware
-from lib.interfaces.fastapi.middlewares.request import RequestProtectionMiddleware
+from lib.interfaces.fastapi.middlewares.decompress import DecompressMiddleware
+from lib.interfaces.fastapi.middlewares.header import HeaderMiddleware
+from lib.interfaces.fastapi.middlewares.query import QueryMiddleware
+from lib.interfaces.fastapi.middlewares.request import RequestMiddleware
 from lib.interfaces.fastapi.routers.router_api import get_router_api
 from lib.interfaces.fastapi.security.limiter import RateLimitError
 from lib.utils import to_snake_case
@@ -37,15 +37,15 @@ add_cors_middleware(app)
 app.add_middleware(CompressMiddleware)
 
 # 3. Request protection middlewares
-app.add_middleware(RequestProtectionMiddleware)
-app.add_middleware(HeaderSizeLimitMiddleware)
-app.add_middleware(QueryParamLimitMiddleware)
+app.add_middleware(RequestMiddleware)
+app.add_middleware(HeaderMiddleware)
+app.add_middleware(QueryMiddleware)
 
 # 4. Body size limit
-app.add_middleware(BodySizeLimitMiddleware)
+app.add_middleware(BodyMiddleware)
 
 # 5. Decompression
-app.add_middleware(DecompressionMiddleware)
+app.add_middleware(DecompressMiddleware)
 
 #######################################################################################
 # Routes

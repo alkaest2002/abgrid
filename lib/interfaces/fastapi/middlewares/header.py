@@ -15,7 +15,7 @@ from fastapi import Request, status
 from fastapi.responses import JSONResponse
 
 
-class HeaderSizeLimitMiddleware(BaseHTTPMiddleware):
+class HeaderMiddleware(BaseHTTPMiddleware):
     """Middleware to limit HTTP header sizes and ensure JSON content for POST requests.
 
     Attributes:

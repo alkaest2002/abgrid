@@ -15,7 +15,7 @@ from fastapi import Request, status
 from fastapi.responses import JSONResponse
 
 
-class BodySizeLimitMiddleware(BaseHTTPMiddleware):
+class BodyMiddleware(BaseHTTPMiddleware):
     """ASGI middleware to enforce request body size limits and prevent memory exhaustion attacks.
 
     Attributes:
