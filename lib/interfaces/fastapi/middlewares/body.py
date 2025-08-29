@@ -80,7 +80,7 @@ class BodySizeLimitMiddleware(BaseHTTPMiddleware):
 
         """
         # Phase 1: Pre-validation using Content-Length header
-        content_length = request.headers.get("Content-Length")
+        content_length = request.headers.get("content-length")
         if content_length:
             try:
                 body_size = int(content_length)

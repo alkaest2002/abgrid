@@ -88,7 +88,7 @@ class DecompressionMiddleware(BaseHTTPMiddleware):
         if request.method in ("GET", "HEAD", "OPTIONS"):
             return await call_next(request)
 
-        content_encoding = request.headers.get("Content-Encoding", "").lower()
+        content_encoding = request.headers.get("content-encoding", "").lower()
 
         # Skip if no compression
         if content_encoding not in ("gzip", "deflate"):
