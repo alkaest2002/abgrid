@@ -576,7 +576,7 @@ class ABGridReportStep3SchemaIn(ABGridReportStep2SchemaIn):
 ##################################################################################################################
 
 def _validate_hmac_signed_field(field_name: str, field_value: Any) -> list[dict[str, Any]]:
-    """Validate signature field for presence and format.
+    """Validate HMAC signed field for presence, format, and signature integrity.
 
     Args:
         field_name: Name of field for error reporting.

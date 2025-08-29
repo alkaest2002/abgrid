@@ -237,7 +237,7 @@ class CoreExport:
             data: The data dictionary to convert and sign.
 
         Returns:
-            A JSON-serializable dictionary containing both group and SNA data with signatures.
+            A JSON-serializable dictionary containing complete report data with HMAC signature.
 
         Notes:
             this encoding process ensures that all data is properly serialized

@@ -462,9 +462,9 @@ class CoreSna:
 
         Notes:
             Edge classification uses upper triangular matrices to avoid double-counting
-            reciprocal relationships. Currently all type_iii, type_iv, and type_v
-            classifications result in the same reciprocal edges as type_ii due to
-            using the same adjacency matrix for both network and reference.
+            reciprocal relationships. Currently this implementation classifies edges
+            within a single network since both network and reference use the same
+            adjacency matrix.
 
         Raises:
             ValueError: If required adjacency matrix data is not available.

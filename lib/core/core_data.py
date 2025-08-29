@@ -202,7 +202,6 @@ class CoreData:
 
         Args:
             validated_data: Validated ABGrid multi-step report data schema instance.
-            with_sociogram: Whether to include sociogram analysis in the final report.
 
         Returns:
             Dict containing complete report data with isolated and relevant nodes analysis.
