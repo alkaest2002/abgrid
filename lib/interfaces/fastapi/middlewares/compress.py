@@ -67,7 +67,7 @@ class CompressMiddleware:
         response_body = bytearray()
         response_headers = {}
 
-        async def send_wrapper(message: Message) -> None:
+        async def _send_wrapper(message: Message) -> None:
             """Wrapper function to intercept and potentially compress response messages.
 
             Args:
@@ -136,7 +136,7 @@ class CompressMiddleware:
             else:
                 await send(message)
 
-        await self.app(scope, receive, send_wrapper)
+        await self.app(scope, receive, _send_wrapper)
 
     def _should_compress(self, headers: dict[bytes, bytes], body: bytes) -> bool:
         """Check if response should be compressed.
