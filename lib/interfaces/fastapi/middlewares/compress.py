@@ -21,10 +21,11 @@ class CompressMiddleware:
     MIN_BODY_SIZE: ClassVar[int] = 1000  # Minimum size in bytes to trigger compression
     COMPRESSION_LEVEL: ClassVar[int] = 6  # Compression level (1-9)
     COMPRESSIBLE_TYPES: ClassVar[set[str]] = {
-        "text/html", "text/plain", "text/css", "text/javascript",
-        "application/json", "application/javascript", "application/xml",
-        "text/xml", "application/rss+xml", "application/atom+xml",
-    } # Compressible MIME types
+        "application/atom+xml", "application/javascript", "application/json", "application/xml",
+        "text/css", "text/javascript", "text/html", "text/plain","application/rss+xml",
+        "text/xml"
+    }  # Compressible MIME types
+
 
 
     def __init__(self, app: ASGIApp) -> None:
