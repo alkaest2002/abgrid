@@ -202,8 +202,8 @@ class CompressMiddleware(BaseHTTPMiddleware):
 
             # Add Vary header for proper caching
             vary_header = response.headers.get("vary", "")
-            if "Accept-Encoding" not in vary_header:
-                vary_header = f"{vary_header}, Accept-Encoding" if vary_header else "Accept-Encoding"
+            if "accept-encoding" not in vary_header:
+                vary_header = f"{vary_header}, accept-encoding" if vary_header else "accept-encoding"
                 response.headers["vary"] = vary_header
 
         except Exception:
