@@ -59,9 +59,12 @@
             "values_reference_invalid_keys": "alcuni partecipanti hanno indicato lettere non valide"
         },
         "server": {
+            "decompressed_data_too_large": "i dati decompressi sono troppo grandi",
+            "decompression_failed": "decompressione dei dati non riuscita",
             "down": "server non raggiungibile",
             "failed_to_generate_report": "generazione del report non riuscita",
             "failed_to_render_jinja_template": "non è stato possibile trovare il template jinja",
+            "invalid_json_after_decompression": "JSON non valido dopo decompressione",
             "invalid_or_expired_jwt_token": "licenza ab-grid non fornita o scaduta",
             "internal_error": "errore interno del server",
             "not_authenticated": "licenza ab-grid non fornita o scaduta",
@@ -70,9 +73,9 @@
             "online": "online",
             "only_json_body_data_accepted": "dati inviati non corretti",
             "required_jwt_token": "licenza ab-grid non fornita o scaduta",
-            "requests_exceeded_rate_limit": "hai inviato troppe richieste, riprova tra circa 30 secondi",
+            "requests_exceeded_rate_limit": "hai inviato troppe richieste in un breve lasso di tempo",
             "request_timeout": "timeout della richiesta",
-            "too_many_concurrent_requests": "server sovraccarico per traffico intenso, riprova tra circa 30 secondi",
+            "too_many_concurrent_requests": "server sovraccarico per traffico intenso",
             "up": "server raggiungibile"
         },
         "toast": {
