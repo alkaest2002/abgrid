@@ -61,6 +61,20 @@ class Settings(BaseSettings):
         le=1000  # Reasonable upper limit
     )
 
+    max_compressed_body_size: int = Field(
+        default=524288,
+        description="Maximum allowed request body size for compressed requests",
+        validation_alias="MAX_COMPRESSED_BODY_SIZE",
+        ge=1
+    )
+
+    max_decompressed_body_size: int = Field(
+        default=1048576,
+        description="Maximum allowed request body size for decompressed requests",
+        validation_alias="MAX_DECOMPRESSED_BODY_SIZE",
+        ge=1
+    )
+
     gzip_minimum_size: int = Field(
         default=1000,
         description="Minimum response size in bytes to trigger gzip compression",

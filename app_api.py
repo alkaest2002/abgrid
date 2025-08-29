@@ -31,22 +31,21 @@ app = FastAPI(default_response_class=ORJSONResponse)
 # Middlewares
 #######################################################################################
 
-# 1. CORS (handles preflight and origin validation)
+# 1. CORS
 add_cors_middleware(app)
 
-# 2. Compression (processes responses - applied last in response chain)
+# 2. Compression
 app.add_middleware(CompressMiddleware)
 
-# 3. Request protection middlewares (before body processing)
+# 3. Request protection middlewares
 app.add_middleware(RequestProtectionMiddleware)
 app.add_middleware(HeaderSizeLimitMiddleware)
 app.add_middleware(QueryParamLimitMiddleware)
 
-# 4. Decompression (processes request bodies - should be after size limits)
+# 4. Body size limit
+app.add_middleware(BodySizeLimitMiddleware, limit_type="compressed")
 app.add_middleware(DecompressionMiddleware)
-
-# 5. Body size limit (applied after decompression to check actual size)
-app.add_middleware(BodySizeLimitMiddleware)
+app.add_middleware(BodySizeLimitMiddleware, limit_type="decompressed")
 
 #######################################################################################
 # Routes
