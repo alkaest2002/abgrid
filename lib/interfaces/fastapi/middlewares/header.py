@@ -13,16 +13,27 @@ from starlette.types import ASGIApp
 
 from fastapi import Request, status
 from fastapi.responses import JSONResponse
+from lib.interfaces.fastapi.security.jwt import AnonymousJWT
 
 
 class HeaderMiddleware(BaseHTTPMiddleware):
-    """Middleware to limit HTTP header sizes and ensure JSON content for POST requests.
+    """Middleware to limit HTTP header sizes, ensure JSON content for POST requests, and validate JWT tokens.
 
     Attributes:
             max_header_size: Maximum allowed size for HTTP headers.
     """
 
     MAX_HEADER_SIZE: ClassVar[int] = 8 * 1024 # 8KB
+
+    # Routes that don't require JWT authentication
+    EXEMPT_PATHS: ClassVar[set[str]] = {
+        "/",
+        "/health",
+        "/docs",
+        "/redoc",
+        "/openapi.json",
+        "/favicon.ico"
+    }
 
     def __init__(self, app: ASGIApp) -> None:
         """Initialize the middleware with header size limit configuration.
@@ -34,11 +45,10 @@ class HeaderMiddleware(BaseHTTPMiddleware):
             None.
         """
         super().__init__(app)
+        self.jwt_handler = AnonymousJWT()
 
     async def dispatch(self, request: Request, call_next: Callable[[Request], Awaitable[Response]]) -> Response:
-        """Process incoming request and enforce header validations.
-
-        Validates header sizes and ensures POST requests have JSON content type.
+        """Process incoming request and enforce header validations and JWT authentication.
 
         Args:
             request: The incoming HTTP request with headers to validate.
@@ -49,8 +59,9 @@ class HeaderMiddleware(BaseHTTPMiddleware):
                      from the next handler in the chain.
 
         Raises:
-            - JSONResponse: 413 status if any header value exceeds the size limit.
-            - JSONResponse: 415 status if POST request doesn't have JSON content type.
+            HTTPException: 401 Unauthorized.
+            HTTPException: 413 Request Entity Too Large.
+            HTTPException: 415 Unsupported Media Type.
         """
         # Check header sizes
         for header_value in request.headers.values():
@@ -60,7 +71,28 @@ class HeaderMiddleware(BaseHTTPMiddleware):
                     content={"detail": "header_is_too_large"}
                 )
 
-        # Check JSON content type for POST requests
+        # Skip JWT check for exempt paths and OPTIONS requests
+        if request.url.path not in self.EXEMPT_PATHS and request.method != "OPTIONS":
+
+            # Extract JWT token
+            auth_header = request.headers.get("authorization")
+            if not auth_header or not auth_header.lower().startswith("bearer "):
+                return JSONResponse(
+                    status_code=status.HTTP_401_UNAUTHORIZED,
+                    content={"detail": "missing_jwt_token"}
+                )
+
+            # Remove "Bearer " prefix from JWT token
+            token = auth_header[7:]
+
+            # Verify JWT token
+            if not self.jwt_handler.verify_token_boolean(token):
+                return JSONResponse(
+                    status_code=status.HTTP_401_UNAUTHORIZED,
+                    content={"detail": "invalid_jwt_token"}
+                )
+
+        # Ensure JSON content type for POST requests
         if request.method == "POST":
             content_type = request.headers.get("content-type", "")
             # Extract main content type (ignore charset and other parameters)

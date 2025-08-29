@@ -8,6 +8,7 @@ The code is part of the AB-Grid project and is licensed under the MIT License.
 import uuid
 from datetime import datetime, timedelta, timezone
 from typing import Any
+from xmlrpc.client import Boolean
 
 import jwt
 
@@ -47,7 +48,6 @@ class AnonymousJWT:
 
         return jwt.encode(payload, self.secret_key, algorithm=self.algorithm)
 
-
     def verify_token(self, token: str) -> Any:
         """Verify and decode a JWT token.
 
@@ -68,3 +68,18 @@ class AnonymousJWT:
                 status_code=status.HTTP_401_UNAUTHORIZED,
                 detail="invalid_or_expired_jwt_token"
             ) from e
+
+    def verify_token_boolean(self, token: str) -> Boolean:
+        """Verify a JWT token without raising an error.
+
+        Args:
+            token: The JWT token to verify.
+
+        Returns:
+            Boolean: True if the token is valid, False otherwise.
+        """
+        try:
+            _ = jwt.decode(token, self.secret_key, algorithms=[self.algorithm])
+        except jwt.InvalidTokenError:
+            return False
+        return True

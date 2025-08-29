@@ -33,18 +33,22 @@ app = FastAPI(default_response_class=ORJSONResponse)
 # 1. CORS
 add_cors_middleware(app)
 
-# 2. Compression
+# 2. Compress
 app.add_middleware(CompressMiddleware)
 
-# 3. Request protection middlewares
-app.add_middleware(RequestMiddleware)
+# 3. Header
 app.add_middleware(HeaderMiddleware)
+
+# 4. Query
 app.add_middleware(QueryMiddleware)
 
-# 4. Body size limit
+# 5. Request
+app.add_middleware(RequestMiddleware)
+
+# 6. Body
 app.add_middleware(BodyMiddleware)
 
-# 5. Decompression
+# 7. Decompress
 app.add_middleware(DecompressMiddleware)
 
 #######################################################################################
