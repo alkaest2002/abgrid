@@ -206,18 +206,20 @@ class TerminalMain:
         """Load and parse YAML data from file with error handling.
 
         Safely loads YAML configuration files and handles common errors such as
-        missing files and parsing issues. Returns structured data or None with
-        appropriate error information.
+        missing files and parsing issues.
 
         Args:
             yaml_file_path: Path to the YAML file to load.
 
         Returns:
-            Dictionary containing parsed YAML data, or None if loading failed.
+            Dictionary containing parsed YAML data.
+
+        Raises:
+            ValueError: If YAML file cannot be parsed or contains invalid syntax.
 
         Notes:
-            - Handles FileNotFoundError and YAMLError exceptions gracefully.
-            - Returns error messages for debugging purposes.
+            - Handles FileNotFoundError and YAMLError exceptions by re-raising as ValueError.
+            - File encoding is handled automatically by the YAML parser.
         """
         try:
             with Path.open(yaml_file_path) as file:
@@ -235,8 +237,11 @@ class TerminalMain:
             suffix: Suffix used in filename.
             output_directory: Directory to save the PDF file.
 
-        Return:
+        Returns:
             None.
+
+        Raises:
+            OSError: If PDF generation fails due to file system or rendering errors.
 
         Notes:
             Filename format: {template_type}_{suffix}.pdf.
