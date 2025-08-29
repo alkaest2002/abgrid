@@ -5,6 +5,7 @@ The code is part of the AB-Grid project and is licensed under the MIT License.
 """
 
 from collections.abc import Awaitable, Callable
+from typing import ClassVar
 
 from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.responses import Response
@@ -15,39 +16,20 @@ from fastapi.responses import JSONResponse
 
 
 class HeaderSizeLimitMiddleware(BaseHTTPMiddleware):
-    """Middleware to limit HTTP header sizes and ensure JSON content for POST requests.
+    """Middleware to limit HTTP header sizes and ensure JSON content for POST requests."""
 
-    This middleware inspects all incoming request headers and:
-    1. Rejects requests where any individual header value exceeds the size limit
-    2. Ensures POST requests have Content-Type: application/json
+    MAX_HEADER_SIZE: ClassVar[int] = 8 * 1024 # 8KB
 
-    Args:
-        app: The ASGI application instance
-        max_header_size: Maximum allowed size for any individual header value
-                        in bytes (default: 8KB).
-
-    Raises:
-        - JSONResponse: Returns 413 status for headers exceeding the size limit.
-        - JSONResponse: Returns 415 status for POST requests without JSON content type.
-
-    Notes:
-        This middleware checks individual header values, not the total size
-        of all headers combined. Each header value must be within the limit.
-    """
-
-    def __init__(self, app: ASGIApp, max_header_size: int = 8 * 1024) -> None:
+    def __init__(self, app: ASGIApp) -> None:
         """Initialize the middleware with header size limit configuration.
 
         Args:
             app: The ASGI application instance.
-            max_header_size: Maximum allowed size for any individual header value
-                           in bytes (default: 8KB).
 
         Returns:
             None.
         """
         super().__init__(app)
-        self.max_header_size = max_header_size
 
     async def dispatch(self, request: Request, call_next: Callable[[Request], Awaitable[Response]]) -> Response:
         """Process incoming request and enforce header validations.
@@ -68,7 +50,7 @@ class HeaderSizeLimitMiddleware(BaseHTTPMiddleware):
         """
         # Check header sizes
         for header_value in request.headers.values():
-            if len(header_value) > self.max_header_size:
+            if len(header_value) > self.MAX_HEADER_SIZE:
                 return JSONResponse(
                     status_code=status.HTTP_413_REQUEST_ENTITY_TOO_LARGE,
                     content={"detail": "header_is_too_large"}

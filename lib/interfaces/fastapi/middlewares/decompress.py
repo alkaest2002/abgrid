@@ -4,41 +4,24 @@ Author: Pierpaolo Calanna
 The code is part of the AB-Grid project and is licensed under the MIT License.
 """
 import gzip
-import json
 import zlib
 from collections.abc import Awaitable, Callable
+from typing import ClassVar
 
+import orjson
 from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.types import ASGIApp
 
 from fastapi import Request
 from fastapi.responses import JSONResponse, Response
-from lib.interfaces.fastapi.settings import Settings
-
-
-settings: Settings = Settings.load()
 
 
 class DecompressionMiddleware(BaseHTTPMiddleware):
-    """Middleware to decompress gzip/deflate compressed request bodies.
+    """Middleware to decompress gzip/deflate compressed request bodies."""
 
-    This middleware provides request body decompression by implementing:
-    - Automatic gzip and deflate decompression for incoming request bodies
-    - Size validation to prevent memory exhaustion attacks
-    - JSON validation after decompression to ensure data integrity
-    - Proper header management for decompressed content
+    MAX_DECOMPRESSED_SIZE: ClassVar[int] = 1 * 1024 * 1024 # 1MB
 
-    The middleware applies decompression based on:
-    - HTTP method: Skips methods that typically don't have bodies (GET, HEAD, OPTIONS)
-    - Content-Encoding header: Only processes gzip and deflate encoded requests
-    - Size limits: Enforces maximum decompressed size to prevent DoS attacks
-    - Content validation: Ensures decompressed data is valid JSON
-
-    Attributes:
-        max_size: Maximum allowed size for decompressed request bodies in bytes.
-    """
-
-    def __init__(self, app: ASGIApp, max_size: int = 50 * 1024 * 1024) -> None:
+    def __init__(self, app: ASGIApp) -> None:
         """Initialize the middleware with decompression settings.
 
         Sets up the middleware with size limits and configures the maximum
@@ -47,18 +30,11 @@ class DecompressionMiddleware(BaseHTTPMiddleware):
 
         Args:
             app: The ASGI application instance to wrap with decompression.
-            max_size: Maximum size in bytes for decompressed bodies.
-                     Defaults to 50MB (50 * 1024 * 1024 bytes).
 
         Returns:
             None.
-
-        Notes:
-            Default maximum size is 50MB to balance functionality with security.
-            This prevents potential DoS attacks via compression bombs.
         """
         super().__init__(app)
-        self.max_size = max_size
 
     async def dispatch(  # noqa: PLR0911
         self,
@@ -170,7 +146,7 @@ class DecompressionMiddleware(BaseHTTPMiddleware):
             Size validation prevents compression bomb attacks where small
             compressed data expands to enormous decompressed sizes.
         """
-        return len(decompressed_body) <= self.max_size
+        return len(decompressed_body) <= self.MAX_DECOMPRESSED_SIZE
 
     def _is_json_valid(self, decompressed_body: bytes) -> bool:
         """Validate that decompressed content is valid JSON.
@@ -189,8 +165,8 @@ class DecompressionMiddleware(BaseHTTPMiddleware):
             This ensures the decompressed data is usable by downstream handlers.
         """
         try:
-            json.loads(decompressed_body.decode("utf-8"))
-        except (json.JSONDecodeError, UnicodeDecodeError):
+            orjson.loads(decompressed_body.decode("utf-8"))
+        except (orjson.JSONDecodeError, UnicodeDecodeError):
             return False
         return True
 

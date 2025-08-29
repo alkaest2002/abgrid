@@ -4,17 +4,22 @@ Author: Pierpaolo Calanna
 The code is part of the AB-Grid project and is licensed under the MIT License.
 """
 import gzip
+from typing import ClassVar
 
 from starlette.types import ASGIApp, Message, Receive, Scope, Send
-
-from lib.interfaces.fastapi.settings import Settings
-
-
-settings: Settings = Settings.load()
 
 
 class CompressMiddleware:
     """ASGI-level compression middleware."""
+
+    MINIMUM_SIZE: ClassVar[int] = 1000  # Minimum size in bytes to trigger compression
+    COMPRESSION_LEVEL: ClassVar[int] = 6  # Compression level (1-9)
+    COMPRESSIBLE_TYPES: ClassVar[set[str]] = {
+        "text/html", "text/plain", "text/css", "text/javascript",
+        "application/json", "application/javascript", "application/xml",
+        "text/xml", "application/rss+xml", "application/atom+xml",
+    } # Compressible MIME types
+
 
     def __init__(self, app: ASGIApp) -> None:
         """Initialize the compression middleware.
@@ -22,17 +27,15 @@ class CompressMiddleware:
         Args:
             app: The ASGI application to wrap with compression.
 
+        Attributes:
+            minimum_size: Minimum size in bytes to trigger compression.
+            compression_level: Compression level (1-9).
+            compressible_types: Set of MIME types eligible for compression.
+
         Returns:
             None
         """
         self.app = app
-        self.minimum_size = settings.gzip_minimum_size
-        self.compression_level = settings.gzip_compression_level
-        self.compressible_types = {
-            "text/html", "text/plain", "text/css", "text/javascript",
-            "application/json", "application/javascript", "application/xml",
-            "text/xml", "application/rss+xml", "application/atom+xml",
-        }
 
     async def __call__(self, scope: Scope, receive: Receive, send: Send) -> None:
         """Handle ASGI requests with optional gzip compression.
@@ -101,7 +104,7 @@ class CompressMiddleware:
                     if self._should_compress(response_headers, bytes(response_body)):
 
                         # Compress body
-                        compressed_body = gzip.compress(bytes(response_body), compresslevel=self.compression_level)
+                        compressed_body = gzip.compress(bytes(response_body), compresslevel=self.COMPRESSION_LEVEL)
 
                         # Update headers
                         self.start_message["headers"] = [
@@ -143,7 +146,7 @@ class CompressMiddleware:
         Returns:
             bool: True if the response should be compressed, False otherwise.
         """
-        if len(body) < self.minimum_size:
+        if len(body) < self.MINIMUM_SIZE:
             return False
         content_type = headers.get(b"content-type", b"").decode("latin1").split(";")[0].strip()
-        return content_type in self.compressible_types
+        return content_type in self.COMPRESSIBLE_TYPES

@@ -43,9 +43,10 @@ app.add_middleware(HeaderSizeLimitMiddleware)
 app.add_middleware(QueryParamLimitMiddleware)
 
 # 4. Body size limit
-app.add_middleware(BodySizeLimitMiddleware, limit_type="compressed")
+app.add_middleware(BodySizeLimitMiddleware)
+
+# 5. Decompression
 app.add_middleware(DecompressionMiddleware)
-app.add_middleware(BodySizeLimitMiddleware, limit_type="decompressed")
 
 #######################################################################################
 # Routes

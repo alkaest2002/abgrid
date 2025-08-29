@@ -5,6 +5,7 @@ The code is part of the AB-Grid project and is licensed under the MIT License.
 """
 import asyncio
 from collections.abc import Awaitable, Callable
+from typing import ClassVar
 
 from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.types import ASGIApp
@@ -16,23 +17,11 @@ from lib.interfaces.fastapi.settings import Settings
 
 settings: Settings = Settings.load()
 
-
 class RequestProtectionMiddleware(BaseHTTPMiddleware):
-    """Middleware to protect against request-based attacks and resource exhaustion.
+    """Middleware to protect against request-based attacks and resource exhaustion."""
 
-    This middleware provides comprehensive request protection by implementing:
-    - Request timeout enforcement for all incoming requests
-    - Concurrent request limiting specifically for /api routes to prevent overload
-    - Automatic rejection of requests when concurrency limits are exceeded
-
-    The middleware applies different handling strategies based on the request path:
-    - API routes (/api/*): Subject to both timeout and concurrency controls
-    - Other routes: Subject to timeout control only
-
-    Attributes:
-        request_timeout (int): Maximum time in seconds to wait for request completion
-        semaphore (asyncio.Semaphore): Controls concurrent request limits for API routes
-    """
+    REQUEST_TIMEOUT: ClassVar[int] = 60  # 60 seconds timeout for all requests
+    SEMAPHORE: ClassVar[asyncio.Semaphore] = asyncio.Semaphore(settings.max_concurrent_requests) # from .env
 
     def __init__(self, app: ASGIApp) -> None:
         """Initialize the middleware with validation and protection settings.
@@ -46,14 +35,8 @@ class RequestProtectionMiddleware(BaseHTTPMiddleware):
 
         Returns:
             None.
-
-        Notes:
-            The request timeout is hardcoded to 60 seconds, while max concurrent
-            requests is loaded from the Settings configuration.
         """
         super().__init__(app)
-        self.request_timeout = 60
-        self.semaphore = asyncio.Semaphore(settings.max_concurrent_requests)
 
     async def dispatch(
         self,
@@ -105,13 +88,13 @@ class RequestProtectionMiddleware(BaseHTTPMiddleware):
             The semaphore.locked() check provides immediate rejection without
             waiting, preventing request queuing when at capacity.
         """
-        if self.semaphore.locked():
+        if self.SEMAPHORE.locked():
             return JSONResponse(
                 status_code=status.HTTP_429_TOO_MANY_REQUESTS,
                 content={"detail": "too_many_concurrent_requests"}
             )
 
-        async with self.semaphore:
+        async with self.SEMAPHORE:
             return await self._execute_with_timeout(request, call_next)
 
     async def _execute_with_timeout(
@@ -144,7 +127,7 @@ class RequestProtectionMiddleware(BaseHTTPMiddleware):
         try:
             return await asyncio.wait_for(
                 call_next(request),
-                timeout=self.request_timeout
+                timeout=self.REQUEST_TIMEOUT
             )
         except TimeoutError:
             return JSONResponse(

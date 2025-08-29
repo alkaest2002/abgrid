@@ -17,43 +17,14 @@ from fastapi.responses import JSONResponse
 
 
 class QueryParamLimitMiddleware(BaseHTTPMiddleware):
-    """Aggressive middleware for closed API server query parameter validation.
+    """Aggressive middleware for closed API server query parameter validation."""
 
-    This middleware provides strict validation for a closed API that only accepts:
-    - language: Always required (e.g., 'it' for Italian)
-    - with_sociogram: Optional boolean ('true' or 'false')
-
-    Any deviation from these exact requirements results in immediate rejection.
-    Empty query strings are allowed to pass through without validation.
-
-    Early rejection criteria:
-    - Unusually long query strings (>200 chars)
-    - Unknown query parameters
-    - Missing required 'language' parameter (when params are present)
-    - Invalid boolean values for 'with_sociogram'
-    - Malformed query strings
-    - Excessive parameter counts
-
-    Args:
-        app: The ASGI application instance.
-
-    Raises:
-        JSONResponse: Returns 400 status for various validation failures.
-
-    Notes:
-        This middleware is designed for maximum efficiency and security in a
-        controlled API environment where parameter specifications are strict.
-        Empty query strings bypass all validation.
-    """
-    # Valid parameter names for this closed API
     ALLOWED_PARAMS: ClassVar[set[str]] = {"language", "with_sociogram"}
     VALID_SOCIOGRAM_VALUES: ClassVar[set[str]] = {"true", "false"}
-
-    # Aggressive limits for closed API
-    MAX_QUERY_STRING_LENGTH: ClassVar[int] = 200  # Very conservative for closed API
-    MAX_PARAM_KEY_LENGTH: ClassVar[int] = 20      # "with_sociogram" is 14 chars
-    MAX_PARAM_VALUE_LENGTH: ClassVar[int] = 10    # Language codes are typically 2-5 chars
-    MAX_PARAMS_COUNT: ClassVar[int] = 2           # Only 2 possible parameters
+    MAX_QUERY_STRING_LENGTH: ClassVar[int] = 200  # maximum allowed length of query string
+    MAX_PARAM_KEY_LENGTH: ClassVar[int] = 20      # maximum allowed length of parameter key
+    MAX_PARAM_VALUE_LENGTH: ClassVar[int] = 5     # maximum allowed length of parameter value
+    MAX_PARAMS_COUNT: ClassVar[int] = 2           # maximum allowed number of parameters
 
     def __init__(self, app: ASGIApp) -> None:
         """Initialize the aggressive query parameter validation middleware.
@@ -66,7 +37,10 @@ class QueryParamLimitMiddleware(BaseHTTPMiddleware):
         """
         super().__init__(app)
 
-    async def dispatch(self, request: Request, call_next: Callable[[Request], Awaitable[Response]]) -> Response:  # noqa: PLR0911, PLR0912
+    async def dispatch(self,  # noqa: PLR0911, PLR0912
+            request: Request,
+            call_next: Callable[[Request], Awaitable[Response]]
+        ) -> Response:
         """
         Aggressively validate query parameters with early rejection.
 
