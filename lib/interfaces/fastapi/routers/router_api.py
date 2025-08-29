@@ -119,7 +119,7 @@ def get_router_api() -> APIRouter:  # noqa: PLR0915
 
             # Generate safe filename
             safe_title = "".join(c for c in model.project_title if c.isalnum() or c in (" ", "-", "_")).rstrip()
-            safe_title = safe_title.replace(" ", "_")[:30]
+            safe_title = safe_title.replace(" ", "_")[:50]  # Limit to 50 characters
             filename = f"{safe_title}_g{model.group}.yaml"
 
             return JSONResponse(
