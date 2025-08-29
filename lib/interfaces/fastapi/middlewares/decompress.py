@@ -35,7 +35,7 @@ class DecompressionMiddleware(BaseHTTPMiddleware):
     - Content validation: Ensures decompressed data is valid JSON
 
     Attributes:
-        max_size (int): Maximum allowed size for decompressed request bodies in bytes
+        max_size: Maximum allowed size for decompressed request bodies in bytes.
     """
 
     def __init__(self, app: ASGIApp, max_size: int = 50 * 1024 * 1024) -> None:
@@ -46,9 +46,9 @@ class DecompressionMiddleware(BaseHTTPMiddleware):
         exhaustion attacks.
 
         Args:
-            app (ASGIApp): The ASGI application instance to wrap with decompression.
-            max_size (int): Maximum size in bytes for decompressed bodies.
-                           Defaults to 50MB (50 * 1024 * 1024 bytes).
+            app: The ASGI application instance to wrap with decompression.
+            max_size: Maximum size in bytes for decompressed bodies.
+                     Defaults to 50MB (50 * 1024 * 1024 bytes).
 
         Returns:
             None.
@@ -72,12 +72,12 @@ class DecompressionMiddleware(BaseHTTPMiddleware):
         decompressed content and updates request headers accordingly.
 
         Args:
-            request (Request): The incoming HTTP request object with potentially compressed body.
-            call_next (Callable): The next middleware or route handler in the chain.
+            request: The incoming HTTP request object with potentially compressed body.
+            call_next: The next middleware or route handler in the chain.
 
         Returns:
-            Response: HTTP response from downstream handlers, or error response if
-                     decompression fails, size limits are exceeded, or content is invalid.
+            HTTP response from downstream handlers, or error response if
+            decompression fails, size limits are exceeded, or content is invalid.
 
         Notes:
             Returns specific error responses for different failure modes:
@@ -136,11 +136,11 @@ class DecompressionMiddleware(BaseHTTPMiddleware):
         Content-Encoding header value.
 
         Args:
-            compressed_body (bytes): The compressed request body data.
-            encoding (str): The compression encoding type ("gzip" or "deflate").
+            compressed_body: The compressed request body data.
+            encoding: The compression encoding type ("gzip" or "deflate").
 
         Returns:
-            bytes: The decompressed request body data.
+            The decompressed request body data.
 
         Raises:
             Exception: Decompression errors are propagated to the caller
@@ -161,10 +161,10 @@ class DecompressionMiddleware(BaseHTTPMiddleware):
         maximum size limit to prevent memory exhaustion attacks.
 
         Args:
-            decompressed_body (bytes): The decompressed request body data.
+            decompressed_body: The decompressed request body data.
 
         Returns:
-            bool: True if size is within limits, False if too large.
+            True if size is within limits, False if too large.
 
         Notes:
             Size validation prevents compression bomb attacks where small
@@ -179,10 +179,10 @@ class DecompressionMiddleware(BaseHTTPMiddleware):
         data integrity after decompression.
 
         Args:
-            decompressed_body (bytes): The decompressed request body data.
+            decompressed_body: The decompressed request body data.
 
         Returns:
-            bool: True if content is valid JSON, False otherwise.
+            True if content is valid JSON, False otherwise.
 
         Notes:
             Validation catches both JSON parsing errors and UTF-8 decoding errors.
@@ -202,8 +202,8 @@ class DecompressionMiddleware(BaseHTTPMiddleware):
         updates relevant headers to reflect the decompressed content.
 
         Args:
-            request (Request): The HTTP request object to modify.
-            decompressed_body (bytes): The decompressed request body data.
+            request: The HTTP request object to modify.
+            decompressed_body: The decompressed request body data.
 
         Returns:
             None.

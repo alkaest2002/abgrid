@@ -25,7 +25,7 @@ def add_cors_middleware(app: FastAPI) -> None:
     - Standard HTTP methods and headers for API operations
 
     Args:
-        app (FastAPI): The FastAPI application instance to configure with CORS middleware.
+        app: The FastAPI application instance to configure with CORS middleware.
 
     Returns:
         None.
