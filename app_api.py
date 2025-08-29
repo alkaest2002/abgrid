@@ -19,7 +19,6 @@ from lib.interfaces.fastapi.middlewares.header import HeaderSizeLimitMiddleware
 from lib.interfaces.fastapi.middlewares.query import QueryParamLimitMiddleware
 from lib.interfaces.fastapi.middlewares.request import RequestProtectionMiddleware
 from lib.interfaces.fastapi.routers.router_api import get_router_api
-from lib.interfaces.fastapi.routers.router_fake import get_router_fake
 from lib.interfaces.fastapi.security.limiter import RateLimitError
 from lib.utils import to_snake_case
 
@@ -54,9 +53,6 @@ app.add_middleware(DecompressionMiddleware)
 
 # Include api router
 app.include_router(get_router_api())
-
-# Include api router
-app.include_router(get_router_fake())
 
 # Add other routes
 @app.get("/")
