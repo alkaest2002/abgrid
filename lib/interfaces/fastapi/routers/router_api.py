@@ -63,7 +63,9 @@ def get_router_api() -> APIRouter:  # noqa: PLR0915
         POST /api/report/step_3: Generate multi-step report, step 3.
 
     Notes:
-        All endpoints return consistent JSON responses with "detail" field
+        All endpoints return consistent JSON responses with "detail" field.
+        Rate limiting varies by endpoint: /group uses 3s window, /report uses 10s window,
+        multi-step endpoints use 3s window.
     """
     # Initialize router
     router = APIRouter(prefix="/api")
@@ -89,18 +91,18 @@ def get_router_api() -> APIRouter:  # noqa: PLR0915
 
         Returns:
             JSONResponse: Success response with rendered group and metadata
-                         containing "rendered_group" content and "metadata" with filename
-                         and media type information.
+                        containing "rendered_group" content and "metadata" with filename
+                        and media type information.
 
         Status Codes:
             - 200: Group generated successfully.
             - 400: Invalid request data, missing required fields, or template not found.
             - 401: Authentication token invalid or missing.
-            - 429: Rate limit exceeded (1 request per 5 seconds).
+            - 429: Rate limit exceeded (1 request per 3 seconds).
             - 500: Template rendering failed or internal server error.
 
         Rate Limiting:
-            Rate limited due to computational intensity.
+            Rate limited to 1 request per 3 seconds due to computational intensity.
         """
         try:
             # Data computation
@@ -170,18 +172,18 @@ def get_router_api() -> APIRouter:  # noqa: PLR0915
 
         Returns:
             JSONResponse: Success response with rendered HTML report and JSON data
-                         containing "report_html" with the rendered template and
-                         "report_json" with the structured data.
+                        containing "report_html" with the rendered template and
+                        "report_json" with the structured data.
 
         Status Codes:
             - 200: Report generated successfully.
             - 400: Invalid request data, missing fields, or template not found.
             - 401: Authentication token invalid or missing.
-            - 429: Rate limit exceeded (1 request per 15 seconds).
+            - 429: Rate limit exceeded (1 request per 10 seconds).
             - 500: Report generation failed or internal server error.
 
         Rate Limiting:
-            Rate limited due to computational intensity.
+            Rate limited to 1 request per 10 seconds due to computational intensity.
         """
         try:
             # Data computation
@@ -257,11 +259,11 @@ def get_router_api() -> APIRouter:  # noqa: PLR0915
             - 200: Group and SNA data generated successfully.
             - 400: Invalid report data or missing required fields.
             - 401: Authentication token invalid or missing.
-            - 429: Rate limit exceeded (1 request per 15 seconds).
+            - 429: Rate limit exceeded (1 request per 3 seconds).
             - 500: Data generation failed or internal server error.
 
         Rate Limiting:
-            Rate limited due to computational intensity.
+            Rate limited to 1 request per 3 seconds due to computational intensity.
 
         Notes:
             This is step 1 of a 3-step process. The returned data should be used
@@ -326,11 +328,11 @@ def get_router_api() -> APIRouter:  # noqa: PLR0915
             - 200: Sociogram data generated successfully.
             - 400: Invalid report data or missing required fields.
             - 401: Authentication token invalid or missing.
-            - 429: Rate limit exceeded (1 request per 15 seconds).
+            - 429: Rate limit exceeded (1 request per 3 seconds).
             - 500: Sociogram generation failed or internal server error.
 
         Rate Limiting:
-            Rate limited due to computational intensity.
+            Rate limited to 1 request per 3 seconds due to computational intensity.
 
         Notes:
             This is step 2 of a 3-step process. The returned sociogram data should be
@@ -398,11 +400,11 @@ def get_router_api() -> APIRouter:  # noqa: PLR0915
             - 400: Invalid multi-step report data or missing required fields.
             - 401: Authentication token invalid or missing.
             - 404: Report template not found for specified language.
-            - 429: Rate limit exceeded (1 request per 15 seconds).
+            - 429: Rate limit exceeded (1 request per 3 seconds).
             - 500: Template rendering failed or internal server error.
 
         Rate Limiting:
-            Rate limited due to computational intensity.
+            Rate limited to 1 request per 3 seconds due to computational intensity.
 
         Notes:
             This is the final step (step 3) of the multi-step process. It requires
