@@ -58,10 +58,13 @@ app.include_router(get_router_api())
 @app.get("/")
 @app.get("/health")
 def server_check() -> JSONResponse:
-    """Public endpoint that can be accessed without authentication.
+    """Health check endpoint that can be accessed without authentication.
+
+    Provides a simple health check for the API service, accessible at both
+    root path (/) and /health endpoints.
 
     Returns:
-        JSONResponse: A message indicating the endpoint is publicly accessible.
+        JSONResponse: A message indicating the service is up and running.
     """
     return JSONResponse(
         status_code=status.HTTP_200_OK,
@@ -72,7 +75,14 @@ def server_check() -> JSONResponse:
 
 @app.get("/{path:path}")
 def catchall(path: str) -> JSONResponse:
-    """Catchall endpoint that returns a JSON response for undefined routes."""
+    """Catchall endpoint that returns a JSON response for undefined routes.
+
+    Args:
+        path: The requested path that doesn't match any defined routes.
+
+    Returns:
+        JSONResponse: 404 error response with redirect suggestion to root path.
+    """
     return JSONResponse(
         status_code=status.HTTP_404_NOT_FOUND,
         content={
@@ -87,7 +97,15 @@ def catchall(path: str) -> JSONResponse:
 
 @app.exception_handler(status.HTTP_401_UNAUTHORIZED)
 async def custom_401_handler(request: Request, exc: HTTPException) -> JSONResponse:
-    """Custom handler for 401 Unauthorized errors."""
+    """Custom handler for 401 Unauthorized errors.
+
+    Args:
+        request: The HTTP request object.
+        exc: The HTTPException that was raised.
+
+    Returns:
+        JSONResponse: Standardized 401 error response.
+    """
     return JSONResponse(
         status_code=status.HTTP_401_UNAUTHORIZED,
         content={"detail": "not_authenticated"}
@@ -95,7 +113,15 @@ async def custom_401_handler(request: Request, exc: HTTPException) -> JSONRespon
 
 @app.exception_handler(status.HTTP_403_FORBIDDEN)
 async def custom_403_handler(request: Request, exc: HTTPException) -> JSONResponse:
-    """Custom handler for 403 Forbidden errors."""
+    """Custom handler for 403 Forbidden errors.
+
+    Args:
+        request: The HTTP request object.
+        exc: The HTTPException that was raised.
+
+    Returns:
+        JSONResponse: Standardized 403 error response.
+    """
     return JSONResponse(
         status_code=status.HTTP_403_FORBIDDEN,
         content={"detail": "not_authorized"}
@@ -105,7 +131,15 @@ async def custom_403_handler(request: Request, exc: HTTPException) -> JSONRespon
 async def custom_pydantic_validation_exception_handler(
     request: Request, exc: PydanticValidationError
 ) -> JSONResponse:
-    """Custom handler for PydanticValidationError errors."""
+    """Custom handler for PydanticValidationError errors.
+
+    Args:
+        request: The HTTP request object.
+        exc: The PydanticValidationError that was raised.
+
+    Returns:
+        JSONResponse: Standardized validation error response with error details.
+    """
     return JSONResponse(
         status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
         content={"detail": exc.errors}
@@ -113,7 +147,18 @@ async def custom_pydantic_validation_exception_handler(
 
 @app.exception_handler(RequestValidationError)
 async def validation_exception_handler(request: Request, exc: RequestValidationError) -> JSONResponse:
-    """Custom handler for RequestValidationError errors."""
+    """Custom handler for RequestValidationError errors.
+
+    Processes validation errors and converts field names and messages to snake_case
+    for consistent API response formatting.
+
+    Args:
+        request: The HTTP request object.
+        exc: The RequestValidationError that was raised.
+
+    Returns:
+        JSONResponse: Standardized validation error response with formatted error details.
+    """
     errors = []
     for error in exc.errors():
         # Create a copy of the error dict
@@ -135,7 +180,15 @@ async def validation_exception_handler(request: Request, exc: RequestValidationE
 async def rate_limit_exception_handler(
     request: Request, exc: RateLimitError
 ) -> JSONResponse:
-    """Custom handler for RateLimitError errors."""
+    """Custom handler for RateLimitError errors.
+
+    Args:
+        request: The HTTP request object.
+        exc: The RateLimitError that was raised.
+
+    Returns:
+        JSONResponse: Standardized rate limit error response.
+    """
     return JSONResponse(
         status_code=status.HTTP_429_TOO_MANY_REQUESTS,
         content={"detail": exc.message}
