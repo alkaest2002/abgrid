@@ -4,210 +4,146 @@ Author: Pierpaolo Calanna
 The code is part of the AB-Grid project and is licensed under the MIT License.
 """
 import gzip
-from collections.abc import Awaitable, Callable
 
-from starlette.middleware.base import BaseHTTPMiddleware
-from starlette.types import ASGIApp
+from starlette.types import ASGIApp, Message, Receive, Scope, Send
 
-from fastapi import Request
-from fastapi.responses import Response
 from lib.interfaces.fastapi.settings import Settings
 
 
 settings: Settings = Settings.load()
 
 
-class CompressMiddleware(BaseHTTPMiddleware):
-    """Middleware to provide gzip compression for HTTP responses.
-
-    This middleware provides response compression by implementing:
-    - Automatic gzip compression for responses above minimum size threshold
-    - Content-type filtering to compress only appropriate response types
-    - Client capability detection via Accept-Encoding header validation
-    - Configurable compression level and minimum response size
-
-    The middleware applies compression based on:
-    - Client support: Checks Accept-Encoding header for gzip support
-    - Response size: Only compresses responses above minimum_size bytes
-    - Content type: Compresses text-based and JSON content types
-    - Existing encoding: Skips responses that are already encoded
-
-    Attributes:
-        minimum_size (int): Minimum response size in bytes to trigger compression
-        compression_level (int): Gzip compression level (1-9, higher = better compression)
-        compressible_types (set[str]): Content types eligible for compression
-    """
+class CompressMiddleware:
+    """ASGI-level compression middleware."""
 
     def __init__(self, app: ASGIApp) -> None:
-        """Initialize the middleware with compression settings.
-
-        Sets up the middleware with compression parameters loaded from settings
-        or using sensible defaults. Configures which content types should be
-        compressed and the minimum response size threshold.
+        """Initialize the compression middleware.
 
         Args:
-            app (ASGIApp): The ASGI application instance to wrap with compression.
+            app: The ASGI application to wrap with compression.
 
         Returns:
-            None.
-
-        Notes:
-            Default minimum size is 1000 bytes to avoid compressing small responses.
-            Default compression level is 6 (good balance of speed vs compression ratio).
-            Only text-based content types are compressed by default.
+            None
         """
-        super().__init__(app)
+        self.app = app
         self.minimum_size = settings.gzip_minimum_size
         self.compression_level = settings.gzip_compression_level
         self.compressible_types = {
-            "text/html",
-            "text/plain",
-            "text/css",
-            "text/javascript",
-            "application/json",
-            "application/javascript",
-            "application/xml",
-            "text/xml",
-            "application/rss+xml",
-            "application/atom+xml",
+            "text/html", "text/plain", "text/css", "text/javascript",
+            "application/json", "application/javascript", "application/xml",
+            "text/xml", "application/rss+xml", "application/atom+xml",
         }
 
-    async def dispatch(
-        self,
-        request: Request,
-        call_next: Callable[[Request], Awaitable[Response]]
-    ) -> Response:
-        """Process requests and apply gzip compression to eligible responses.
-
-        Checks if the client supports gzip compression and applies it to responses
-        that meet the compression criteria (size, content-type, encoding status).
+    async def __call__(self, scope: Scope, receive: Receive, send: Send) -> None:
+        """Handle ASGI requests with optional gzip compression.
 
         Args:
-            request (Request): The incoming HTTP request object.
-            call_next (Callable): The next middleware or route handler in the chain.
+            scope: The ASGI scope containing request information.
+            receive: Callable to receive ASGI messages.
+            send: Callable to send ASGI messages.
 
         Returns:
-            Response: HTTP response, potentially compressed if eligible.
-
-        Notes:
-            Compression is only applied when all conditions are met:
-            - Client accepts gzip encoding
-            - Response is large enough (>= minimum_size)
-            - Content-Type is compressible
-            - Response is not already encoded
+            None
         """
-        response = await call_next(request)
+        if scope["type"] != "http":
+            await self.app(scope, receive, send)
+            return
 
-        # Check if client supports gzip
-        if not self._client_accepts_gzip(request):
-            return response
+        # Check Accept-Encoding header
+        headers = dict(scope.get("headers", []))
+        accept_encoding = headers.get(b"accept-encoding", b"").decode("latin1")
 
-        # Check if response should be compressed
-        if not self._should_compress_response(response):
-            return response
+        if not ("gzip" in accept_encoding.lower() or "*" in accept_encoding):
+            await self.app(scope, receive, send)
+            return
 
-        return self._compress_response(response)
+        # Wrap the send function to intercept response
+        response_started = False
+        response_body = bytearray()
+        response_headers = {}
 
-    def _client_accepts_gzip(self, request: Request) -> bool:
-        """Check if the client accepts gzip encoding.
+        async def send_wrapper(message: Message) -> None:
+            """Wrapper function to intercept and potentially compress response messages.
 
-        Examines the Accept-Encoding header to determine if the client
-        supports gzip compression for the response.
+            Args:
+                message: The ASGI message to process.
 
-        Args:
-            request (Request): The HTTP request to check for gzip support.
+            Returns:
+                None
+            """
+            nonlocal response_started, response_body, response_headers
 
-        Returns:
-            bool: True if client accepts gzip encoding, False otherwise.
+            if message["type"] == "http.response.start":
+                response_started = True
+                response_headers = dict(message.get("headers", []))
 
-        Notes:
-            Checks for both "gzip" and "*" in the Accept-Encoding header.
-            Missing Accept-Encoding header is treated as no gzip support.
-        """
-        accept_encoding = request.headers.get("accept-encoding", "")
-        return "gzip" in accept_encoding.lower() or "*" in accept_encoding
+                # Don't compress if already encoded or streaming
+                if b"content-encoding" in response_headers:
+                    await send(message)
+                    return
 
-    def _should_compress_response(self, response: Response) -> bool:
-        """Determine if a response should be compressed.
+                # Store the start message, we'll send it later
+                self.start_message = message
 
-        Evaluates response characteristics to decide if gzip compression
-        should be applied based on size, content type, and encoding status.
+            elif message["type"] == "http.response.body":
 
-        Args:
-            response (Response): The HTTP response to evaluate for compression.
+                # Get body and more_body
+                body = message.get("body", b"")
+                more_body = message.get("more_body", False)
 
-        Returns:
-            bool: True if response should be compressed, False otherwise.
+                # Collect response body
+                response_body.extend(body)
 
-        Notes:
-            Compression is skipped for:
-            - Responses already encoded (Content-Encoding header present)
-            - Responses smaller than minimum_size bytes
-            - Non-compressible content types
-            - Responses without body content
-        """
-        # Skip if already encoded
-        if response.headers.get("content-encoding"):
-            return False
+                # Final chunk
+                if not more_body:
 
-        # Skip if no body content
-        if not hasattr(response, "body") or not response.body:
-            return False
+                    # Check if we should compress
+                    if self._should_compress(response_headers, bytes(response_body)):
 
-        # Skip if too small
-        body_size = len(response.body) if isinstance(response.body, bytes) else len(str(response.body).encode())
-        if body_size < self.minimum_size:
-            return False
+                        # Compress body
+                        compressed_body = gzip.compress(bytes(response_body), compresslevel=self.compression_level)
 
-        # Skip if non-compressible content type
-        content_type = response.headers.get("content-type", "").split(";")[0].strip()
-        return content_type not in self.compressible_types
+                        # Update headers
+                        self.start_message["headers"] = [
+                            (k, v) for k, v in self.start_message["headers"]
+                            if k.lower() not in [b"content-length", b"content-encoding"]
+                        ]
+                        self.start_message["headers"].extend([
+                            (b"content-encoding", b"gzip"),
+                            (b"content-length", str(len(compressed_body)).encode()),
+                            (b"vary", b"Accept-Encoding"),
+                        ])
 
-    def _compress_response(self, response: Response) -> Response:
-        """Apply gzip compression to a response.
-
-        Compresses the response body using gzip and updates the appropriate
-        headers to indicate the compressed content encoding.
-
-        Args:
-            response (Response): The HTTP response to compress.
-
-        Returns:
-            Response: The response with compressed body and updated headers.
-
-        Raises:
-            Exception: Compression errors are handled gracefully by returning
-                      the original uncompressed response.
-
-        Notes:
-            Updates the following headers after compression:
-            - Content-Encoding: Set to "gzip"
-            - Content-Length: Updated to compressed body size
-            - Vary: Adds "Accept-Encoding" for caching compatibility
-        """
-        try:
-            # Get body as bytes
-            if isinstance(response.body, bytes):
-                body_bytes = response.body
+                        # Send compressed response
+                        await send(self.start_message)
+                        await send({
+                            "type": "http.response.body",
+                            "body": compressed_body,
+                            "more_body": False
+                        })
+                    else:
+                        # Send original response
+                        await send(self.start_message)
+                        await send(message)
+                else:
+                    # Still more body coming, continue collecting
+                    pass
             else:
-                body_bytes = str(response.body).encode("utf-8")
+                await send(message)
 
-            # Compress the body
-            compressed_body = gzip.compress(body_bytes, compresslevel=self.compression_level)
+        await self.app(scope, receive, send_wrapper)
 
-            # Update response body and headers
-            response.body = compressed_body
-            response.headers["content-encoding"] = "gzip"
-            response.headers["content-length"] = str(len(compressed_body))
+    def _should_compress(self, headers: dict[bytes, bytes], body: bytes) -> bool:
+        """Check if response should be compressed.
 
-            # Add Vary header for proper caching
-            vary_header = response.headers.get("vary", "")
-            if "accept-encoding" not in vary_header:
-                vary_header = f"{vary_header}, accept-encoding" if vary_header else "accept-encoding"
-                response.headers["vary"] = vary_header
+        Args:
+            headers: The response headers.
+            body: The response body.
 
-        except Exception:
-            # Return original response if compression fails
-            return response
-
-        return response
+        Returns:
+            bool: True if the response should be compressed, False otherwise.
+        """
+        if len(body) < self.minimum_size:
+            return False
+        content_type = headers.get(b"content-type", b"").decode("latin1").split(";")[0].strip()
+        return content_type in self.compressible_types
