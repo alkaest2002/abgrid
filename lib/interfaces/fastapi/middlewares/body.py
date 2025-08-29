@@ -20,9 +20,11 @@ class BodySizeLimitMiddleware(BaseHTTPMiddleware):
 
     Attributes:
         max_body_size: Maximum allowed request body size in bytes.
+        leniency_percentage: Percentage of leniency for Content-Length validation.
     """
 
     MAX_BODY_SIZE: ClassVar[int] = 524288  # Max size 512KB
+    LENIENCY_PERCENTAGE: ClassVar[float] = 0.10  # 10% leniency
 
     def __init__(self, app: ASGIApp) -> None:
         """Initialize the body size limit middleware.
@@ -42,9 +44,10 @@ class BodySizeLimitMiddleware(BaseHTTPMiddleware):
     ) -> Response:
         """Process incoming HTTP requests and enforce body size limits.
 
-        This method implements a two-phase approach to body size validation:
-        1. Header-based validation using Content-Length header when available
-        2. Streaming validation for chunked transfers or requests without Content-Length
+        This method implements a three-phase approach to body size validation:
+        1. Early exit if Content-Length exceeds maximum size (with leniency)
+        2. Content-Length validation - verify actual body is within acceptable range
+        3. Stream validation for requests without Content-Length header
 
         Args:
             request (Request): The incoming FastAPI/Starlette request object.
@@ -60,12 +63,16 @@ class BodySizeLimitMiddleware(BaseHTTPMiddleware):
         if request.method in ("GET", "HEAD", "OPTIONS"):
             return await call_next(request)
 
-        # Phase 1: Pre-validation using Content-Length header
+        # Phase 1: Check Content-Length header and exit early if too large (with leniency)
         content_length = request.headers.get("content-length")
         if content_length:
             try:
+                # Get declared size from Content-Length header
                 declared_size = int(content_length)
-                if declared_size > self.MAX_BODY_SIZE:
+                # Apply leniency to the maximum size check
+                max_allowed_with_leniency = self.MAX_BODY_SIZE + int(self.MAX_BODY_SIZE * self.LENIENCY_PERCENTAGE)
+                # If declared size exceeds the maximum allowed size (with leniency)
+                if declared_size > max_allowed_with_leniency:
                     return self._size_exceeded_response()
             except ValueError:
                 return JSONResponse(
@@ -73,17 +80,11 @@ class BodySizeLimitMiddleware(BaseHTTPMiddleware):
                     content={"detail": "invalid_content_length_header"}
                 )
 
-        # Phase 2: Streaming validation for chunked/unknown size requests
-        should_wrap = (
-            not content_length or
-            request.headers.get("transfer-encoding") == "chunked"
-        )
-
-        if should_wrap:
-            try:
-                request = await self._wrap_request_body(request)
-            except ValueError:
-                return self._size_exceeded_response()
+        # Phase 2 & 3: Wrap request body for validation
+        try:
+            request = await self._wrap_request_body(request, content_length)
+        except ValueError:
+            return self._size_exceeded_response()
 
         return await call_next(request)
 
@@ -98,55 +99,87 @@ class BodySizeLimitMiddleware(BaseHTTPMiddleware):
             content={"detail": "request_body_too_large"}
         )
 
-    async def _wrap_request_body(self, request: Request) -> Request:
+    async def _wrap_request_body(self, request: Request, content_length: str | None) -> Request:
         """Create a size-monitored wrapper around the request's body stream.
 
         Args:
             request (Request): The original request object to wrap.
+            content_length (str | None): The Content-Length header value if present.
 
         Returns:
             Request: A new Request object with size-monitored receive callable.
 
         Raises:
-            ValueError: When the accumulated body size exceeds the configured limit.
+            ValueError: When the body size validation fails.
         """
+        declared_size = None
+        if content_length:
+            try:
+                declared_size = int(content_length)
+            except ValueError:
+                # This should not happen as we already validated it, but just in case
+                declared_size = None
+
         class SizeLimitedBody:
-            """ASGI receive callable wrapper that enforces cumulative body size limits."""
+            """ASGI receive callable wrapper that enforces body size limits with leniency."""
 
             def __init__(
                 self,
                 original_receive: Callable[[], Awaitable[MutableMapping[str, Any]]],
-                max_size: int
+                max_size: int,
+                expected_size: int | None,
+                leniency_percentage: float
             ) -> None:
                 self.original_receive = original_receive
                 self.max_size = max_size
+                self.expected_size = expected_size
+                self.leniency_percentage = leniency_percentage
                 self.current_size = 0
 
             async def __call__(self) -> MutableMapping[str, Any]:
-                """Process ASGI messages with size monitoring for request bodies.
+                """Process ASGI messages with size monitoring and lenient content-length validation.
 
                 Returns:
                     MutableMapping[str, Any]: The original ASGI message unchanged.
 
                 Raises:
-                    ValueError: When the cumulative body size exceeds max_size.
+                    ValueError: When the body size validation fails.
                 """
                 message = await self.original_receive()
 
                 if message["type"] == "http.request":
                     body = message.get("body", b"")
+
                     self.current_size += len(body)
 
-                    if self.current_size > self.max_size:
-                        error_message = "request_body_too_large"
-                        raise ValueError(error_message)
+                    # If Content-Length is set, validate with leniency
+                    if self.expected_size is not None:
+                        # Calculate the maximum allowed size with leniency
+                        # Use the larger of: max_size or expected_size + leniency
+                        leniency_buffer = int(self.max_size * self.leniency_percentage)
+                        max_allowed = max(
+                            self.max_size + leniency_buffer,
+                            self.expected_size + leniency_buffer
+                        )
+
+                        if self.current_size > max_allowed:
+                            error_message = "request_body_too_large"
+                            raise ValueError(error_message)
+                    else:
+                        # No Content-Length header - enforce max size limit with leniency
+                        max_allowed_with_leniency = self.max_size + int(self.max_size * self.leniency_percentage)
+                        if self.current_size > max_allowed_with_leniency:
+                            error_message = "request_body_too_large"
+                            raise ValueError(error_message)
 
                 return message
 
         # Create new request with size-limited body
         limited_receive = SizeLimitedBody(
             request.receive,
-            self.MAX_BODY_SIZE
+            self.MAX_BODY_SIZE,
+            declared_size,
+            self.LENIENCY_PERCENTAGE
         )
 
         # Create new request object with limited receive
