@@ -16,7 +16,11 @@ from fastapi.responses import JSONResponse
 
 
 class HeaderSizeLimitMiddleware(BaseHTTPMiddleware):
-    """Middleware to limit HTTP header sizes and ensure JSON content for POST requests."""
+    """Middleware to limit HTTP header sizes and ensure JSON content for POST requests.
+
+    Attributes:
+            max_header_size: Maximum allowed size for HTTP headers.
+    """
 
     MAX_HEADER_SIZE: ClassVar[int] = 8 * 1024 # 8KB
 

@@ -16,18 +16,19 @@ from fastapi.responses import JSONResponse
 
 
 class BodySizeLimitMiddleware(BaseHTTPMiddleware):
-    """ASGI middleware to enforce request body size limits and prevent memory exhaustion attacks."""
+    """ASGI middleware to enforce request body size limits and prevent memory exhaustion attacks.
 
-    MAX_BODY_SIZE: ClassVar[int] = 524288  # 512KB
+    Attributes:
+        max_body_size: Maximum allowed request body size in bytes.
+    """
+
+    MAX_BODY_SIZE: ClassVar[int] = 524288  # Max size 512KB
 
     def __init__(self, app: ASGIApp) -> None:
         """Initialize the body size limit middleware.
 
         Args:
             app (ASGIApp): The ASGI application instance to wrap.
-
-        Attributes:
-            max_body_size: Maximum allowed request body size in bytes.
 
         Returns:
             None.

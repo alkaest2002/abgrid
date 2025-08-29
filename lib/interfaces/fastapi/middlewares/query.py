@@ -17,7 +17,16 @@ from fastapi.responses import JSONResponse
 
 
 class QueryParamLimitMiddleware(BaseHTTPMiddleware):
-    """Aggressive middleware for closed API server query parameter validation."""
+    """Aggressive middleware for closed API server query parameter validation.
+
+    Attributes:
+        allowed_params: Set of allowed query parameter keys.
+        valid_sociogram_values: Set of valid values for the "with_sociogram" parameter.
+        max_query_string_length: Maximum allowed length of the query string.
+        max_param_key_length: Maximum allowed length of parameter keys.
+        max_param_value_length: Maximum allowed length of parameter values.
+        max_params_count: Maximum allowed number of query parameters.
+    """
 
     ALLOWED_PARAMS: ClassVar[set[str]] = {"language", "with_sociogram"}
     VALID_SOCIOGRAM_VALUES: ClassVar[set[str]] = {"true", "false"}

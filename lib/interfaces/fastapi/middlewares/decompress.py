@@ -17,16 +17,16 @@ from fastapi.responses import JSONResponse, Response
 
 
 class DecompressionMiddleware(BaseHTTPMiddleware):
-    """Middleware to decompress gzip/deflate compressed request bodies."""
+    """Middleware to decompress gzip/deflate compressed request bodies.
+
+    Attributes:
+        max_decompressed_size: Maximum allowed size for decompressed request bodies.
+    """
 
     MAX_DECOMPRESSED_SIZE: ClassVar[int] = 1 * 1024 * 1024 # 1MB
 
     def __init__(self, app: ASGIApp) -> None:
         """Initialize the middleware with decompression settings.
-
-        Sets up the middleware with size limits and configures the maximum
-        allowed size for decompressed request bodies to prevent memory
-        exhaustion attacks.
 
         Args:
             app: The ASGI application instance to wrap with decompression.

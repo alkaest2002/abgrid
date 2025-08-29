@@ -10,9 +10,15 @@ from starlette.types import ASGIApp, Message, Receive, Scope, Send
 
 
 class CompressMiddleware:
-    """ASGI-level compression middleware."""
+    """ASGI-level compression middleware.
 
-    MINIMUM_SIZE: ClassVar[int] = 1000  # Minimum size in bytes to trigger compression
+    Attributes:
+        min_body_size: Minimum body size in bytes to trigger compression.
+        compression_level: Compression level (1-9).
+        compressible_types: Set of MIME types eligible for compression.
+    """
+
+    MIN_BODY_SIZE: ClassVar[int] = 1000  # Minimum size in bytes to trigger compression
     COMPRESSION_LEVEL: ClassVar[int] = 6  # Compression level (1-9)
     COMPRESSIBLE_TYPES: ClassVar[set[str]] = {
         "text/html", "text/plain", "text/css", "text/javascript",
@@ -26,11 +32,6 @@ class CompressMiddleware:
 
         Args:
             app: The ASGI application to wrap with compression.
-
-        Attributes:
-            minimum_size: Minimum size in bytes to trigger compression.
-            compression_level: Compression level (1-9).
-            compressible_types: Set of MIME types eligible for compression.
 
         Returns:
             None
@@ -146,7 +147,7 @@ class CompressMiddleware:
         Returns:
             bool: True if the response should be compressed, False otherwise.
         """
-        if len(body) < self.MINIMUM_SIZE:
+        if len(body) < self.MIN_BODY_SIZE:
             return False
         content_type = headers.get(b"content-type", b"").decode("latin1").split(";")[0].strip()
         return content_type in self.COMPRESSIBLE_TYPES

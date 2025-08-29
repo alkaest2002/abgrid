@@ -18,7 +18,12 @@ from lib.interfaces.fastapi.settings import Settings
 settings: Settings = Settings.load()
 
 class RequestProtectionMiddleware(BaseHTTPMiddleware):
-    """Middleware to protect against request-based attacks and resource exhaustion."""
+    """Middleware to protect against request-based attacks and resource exhaustion.
+
+    Attributes:
+        request_timeout: Timeout duration for incoming requests.
+        semaphore: Semaphore to limit concurrent API requests.
+    """
 
     REQUEST_TIMEOUT: ClassVar[int] = 60  # 60 seconds timeout for all requests
     SEMAPHORE: ClassVar[asyncio.Semaphore] = asyncio.Semaphore(settings.max_concurrent_requests) # from .env
