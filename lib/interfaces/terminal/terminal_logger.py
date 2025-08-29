@@ -32,10 +32,17 @@ def logger_decorator[F: Callable[..., Any]](func: F | None = None) -> F | Callab
     This decorator provides comprehensive error handling for function execution,
     catching common exceptions and formatting them for user-friendly display.
 
+    Args:
+        func: Optional function to decorate. When None, returns a decorator function.
+
+    Returns:
+        Either the decorated function or a decorator function, depending on usage pattern.
+
     Notes:
-        - Returns None for handled exceptions (doesn"t re-raise them).
+        - Returns None for handled exceptions (doesn't re-raise them).
         - Uses print for consistent message formatting.
         - Handles different exception types with appropriate formatting.
+        - Supports both @logger_decorator and @logger_decorator() usage patterns.
     """
 
     def _decorator(function: F) -> F:
@@ -101,7 +108,7 @@ def logger_decorator[F: Callable[..., Any]](func: F | None = None) -> F | Callab
 def extract_traceback_info(error: Exception, exclude_files: set[str] | None = None) -> str:
     """Extract and format traceback information from an exception.
 
-    Processes the exception"s traceback to create a readable string representation,
+    Processes the exception's traceback to create a readable string representation,
     filtering out specified files to focus on relevant code locations.
 
     Args:
