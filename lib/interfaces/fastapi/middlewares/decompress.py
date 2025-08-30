@@ -28,8 +28,8 @@ class DecompressMiddleware(BaseHTTPMiddleware):
         chunk_size: Size of each chunk read during decompression.
     """
 
-    MAX_DECOMPRESSED_SIZE: ClassVar[int] = 1 * 1024 * 1024 # 1MB
-    CHUNK_SIZE: ClassVar[int] = 8192  # 8KB chunks
+    MAX_DECOMPRESSED_SIZE: ClassVar[int] = 1058456  # Max size 1MB
+    CHUNK_SIZE: ClassVar[int] = 8192  # 8KB read chunks
 
     def __init__(self, app: ASGIApp) -> None:
         """Initialize the middleware with decompression settings.
