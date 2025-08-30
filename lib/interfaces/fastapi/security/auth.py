@@ -24,7 +24,7 @@ class Auth:
         """
         self.jwt_handler = AnonymousJWT()
 
-    async def verify_token(
+    async def verify_and_get_token(
         self,
         token: HTTPAuthorizationCredentials | None = Depends(HTTPBearer(auto_error=False))
     ) -> Any:
@@ -44,4 +44,4 @@ class Auth:
                 status_code=status.HTTP_401_UNAUTHORIZED,
                 detail="required_jwt_token"
             )
-        return self.jwt_handler.verify_token(token.credentials)
+        return self.jwt_handler.verify_and_get_token(token.credentials)

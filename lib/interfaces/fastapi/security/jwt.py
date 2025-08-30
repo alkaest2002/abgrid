@@ -48,7 +48,7 @@ class AnonymousJWT:
 
         return jwt.encode(payload, self.secret_key, algorithm=self.algorithm)
 
-    def verify_token(self, token: str) -> Any:
+    def verify_and_get_token(self, token: str) -> Any:
         """Verify and decode a JWT token.
 
         Args:
@@ -69,7 +69,7 @@ class AnonymousJWT:
                 detail="invalid_or_expired_jwt_token"
             ) from e
 
-    def verify_token_boolean(self, token: str) -> Boolean:
+    def verify_token(self, token: str) -> Boolean:
         """Verify a JWT token without raising an error.
 
         Args:

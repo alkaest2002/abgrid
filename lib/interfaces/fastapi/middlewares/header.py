@@ -78,7 +78,7 @@ class HeaderMiddleware(BaseHTTPMiddleware):
             token = auth_header[7:]
 
             # Verify JWT token
-            if not self.jwt_handler.verify_token_boolean(token):
+            if not self.jwt_handler.verify_token(token):
                 return JSONResponse(
                     status_code=status.HTTP_401_UNAUTHORIZED,
                     content={"detail": "invalid_jwt_token"}
