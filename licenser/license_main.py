@@ -122,11 +122,6 @@ class JWTGenerator:
         if expiration_date.tzinfo is None:
             expiration_date = expiration_date.replace(tzinfo=timezone.utc)
 
-        # Validate expiration is in the future
-        if expiration_date <= now:
-            error_message = "Expiration date must be in the future"
-            raise TokenGenerationError(error_message)
-
         payload = {
             "sub": user_uuid,
             "iat": now,
