@@ -21,19 +21,11 @@ class HeaderMiddleware(BaseHTTPMiddleware):
 
     Attributes:
             max_header_size: Maximum allowed size for HTTP headers.
+            exempt_paths: Set of paths that are exempt from JWT authentication.
     """
 
     MAX_HEADER_SIZE: ClassVar[int] = 8 * 1024 # 8KB
-
-    # Routes that don't require JWT authentication
-    EXEMPT_PATHS: ClassVar[set[str]] = {
-        "/",
-        "/health",
-        "/docs",
-        "/redoc",
-        "/openapi.json",
-        "/favicon.ico"
-    }
+    EXEMPT_PATHS: ClassVar[set[str]] = {"/", "/health"} # Routes that don't require JWT authentication
 
     def __init__(self, app: ASGIApp) -> None:
         """Initialize the middleware with header size limit configuration.
