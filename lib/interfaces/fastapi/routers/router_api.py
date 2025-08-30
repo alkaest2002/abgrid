@@ -4,12 +4,11 @@ Author: Pierpaolo Calanna
 The code is part of the AB-Grid project and is licensed under the MIT License.
 """
 # ruff: noqa: ARG001
-# ruff: noqa: B008
 
 import asyncio
 from typing import Any
 
-from fastapi import APIRouter, Depends, Query, Request, status
+from fastapi import APIRouter, Query, Request, status
 from fastapi.responses import JSONResponse
 from lib.core.core_data import CoreData
 from lib.core.core_export import CoreExport
@@ -21,12 +20,10 @@ from lib.core.core_schemas_in import (
     ABGridReportStep3SchemaIn,
 )
 from lib.core.core_templates import CoreRenderer
-from lib.interfaces.fastapi.security.auth import Auth
 from lib.interfaces.fastapi.security.limiter import SimpleRateLimiter
 
 
 # Initialize once at module level
-_auth = Auth()
 _abgrid_data = CoreData()
 _abgrid_renderer = CoreRenderer()
 
@@ -49,7 +46,7 @@ def get_router_api() -> APIRouter:  # noqa: PLR0915
     """Create and configure the FastAPI router with API endpoints.
 
     This function creates a FastAPI router with all the application endpoints
-    configured with proper authentication, rate limiting, and error handling.
+    configured with rate limiting, and error handling.
     All responses are returned as JSON, including error cases.
 
     Returns:
@@ -77,7 +74,6 @@ def get_router_api() -> APIRouter:  # noqa: PLR0915
         request: Request,
         model: ABGridGroupSchemaIn,
         language: str = Query(..., description="Language of the group template"),
-        user_data: dict[str, Any] = Depends(_auth.verify_token)
     ) -> JSONResponse:
         """Generate group configuration file based on provided data.
 
@@ -87,7 +83,6 @@ def get_router_api() -> APIRouter:  # noqa: PLR0915
             request: The HTTP request object (used by rate limiter).
             model: Group schema containing all group parameters.
             language: Language code for template selection.
-            user_data: Authenticated user data from JWT token verification.
 
         Returns:
             JSONResponse: Success response with rendered group and metadata
@@ -156,7 +151,6 @@ def get_router_api() -> APIRouter:  # noqa: PLR0915
         model: ABGridReportSchemaIn,
         language: str = Query(..., description="Language of the report"),
         with_sociogram: bool = Query(..., description="Include sociogram visualization"),
-        user_data: dict[str, Any] = Depends(_auth.verify_token)
     ) -> JSONResponse:
         """Generate analysis report based on provided data.
 
@@ -168,7 +162,6 @@ def get_router_api() -> APIRouter:  # noqa: PLR0915
             model: Report schema containing collected data.
             language: Language code for report template.
             with_sociogram: Whether to include sociogram visualization in the report.
-            user_data: Authenticated user data from JWT token verification.
 
         Returns:
             JSONResponse: Success response with rendered HTML report and JSON data
@@ -239,7 +232,6 @@ def get_router_api() -> APIRouter:  # noqa: PLR0915
     async def multi_step_step_1(
         request: Request,
         model: ABGridReportStep1SchemaIn,
-        user_data: dict[str, Any] = Depends(_auth.verify_token)
     ) -> JSONResponse:
         """Generate step 1 data for multi-step report generation.
 
@@ -250,7 +242,6 @@ def get_router_api() -> APIRouter:  # noqa: PLR0915
         Args:
             request: The HTTP request object (used by rate limiter).
             model: Report schema containing collected survey data.
-            user_data: Authenticated user data from JWT token verification.
 
         Returns:
             JSONResponse: Success response with JSON data.
@@ -307,7 +298,6 @@ def get_router_api() -> APIRouter:  # noqa: PLR0915
         request: Request,
         model: ABGridReportStep2SchemaIn,
         with_sociogram: bool = Query(..., description="Include sociogram visualization"),
-        user_data: dict[str, Any] = Depends(_auth.verify_token)
     ) -> JSONResponse:
         """Generate step 2 data for multi-step report generation.
 
@@ -319,7 +309,6 @@ def get_router_api() -> APIRouter:  # noqa: PLR0915
             request: The HTTP request object (used by rate limiter).
             model: Report schema containing collected data.
             with_sociogram: Whether to include sociogram visualization in the report.
-            user_data: Authenticated user data from JWT token verification.
 
         Returns:
             JSONResponse: Success response with JSON data.
@@ -378,7 +367,6 @@ def get_router_api() -> APIRouter:  # noqa: PLR0915
         request: Request,
         model: ABGridReportStep3SchemaIn,
         language: str = Query(..., description="Language of the report template"),
-        user_data: dict[str, Any] = Depends(_auth.verify_token)
     ) -> JSONResponse:
         """Generate HTML report.
 
@@ -390,7 +378,6 @@ def get_router_api() -> APIRouter:  # noqa: PLR0915
             request: The HTTP request object (used by rate limiter).
             model: Multi-step report schema containing data from previous steps.
             language: Language code for report template selection.
-            user_data: Authenticated user data from JWT token verification.
 
         Returns:
             JSONResponse: Success response with rendered HTML report content.
