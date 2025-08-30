@@ -79,7 +79,7 @@ class AnonymousJWT:
             Boolean: True if the token is valid, False otherwise.
         """
         try:
-            _ = jwt.decode(token, self.secret_key, algorithms=[self.algorithm])
+            jwt.decode(token, self.secret_key, algorithms=[self.algorithm])
         except jwt.InvalidTokenError:
             return False
         return True
