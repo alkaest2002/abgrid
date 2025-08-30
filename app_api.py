@@ -28,7 +28,6 @@ app = FastAPI(default_response_class=ORJSONResponse)
 # Middlewares (processed in reverse order)
 #######################################################################################
 
-
 # 7. Compress
 app.add_middleware(CompressMiddleware)
 
