@@ -11,9 +11,7 @@ from fastapi.responses import JSONResponse, ORJSONResponse
 from lib.core.core_schemas_errors import PydanticValidationError
 from lib.interfaces.fastapi.middlewares.body import BodyMiddleware
 from lib.interfaces.fastapi.middlewares.compress import CompressMiddleware
-from lib.interfaces.fastapi.middlewares.coors import (
-    add_cors_middleware,  # Import the CORS function
-)
+from lib.interfaces.fastapi.middlewares.coors import CORSMiddleware
 from lib.interfaces.fastapi.middlewares.decompress import DecompressMiddleware
 from lib.interfaces.fastapi.middlewares.header import HeaderMiddleware
 from lib.interfaces.fastapi.middlewares.query import QueryMiddleware
@@ -50,7 +48,8 @@ app.add_middleware(QueryMiddleware)
 app.add_middleware(HeaderMiddleware)
 
 # 1. CORS
-add_cors_middleware(app)
+app.add_middleware(CORSMiddleware, **CORSMiddleware.get_params())
+
 
 #######################################################################################
 # Routes
