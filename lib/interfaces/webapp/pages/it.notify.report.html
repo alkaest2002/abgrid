@@ -43,9 +43,7 @@
                         <!-- Main content goes here -->
                         <div class="h-full flex flex-col justify-start items-start">
                             <div class="w-full h-full flex flex-col justify-start items-start">
-                                <p class="mb-2 text-3xl font-bold text-center text-gray-800">Urrà!</p>
-                                <p class="text-center font-semibold">Il report è stato generato correttamente.</p>
-                                <p class="mb-3 text-xs text-center">Clicca sulle icone per scaricarlo nei formati disponibili.</p>
+                                <p class="mb-3">Il report è stato generato correttamente. Clicca sulle icone visibili qui sotto, per scaricarlo nei formati disponibili (JSON per analisi statistiche e PDF/HTML per visualizzazione).</p>
                                 <div class="flex flex-col gap-12 mt-6">
                                     <!-- Report HTML or PDF -->
                                     <div class="flex items-center gap-9">
@@ -98,7 +96,7 @@
                                         <div>
                                             <p class="text-xl font-semibold mb-2">Avvertenze</p>
                                             <template x-if="!$store.app.appIsElectron">
-                                                <p>
+                                                <p >
                                                     Il file HTML è visualizzabile con i browser più comuni.
                                                     Inoltre, è possibile generare un PDF tramite la funzione di
                                                     stampa del browser stesso. Consigliamo di utilizzare l'ultima versione
@@ -108,7 +106,7 @@
                                                 </p>
                                             </template>
                                             <template x-if="$store.app.appIsElectron">
-                                                <p>
+                                                <p class="text-sm">
                                                     Il report PDF è pensato per una fruizione visivamente ricca dei
                                                     dati AB-Grid. Se desideri analizzare i dati da un punto
                                                     di vista statstico ti consigliamo di scaricare il formato JSON.
@@ -157,7 +155,7 @@
                                         </div>
                                         <div>
                                             <p class="text-xl font-semibold mb-2">Avvertenze</p>
-                                            <p>
+                                            <p class="text-sm">
                                                 Il file JSON include tutti i dati del report ed è strutturato in modo da essere compatibile per
                                                 l'analisi con i più diffusi pacchetti statistici.
                                             </p>
