@@ -27,29 +27,30 @@ from lib.utils import to_snake_case
 app = FastAPI(default_response_class=ORJSONResponse)
 
 #######################################################################################
-# Middlewares
+# Middlewares (processed in reverse order)
 #######################################################################################
+
+
+# 7. Compress
+app.add_middleware(CompressMiddleware)
+
+# 6. Decompress
+app.add_middleware(DecompressMiddleware)
+
+# 5. Body
+app.add_middleware(BodyMiddleware)
+
+# 4. Request
+app.add_middleware(RequestMiddleware)
+
+# 3. Query
+app.add_middleware(QueryMiddleware)
+
+# 2. Header
+app.add_middleware(HeaderMiddleware)
 
 # 1. CORS
 add_cors_middleware(app)
-
-# 2. Compress
-app.add_middleware(CompressMiddleware)
-
-# 3. Header
-app.add_middleware(HeaderMiddleware)
-
-# 4. Query
-app.add_middleware(QueryMiddleware)
-
-# 5. Request
-app.add_middleware(RequestMiddleware)
-
-# 6. Body
-app.add_middleware(BodyMiddleware)
-
-# 7. Decompress
-app.add_middleware(DecompressMiddleware)
 
 #######################################################################################
 # Routes
