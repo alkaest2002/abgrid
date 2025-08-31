@@ -81,7 +81,7 @@ class HeaderMiddleware(BaseHTTPMiddleware):
             if not self.jwt_handler.verify_token(token):
                 return JSONResponse(
                     status_code=status.HTTP_401_UNAUTHORIZED,
-                    content={"detail": "invalid_jwt_token"}
+                    content={"detail": "invalid_or_expired_jwt_token"}
                 )
 
         # Ensure JSON content type for POST requests
