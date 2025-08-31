@@ -1,0 +1,9 @@
+{
+  "name": "abgrid-server",
+  "private": true,
+  "version": "1.0.0",
+  "author": "Pierpaolo Calanna",
+  "scripts": {
+    "start:server": "./venv/bin/python3 -m fastapi dev app_api.py --port 7895"
+  }
+}
