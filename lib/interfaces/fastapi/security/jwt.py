@@ -8,7 +8,6 @@ The code is part of the AB-Grid project and is licensed under the MIT License.
 import uuid
 from datetime import datetime, timedelta, timezone
 from typing import Any
-from xmlrpc.client import Boolean
 
 import jwt
 
@@ -69,7 +68,7 @@ class AnonymousJWT:
                 detail="invalid_or_expired_jwt_token"
             ) from e
 
-    def verify_token(self, token: str) -> Boolean:
+    def verify_token(self, token: str) -> bool:
         """Verify a JWT token without raising an error.
 
         Args:
