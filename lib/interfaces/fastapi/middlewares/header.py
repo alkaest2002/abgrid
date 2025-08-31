@@ -17,18 +17,18 @@ from lib.interfaces.fastapi.security.jwt import AnonymousJWT
 
 
 class HeaderMiddleware(BaseHTTPMiddleware):
-    """Middleware to limit HTTP header sizes, ensure JSON content for POST requests, and validate JWT tokens.
+    """Middleware for JWT token validation and POST request content-type enforcement.
 
     Attributes:
-            max_header_size: Maximum allowed size for HTTP headers.
-            exempt_paths: Set of paths that are exempt from JWT authentication.
+        exempt_paths: Set of paths that are exempt from JWT authentication.
+        jwt_handler: Shared JWT handler instance for token validation.
     """
 
-    MAX_HEADER_SIZE: ClassVar[int] = 8 * 1024 # 8KB
-    EXEMPT_PATHS: ClassVar[set[str]] = {"/", "/health"} # Routes that don't require JWT authentication
+    EXEMPT_PATHS: ClassVar[set[str]] = {"/", "/health"}
+    JWT_HANDLER: ClassVar[AnonymousJWT] = AnonymousJWT()
 
     def __init__(self, app: ASGIApp) -> None:
-        """Initialize the middleware with header size limit configuration.
+        """Initialize the middleware for JWT and content-type validation.
 
         Args:
             app: The ASGI application instance.
@@ -37,33 +37,23 @@ class HeaderMiddleware(BaseHTTPMiddleware):
             None.
         """
         super().__init__(app)
-        self.jwt_handler = AnonymousJWT()
 
     async def dispatch(self, request: Request, call_next: Callable[[Request], Awaitable[Response]]) -> Response:
-        """Process incoming request and enforce header validations and JWT authentication.
+        """Process incoming request with JWT validation and POST content-type enforcement.
+
+        Processing order:
+        1. Extract and validate JWT token for protected paths
+        2. Ensure JSON content type for POST requests
 
         Args:
-            request: The incoming HTTP request with headers to validate.
+            request: The incoming HTTP request.
             call_next: The next middleware or route handler in the chain.
 
         Returns:
             Response: Either an error response for validation failures or the result
                      from the next handler in the chain.
-
-        Raises:
-            HTTPException: 401 Unauthorized.
-            HTTPException: 413 Request Entity Too Large.
-            HTTPException: 415 Unsupported Media Type.
         """
-        # Check header sizes
-        for header_value in request.headers.values():
-            if len(header_value) > self.MAX_HEADER_SIZE:
-                return JSONResponse(
-                    status_code=status.HTTP_413_REQUEST_ENTITY_TOO_LARGE,
-                    content={"detail": "header_is_too_large"}
-                )
-
-        # Skip JWT check for exempt paths and OPTIONS requests
+        # Step 1: JWT token extraction and validation
         if request.url.path not in self.EXEMPT_PATHS and request.method != "OPTIONS":
 
             # Extract JWT token
@@ -77,14 +67,14 @@ class HeaderMiddleware(BaseHTTPMiddleware):
             # Remove "Bearer " prefix from JWT token
             token = auth_header[7:].strip()
 
-            # Verify JWT token
-            if not self.jwt_handler.verify_token(token):
+            # Verify JWT token using shared class instance
+            if not self.JWT_HANDLER.verify_token(token):
                 return JSONResponse(
                     status_code=status.HTTP_401_UNAUTHORIZED,
                     content={"detail": "invalid_or_expired_jwt_token"}
                 )
 
-        # Ensure JSON content type for POST requests
+        # Step 2: Ensure JSON content type for POST requests
         if request.method == "POST":
             content_type = request.headers.get("content-type", "")
             # Extract main content type (ignore charset and other parameters)
