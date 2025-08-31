@@ -11,7 +11,7 @@ from fastapi.responses import JSONResponse, ORJSONResponse
 from lib.core.core_schemas_errors import PydanticValidationError
 from lib.interfaces.fastapi.middlewares.body import BodyMiddleware
 from lib.interfaces.fastapi.middlewares.compress import CompressMiddleware
-from lib.interfaces.fastapi.middlewares.coors import CORSMiddleware
+from lib.interfaces.fastapi.middlewares.cors import CORSMiddleware
 from lib.interfaces.fastapi.middlewares.decompress import DecompressMiddleware
 from lib.interfaces.fastapi.middlewares.header import HeaderMiddleware
 from lib.interfaces.fastapi.middlewares.query import QueryMiddleware
