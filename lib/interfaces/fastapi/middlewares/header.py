@@ -75,7 +75,7 @@ class HeaderMiddleware(BaseHTTPMiddleware):
                 )
 
             # Remove "Bearer " prefix from JWT token
-            token = auth_header[7:]
+            token = auth_header[7:].strip()
 
             # Verify JWT token
             if not self.jwt_handler.verify_token(token):
