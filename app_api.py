@@ -4,7 +4,7 @@ Author: Pierpaolo Calanna
 The code is part of the AB-Grid project and is licensed under the MIT License.
 """
 # ruff: noqa: ARG001
-from fastapi import FastAPI, HTTPException, Request, status
+from fastapi import FastAPI, Request, status
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse, ORJSONResponse
 
@@ -97,38 +97,6 @@ def catchall(path: str) -> JSONResponse:
 #######################################################################################
 # Custom error handlers
 #######################################################################################
-
-@app.exception_handler(status.HTTP_401_UNAUTHORIZED)
-async def custom_401_handler(request: Request, exc: HTTPException) -> JSONResponse:
-    """Custom handler for 401 Unauthorized errors.
-
-    Args:
-        request: The HTTP request object.
-        exc: The HTTPException that was raised.
-
-    Returns:
-        JSONResponse: Standardized 401 error response.
-    """
-    return JSONResponse(
-        status_code=status.HTTP_401_UNAUTHORIZED,
-        content={"detail": "not_authenticated"}
-    )
-
-@app.exception_handler(status.HTTP_403_FORBIDDEN)
-async def custom_403_handler(request: Request, exc: HTTPException) -> JSONResponse:
-    """Custom handler for 403 Forbidden errors.
-
-    Args:
-        request: The HTTP request object.
-        exc: The HTTPException that was raised.
-
-    Returns:
-        JSONResponse: Standardized 403 error response.
-    """
-    return JSONResponse(
-        status_code=status.HTTP_403_FORBIDDEN,
-        content={"detail": "not_authorized"}
-    )
 
 @app.exception_handler(PydanticValidationError)
 async def custom_pydantic_validation_exception_handler(
