@@ -67,6 +67,7 @@
             "invalid_json_after_decompression": "JSON non valido dopo decompressione",
             "invalid_or_expired_jwt_token": "licenza ab-grid non fornita o scaduta",
             "internal_error": "errore interno del server",
+            "malformed_query_string": "stringa di query non valida",
             "missing_jwt_token": "licenza ab-grid non fornita",
             "offline": "offline",
             "online": "online",
