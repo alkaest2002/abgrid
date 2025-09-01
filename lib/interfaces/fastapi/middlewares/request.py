@@ -69,6 +69,10 @@ class RequestMiddleware(BaseHTTPMiddleware):
             return await self._handle_api_request(request, call_next)
         return await self._execute_with_timeout(request, call_next)
 
+    ##################################################################################################################
+    #   PRIVATE METHODS
+    ##################################################################################################################
+
     async def _handle_api_request(
         self,
         request: Request,
