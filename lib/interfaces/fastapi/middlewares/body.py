@@ -37,18 +37,6 @@ class BodyMiddleware(BaseHTTPMiddleware):
         """
         super().__init__(app)
 
-    def _is_body_gzip_compressed(self, request: Request) -> bool:
-        """Check if the request body is gzip compressed based on Content-Encoding header.
-
-        Args:
-            request (Request): The incoming FastAPI/Starlette request object.
-
-        Returns:
-            bool: True if the body is gzip compressed, False otherwise.
-        """
-        content_encoding = request.headers.get("content-encoding", "").lower()
-        return content_encoding == "gzip"
-
     async def dispatch(
         self,
         request: Request,
@@ -105,6 +93,22 @@ class BodyMiddleware(BaseHTTPMiddleware):
             return self._size_exceeded_response()
 
         return await call_next(request)
+
+    ##################################################################################################################
+    #   PRIVATE METHODS
+    ##################################################################################################################
+
+    def _is_body_gzip_compressed(self, request: Request) -> bool:
+        """Check if the request body is gzip compressed based on Content-Encoding header.
+
+        Args:
+            request (Request): The incoming FastAPI/Starlette request object.
+
+        Returns:
+            bool: True if the body is gzip compressed, False otherwise.
+        """
+        content_encoding = request.headers.get("content-encoding", "").lower()
+        return content_encoding == "gzip"
 
     def _size_exceeded_response(self) -> JSONResponse:
         """Generate error response for size limit violations.
