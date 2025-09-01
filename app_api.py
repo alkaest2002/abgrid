@@ -22,7 +22,12 @@ from lib.utils import to_snake_case
 
 
 # Initialization of FastAPI application
-app = FastAPI(default_response_class=ORJSONResponse)
+app = FastAPI(
+    openapi_url=None,
+    docs_url=None,
+    redoc_url=None,
+    default_response_class=ORJSONResponse
+)
 
 #######################################################################################
 # Middlewares (processed in reverse order)
