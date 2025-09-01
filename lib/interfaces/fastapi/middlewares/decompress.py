@@ -28,7 +28,7 @@ class DecompressMiddleware(BaseHTTPMiddleware):
         chunk_size: Size of each chunk read during decompression.
     """
 
-    MAX_DECOMPRESSED_SIZE: ClassVar[int] = 1058456  # Max size 1MB
+    MAX_DECOMPRESSED_SIZE: ClassVar[int] = 524288  # Max size 512KB
     CHUNK_SIZE: ClassVar[int] = 8192  # 8KB read chunks
 
     def __init__(self, app: ASGIApp) -> None:
@@ -196,7 +196,7 @@ class DecompressMiddleware(BaseHTTPMiddleware):
 
             # If total size exceeds limit, raise error
             if total_size > self.MAX_DECOMPRESSED_SIZE:
-                error_message = "Decompressed data exceeds size limit"
+                error_message = "decompressed_data_exceeds_size_limit"
                 raise DecompressError(error_message)
 
             # Write the decompressed chunk to the output
@@ -210,7 +210,7 @@ class DecompressMiddleware(BaseHTTPMiddleware):
 
         # If total size exceeds limit, raise error
         if total_size > self.MAX_DECOMPRESSED_SIZE:
-            error_message = "Decompressed data exceeds size limit"
+            error_message = "decompressed_data_exceeds_size_limit"
             raise DecompressError(error_message)
 
         # Write the final chunk to the output

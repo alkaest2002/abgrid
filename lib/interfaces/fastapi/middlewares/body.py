@@ -37,6 +37,19 @@ class BodyMiddleware(BaseHTTPMiddleware):
         """
         super().__init__(app)
 
+    def _is_body_compressed(self, request: Request) -> bool:
+        """Check if the request body is compressed based on Content-Encoding header.
+
+        Args:
+            request (Request): The incoming FastAPI/Starlette request object.
+
+        Returns:
+            bool: True if the body is compressed, False otherwise.
+        """
+        content_encoding = request.headers.get("content-encoding", "").lower()
+        compression_encodings = {"gzip", "deflate", "br", "compress", "brotli"}
+        return content_encoding in compression_encodings
+
     async def dispatch(
         self,
         request: Request,
@@ -48,6 +61,8 @@ class BodyMiddleware(BaseHTTPMiddleware):
         1. Early exit if Content-Length exceeds maximum size (with leniency)
         2. Content-Length validation - verify actual body is within acceptable range
         3. Stream validation for requests without Content-Length header
+
+        Body checking is skipped if the request body is compressed.
 
         Args:
             request (Request): The incoming FastAPI/Starlette request object.
@@ -61,6 +76,10 @@ class BodyMiddleware(BaseHTTPMiddleware):
         """
         # Skip body size checks for methods that typically don't have bodies
         if request.method in ("GET", "HEAD", "OPTIONS"):
+            return await call_next(request)
+
+        # Skip body size checks if the body is compressed
+        if self._is_body_compressed(request):
             return await call_next(request)
 
         # Phase 1: Check Content-Length header and exit early if too large (with leniency)
