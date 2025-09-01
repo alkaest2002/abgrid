@@ -165,7 +165,7 @@ class HeaderMiddleware(BaseHTTPMiddleware):
             return json_error
 
         # Validate compression
-        return self._validate_compression(request)
+        return self._validate_compression_encoding(request)
 
     def _validate_head_request(self, request: Request) -> Response | None:  # noqa: ARG002
         """Validate HEAD request.
@@ -213,7 +213,7 @@ class HeaderMiddleware(BaseHTTPMiddleware):
 
         return None
 
-    def _validate_compression(self, request: Request) -> Response | None:
+    def _validate_compression_encoding(self, request: Request) -> Response | None:
         """Validate compression encoding (only gzip allowed).
 
         Args:
