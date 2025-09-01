@@ -17,7 +17,7 @@ from lib.interfaces.fastapi.security.jwt import AnonymousJWT
 
 
 class HeaderMiddleware(BaseHTTPMiddleware):
-    """Middleware for JWT token validation and POST request content-type enforcement.
+    """Middleware for JWT token validation, POST request content-type enforcement, and compression validation.
 
     Attributes:
         exempt_paths: Set of paths that are exempt from JWT authentication.
@@ -28,7 +28,7 @@ class HeaderMiddleware(BaseHTTPMiddleware):
     JWT_HANDLER: ClassVar[AnonymousJWT] = AnonymousJWT()
 
     def __init__(self, app: ASGIApp) -> None:
-        """Initialize the middleware for JWT and content-type validation.
+        """Initialize the middleware for JWT, content-type, and compression validation.
 
         Args:
             app: The ASGI application instance.
@@ -39,11 +39,12 @@ class HeaderMiddleware(BaseHTTPMiddleware):
         super().__init__(app)
 
     async def dispatch(self, request: Request, call_next: Callable[[Request], Awaitable[Response]]) -> Response:
-        """Process incoming request with JWT validation and POST content-type enforcement.
+        """Process incoming request with JWT validation, POST content-type enforcement, and compression validation.
 
         Processing order:
         1. Extract and validate JWT token for protected paths
         2. Ensure JSON content type for POST requests
+        3. Enforce gzip compression if any compression is present
 
         Args:
             request: The incoming HTTP request.
@@ -76,14 +77,29 @@ class HeaderMiddleware(BaseHTTPMiddleware):
 
         # Step 2: Ensure JSON content type for POST requests
         if request.method == "POST":
+            # Check for Content-Type header
             content_type = request.headers.get("content-type", "")
+
             # Extract main content type (ignore charset and other parameters)
             main_content_type = content_type.split(";")[0].strip().lower()
 
+            # Check if the request body is JSON
             if main_content_type != "application/json":
                 return JSONResponse(
                     status_code=status.HTTP_415_UNSUPPORTED_MEDIA_TYPE,
                     content={"detail": "post_requests_must_be_json"}
+                )
+
+        # Step 3: Enforce gzip compression if any compression is present
+        if request.method not in ("GET", "HEAD", "OPTIONS"):
+            # Check for Content-Encoding header
+            content_encoding = request.headers.get("content-encoding", "").lower()
+
+            # Check if the request body is gzip compressed
+            if content_encoding and content_encoding != "gzip":
+                return JSONResponse(
+                    status_code=status.HTTP_415_UNSUPPORTED_MEDIA_TYPE,
+                    content={"detail": "only_gzip_compression_supported"}
                 )
 
         return await call_next(request)

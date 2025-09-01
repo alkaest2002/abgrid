@@ -56,6 +56,7 @@ class CompressMiddleware:
         headers = dict(scope.get("headers", []))
         accept_encoding = headers.get(b"accept-encoding", b"").decode("latin1")
 
+        # Check if the client accepts gzip encoding
         if not ("gzip" in accept_encoding.lower() or "*" in accept_encoding):
             await self.app(scope, receive, send)
             return

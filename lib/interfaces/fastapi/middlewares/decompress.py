@@ -5,7 +5,6 @@ The code is part of the AB-Grid project and is licensed under the MIT License.
 """
 import gzip
 import io
-import zlib
 from collections.abc import Awaitable, Callable
 from typing import ClassVar
 
@@ -21,7 +20,7 @@ class DecompressError(Exception):
     """Raised when decompression fails or exceeds size limits."""
 
 class DecompressMiddleware(BaseHTTPMiddleware):
-    """Middleware to decompress gzip/deflate compressed request bodies.
+    """Middleware to decompress gzip compressed request bodies.
 
     Attributes:
         max_decompressed_size: Maximum allowed size for decompressed request bodies.
@@ -47,11 +46,10 @@ class DecompressMiddleware(BaseHTTPMiddleware):
         request: Request,
         call_next: Callable[[Request], Awaitable[Response]]
     ) -> Response:
-        """Process requests and decompress compressed request bodies.
+        """Process requests and decompress gzip compressed request bodies.
 
-        Checks if the request has a compressed body and decompresses it if
-        the content encoding is supported (gzip or deflate). Validates the
-        decompressed content and updates request headers accordingly.
+        Checks if the request has a gzip compressed body and decompresses it.
+        Validates the decompressed content and updates request headers accordingly.
 
         Args:
             request: The incoming HTTP request object with potentially compressed body.
@@ -72,8 +70,8 @@ class DecompressMiddleware(BaseHTTPMiddleware):
 
         content_encoding = request.headers.get("content-encoding", "").lower()
 
-        # Skip if no compression
-        if content_encoding not in ("gzip", "deflate"):
+        # Skip if not gzip compressed
+        if content_encoding != "gzip":
             return await call_next(request)
 
         try:
@@ -83,8 +81,8 @@ class DecompressMiddleware(BaseHTTPMiddleware):
             if not compressed_body:
                 return await call_next(request)
 
-            # Decompress based on encoding type
-            decompressed_body = self._decompress_body(compressed_body, content_encoding)
+            # Decompress gzip body
+            decompressed_body = self._decompress_gzip(compressed_body)
 
             # Validate JSON content
             if not self._is_json_valid(decompressed_body):
@@ -109,33 +107,6 @@ class DecompressMiddleware(BaseHTTPMiddleware):
 
         return await call_next(request)
 
-    def _decompress_body(self, compressed_body: bytes, encoding: str) -> bytes:
-        """Decompress request body based on content encoding with size limits.
-
-        Applies the appropriate decompression algorithm based on the
-        Content-Encoding header value, reading in chunks to prevent
-        decompression bombs.
-
-        Args:
-            compressed_body: The compressed request body data.
-            encoding: The compression encoding type ("gzip" or "deflate").
-
-        Returns:
-            The decompressed request body data.
-
-        Raises:
-            DecompressError: If decompressed data exceeds size limit.
-            Exception: Other decompression errors are propagated to the caller
-                      for appropriate error response handling.
-
-        Notes:
-            Supports both gzip and deflate compression algorithms.
-            Decompression is done in chunks to prevent memory exhaustion.
-        """
-        if encoding == "gzip":
-            return self._decompress_gzip(compressed_body)
-        return self._decompress_deflate(compressed_body)
-
     def _decompress_gzip(self, compressed_body: bytes) -> bytes:
         """Decompress gzip data in chunks with size validation.
 
@@ -144,6 +115,9 @@ class DecompressMiddleware(BaseHTTPMiddleware):
 
         Returns:
             The decompressed request body data.
+
+        Raises:
+            DecompressError: If decompressed data exceeds size limit.
         """
         decompressed_data = io.BytesIO()
         total_size = 0
@@ -167,54 +141,6 @@ class DecompressMiddleware(BaseHTTPMiddleware):
 
                 # Write the decompressed chunk to the output
                 decompressed_data.write(chunk)
-
-        return decompressed_data.getvalue()
-
-    def _decompress_deflate(self, compressed_body: bytes) -> bytes:
-        """Decompress deflate data in chunks with size validation.
-
-        Args:
-            compressed_body: The compressed request body data.
-
-        Returns:
-            The decompressed request body data.
-        """
-        decompressor = zlib.decompressobj()
-        decompressed_data = io.BytesIO()
-        total_size = 0
-
-        # Process compressed data in chunks
-        for i in range(0, len(compressed_body), self.CHUNK_SIZE):
-            # Get the next chunk
-            chunk = compressed_body[i:i + self.CHUNK_SIZE]
-
-            # Decompress the chunk
-            decompressed_chunk = decompressor.decompress(chunk)
-
-            # Update total size
-            total_size += len(decompressed_chunk)
-
-            # If total size exceeds limit, raise error
-            if total_size > self.MAX_DECOMPRESSED_SIZE:
-                error_message = "decompressed_data_exceeds_size_limit"
-                raise DecompressError(error_message)
-
-            # Write the decompressed chunk to the output
-            decompressed_data.write(decompressed_chunk)
-
-        # Flush any remaining data
-        final_chunk = decompressor.flush()
-
-        # Update total size
-        total_size += len(final_chunk)
-
-        # If total size exceeds limit, raise error
-        if total_size > self.MAX_DECOMPRESSED_SIZE:
-            error_message = "decompressed_data_exceeds_size_limit"
-            raise DecompressError(error_message)
-
-        # Write the final chunk to the output
-        decompressed_data.write(final_chunk)
 
         return decompressed_data.getvalue()
 
