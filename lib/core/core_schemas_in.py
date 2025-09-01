@@ -510,7 +510,7 @@ class ABGridReportSchemaIn(BaseModel):
             errors.append({
                 "location": field_name,
                 "value_to_blame": round(empty_percentage, 1),
-                "error_message": "too_many_nodes_have_empty_values"
+                "error_message": "too_many_empty_values"
             })
 
 
