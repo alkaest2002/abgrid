@@ -34,11 +34,11 @@ class ABGridGroupSchemaIn(BaseModel):
         error collection in a single pass.
     """
 
-    project_title: Any = Field(...)
-    question_a: Any = Field(...)
-    question_b: Any = Field(...)
-    group: Any = Field(...)
-    members: Any = Field(...)
+    project_title: Any = Field(..., description="Project title.")
+    question_a: Any = Field(..., description="First question text.")
+    question_b: Any = Field(..., description="Second question text.")
+    group: Any = Field(..., description="Group numeric identifier.")
+    members: Any = Field(..., description="Number of members per group.")
 
     model_config = {
         "extra": "forbid"
@@ -143,12 +143,12 @@ class ABGridReportSchemaIn(BaseModel):
         - Choice values are stripped of extra spaces after validation.
     """
 
-    project_title: Any = Field(...)
-    question_a: Any = Field(...)
-    question_b: Any = Field(...)
-    group: Any = Field(...)
-    choices_a: Any = Field(...)
-    choices_b: Any = Field(...)
+    project_title: Any = Field(..., description="Project title.")
+    question_a: Any = Field(..., description="First question text.")
+    question_b: Any = Field(..., description="Second question text.")
+    group: Any = Field(..., description="Group numeric identifier.")
+    choices_a: Any = Field(..., description="Choice dictionaries for question A.")
+    choices_b: Any = Field(..., description="Choice dictionaries for question B.")
 
     model_config = {"extra": "forbid"}
 
@@ -540,8 +540,8 @@ class ABGridReportStep2SchemaIn(BaseModel):
         - HMAC signature is verified for data integrity.
     """
 
-    encoded_data: str = Field(...)
-    signature: str = Field(...)
+    encoded_data: str = Field(..., description="Stringified json data.")
+    signature: str = Field(..., description="HMAC signature.")
 
     @model_validator(mode="before")
     @classmethod
