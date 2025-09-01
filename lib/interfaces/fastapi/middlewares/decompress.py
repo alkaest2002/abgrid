@@ -107,6 +107,10 @@ class DecompressMiddleware(BaseHTTPMiddleware):
 
         return await call_next(request)
 
+    ##################################################################################################################
+    #   PRIVATE METHODS
+    ##################################################################################################################
+
     def _decompress_gzip(self, compressed_body: bytes) -> bytes:
         """Decompress gzip data in chunks with size validation.
 
