@@ -17,11 +17,11 @@ from lib.interfaces.fastapi.settings import Settings
 
 settings = Settings.load()
 
-class AnonymousJWT:
-    """Simple JWT handler for anonymous user tracking."""
+class SimpleJWT:
+    """Simple JWT handler for user tracking."""
 
     def __init__(self) -> None:
-        """Initializes an AnonymousJWT instance.
+        """Initializes an SimpleJWT instance.
 
         Returns:
             None.
@@ -31,7 +31,7 @@ class AnonymousJWT:
         self.token_lifetime = timedelta(hours=720)
 
     def generate_token(self) -> str:
-        """Generate a new anonymous JWT token with a unique identifier.
+        """Generate a new JWT token with a unique identifier.
 
         Returns:
             A string representing the encoded JWT token containing a UUID as subject,
@@ -42,7 +42,8 @@ class AnonymousJWT:
         payload = {
             "sub": str(uuid.uuid4()),
             "iat": now,
-            "exp": expires
+            "exp": expires,
+            "iss": "abgrid"
         }
 
         return jwt.encode(payload, self.secret_key, algorithm=self.algorithm)

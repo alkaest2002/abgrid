@@ -13,7 +13,7 @@ from starlette.types import ASGIApp
 
 from fastapi import Request, status
 from fastapi.responses import JSONResponse
-from lib.interfaces.fastapi.security.jwt import AnonymousJWT
+from lib.interfaces.fastapi.security.jwt import SimpleJWT
 
 
 class HeaderMiddleware(BaseHTTPMiddleware):
@@ -25,7 +25,7 @@ class HeaderMiddleware(BaseHTTPMiddleware):
     """
 
     EXEMPT_PATHS: ClassVar[set[str]] = {"/", "/health"}
-    JWT_HANDLER: ClassVar[AnonymousJWT] = AnonymousJWT()
+    JWT_HANDLER: ClassVar[SimpleJWT] = SimpleJWT()
 
     def __init__(self, app: ASGIApp) -> None:
         """Initialize the middleware for JWT, content-type, and compression validation.
