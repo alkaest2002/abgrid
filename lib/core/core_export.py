@@ -89,7 +89,7 @@ class CoreExport:
 
         # Main conversion logic
         if value is None:
-            return None
+            return "null"
         if isinstance(value, str | int | float | bool):
             return value
         if isinstance(value, pd.DataFrame):
