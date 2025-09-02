@@ -122,9 +122,9 @@ class HeaderMiddleware(BaseHTTPMiddleware):
         # Select the appropriate handler for the request method
         handler = method_handlers.get(request.method, self._handle_not_allowed_request)
 
-        return handler(request)
+        return await handler(request)
 
-    def _handle_not_allowed_request(self, request: Request) -> JSONResponse: # noqa: ARG002
+    async def _handle_not_allowed_request(self, request: Request) -> JSONResponse: # noqa: ARG002
         """Validate any other HTTP method.
 
         Args:
@@ -139,18 +139,19 @@ class HeaderMiddleware(BaseHTTPMiddleware):
                 content={"detail": "method_not_allowed"}
             )
 
-    def _validate_get_request(self, request: Request) -> Response | None:  # noqa: ARG002
+    async def _validate_get_request(self, request: Request) -> Response | None:
         """Validate GET request.
 
         Args:
             request: The incoming HTTP request.
 
         Returns:
-            Response or None: Always None (no additional validation for GET).
+            Response or None: Error response if validation fails, None otherwise.
         """
-        return None
+        # GET requests must not have a body
+        return await self._validate_no_body_allowed(request)
 
-    def _validate_post_request(self, request: Request) -> Response | None:
+    async def _validate_post_request(self, request: Request) -> Response | None:
         """Validate POST request.
 
         Args:
@@ -167,26 +168,50 @@ class HeaderMiddleware(BaseHTTPMiddleware):
         # Validate compression
         return self._validate_compression_encoding(request)
 
-    def _validate_head_request(self, request: Request) -> Response | None:  # noqa: ARG002
+    async def _validate_head_request(self, request: Request) -> Response | None:
         """Validate HEAD request.
 
         Args:
             request: The incoming HTTP request.
 
         Returns:
-            Response or None: Always None (no additional validation for HEAD).
+            Response or None: Error response if validation fails, None otherwise.
         """
-        return None
+        # HEAD requests must not have a body
+        return await self._validate_no_body_allowed(request)
 
-    def _validate_options_request(self, request: Request) -> Response | None:  # noqa: ARG002
+    async def _validate_options_request(self, request: Request) -> Response | None:
         """Validate OPTIONS request.
 
         Args:
             request: The incoming HTTP request.
 
         Returns:
-            Response or None: Always None (no validation for OPTIONS).
+            Response or None: Error response if validation fails, None otherwise.
         """
+        # OPTIONS requests must not have a body
+        return await self._validate_no_body_allowed(request)
+
+    async def _validate_no_body_allowed(self, request: Request) -> Response | None:
+        """Validate that the request has no body data.
+
+        Args:
+            request: The incoming HTTP request.
+
+        Returns:
+            Response or None: Error response if body is present, None otherwise.
+        """
+        # Get Content-Length header
+        content_length = request.headers.get("content-length")
+
+        # Check Content-Length header
+        if (content_length and int(content_length) > 0) or \
+        request.headers.get("transfer-encoding", "").lower() == "chunked":
+            return JSONResponse(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                content={"detail": "request_body_not_allowed"}
+            )
+
         return None
 
     def _validate_json_content_type(self, request: Request) -> Response | None:

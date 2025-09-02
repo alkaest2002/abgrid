@@ -72,6 +72,7 @@
             "offline": "offline",
             "online": "online",
             "only_json_body_data_accepted": "dati inviati non corretti",
+            "request_body_not_allowed": "non è consentito inviare dati di tipo 'body' per questo endpoint",
             "requests_exceeded_rate_limit": "hai inviato troppe richieste in un breve lasso di tempo",
             "request_timeout": "timeout della richiesta",
             "route_not_found": "risorsa non trovata",
