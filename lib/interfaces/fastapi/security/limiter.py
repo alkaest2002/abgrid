@@ -85,7 +85,7 @@ class SimpleRateLimiter:
         self._cache: OrderedDict[str, list[float]] = OrderedDict()
         self._lock: asyncio.Lock = asyncio.Lock()
 
-    def __call__(self, func: Callable[..., Awaitable[Any]]) -> Callable[..., Awaitable[Any]]:
+    def __call__(self, func: Callable[..., Any | Awaitable[Any]]) -> Callable[..., Awaitable[Any]]:
         """Decorator that applies rate limiting to an async function.
 
         The decorated function must accept a 'request' parameter that contains
