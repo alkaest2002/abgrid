@@ -42,7 +42,7 @@ api_limiter_10s = SimpleRateLimiter(
     skip_options=True
 )
 
-def get_router_api() -> APIRouter:  # noqa: PLR0915
+def get_router_api() -> APIRouter:
     """Create and configure the FastAPI router with API endpoints.
 
     This function creates a FastAPI router with all the application endpoints
@@ -186,18 +186,13 @@ def get_router_api() -> APIRouter:  # noqa: PLR0915
                 with_sociogram
             )
 
-            # Template rendering
+            # Template path
             template_path = f"./{language}/report.html"
-            rendered_report = await asyncio.to_thread(
-                _abgrid_renderer.render,
-                template_path,
-                data
-            )
 
-            # JSON serialization
-            data_json = await asyncio.to_thread(
-                CoreExport.to_json,
-                data
+            # Template rendering and JSON serialization
+            rendered_report, data_json = await asyncio.gather(
+                asyncio.to_thread(_abgrid_renderer.render, template_path, data),
+                asyncio.to_thread(CoreExport.to_json, data)
             )
 
             return JSONResponse(
