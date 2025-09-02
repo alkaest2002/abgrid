@@ -113,10 +113,10 @@ class HeaderMiddleware(BaseHTTPMiddleware):
         """
         # Map HTTP methods to their validation handlers
         method_handlers = {
-            "GET": self._validate_get_request,
+            "GET": self._validate_no_body_allowed,
             "POST": self._validate_post_request,
-            "HEAD": self._validate_head_request,
-            "OPTIONS": self._validate_options_request,
+            "HEAD": self._validate_no_body_allowed,
+            "OPTIONS": self._validate_no_body_allowed,
         }
 
         # Select the appropriate handler for the request method
@@ -139,59 +139,6 @@ class HeaderMiddleware(BaseHTTPMiddleware):
                 content={"detail": "method_not_allowed"}
             )
 
-    async def _validate_get_request(self, request: Request) -> Response | None:
-        """Validate GET request.
-
-        Args:
-            request: The incoming HTTP request.
-
-        Returns:
-            Response or None: Error response if validation fails, None otherwise.
-        """
-        # GET requests must not have a body
-        return await self._validate_no_body_allowed(request)
-
-    async def _validate_post_request(self, request: Request) -> Response | None:
-        """Validate POST request.
-
-        Args:
-            request: The incoming HTTP request.
-
-        Returns:
-            Response or None: Error response if validation fails, None otherwise.
-        """
-        # Validate JSON content type
-        json_error = self._validate_json_content_type(request)
-        if json_error:
-            return json_error
-
-        # Validate compression
-        return self._validate_compression_encoding(request)
-
-    async def _validate_head_request(self, request: Request) -> Response | None:
-        """Validate HEAD request.
-
-        Args:
-            request: The incoming HTTP request.
-
-        Returns:
-            Response or None: Error response if validation fails, None otherwise.
-        """
-        # HEAD requests must not have a body
-        return await self._validate_no_body_allowed(request)
-
-    async def _validate_options_request(self, request: Request) -> Response | None:
-        """Validate OPTIONS request.
-
-        Args:
-            request: The incoming HTTP request.
-
-        Returns:
-            Response or None: Error response if validation fails, None otherwise.
-        """
-        # OPTIONS requests must not have a body
-        return await self._validate_no_body_allowed(request)
-
     async def _validate_no_body_allowed(self, request: Request) -> Response | None:
         """Validate that the request has no body data.
 
@@ -213,6 +160,23 @@ class HeaderMiddleware(BaseHTTPMiddleware):
             )
 
         return None
+
+    async def _validate_post_request(self, request: Request) -> Response | None:
+        """Validate POST request.
+
+        Args:
+            request: The incoming HTTP request.
+
+        Returns:
+            Response or None: Error response if validation fails, None otherwise.
+        """
+        # Validate JSON content type
+        json_error = self._validate_json_content_type(request)
+        if json_error:
+            return json_error
+
+        # Validate compression
+        return self._validate_compression_encoding(request)
 
     def _validate_json_content_type(self, request: Request) -> Response | None:
         """Validate that the request has JSON content type.
