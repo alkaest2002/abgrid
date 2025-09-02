@@ -86,17 +86,15 @@ class SimpleRateLimiter:
         self._lock: asyncio.Lock = asyncio.Lock()
 
     def __call__(self, func: Callable[..., Any | Awaitable[Any]]) -> Callable[..., Awaitable[Any]]:
-        """Decorator that applies rate limiting to an async function.
+        """Decorator that applies rate limiting to both sync and async functions.
 
-        The decorated function must accept a 'request' parameter that contains
-        the HTTP request object with headers. OPTIONS requests bypass rate limiting
-        if skip_options is True.
+        Always returns an async wrapper, so sync functions become async when decorated.
 
         Args:
-            func: Async function to be rate limited.
+            func: Function (sync or async) to be rate limited.
 
         Returns:
-            Wrapped async function with rate limiting applied.
+            Async wrapped function with rate limiting applied.
 
         Raises:
             RateLimitError: When rate limit is exceeded or JWT token is missing.
@@ -109,7 +107,9 @@ class SimpleRateLimiter:
 
             # Skip rate limiting for OPTIONS requests (CORS preflight)
             if self.skip_options and getattr(request, "method", None) == "OPTIONS":
-                return await func(*args, **kwargs)
+                if asyncio.iscoroutinefunction(func):
+                    return await func(*args, **kwargs)
+                return func(*args, **kwargs)
 
             # Get cache key from JWT token
             key: str = self._get_cache_key(request)
@@ -117,8 +117,13 @@ class SimpleRateLimiter:
             # Check rate limit
             await self._check_rate_limit(key)
 
-            return await func(*args, **kwargs)
+            # Call the original function
+            if asyncio.iscoroutinefunction(func):
+                return await func(*args, **kwargs)
+            return func(*args, **kwargs)
+
         return wrapper
+
 
     def _get_cache_key(self, request: Any) -> str:
         """Extract JWT token from request and create a unique cache key.

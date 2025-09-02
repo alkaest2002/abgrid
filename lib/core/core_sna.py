@@ -74,7 +74,7 @@ class CoreSna:
             for both networks. The data is validated against ABGridSNASchema.
         """
         # Get data
-        data = asyncio.run(self._get_async())
+        data = self._get_sync()
 
         # Validate data
         validated_data = ABGridSNASchema(**data)
@@ -179,6 +179,7 @@ class CoreSna:
             adjacency matrices, statistics, rankings, components, and visualization data
             for both networks.
         """
+        # Create networks first
         self._create_networks()
 
         # Store edge types, components, macro stats, micro stats, descriptives, rankings and graphs

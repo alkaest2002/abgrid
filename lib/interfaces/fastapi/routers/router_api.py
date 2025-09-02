@@ -70,7 +70,7 @@ def get_router_api() -> APIRouter:
     # Add endpoints
     @router.post("/group")
     @api_limiter_3s
-    async def create_group(
+    def create_group(
         request: Request,
         model: ABGridGroupSchemaIn,
         language: str = Query(..., description="Language of the group template"),
@@ -101,18 +101,11 @@ def get_router_api() -> APIRouter:
         """
         try:
             # Data computation
-            data: dict[str, Any] = await asyncio.to_thread(
-                _abgrid_data.get_group_data,
-                model
-            )
+            data: dict[str, Any] = _abgrid_data.get_group_data(model)
 
             # Template rendering
             template_path = f"/{language}/group.yaml"
-            rendered_group = await asyncio.to_thread(
-                _abgrid_renderer.render,
-                template_path,
-                data
-            )
+            rendered_group = _abgrid_renderer.render(template_path, data)
 
             # Generate safe filename
             safe_title = "".join(c for c in model.project_title if c.isalnum() or c in (" ", "-", "_")).rstrip()
@@ -224,7 +217,7 @@ def get_router_api() -> APIRouter:
 
     @router.post("/report/step_1")
     @api_limiter_3s
-    async def multi_step_step_1(
+    def multi_step_step_1(
         request: Request,
         model: ABGridReportStep1SchemaIn,
     ) -> JSONResponse:
@@ -257,16 +250,10 @@ def get_router_api() -> APIRouter:
         """
         try:
             # Data computation
-            data: dict[str, Any] = await asyncio.to_thread(
-                _abgrid_data.get_multistep_step_1,
-                model,
-            )
+            data: dict[str, Any] = _abgrid_data.get_multistep_step_1(model)
 
             # JSON serialization
-            data_json = await asyncio.to_thread(
-                CoreExport.to_json_report_step_1,
-                data,
-            )
+            data_json = CoreExport.to_json_report_step_1(data)
 
             return JSONResponse(
                 status_code=status.HTTP_200_OK,
@@ -289,7 +276,7 @@ def get_router_api() -> APIRouter:
 
     @router.post("/report/step_2")
     @api_limiter_3s
-    async def multi_step_step_2(
+    def multi_step_step_2(
         request: Request,
         model: ABGridReportStep2SchemaIn,
         with_sociogram: bool = Query(..., description="Include sociogram visualization"),
@@ -325,17 +312,10 @@ def get_router_api() -> APIRouter:
         try:
 
             # Data computation
-            data: dict[str, Any] = await asyncio.to_thread(
-                _abgrid_data.get_multistep_step_2,
-                model,
-                with_sociogram
-            )
+            data: dict[str, Any] = _abgrid_data.get_multistep_step_2(model, with_sociogram)
 
             # JSON serialization
-            data_json = await asyncio.to_thread(
-                CoreExport.to_json_report_step_2,
-                data
-            )
+            data_json = CoreExport.to_json_report_step_2(data)
 
             return JSONResponse(
                 status_code=status.HTTP_200_OK,
@@ -395,18 +375,11 @@ def get_router_api() -> APIRouter:
         try:
 
             # Data computation
-            data: dict[str, Any] = await asyncio.to_thread(
-                _abgrid_data.get_multistep_step3,
-                model,
-            )
+            data: dict[str, Any] = _abgrid_data.get_multistep_step3(model)
 
             # Template rendering
             template_path = f"./{language}/report.html"
-            rendered_report = await asyncio.to_thread(
-                _abgrid_renderer.render,
-                template_path,
-                data
-            )
+            rendered_report = _abgrid_renderer.render(template_path, data)
 
             return JSONResponse(
                 status_code=status.HTTP_200_OK,
