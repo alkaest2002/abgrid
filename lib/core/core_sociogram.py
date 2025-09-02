@@ -86,7 +86,7 @@ class CoreSociogram:
                 - "relevant_nodes": Dictionary with most/least relevant nodes for positive/negative outcomes
         """
         # Get data
-        data = self._get_sync()
+        data = asyncio.run(self._get_async())
 
         # Validate data
         validated_data = ABGridSociogramSchema(**data)

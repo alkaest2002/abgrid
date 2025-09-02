@@ -74,7 +74,7 @@ class CoreSna:
             for both networks. The data is validated against ABGridSNASchema.
         """
         # Get data
-        data = self._get_sync()
+        data = asyncio.run(self._get_async())
 
         # Validate data
         validated_data = ABGridSNASchema(**data)
