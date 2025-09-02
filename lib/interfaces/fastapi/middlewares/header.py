@@ -113,10 +113,10 @@ class HeaderMiddleware(BaseHTTPMiddleware):
         """
         # Map HTTP methods to their validation handlers
         method_handlers = {
-            "GET": self._validate_no_body_allowed,
+            "GET": self._validate_default,
+            "HEAD": self._validate_default,
+            "OPTIONS": self._validate_default,
             "POST": self._validate_post_request,
-            "HEAD": self._validate_no_body_allowed,
-            "OPTIONS": self._validate_no_body_allowed,
         }
 
         # Select the appropriate handler for the request method
@@ -139,26 +139,15 @@ class HeaderMiddleware(BaseHTTPMiddleware):
                 content={"detail": "method_not_allowed"}
             )
 
-    async def _validate_no_body_allowed(self, request: Request) -> Response | None:
+    async def _validate_default(self, request: Request) -> Response | None:  # noqa: ARG002
         """Validate that the request has no body data.
 
         Args:
             request: The incoming HTTP request.
 
         Returns:
-            Response or None: Error response if body is present, None otherwise.
+            None: No checks. Just return None.
         """
-        # Get Content-Length header
-        content_length = request.headers.get("content-length")
-
-        # Check Content-Length header
-        if (content_length and int(content_length) > 0) or \
-        request.headers.get("transfer-encoding", "").lower() == "chunked":
-            return JSONResponse(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                content={"detail": "request_body_not_allowed"}
-            )
-
         return None
 
     async def _validate_post_request(self, request: Request) -> Response | None:
