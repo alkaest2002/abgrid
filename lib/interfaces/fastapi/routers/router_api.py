@@ -106,8 +106,10 @@ def get_router_api() -> APIRouter:
                 model
             )
 
-            # Template rendering
+            # Template path
             template_path = f"/{language}/group.yaml"
+
+            # Template rendering
             rendered_group = await asyncio.to_thread(
                 _abgrid_renderer.render,
                 template_path,
@@ -400,8 +402,10 @@ def get_router_api() -> APIRouter:
                 model,
             )
 
-            # Template rendering
+            # Template path
             template_path = f"./{language}/report.html"
+
+            # Template rendering
             rendered_report = await asyncio.to_thread(
                 _abgrid_renderer.render,
                 template_path,
