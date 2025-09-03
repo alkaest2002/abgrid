@@ -4,7 +4,6 @@ Author: Pierpaolo Calanna
 The code is part of the AB-Grid project and is licensed under the MIT License.
 """
 
-import asyncio
 import re
 from typing import Any, Literal
 
@@ -19,7 +18,6 @@ from lib.core.core_schemas import ABGridSNASchema
 from lib.core.core_utils import (
     compute_descriptives,
     figure_to_base64_svg,
-    run_in_executor,
     unpack_network_edges,
     unpack_network_nodes,
 )
@@ -85,88 +83,6 @@ class CoreSna:
     ##################################################################################################################
     #   PRIVATE METHODS
     ##################################################################################################################
-
-    async def _get_async(self) -> dict[str, Any]:
-        """Asynchronously compute and store comprehensive network analysis for two directed networks.
-
-        Performs a complete social network analysis on input networks using concurrent execution
-        where possible, including graph construction, statistical analysis, centrality measures,
-        component detection, and visualization generation.
-
-        Returns:
-            A dictionary containing all network analysis results including nodes, edges,
-            adjacency matrices, statistics, rankings, components, and visualization data
-            for both networks.
-        """
-        # STEP 1: Create networks (must happen first)
-        await run_in_executor(self._create_networks)
-
-        # STEP 2: Concurrent computation using TaskGroups
-
-        # Batch 1: Independent computations that only depend on Step 1
-        async with asyncio.TaskGroup() as tg:
-            # Store tasks with their result keys for later retrieval
-            tasks = {}
-            for network_type in ("a", "b"):
-                tasks[f"edges_types_{network_type}"] = tg.create_task(
-                    run_in_executor(self._compute_edges_types, network_type)
-                )
-                tasks[f"components_{network_type}"] = tg.create_task(
-                    run_in_executor(self._compute_components, network_type)
-                )
-                tasks[f"graph_{network_type}"] = tg.create_task(
-                    run_in_executor(self._create_graph, network_type)
-                )
-
-        # Store batch 1 results
-        for key, task in tasks.items():
-            self.sna[key] = task.result()
-
-        # Batch 2: Computations that depend on edges_types
-        async with asyncio.TaskGroup() as tg:
-            tasks = {}
-            for network_type in ("a", "b"):
-                tasks[f"macro_stats_{network_type}"] = tg.create_task(
-                    run_in_executor(self._compute_macro_stats, network_type)
-                )
-                tasks[f"micro_stats_{network_type}"] = tg.create_task(
-                    run_in_executor(self._compute_micro_stats, network_type)
-                )
-
-        # Store batch 2 results
-        for key, task in tasks.items():
-            self.sna[key] = task.result()
-
-        # Batch 3: Computations that depend on micro_stats
-        async with asyncio.TaskGroup() as tg:
-            tasks = {}
-            for network_type in ("a", "b"):
-                tasks[f"descriptives_{network_type}"] = tg.create_task(
-                    run_in_executor(self._compute_descriptives, network_type)
-                )
-                tasks[f"rankings_{network_type}"] = tg.create_task(
-                    run_in_executor(self._compute_rankings, network_type)
-                )
-
-        # Store batch 3 results
-        for key, task in tasks.items():
-            self.sna[key] = task.result()
-
-        # Batch 4: isolated and relevant nodes
-        async with asyncio.TaskGroup() as tg:
-            tasks = {}
-            for network_type in ("a", "b"):
-                tasks[f"isolated_nodes_{network_type}"] = tg.create_task(
-                    run_in_executor(self._compute_isolated_nodes, network_type)
-                )
-                tasks[f"relevant_nodes_{network_type}"] = tg.create_task(
-                    run_in_executor(self._compute_relevant_nodes, network_type)
-                )
-        # Store batch 4 results
-        for key, task in tasks.items():
-            self.sna[key] = task.result()
-
-        return self.sna
 
     def _get_sync(self) -> dict[str, Any] :
         """Synchronously compute comprehensive network analysis for two directed networks.
