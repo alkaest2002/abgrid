@@ -532,7 +532,7 @@ class ABGridReportStep2SchemaIn(BaseModel):
     Validates step 2 incoming data with HMAC signature verification.
 
     Attributes:
-        stringified_data: base encoded data.
+        stringified_data: stringified data.
         signature: HMAC signature
 
     Notes:

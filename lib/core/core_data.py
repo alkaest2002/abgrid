@@ -158,7 +158,7 @@ class CoreData:
         # Get validated model dump
         data: dict[str, Any] = validated_data.model_dump()
 
-        # Get encoded data to decode
+        # Get stringified data to parse
         data_to_parse: str = cast("str", data.get("stringified_data"))
 
         # Decode and json-parse data
