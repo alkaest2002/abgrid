@@ -5,8 +5,11 @@ The code is part of the AB-Grid project and is licensed under the MIT License.
 """
 # ruff: noqa: T201
 
+import asyncio
 import re
 import sys
+from collections.abc import Callable
+from typing import Any
 
 
 def check_python_version() -> None:
@@ -48,3 +51,19 @@ def to_snake_case(text: str) -> str:
     text = re.sub(r"_+", "_", text.lower())
     # Remove leading/trailing underscores
     return text.strip("_")
+
+async def run_in_executor[T](func: Callable[..., T], *args: Any) -> T:
+    """Run a synchronous function in a thread pool executor.
+
+    This allows CPU-bound synchronous functions to run without blocking
+    the asyncio event loop.
+
+    Args:
+        func: The synchronous function to run.
+        *args: Arguments to pass to the function.
+
+    Returns:
+        The result of the function call.
+    """
+    loop = asyncio.get_event_loop()
+    return await loop.run_in_executor(None, func, *args)

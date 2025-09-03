@@ -284,4 +284,3 @@ class CoreExport:
             "stringified_data": stringified_data,
             "signature": signature
         }
-

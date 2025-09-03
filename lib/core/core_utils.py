@@ -4,14 +4,11 @@ Author: Pierpaolo Calanna
 The code is part of the AB-Grid project and is licensed under the MIT License.
 """
 
-import asyncio
 import hashlib
 import hmac
 import io
 from base64 import b64encode
-from collections.abc import Callable
 from functools import reduce
-from typing import Any, TypeVar
 
 import pandas as pd
 from matplotlib import pyplot as plt
@@ -22,23 +19,6 @@ from lib.interfaces.fastapi.settings import Settings
 
 settings = Settings.load()
 
-T = TypeVar("T")
-
-async def run_in_executor[T](func: Callable[..., T], *args: Any) -> T:
-    """Run a synchronous function in a thread pool executor.
-
-    This allows CPU-bound synchronous functions to run without blocking
-    the asyncio event loop.
-
-    Args:
-        func: The synchronous function to run.
-        *args: Arguments to pass to the function.
-
-    Returns:
-        The result of the function call.
-    """
-    loop = asyncio.get_event_loop()
-    return await loop.run_in_executor(None, func, *args)
 
 def unpack_network_edges(packed_edges: list[dict[str, str | None]]) -> list[tuple[str, str]]:
     """Unpack edge dictionaries into a list of directed edge tuples.
