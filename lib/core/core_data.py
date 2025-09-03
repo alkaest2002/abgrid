@@ -4,6 +4,7 @@ Author: Pierpaolo Calanna
 The code is part of the AB-Grid project and is licensed under the MIT License.
 """
 import datetime
+import gc
 from typing import Any, cast
 
 import orjson
@@ -83,6 +84,10 @@ class CoreData:
         # Compute SNA results
         sna_data: dict[str, Any] = abgrid_sna.get()
 
+        # Delete SNA class and garbage collect
+        del abgrid_sna
+        gc.collect()
+
         # Initialize Sociogram dictionary data
         sociogram_data: dict[str, Any] = {}
 
@@ -93,6 +98,10 @@ class CoreData:
 
             # Compute Sociogram results
             sociogram_data = abgrid_sociogram.get()
+
+            # Delete Sociogram class and garbage collect
+            del abgrid_sociogram
+            gc.collect()
 
         # Build final data
         final_data: dict[str, Any] = self._build_report_data_out(
@@ -133,6 +142,10 @@ class CoreData:
 
         # Compute SNA data
         sna_data: dict[str, Any] = abgrid_sna.get()
+
+        # Delete SNA class and garbage collect
+        del abgrid_sna
+        gc.collect()
 
         # Build final data
         final_data: dict[str, Any]  = {
@@ -183,6 +196,10 @@ class CoreData:
 
             # Get Sociogram data
             sociogram_data = abgrid_sociogram.get()
+
+            # Delete Sociogram class and garbage collect
+            del abgrid_sociogram
+            gc.collect()
 
         # Build final data
         final_data: dict[str, Any] = self._build_report_data_out(
