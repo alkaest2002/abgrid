@@ -235,6 +235,10 @@ class CoreData:
         # Validate and convert report data
         final_data_out: ABGridReportStep3SchemaOut = ABGridReportStep3SchemaOut(**parsed_data)
 
+        # Delete parsed data and garbage collect
+        del parsed_data
+        gc.collect()
+
         return final_data_out.model_dump()
 
     ##################################################################################################################
