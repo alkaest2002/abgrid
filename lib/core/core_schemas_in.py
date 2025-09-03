@@ -560,7 +560,7 @@ class ABGridReportStep2SchemaIn(BaseModel):
         errors = []
 
         # Validate data
-        errors.extend(_validate_hmac_signed_field("step_1_data", data))
+        errors.extend(_validate_hmac_signed_field("step_data", data))
 
         # On errors
         if errors:
