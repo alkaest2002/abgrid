@@ -99,7 +99,7 @@ class CoreData:
             # Compute Sociogram results
             sociogram_data = abgrid_sociogram.get()
 
-            # Delete Sociogram class and garbage collect
+            # Delete Sociogram class and garbage collect to free memory
             del abgrid_sociogram
             gc.collect()
 
@@ -143,7 +143,7 @@ class CoreData:
         # Compute SNA data
         sna_data: dict[str, Any] = abgrid_sna.get()
 
-        # Delete SNA class and garbage collect
+        # Delete SNA class and garbage collect to free memory
         del abgrid_sna
         gc.collect()
 
@@ -197,7 +197,7 @@ class CoreData:
             # Get Sociogram data
             sociogram_data = abgrid_sociogram.get()
 
-            # Delete Sociogram class and garbage collect
+            # Delete Sociogram class and garbage collect to free memory
             del abgrid_sociogram
             gc.collect()
 
@@ -235,7 +235,7 @@ class CoreData:
         # Validate and convert report data
         final_data_out: ABGridReportStep3SchemaOut = ABGridReportStep3SchemaOut(**parsed_data)
 
-        # Delete parsed data and garbage collect
+        # Delete parsed data and garbage collect to free memory
         del parsed_data
         gc.collect()
 
