@@ -159,16 +159,16 @@ class CoreData:
         data: dict[str, Any] = validated_data.model_dump()
 
         # Get encoded data to decode
-        data_to_decode: str = cast("str", data.get("encoded_data"))
+        data_to_parse: str = cast("str", data.get("stringified_data"))
 
         # Decode and json-parse data
-        decoded_data = orjson.loads(data_to_decode)
+        parsed_data = orjson.loads(data_to_parse)
 
         # Extract group data
-        group_data = decoded_data.get("group_data", {})
+        group_data = parsed_data.get("group_data", {})
 
         # Extract SNA data
-        sna_data = decoded_data.get("sna_data", {})
+        sna_data = parsed_data.get("sna_data", {})
 
         # Initialize Sociogram data
         sociogram_data: dict[str, Any] = {}
@@ -210,13 +210,13 @@ class CoreData:
         data: dict[str, Any] = validated_data.model_dump()
 
         # Get data to decode
-        data_to_decode: str = cast("str", data.get("encoded_data"))
+        data_to_parse: str = cast("str", data.get("stringified_data"))
 
         # Decode and json-parse data
-        decoded_data = orjson.loads(data_to_decode)
+        parsed_data = orjson.loads(data_to_parse)
 
         # Validate and convert report data
-        final_data_out: ABGridReportStep3SchemaOut = ABGridReportStep3SchemaOut(**decoded_data)
+        final_data_out: ABGridReportStep3SchemaOut = ABGridReportStep3SchemaOut(**parsed_data)
 
         return final_data_out.model_dump()
 

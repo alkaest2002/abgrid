@@ -194,7 +194,7 @@ def gini_coefficient(values: pd.Series) -> float:
 
     return gini
 
-def compute_hmac_signature(encoded_data: str) -> str:
+def compute_hmac_signature(stringified_data: str) -> str:
     """Compute an HMAC-SHA256 signature for JSON data using the application secret key.
 
     Creates a cryptographic signature by traversing the JSON object recursively,
@@ -202,7 +202,7 @@ def compute_hmac_signature(encoded_data: str) -> str:
     resulting key string. Used for data integrity verification.
 
     Args:
-        encoded_data: stringified data to sign.
+        stringified_data: stringified data to sign.
 
     Returns:
         Hexadecimal string representation of the HMAC-SHA256 signature.
@@ -216,11 +216,11 @@ def compute_hmac_signature(encoded_data: str) -> str:
     # Compute HMAC-SHA256
     return hmac.new(
         settings.auth_secret.encode("utf-8"),
-        encoded_data.encode("utf-8"),
+        stringified_data.encode("utf-8"),
         hashlib.sha256
     ).hexdigest()
 
-def verify_hmac_signature(encoded_data: str, provided_signature: str) -> bool:
+def verify_hmac_signature(stringified_data: str, provided_signature: str) -> bool:
     """Verify the HMAC signature of JSON data against the expected signature.
 
     Extracts the signature from the "signature" key, removes it from the data,
@@ -228,7 +228,7 @@ def verify_hmac_signature(encoded_data: str, provided_signature: str) -> bool:
     and performs a secure comparison.
 
     Args:
-        encoded_data: encoded data to verify.
+        stringified_data: encoded data to verify.
         provided_signature: provided signature to use for verification.
 
     Returns:
@@ -242,7 +242,7 @@ def verify_hmac_signature(encoded_data: str, provided_signature: str) -> bool:
         - Signature verification is performed on all data excluding the "signature" key.
     """
     # Compute expected signature
-    expected_signature = compute_hmac_signature(encoded_data)
+    expected_signature = compute_hmac_signature(stringified_data)
 
     # Compare signatures
     return hmac.compare_digest(provided_signature, expected_signature)

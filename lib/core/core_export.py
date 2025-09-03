@@ -216,13 +216,13 @@ class CoreExport:
         json_data["sna_data"] = CoreExport._to_json_encoders(sna_data)
 
         # Serialize data to be signed
-        encoded_data = orjson.dumps(json_data).decode("utf-8")
+        stringified_data = orjson.dumps(json_data).decode("utf-8")
 
         # Compute signature of serialized data
-        signature = compute_hmac_signature(encoded_data)
+        signature = compute_hmac_signature(stringified_data)
 
         return {
-            "encoded_data": encoded_data,
+            "stringified_data": stringified_data,
             "signature": signature
         }
 
@@ -275,13 +275,13 @@ class CoreExport:
         }
 
         # Serialize data to be signed
-        encoded_data = orjson.dumps(json_data).decode("utf-8")
+        stringified_data = orjson.dumps(json_data).decode("utf-8")
 
         # Compute signature of serialized data
-        signature = compute_hmac_signature(encoded_data)
+        signature = compute_hmac_signature(stringified_data)
 
         return {
-            "encoded_data": encoded_data,
+            "stringified_data": stringified_data,
             "signature": signature
         }
 

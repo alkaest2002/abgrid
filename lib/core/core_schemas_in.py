@@ -532,7 +532,7 @@ class ABGridReportStep2SchemaIn(BaseModel):
     Validates step 2 incoming data with HMAC signature verification.
 
     Attributes:
-        encoded_data: base encoded data.
+        stringified_data: base encoded data.
         signature: HMAC signature
 
     Notes:
@@ -540,7 +540,7 @@ class ABGridReportStep2SchemaIn(BaseModel):
         - HMAC signature is verified for data integrity.
     """
 
-    encoded_data: str = Field(..., description="Stringified json data.")
+    stringified_data: str = Field(..., description="Stringified json data.")
     signature: str = Field(..., description="HMAC signature.")
 
     @model_validator(mode="before")
@@ -612,9 +612,9 @@ def _validate_hmac_signed_field(field_name: str, field_value: Any) -> list[dict[
         return errors
 
     try:
-        encoded_data: str = field_value.get("encoded_data", "")
+        stringified_data: str = field_value.get("stringified_data", "")
         provided_signature: str = field_value.get("signature", "")
-        if not verify_hmac_signature(encoded_data, provided_signature):
+        if not verify_hmac_signature(stringified_data, provided_signature):
             errors.append({
                 "location": field_name,
                 "value_to_blame": field_value.get("signature"),
