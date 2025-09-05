@@ -23,7 +23,7 @@ class CORSMiddleware(FastAPICORSMiddleware):
 
     DEVELOPMENT_PORTS: ClassVar[list[str]] = ["53472", "53247", "53274", "53427", "53724", "53742"]
     LOCAL_DOMAINS: ClassVar[list[str]] = ["https://localhost", "https://127.0.0.1", "http://localhost", "http://127.0.0.1"]
-    PRODUCTION_ORIGINS: ClassVar[list[str]] = ["https://abgrid-webapp.onrender.com"]
+    PRODUCTION_DOMAINS: ClassVar[list[str]] = ["https://abgrid-webapp.onrender.com"]
     ALLOWED_METHODS: ClassVar[list[str]] = ["HEAD", "GET", "POST", "PUT", "DELETE", "OPTIONS"]
     ALLOWED_HEADERS: ClassVar[list[str]] = ["Authorization", "Content-Type", "Content-Encoding", "Accept-Encoding"]
     EXPOSED_HEADERS: ClassVar[list[str]] = ["Content-Encoding"]
@@ -48,7 +48,7 @@ class CORSMiddleware(FastAPICORSMiddleware):
             list[str]: Complete list of allowed origins.
         """
         origins = cls._get_development_origins()
-        origins.extend(cls.PRODUCTION_ORIGINS)
+        origins.extend(cls.PRODUCTION_DOMAINS)
         return origins
 
     @classmethod
