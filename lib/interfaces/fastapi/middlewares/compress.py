@@ -48,6 +48,7 @@ class CompressMiddleware:
         Returns:
             None
         """
+        # Only handle HTTP requests
         if scope["type"] != "http":
             await self.app(scope, receive, send)
             return
@@ -56,16 +57,17 @@ class CompressMiddleware:
         headers = dict(scope.get("headers", []))
         accept_encoding = headers.get(b"accept-encoding", b"").decode("latin1")
 
-        # Check if the client accepts gzip encoding
+        # If gzip is not accepted, proceed without compression
         if not ("gzip" in accept_encoding.lower() or "*" in accept_encoding):
             await self.app(scope, receive, send)
             return
 
-        # Wrap the send function to intercept response
+        # Variables to track response state
         response_started = False
         response_body = bytearray()
         response_headers = {}
 
+        # Wrap the send function to intercept response
         async def _send_wrapper(message: Message) -> None:
             """Wrapper function to intercept and potentially compress response messages.
 
@@ -75,8 +77,10 @@ class CompressMiddleware:
             Returns:
                 None
             """
+            # Use nonlocal to modify outer scope variables
             nonlocal response_started, response_body, response_headers
 
+            # Handle response start
             if message["type"] == "http.response.start":
                 response_started = True
                 response_headers = dict(message.get("headers", []))
@@ -89,6 +93,7 @@ class CompressMiddleware:
                 # Store the start message, we'll send it later
                 self.start_message = message
 
+            # Handle response body
             elif message["type"] == "http.response.body":
 
                 # Get body and more_body
