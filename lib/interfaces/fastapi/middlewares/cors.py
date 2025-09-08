@@ -47,8 +47,11 @@ class CORSMiddleware(FastAPICORSMiddleware):
         Returns:
             list[str]: Complete list of allowed origins.
         """
+        # Start with development origins
         origins = cls._get_development_origins()
+        # Add production domains
         origins.extend(cls.PRODUCTION_DOMAINS)
+
         return origins
 
     @classmethod
