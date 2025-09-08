@@ -89,7 +89,7 @@ class CoreExport:
 
         # Main conversion logic
         if value is None:
-            return "null"
+            return None
         if isinstance(value, str | int | float | bool):
             return value
         if isinstance(value, dict):
