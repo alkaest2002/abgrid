@@ -148,13 +148,22 @@ class BodyMiddleware(BaseHTTPMiddleware):
             def __init__(
                 self,
                 original_receive: Callable[[], Awaitable[MutableMapping[str, Any]]],
-                max_size: int,
                 expected_size: int | None,
+                max_size: int,
                 leniency_percentage: float
             ) -> None:
+                """Initialize the size-limited body wrapper.
+
+                Args:
+                    original_receive: The original ASGI receive callable.
+                    expected_size: The expected body size from Content-Length header, if any.
+                    max_size: The maximum allowed body size in bytes.
+                    leniency_percentage: The percentage of leniency for size validation.
+                """
+                # Initialize the size-limited body wrapper.
                 self.original_receive = original_receive
-                self.max_size = max_size
                 self.expected_size = expected_size
+                self.max_size = max_size
                 self.leniency_percentage = leniency_percentage
                 self.current_size = 0
 
@@ -167,11 +176,14 @@ class BodyMiddleware(BaseHTTPMiddleware):
                 Raises:
                     ValueError: When the body size validation fails.
                 """
+                # Receive the next ASGI message
                 message = await self.original_receive()
 
+                # Only monitor http.request messages
                 if message["type"] == "http.request":
                     body = message.get("body", b"")
 
+                    # Update current size with the length of the received body chunk
                     self.current_size += len(body)
 
                     # If Content-Length is set, validate with leniency
@@ -183,7 +195,7 @@ class BodyMiddleware(BaseHTTPMiddleware):
                             self.max_size + leniency_buffer,
                             self.expected_size + leniency_buffer
                         )
-
+                        # If current size exceeds the maximum allowed size, raise error
                         if self.current_size > max_allowed:
                             error_message = "request_body_too_large"
                             raise ValueError(error_message)
@@ -199,8 +211,8 @@ class BodyMiddleware(BaseHTTPMiddleware):
         # Create new request with size-limited body
         limited_receive = SizeLimitedBody(
             request.receive,
-            self.MAX_BODY_SIZE,
             declared_size,
+            self.MAX_BODY_SIZE,
             self.LENIENCY_PERCENTAGE
         )
 
