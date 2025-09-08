@@ -190,10 +190,9 @@ class CoreData:
         if with_sociogram:
             # Initialize Sociogram analysis class
             abgrid_sociogram: CoreSociogram = CoreSociogram(
-                group_data.get("choices_a", []),
-                group_data.get("choices_b", [])
+                group_data.get("choices_a"),
+                group_data.get("choices_b")
             )
-
             # Get Sociogram data
             sociogram_data = abgrid_sociogram.get()
 
