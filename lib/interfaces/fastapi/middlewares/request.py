@@ -22,11 +22,25 @@ class RequestMiddleware(BaseHTTPMiddleware):
 
     Attributes:
         request_timeout: Timeout duration for incoming requests.
-        semaphore: Semaphore to limit concurrent API requests.
     """
 
     REQUEST_TIMEOUT: ClassVar[int] = 60  # 60 seconds timeout for all requests
-    SEMAPHORE: ClassVar[asyncio.Semaphore] = asyncio.Semaphore(settings.max_concurrent_requests) # from .env
+
+    @property
+    def semaphore(self) -> asyncio.Semaphore:
+        """Get or create the shared semaphore for limiting concurrent API requests.
+
+        Returns:
+            asyncio.Semaphore: Semaphore
+        """
+        # Get attribute if already set
+        semaphore = getattr(RequestMiddleware, "_shared_semaphore", None)
+        # Create semaphore if not already set
+        if semaphore is None:
+            semaphore = asyncio.Semaphore(settings.max_concurrent_requests)
+            RequestMiddleware._shared_semaphore = semaphore  # type: ignore[attr-defined]
+
+        return semaphore
 
     def __init__(self, app: ASGIApp) -> None:
         """Initialize the middleware with validation and protection settings.
@@ -37,6 +51,9 @@ class RequestMiddleware(BaseHTTPMiddleware):
 
         Args:
             app (ASGIApp): The ASGI application instance to wrap with protection.
+
+        Attributes:
+            semaphore: Semaphore to limit concurrent API requests.
 
         Returns:
             None.
@@ -97,13 +114,13 @@ class RequestMiddleware(BaseHTTPMiddleware):
             The semaphore.locked() check provides immediate rejection without
             waiting, preventing request queuing when at capacity.
         """
-        if self.SEMAPHORE.locked():
+        if self.semaphore.locked():
             return JSONResponse(
                 status_code=status.HTTP_429_TOO_MANY_REQUESTS,
                 content={"detail": "too_many_concurrent_requests"}
             )
 
-        async with self.SEMAPHORE:
+        async with self.semaphore:
             return await self._execute_with_timeout(request, call_next)
 
     async def _execute_with_timeout(
