@@ -68,6 +68,7 @@ class DecompressMiddleware(BaseHTTPMiddleware):
         if request.method in ("GET", "HEAD", "OPTIONS"):
             return await call_next(request)
 
+        # Check for gzip content encoding
         content_encoding = request.headers.get("content-encoding", "").lower()
 
         # Skip if not gzip compressed
@@ -75,6 +76,7 @@ class DecompressMiddleware(BaseHTTPMiddleware):
             return await call_next(request)
 
         try:
+            # Read the compressed body
             compressed_body = await request.body()
 
             # Check if body is empty
@@ -123,15 +125,17 @@ class DecompressMiddleware(BaseHTTPMiddleware):
         Raises:
             DecompressError: If decompressed data exceeds size limit.
         """
+        # Initialize decompression stream and size counter
         decompressed_data = io.BytesIO()
         total_size = 0
 
+        # Decompress in chunks to monitor size
         with gzip.GzipFile(fileobj=io.BytesIO(compressed_body)) as gz:
             while True:
-                # Read the next chunk
+                # Read next chunk
                 chunk = gz.read(self.CHUNK_SIZE)
 
-                # Check if chunk is empty
+                # Break if end of stream
                 if not chunk:
                     break
 
