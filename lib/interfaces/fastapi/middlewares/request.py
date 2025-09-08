@@ -26,8 +26,7 @@ class RequestMiddleware(BaseHTTPMiddleware):
 
     REQUEST_TIMEOUT: ClassVar[int] = 60  # 60 seconds timeout for all requests
 
-    # Lazy-initialized semaphore as a class variable
-    # To ensure event loop is available when creating it
+    # Lazy-initialized semaphore as a class variable to ensure event loop is available
     @property
     def semaphore(self) -> asyncio.Semaphore:
         """Get or create the shared semaphore for limiting concurrent API requests.
