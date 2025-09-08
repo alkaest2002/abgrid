@@ -25,11 +25,11 @@ def unpack_network_edges(packed_edges: list[dict[str, str | None]]) -> list[tupl
 
     Takes a list of dictionaries where each dictionary represents outgoing edges
     from source nodes, and converts them into a flat list of (source, target) tuples.
-    Safely handles None values and 'null' strings in edge lists.
+    Safely handles None values in edge lists.
 
     Args:
         packed_edges: List of dictionaries where keys are source nodes and values are
-            comma-separated strings of target nodes. None values and 'null' strings are ignored.
+            comma-separated strings of target nodes. None values are ignored.
 
     Returns:
         Flat list of directed edge tuples (source, target).
@@ -39,7 +39,7 @@ def unpack_network_edges(packed_edges: list[dict[str, str | None]]) -> list[tupl
             *acc,
             *[
                 (node_from, node_to) for node_from, edges in itr.items()
-                if edges is not None and edges != "null"
+                if edges is not None
                 for node_to in edges.split(",")
             ]
         ],
