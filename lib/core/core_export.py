@@ -92,6 +92,10 @@ class CoreExport:
             return "null"
         if isinstance(value, str | int | float | bool):
             return value
+        if isinstance(value, dict):
+            return {str(k): CoreExport._to_json_encoders(v) for k, v in value.items()}
+        if isinstance(value, list | tuple):
+            return [CoreExport._to_json_encoders(item) for item in value]
         if isinstance(value, pd.DataFrame):
             return _convert_pandas_dataframe(value)
         if isinstance(value, pd.Series):
@@ -106,12 +110,8 @@ class CoreExport:
             return _convert_datetime(value)
         if isinstance(value, datetime.date):
             return _convert_datetime(datetime.datetime.combine(value, datetime.time()))
-        if isinstance(value, dict):
-            return {k: CoreExport._to_json_encoders(v) for k, v in value.items()}
-        if isinstance(value, list | tuple):
-            return [CoreExport._to_json_encoders(item) for item in value]
         try:
-            return orjson.dumps(value)
+            return orjson.dumps(value).decode("utf-8")
         except (TypeError, ValueError):
             return str(value)
 
