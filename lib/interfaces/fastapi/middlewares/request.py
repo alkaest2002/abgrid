@@ -26,6 +26,8 @@ class RequestMiddleware(BaseHTTPMiddleware):
 
     REQUEST_TIMEOUT: ClassVar[int] = 60  # 60 seconds timeout for all requests
 
+    # Lazy-initialized semaphore as a class variable
+    # To ensure event loop is available when creating it
     @property
     def semaphore(self) -> asyncio.Semaphore:
         """Get or create the shared semaphore for limiting concurrent API requests.
@@ -33,9 +35,11 @@ class RequestMiddleware(BaseHTTPMiddleware):
         Returns:
             asyncio.Semaphore: Semaphore
         """
-        # Use a class variable to hold the semaphore instance
+        # If the semaphore does not exist
         if (semaphore := getattr(RequestMiddleware, "_shared_semaphore", None)) is None:
+            # Create a new semaphore with the configured limit
             semaphore = asyncio.Semaphore(settings.max_concurrent_requests)
+            # Store it as a class variable for shared access
             RequestMiddleware._shared_semaphore = semaphore  # type: ignore[attr-defined]
 
         return semaphore
