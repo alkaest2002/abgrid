@@ -33,14 +33,13 @@ class RequestMiddleware(BaseHTTPMiddleware):
         Returns:
             asyncio.Semaphore: Semaphore
         """
-        # Get attribute if already set
-        semaphore = getattr(RequestMiddleware, "_shared_semaphore", None)
-        # Create semaphore if not already set
-        if semaphore is None:
+        # Use a class variable to hold the semaphore instance
+        if (semaphore := getattr(RequestMiddleware, "_shared_semaphore", None)) is None:
             semaphore = asyncio.Semaphore(settings.max_concurrent_requests)
             RequestMiddleware._shared_semaphore = semaphore  # type: ignore[attr-defined]
 
         return semaphore
+
 
     def __init__(self, app: ASGIApp) -> None:
         """Initialize the middleware with validation and protection settings.
