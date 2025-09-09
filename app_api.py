@@ -4,8 +4,6 @@ Author: Pierpaolo Calanna
 The code is part of the AB-Grid project and is licensed under the MIT License.
 """
 # ruff: noqa: ARG001
-# ruff: noqa: ERA001
-# ruff: noqa: F401
 from fastapi import FastAPI, Request, status
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse, ORJSONResponse
@@ -20,8 +18,11 @@ from lib.interfaces.fastapi.middlewares.query import QueryMiddleware
 from lib.interfaces.fastapi.middlewares.request import RequestMiddleware
 from lib.interfaces.fastapi.routers.router_api import get_router_api
 from lib.interfaces.fastapi.security.limiter import RateLimitError
+from lib.interfaces.fastapi.settings import Settings
 from lib.utils import to_snake_case
 
+
+settings = Settings.load()
 
 # Initialization of FastAPI application
 app = FastAPI(
@@ -36,7 +37,8 @@ app = FastAPI(
 #######################################################################################
 
 # 7. Compress
-# app.add_middleware(CompressMiddleware)
+if settings.fastapi_response_compression_enabled:
+    app.add_middleware(CompressMiddleware)
 
 # 6. Decompress
 app.add_middleware(DecompressMiddleware)

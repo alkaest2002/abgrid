@@ -61,6 +61,12 @@ class Settings(BaseSettings):
         le=1000  # Reasonable upper limit
     )
 
+    fastapi_response_compression_enabled: bool = Field(
+        default=False,
+        description="Enable or disable response compression",
+        validation_alias="FASTAPI_RESPONSE_COMPRESSION_ENABLED"
+    )
+
     @classmethod
     @lru_cache
     def load(cls) -> "Settings":
