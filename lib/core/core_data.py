@@ -185,6 +185,7 @@ class CoreData:
                 group_data.get("choices_a"),
                 group_data.get("choices_b")
             )
+
             # Get Sociogram data
             sociogram_data = abgrid_sociogram.get()
 
