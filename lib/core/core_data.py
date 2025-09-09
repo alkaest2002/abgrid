@@ -236,6 +236,36 @@ class CoreData:
     #   PRIVATE METHODS
     ##################################################################################################################
 
+    def _build_report_data_out(self,
+            group_data: dict[str, Any],
+            sna_data: dict[str, Any],
+            sociogram_data: dict[str, Any],
+            with_sociogram: bool
+            ) -> dict[str, Any]:
+        """Build the final report data structure.
+
+        Args:
+            group_data: Validated group data.
+            sna_data: Computed SNA analysis results.
+            sociogram_data: The computed sociogram analysis results (may be empty).
+            with_sociogram: Whether to include sociogram data in the final output.
+
+        Returns:
+            Dict containing the complete report data structure.
+        """
+        # Return the comprehensive report data structure
+        return {
+            "year": datetime.datetime.now(datetime.UTC).year,
+            "project_title": group_data.get("project_title", ""),
+            "question_a": group_data.get("question_a", ""),
+            "question_b": group_data.get("question_b", ""),
+            "group": group_data.get("group", ""),
+            "group_size": len(group_data.get("choices_a", [])),
+            "sna": sna_data,
+            "sociogram": sociogram_data,
+            **self._add_isolated_and_relevant_nodes(sna_data, sociogram_data, with_sociogram)
+        }
+
     def _add_isolated_and_relevant_nodes(
         self,
         sna_data: dict[str, Any],
@@ -359,34 +389,4 @@ class CoreData:
         return {
             "isolated_nodes": isolated_nodes_model.model_dump(),
             "relevant_nodes": relevant_nodes_model.model_dump()
-        }
-
-    def _build_report_data_out(self,
-            group_data: dict[str, Any],
-            sna_data: dict[str, Any],
-            sociogram_data: dict[str, Any],
-            with_sociogram: bool
-            ) -> dict[str, Any]:
-        """Build the final report data structure.
-
-        Args:
-            group_data: Validated group data.
-            sna_data: Computed SNA analysis results.
-            sociogram_data: The computed sociogram analysis results (may be empty).
-            with_sociogram: Whether to include sociogram data in the final output.
-
-        Returns:
-            Dict containing the complete report data structure.
-        """
-        # Return the comprehensive report data structure
-        return {
-            "year": datetime.datetime.now(datetime.UTC).year,
-            "project_title": group_data.get("project_title", ""),
-            "question_a": group_data.get("question_a", ""),
-            "question_b": group_data.get("question_b", ""),
-            "group": group_data.get("group", ""),
-            "group_size": len(group_data.get("choices_a", [])),
-            "sna": sna_data,
-            "sociogram": sociogram_data,
-            **self._add_isolated_and_relevant_nodes(sna_data, sociogram_data, with_sociogram)
         }
