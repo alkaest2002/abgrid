@@ -4,6 +4,8 @@ Author: Pierpaolo Calanna
 The code is part of the AB-Grid project and is licensed under the MIT License.
 """
 # ruff: noqa: ARG001
+# ruff: noqa: ERA001
+# ruff: noqa: F401
 from fastapi import FastAPI, Request, status
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse, ORJSONResponse
@@ -34,7 +36,7 @@ app = FastAPI(
 #######################################################################################
 
 # 7. Compress
-app.add_middleware(CompressMiddleware)
+# app.add_middleware(CompressMiddleware)
 
 # 6. Decompress
 app.add_middleware(DecompressMiddleware)
