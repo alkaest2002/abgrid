@@ -84,10 +84,6 @@ class CoreData:
         # Compute SNA results
         sna_data: dict[str, Any] = abgrid_sna.get()
 
-        # Delete SNA class and garbage collect
-        del abgrid_sna
-        gc.collect()
-
         # Initialize Sociogram dictionary data
         sociogram_data: dict[str, Any] = {}
 
@@ -98,10 +94,6 @@ class CoreData:
 
             # Compute Sociogram results
             sociogram_data = abgrid_sociogram.get()
-
-            # Delete Sociogram class and garbage collect to free memory
-            del abgrid_sociogram
-            gc.collect()
 
         # Build final data
         final_data: dict[str, Any] = self._build_report_data_out(
