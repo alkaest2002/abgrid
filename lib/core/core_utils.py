@@ -7,17 +7,19 @@ The code is part of the AB-Grid project and is licensed under the MIT License.
 import hashlib
 import hmac
 import io
+import os
 from base64 import b64encode
 from functools import reduce
+from typing import cast
 
 import pandas as pd
+from dotenv import load_dotenv
 from matplotlib import pyplot as plt
 from matplotlib.figure import Figure
 
-from lib.interfaces.fastapi.settings import Settings
 
-
-settings = Settings.load()
+# Load environment variables from .env file
+load_dotenv()
 
 
 def unpack_network_edges(packed_edges: list[dict[str, str | None]]) -> list[tuple[str, str]]:
@@ -194,9 +196,11 @@ def compute_hmac_signature(stringified_data: str) -> str:
         - Uses the application's auth_secret from settings as the signing key.
         - Provides tamper detection and authentication capabilities.
     """
+    # Retrieve auth secret from environment variable
+    auth_secret: str = cast("str", os.getenv("AUTH_SECRET"))
     # Compute HMAC-SHA256
     return hmac.new(
-        settings.auth_secret.encode("utf-8"),
+       auth_secret.encode("utf-8"),
         stringified_data.encode("utf-8"),
         hashlib.sha256
     ).hexdigest()
