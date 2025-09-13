@@ -23,4 +23,4 @@ venv
 licenser/licenses
 archive
 dist
-lib/interfaces/do
+lib/interfaces/serverless
