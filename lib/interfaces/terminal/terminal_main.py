@@ -195,6 +195,10 @@ class TerminalMain:
         with json_export_path.open("w", encoding="utf-8") as fout:
             fout.write(orjson.dumps(all_groups_data).decode("utf-8"))
 
+    ##################################################################################################################
+    #   PRIVATE METHODS
+    ##################################################################################################################
+
     def _get_group_filepaths(self) -> list[Path]:
         """Get list of group file paths matching the pattern."""
         if not self.project_folderpath.exists():
