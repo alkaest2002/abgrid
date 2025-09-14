@@ -36,26 +36,27 @@ app = FastAPI(
 # Middlewares (processed in reverse order)
 #######################################################################################
 
-# 7. Compress
+# 7. Compress (optional)
 if settings.fastapi_response_compression_enabled:
     app.add_middleware(CompressMiddleware)
 
-# 6. Decompress
+# 6. Decompress (mandatory)
 app.add_middleware(DecompressMiddleware)
 
-# 5. Body
-app.add_middleware(BodyMiddleware)
+# 5. Body (optional)
+if settings.fastapi_body_inspect_enabled:
+    app.add_middleware(BodyMiddleware)
 
-# 4. Request
+# 4. Request (mandatory)
 app.add_middleware(RequestMiddleware)
 
-# 3. Query
+# 3. Query (mandatory)
 app.add_middleware(QueryMiddleware)
 
-# 2. Header
+# 2. Header (mandatory)
 app.add_middleware(HeaderMiddleware)
 
-# 1. CORS
+# 1. CORS (mandatory)
 app.add_middleware(CORSMiddleware, **CORSMiddleware.get_params())
 
 

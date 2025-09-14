@@ -67,6 +67,12 @@ class Settings(BaseSettings):
         validation_alias="FASTAPI_RESPONSE_COMPRESSION_ENABLED"
     )
 
+    fastapi_body_inspect_enabled: bool = Field(
+        default=False,
+        description="Enable or disable request body inspection middleware",
+        validation_alias="FASTAPI_BODY_INSPECT_ENABLED"
+    )
+
     @classmethod
     @lru_cache
     def load(cls) -> "Settings":
