@@ -10,14 +10,11 @@ import orjson
 
 from lib.core.core_data import CoreData
 from lib.core.core_schemas_in import (
+    ABGridReportSchemaIn,
     ABGridReportStep1SchemaIn,
     ABGridReportStep2SchemaIn,
 )
 
-
-# Define constants
-STEP_1 = 1
-STEP_2 = 2
 
 def lambda_handler(event: dict[str, Any], context: Any) -> dict[str, Any]:  # noqa: ARG001
     """
@@ -39,50 +36,51 @@ def lambda_handler(event: dict[str, Any], context: Any) -> dict[str, Any]:  # no
         ValueError: If required data is missing or invalid
         Exception: For any unexpected errors
     """
+    # Initialize result
+    result: dict[str, Any] = {}
+
     try:
-        # Handle Function URL vs direct invocation
+        # If event contains "body"
         if "body" in event:
-
-            # If body is a string
-            if isinstance(event["body"], str):
-                # Parse JSON body
-                body_data: dict[str, Any] = orjson.loads(event["body"])
-            else:
-                # Body is already a dict
-                body_data = event["body"]
-
             # Extract parameters from body
-            step: int = body_data.get("step", 0)
+            body_data: dict[str, Any] = orjson.loads(event.get("body", "{}"))
+            step: int = body_data.get("step", -1)
             data: dict[str, Any] = body_data.get("data", {})
             with_sociogram: bool = body_data.get("with_sociogram", False)
         else:
-            # Direct invocation
-            step = event.get("step", 0)
+            # Extract parameters from event
+            step = event.get("step", -1)
             data = event.get("data", {})
             with_sociogram = event.get("with_sociogram", False)
+
+        # Validate step and data
+        if step not in [0, 1, 2] or len(data.keys()) == 0:
+            error_message = "invalid_report_data"
+            raise ValueError(error_message)  # noqa: TRY301
 
         # Initialize CoreData instance
         core_data = CoreData()
 
-        # Validate step and data
-        if step not in [1, 2] or len(data.keys()) == 0:
-            error_message = "required_data_missing_or_invalid"
-            raise ValueError(error_message)  # noqa: TRY301
+        # Execute the appropriate step
+        match step:
 
-        result = None
+            # Execute step 0: get full report data
+            case 0:
+                # Validate input data and get result
+                validated_data = ABGridReportSchemaIn(**data)
+                result = core_data.get_report_data(validated_data, with_sociogram)
 
-        # Execute appropriate step
-        if step == STEP_1:
-            # Validate input data for step 1
-            validated_step_1_data = ABGridReportStep1SchemaIn(**data)
-            # Call step 1 method
-            result = core_data.get_multistep_step_1(validated_step_1_data)
+            # Execute step 1: get step 1 data
+            case 1:
+                # Validate input data and get result
+                validated_step_1_data = ABGridReportStep1SchemaIn(**data)
+                result = core_data.get_multistep_step_1(validated_step_1_data)
 
-        elif step == STEP_2:
-            # Validate input data for step 2
-            validated_step_2_data = ABGridReportStep2SchemaIn(**data)
-            # Call step 2 method
-            result = core_data.get_multistep_step_2(validated_step_2_data, with_sociogram)
+            # Execute step 2: get step 2 data
+            case 2:
+                # Validate input data and get result
+                validated_step_2_data = ABGridReportStep2SchemaIn(**data)
+                result = core_data.get_multistep_step_2(validated_step_2_data, with_sociogram)
 
         # Return successful response
         return {
@@ -90,6 +88,7 @@ def lambda_handler(event: dict[str, Any], context: Any) -> dict[str, Any]:  # no
             "body": orjson.dumps({
                 "success": True,
                 "step": step,
+                "with_sociogram": with_sociogram,
                 "data": result
             }, default=str).decode("utf-8")
         }
@@ -99,7 +98,8 @@ def lambda_handler(event: dict[str, Any], context: Any) -> dict[str, Any]:  # no
             "statusCode": 400,
             "body": orjson.dumps({
                 "error": str(e),
-                "step": event.get("step", 0)
+                "step": step,
+                "with_sociogram": with_sociogram,
             }).decode("utf-8")
         }
 
@@ -108,6 +108,7 @@ def lambda_handler(event: dict[str, Any], context: Any) -> dict[str, Any]:  # no
             "statusCode": 500,
             "body": orjson.dumps({
                 "error": "aws_internal_server_error",
-                "step": event.get("step", 0)
+                "step": step,
+                "with_sociogram": with_sociogram,
             }).decode("utf-8")
         }

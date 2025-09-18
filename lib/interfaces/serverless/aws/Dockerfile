@@ -14,10 +14,10 @@ RUN pip install --no-cache-dir --only-binary=:all: -r requirements.txt --target 
     rm -rf "${LAMBDA_TASK_ROOT}/matplotlib/mpl-data/sample_data" || true
 
 # Add your application code
-COPY app.py ${LAMBDA_TASK_ROOT}
+COPY aws_lambda.py ${LAMBDA_TASK_ROOT}
 
 # Add the lib directory
 COPY lib/ ${LAMBDA_TASK_ROOT}/lib/
 
 # Lambda entry point: module.function
-CMD ["app.lambda_handler"]
+CMD ["aws_lambda.lambda_handler"]
