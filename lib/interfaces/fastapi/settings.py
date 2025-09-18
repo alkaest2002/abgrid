@@ -23,18 +23,11 @@ class Settings(BaseSettings):
     3. Default values defined in the class
 
     Attributes:
-        auth_secret: Secret key used for authentication token generation and validation.
-                    This is a required field that must be provided via AUTH_SECRET
-                    environment variable.
-        max_concurrent_requests_for_group: Maximum number of concurrent requests allowed
-                                         for /api/group endpoint. Defaults to 15.
-        max_concurrent_requests_for_report: Maximum number of concurrent requests allowed
-                                          for /api/report endpoint. Defaults to 5.
-
-    Environment Variables:
-        AUTH_SECRET: Required secret key for authentication
-        MAX_CONCURRENT_REQUESTS_FOR_GROUP: Optional concurrent request limit for group endpoint (default: 15)
-        MAX_CONCURRENT_REQUESTS_FOR_REPORT: Optional concurrent request limit for report endpoints (default: 5)
+        auth_secret: Secret key used for authentication jwt token generation and validation.
+        fastapi_max_concurrent_requests: Maximum number of concurrent requests allowed
+        fastapi_response_compression_enabled: Enable or disable response compression middleware
+        fastapi_body_inspect_enabled: Enable or disable request body inspection middleware
+        aws_function_url: AWS Lambda Function URL
 
     Notes:
         Settings are cached using @lru_cache() for performance. The same instance
@@ -53,10 +46,10 @@ class Settings(BaseSettings):
         validation_alias="AUTH_SECRET"
     )
 
-    max_concurrent_requests: int = Field(
+    fastapi_max_concurrent_requests: int = Field(
         default=5,
         description="Maximum number of concurrent requests allowed for /api endpoints",
-        validation_alias="MAX_CONCURRENT_REQUESTS",
+        validation_alias="FASTAPI_MAX_CONCURRENT_REQUESTS",
         ge=1,  # Must allow at least 1 request
         le=1000  # Reasonable upper limit
     )
@@ -71,6 +64,12 @@ class Settings(BaseSettings):
         default=False,
         description="Enable or disable request body inspection middleware",
         validation_alias="FASTAPI_BODY_INSPECT_ENABLED"
+    )
+
+    aws_function_url: str | None = Field(
+        default=None,
+        description="AWS Lambda Function URL for serverless deployment",
+        validation_alias="AWS_FUNCTION_URL"
     )
 
     @classmethod

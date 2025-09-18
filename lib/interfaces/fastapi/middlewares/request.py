@@ -37,7 +37,7 @@ class RequestMiddleware(BaseHTTPMiddleware):
         # If the semaphore does not exist
         if (semaphore := getattr(RequestMiddleware, "_shared_semaphore", None)) is None:
             # Create a new semaphore with the configured limit
-            semaphore = asyncio.Semaphore(settings.max_concurrent_requests)
+            semaphore = asyncio.Semaphore(settings.fastapi_max_concurrent_requests)
             # Store it as a class variable for shared access
             RequestMiddleware._shared_semaphore = semaphore  # type: ignore[attr-defined]
 
