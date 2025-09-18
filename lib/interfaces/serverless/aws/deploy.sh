@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 # Copy the lib directory to the current location
-cp -r ../../lib/core ./lib/core
+cp -r ../../../core ./lib/core
 
 # Load environment variables from .env file
 if [ -f .env ]; then
@@ -24,9 +24,8 @@ IMAGE_URI=$ACCOUNT_ID.dkr.ecr.$REGION.amazonaws.com/$REPO:latest
 echo "Logging into ECR..."
 aws ecr get-login-password --region $REGION | docker login --username AWS --password-stdin $ACCOUNT_ID.dkr.ecr.$REGION.amazonaws.com
 
-echo "Building and pushing image..."
-
 # Usa buildx per cross-platform build
+echo "Building and pushing image..."
 docker buildx create --use --name lambda-builder >/dev/null 2>&1 || true
 docker buildx build \
     --platform linux/arm64 \
@@ -75,4 +74,3 @@ else
 fi
 
 echo "Deployment complete!"
-echo "Function ARN: $(aws lambda get-function --function-name $FUNCTION --region $REGION --query 'Configuration.FunctionArn' --output text)"
