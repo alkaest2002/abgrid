@@ -1,4 +1,9 @@
 
+"""
+Author: Pierpaolo Calanna
+
+The code is part of the AB-Grid project and is licensed under the MIT License.
+"""
 from typing import Any
 
 import orjson
@@ -29,6 +34,10 @@ def lambda_handler(event: dict[str, Any], context: Any) -> dict[str, Any]:  # no
         Dictionary containing:
             - statusCode: HTTP status code
             - body: JSON string with result data or error message
+
+    Raises:
+        ValueError: If required data is missing or invalid
+        Exception: For any unexpected errors
     """
     try:
         # Handle Function URL vs direct invocation
