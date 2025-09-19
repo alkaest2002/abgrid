@@ -244,10 +244,10 @@ def get_router_api() -> APIRouter:  # noqa: PLR0915
                 status_code=status.HTTP_400_BAD_REQUEST,
                 content={"detail": "invalid_report_data"}
             )
-        except Exception:
+        except Exception as e:
             return JSONResponse(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                content={"detail": "failed_to_generate_report"}
+                content={"detail": str(e)}
             )
 
 
@@ -309,10 +309,10 @@ def get_router_api() -> APIRouter:  # noqa: PLR0915
                 status_code=status.HTTP_400_BAD_REQUEST,
                 content={"detail": "invalid_report_data"}
             )
-        except Exception:
+        except Exception as e:
             return JSONResponse(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                content={"detail": "failed_to_generate_report"}
+                content={"detail": str(e)}
             )
 
 
@@ -377,10 +377,10 @@ def get_router_api() -> APIRouter:  # noqa: PLR0915
                 status_code=status.HTTP_400_BAD_REQUEST,
                 content={"detail": "invalid_report_data"}
             )
-        except Exception:
+        except Exception as e:
             return JSONResponse(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                content={"detail": "failed_to_generate_report"}
+                content={"detail": str(e)}
             )
 
 
@@ -455,10 +455,10 @@ def get_router_api() -> APIRouter:  # noqa: PLR0915
                 status_code=status.HTTP_400_BAD_REQUEST,
                 content={"detail": "invalid_report_data"}
             )
-        except Exception:
+        except Exception as e:
             return JSONResponse(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                content={"detail": "failed_to_generate_report"}
+                content={"detail": str(e)}
             )
 
     return router
