@@ -194,10 +194,10 @@ def get_router_api() -> APIRouter:  # noqa: PLR0915
 
                 # Get data via aws lambda
                 data = await _get_report_via_aws(
-                    settings.aws_function_url,
                     model,
                     language,
-                    with_sociogram
+                    with_sociogram,
+                    settings.aws_function_url
                 )
 
                 return JSONResponse(
@@ -469,10 +469,10 @@ def get_router_api() -> APIRouter:  # noqa: PLR0915
 ##################################################################################################################
 
 async def _get_report_via_aws(
-        aws_url: str,
         model: ABGridReportSchemaIn | ABGridReportStep1SchemaIn | ABGridReportStep2SchemaIn,
         language: str,
         with_sociogram: bool,
+        aws_url: str,
     ) -> Any:
     """Retrieve report data using either AWS Lambda function or local processing.
 
@@ -480,10 +480,9 @@ async def _get_report_via_aws(
     configured, otherwise falls back to local data processing using the provided retriever.
 
     Args:
-        aws_url: URL of the AWS Lambda function for report generation.
         model: Pydantic model containing the input data for report generation.
-               Supports multiple schema types for different report steps.
         with_sociogram: Boolean indicating whether to include sociogram visualization.
+        aws_url: URL of the AWS Lambda function for report generation.
         language: Language code for report template selection.
 
     Returns:
@@ -508,6 +507,7 @@ async def _get_report_via_aws(
         # Make request to aws lambda function
         response = await client.post(
             aws_url,
+            headers= { "x-api-key": settings.aws_api_key or "" },
             json=json_payload,
             timeout=45.0
         )
