@@ -63,8 +63,9 @@ def universal_iter_rows(data: Any) -> Any:
 
 
 try:
-    # Initialize Jinja2 environment with a file system loader for templates
+    # Initialize Jinja2 environment
     abgrid_jinja_env = Environment(
+        # Use PackageLoader to load templates from the 'lib.core.templates' package
         loader=PackageLoader(package_name="lib.core", package_path="templates"),
         # Enable strict undefined handling to catch missing variables
         undefined=StrictUndefined,
