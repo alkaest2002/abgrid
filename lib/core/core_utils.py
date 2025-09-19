@@ -27,7 +27,7 @@ def unpack_network_edges(packed_edges: list[dict[str, str | None]]) -> list[tupl
 
     Takes a list of dictionaries where each dictionary represents outgoing edges
     from source nodes, and converts them into a flat list of (source, target) tuples.
-    Safely handles None values in edge lists.
+    Safely handles None values in edge lists by filtering them out.
 
     Args:
         packed_edges: List of dictionaries where keys are source nodes and values are
@@ -98,7 +98,7 @@ def compute_descriptives(data: pd.DataFrame) -> pd.DataFrame:
 
     Calculates a wide range of descriptive statistics including central tendency,
     dispersion, distribution shape, and inequality measures. Extends pandas'
-    basic describe() function with additional metrics useful for social network analysis.
+    basic describe() function with additional metrics useful for data analysis.
 
     Args:
         data: DataFrame containing numerical data for statistical analysis.
@@ -137,7 +137,7 @@ def gini_coefficient(values: pd.Series) -> float:
 
     Computes the Gini coefficient, a measure of inequality ranging from 0 (perfect equality)
     to 1 (maximum inequality). The calculation uses the standard formula and handles
-    negative values by subtracting the minimum value from all observations.
+    negative values by shifting them to a non-negative range.
 
     Args:
         values: Series of numerical values to analyze for inequality.
@@ -150,7 +150,7 @@ def gini_coefficient(values: pd.Series) -> float:
         - Automatically handles negative values by shifting to non-negative range.
         - Uses the standard Gini formula: G = (2 * Σ(i * x_i)) / (n * Σ(x_i)) - (n + 1) / n.
         - Values are sorted before calculation for proper index weighting.
-        - Commonly used in social network analysis for measuring centralization.
+        - Commonly used in economics and social sciences for measuring inequality.
     """
     # Convert to non-negative values by subtracting minimum
     pos_values: pd.Series = values.sub(values.min())
@@ -178,23 +178,23 @@ def gini_coefficient(values: pd.Series) -> float:
     return gini
 
 def compute_hmac_signature(stringified_data: str) -> str:
-    """Compute an HMAC-SHA256 signature for JSON data using the application secret key.
+    """Compute an HMAC-SHA256 signature for stringified data using the application secret key.
 
-    Creates a cryptographic signature by traversing the JSON object recursively,
-    collecting all keys (including duplicates), sorting them, and signing the
-    resulting key string. Used for data integrity verification.
+    Creates a cryptographic signature for the provided stringified data using HMAC-SHA256
+    algorithm with the application's AUTH_SECRET environment variable as the signing key.
+    Used for data integrity verification and authentication.
 
     Args:
-        stringified_data: stringified data to sign.
+        stringified_data: String data to sign cryptographically.
 
     Returns:
         Hexadecimal string representation of the HMAC-SHA256 signature.
 
     Notes:
         - Uses HMAC-SHA256 for cryptographic integrity and authentication.
-        - JSON is serialized with sorted keys and compact formatting for consistency.
-        - Uses the application's auth_secret from settings as the signing key.
+        - Uses the application's AUTH_SECRET from environment variables as the signing key.
         - Provides tamper detection and authentication capabilities.
+        - Returns a hexadecimal string suitable for transmission and storage.
     """
     # Retrieve auth secret from environment variable
     auth_secret: str = cast("str", os.getenv("AUTH_SECRET"))
@@ -206,25 +206,23 @@ def compute_hmac_signature(stringified_data: str) -> str:
     ).hexdigest()
 
 def verify_hmac_signature(stringified_data: str, provided_signature: str) -> bool:
-    """Verify the HMAC signature of JSON data against the expected signature.
+    """Verify the HMAC signature of stringified data against the expected signature.
 
-    Extracts the signature from the "signature" key, removes it from the data,
-    recomputes the expected signature based on the remaining key structure,
-    and performs a secure comparison.
+    Computes the expected HMAC signature for the provided stringified data and
+    performs a secure comparison against the provided signature to verify
+    data integrity and authenticity.
 
     Args:
-        stringified_data: encoded data to verify.
-        provided_signature: provided signature to use for verification.
+        stringified_data: String data to verify.
+        provided_signature: HMAC signature to verify against the computed signature.
 
     Returns:
-        True if the signature is valid and matches the expected signature, False otherwise.
+        True if the provided signature is valid and matches the expected signature, False otherwise.
 
     Notes:
-        - Creates a copy of the input data to avoid modifying the original.
-        - Expects the signature to be stored in the "signature" key.
         - Uses secure comparison (hmac.compare_digest) to prevent timing attacks.
-        - Returns False if "signature" key is missing.
-        - Signature verification is performed on all data excluding the "signature" key.
+        - Computes expected signature using the same method as compute_hmac_signature.
+        - Returns False if signatures don't match or if verification fails.
     """
     # Compute expected signature
     expected_signature = compute_hmac_signature(stringified_data)
