@@ -55,7 +55,7 @@ def lambda_handler(event: dict[str, Any], context: Any) -> dict[str, Any]:  # no
         data = _abgrid_data.get_report_data(validated_data, with_sociogram)
 
         # Get template path
-        template_path = f"/lib.core/{language}/report.html"
+        template_path = f"{language}/report.html"
 
         # Render template
         rendered_report = _abgrid_renderer.render(template_path, data)
