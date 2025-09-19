@@ -8,6 +8,8 @@ The code is part of the AB-Grid project and is licensed under the MIT License.
 import asyncio
 from typing import Any
 
+import httpx
+
 from fastapi import APIRouter, Query, Request, status
 from fastapi.responses import JSONResponse
 from lib.core.core_data import CoreData
@@ -21,7 +23,11 @@ from lib.core.core_schemas_in import (
 )
 from lib.core.core_templates import CoreRenderer
 from lib.interfaces.fastapi.security.limiter import SimpleRateLimiter
+from lib.interfaces.fastapi.settings import Settings
 
+
+# Create a type alias for all report schemas
+type ABGridReportSchemas = ABGridReportSchemaIn | ABGridReportStep1SchemaIn | ABGridReportStep2SchemaIn
 
 # Initialize once at module level
 _abgrid_data = CoreData()
@@ -42,7 +48,9 @@ api_limiter_10s = SimpleRateLimiter(
     skip_options=True
 )
 
-def get_router_api() -> APIRouter:
+settings: Settings = Settings.load()
+
+def get_router_api() -> APIRouter:  # noqa: PLR0915
     """Create and configure the FastAPI router with API endpoints.
 
     This function creates a FastAPI router with all the application endpoints
@@ -100,16 +108,16 @@ def get_router_api() -> APIRouter:
             Rate limited to 1 request per 3 seconds due to computational intensity.
         """
         try:
-            # Data computation
+            # Get data
             data: dict[str, Any] = await asyncio.to_thread(
                 _abgrid_data.get_group_data,
                 model
             )
 
-            # Template path
+            # Get Template path
             template_path = f"/{language}/group.yaml"
 
-            # Template rendering
+            # Render Template
             rendered_group = await asyncio.to_thread(
                 _abgrid_renderer.render,
                 template_path,
@@ -181,17 +189,37 @@ def get_router_api() -> APIRouter:
             Rate limited to 1 request per 10 seconds due to computational intensity.
         """
         try:
-            # Data computation
-            data: dict[str, Any] = await asyncio.to_thread(
+            # if we are calling aws lambda
+            if (settings.aws_function_url):
+                # Get data via aws lambda
+                data = await _get_report_via_aws(
+                    settings.aws_function_url,
+                    model,
+                    language,
+                    with_sociogram
+                )
+
+                return JSONResponse(
+                    status_code=status.HTTP_200_OK,
+                    content={
+                        "detail": {
+                            "report_html": data.get("rendered_report"),
+                            "report_json": data.get("data_json")
+                        }
+                    }
+                )
+
+            # Get data
+            data = await asyncio.to_thread(
                 _abgrid_data.get_report_data,
                 model,
                 with_sociogram
             )
 
-            # Template path
+            # Get template path
             template_path = f"./{language}/report.html"
 
-            # Template rendering and JSON serialization
+            # Render template and JSON serialization
             rendered_report, data_json = await asyncio.gather(
                 asyncio.to_thread(_abgrid_renderer.render, template_path, data),
                 asyncio.to_thread(CoreExport.to_json, data)
@@ -258,8 +286,8 @@ def get_router_api() -> APIRouter:
             as input for subsequent steps in the multi-step report generation workflow.
         """
         try:
-            # Data computation
-            data: dict[str, Any] = await asyncio.to_thread(
+            # Get data
+            data = await asyncio.to_thread(
                 _abgrid_data.get_multistep_step_1,
                 model,
             )
@@ -325,9 +353,8 @@ def get_router_api() -> APIRouter:
             combined with step 1 results for final report generation in step 3.
         """
         try:
-
-            # Data computation
-            data: dict[str, Any] = await asyncio.to_thread(
+            # Get data
+            data = await asyncio.to_thread(
                 _abgrid_data.get_multistep_step_2,
                 model,
                 with_sociogram
@@ -396,7 +423,7 @@ def get_router_api() -> APIRouter:
         """
         try:
 
-            # Data computation
+            # Get data
             data: dict[str, Any] = await asyncio.to_thread(
                 _abgrid_data.get_multistep_step3,
                 model,
@@ -436,3 +463,59 @@ def get_router_api() -> APIRouter:
             )
 
     return router
+
+
+##################################################################################################################
+#   PRIVATE METHODS
+##################################################################################################################
+
+async def _get_report_via_aws(
+        aws_url: str,
+        model: ABGridReportSchemaIn | ABGridReportStep1SchemaIn | ABGridReportStep2SchemaIn,
+        language: str,
+        with_sociogram: bool,
+    ) -> dict[str, Any]:
+    """Retrieve report data using either AWS Lambda function or local processing.
+
+    This function attempts to fetch report data through an AWS Lambda function if
+    configured, otherwise falls back to local data processing using the provided retriever.
+
+    Args:
+        aws_url: URL of the AWS Lambda function for report generation.
+        model: Pydantic model containing the input data for report generation.
+               Supports multiple schema types for different report steps.
+        with_sociogram: Boolean indicating whether to include sociogram visualization.
+        language: Language code for report template selection.
+
+    Returns:
+        dict[str, Any]: Dictionary containing the processed report data. When using AWS Lambda,
+                       returns the 'detail' field from the response data. When using local
+                       processing, returns the result from the provided retriever function.
+
+    Raises:
+        httpx.RequestError: If the AWS Lambda function request fails.
+        httpx.HTTPStatusError: If the AWS Lambda function returns a non-2xx status code.
+        Exception: Any exception that might occur during local data processing.
+    """
+    # httpx async client
+    async with httpx.AsyncClient() as client:
+        # Set json payload
+        json_payload: dict[str, Any] = {
+            "data": model.model_dump_json(),
+            "with_sociogram": with_sociogram,
+            "language": language,
+        }
+        # Make request to aws lambda function
+        response = await client.post(
+            aws_url,
+            json=json_payload,
+            timeout=45.0
+        )
+        # Raise for status
+        response.raise_for_status()
+        # Parse response
+        response_json = response.json()
+        # Extract detail data
+        data: dict[str, Any] = response_json.get("data", {})
+
+        return data
