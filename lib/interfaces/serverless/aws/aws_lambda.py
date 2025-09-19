@@ -1,3 +1,10 @@
+"""
+Author: Pierpaolo Calanna
+
+The code is part of the AB-Grid project and is licensed under the MIT License.
+"""
+
+import os
 from typing import Any
 
 import orjson
@@ -8,6 +15,8 @@ from lib.core.core_schemas_in import ABGridReportSchemaIn
 from lib.core.core_templates import CoreRenderer
 
 
+AWS_API_KEY = os.getenv("AWS_API_KEY")
+
 # Initialize once at module level
 _abgrid_data = CoreData()
 _abgrid_renderer = CoreRenderer()
@@ -17,18 +26,31 @@ def lambda_handler(event: dict[str, Any], context: Any) -> dict[str, Any]:  # no
     AWS Lambda function handler for multi-step AB-Grid report generation.
 
     Args:
-        event: Lambda event object:
+        event: Lambda event object containing headers and request data
         context: Lambda context object
 
     Returns:
         Dictionary containing:
-            - statusCode: HTTP status code
+            - statusCode: HTTP status code (200, 403, or 500)
             - body: JSON string with result data or error message
 
     Raises:
         Exception: For any unexpected errors
     """
     try:
+        # Check for API key authentication
+        headers = event.get("headers", {})
+        api_key = headers.get("x-api-key")
+
+        # Return 403 if API key is missing or invalid
+        if not api_key or api_key != AWS_API_KEY:
+            return {
+                "statusCode": 403,
+                "body": {
+                    "error": "Forbidden: Invalid or missing API key"
+                }
+            }
+
         # If event contains "body"
         if "body" in event:
 
