@@ -8,7 +8,7 @@ from typing import Any
 from jinja2 import (
     Environment,
     FileSystemBytecodeCache,
-    FileSystemLoader,
+    PackageLoader,
     StrictUndefined,
     select_autoescape,
 )
@@ -65,7 +65,7 @@ def universal_iter_rows(data: Any) -> Any:
 try:
     # Initialize Jinja2 environment with a file system loader for templates
     abgrid_jinja_env = Environment(
-        loader=FileSystemLoader(["./lib/core/templates"]),
+        loader=PackageLoader(package_name="lib.core", package_path="templates"),
         # Enable strict undefined handling to catch missing variables
         undefined=StrictUndefined,
         # Auto-escape HTML for security
