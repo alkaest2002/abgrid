@@ -191,6 +191,7 @@ def get_router_api() -> APIRouter:  # noqa: PLR0915
         try:
             # if we are calling aws lambda
             if (settings.aws_function_url):
+
                 # Get data via aws lambda
                 data = await _get_report_via_aws(
                     settings.aws_function_url,
@@ -216,10 +217,8 @@ def get_router_api() -> APIRouter:  # noqa: PLR0915
                 with_sociogram
             )
 
-            # Get template path
+            # Render template and Serialize data concurrently
             template_path = f"./{language}/report.html"
-
-            # Render template and JSON serialization
             rendered_report, data_json = await asyncio.gather(
                 asyncio.to_thread(_abgrid_renderer.render, template_path, data),
                 asyncio.to_thread(CoreExport.to_json, data)
@@ -474,7 +473,7 @@ async def _get_report_via_aws(
         model: ABGridReportSchemaIn | ABGridReportStep1SchemaIn | ABGridReportStep2SchemaIn,
         language: str,
         with_sociogram: bool,
-    ) -> dict[str, Any]:
+    ) -> Any:
     """Retrieve report data using either AWS Lambda function or local processing.
 
     This function attempts to fetch report data through an AWS Lambda function if
@@ -505,17 +504,15 @@ async def _get_report_via_aws(
             "with_sociogram": with_sociogram,
             "language": language,
         }
+
         # Make request to aws lambda function
         response = await client.post(
             aws_url,
             json=json_payload,
             timeout=45.0
         )
+
         # Raise for status
         response.raise_for_status()
-        # Parse response
-        response_json = response.json()
-        # Extract detail data
-        data: dict[str, Any] = response_json.get("data", {})
 
-        return data
+        return response.json()
