@@ -51,7 +51,7 @@ if [ "$FUNCTION_EXISTS" = "false" ]; then
       --timeout 60 \
       --memory-size 256 \
       --architecture arm64 \
-      --environment Variables="{AUTH_SECRET=${AUTH_SECRET},MPLCONFIGDIR=/tmp/matplotlib}"
+      --environment Variables="{AUTH_SECRET=${AUTH_SECRET},AWS_API_KEY=${AWS_API_KEY},MPLCONFIGDIR=/tmp/matplotlib}"
 else
     echo "Updating Lambda function code..."
     aws lambda update-function-code \
