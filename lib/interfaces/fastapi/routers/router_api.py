@@ -501,7 +501,7 @@ async def _get_report_via_aws(
     async with httpx.AsyncClient() as client:
         # Set json payload
         json_payload: dict[str, Any] = {
-            "data": model.model_dump_json(),
+            "data": model.model_dump(),
             "with_sociogram": with_sociogram,
             "language": language,
         }
