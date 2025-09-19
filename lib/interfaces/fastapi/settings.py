@@ -72,6 +72,12 @@ class Settings(BaseSettings):
         validation_alias="AWS_FUNCTION_URL"
     )
 
+    aws_api_key: str | None = Field(
+        default=None,
+        description="API Key for AWS Lambda Function URL if required",
+        validation_alias="AWS_API_KEY"
+    )
+
     @classmethod
     @lru_cache
     def load(cls) -> "Settings":
