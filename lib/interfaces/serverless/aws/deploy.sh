@@ -1,8 +1,5 @@
 #!/usr/bin/env bash
 
-# Copy the lib directory to the current location
-cp -r ../../../core ./lib/core
-
 # Load environment variables from .env file
 if [ -f .env ]; then
     export $(cat .env | grep -v '^#' | xargs)
