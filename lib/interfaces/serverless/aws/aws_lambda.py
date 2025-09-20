@@ -15,11 +15,12 @@ from lib.core.core_schemas_in import ABGridReportSchemaIn
 from lib.core.core_templates import CoreRenderer
 
 
+# Load environment variables from .env file
 AWS_API_KEY = os.getenv("AWS_API_KEY")
 
 # Initialize once at module level
-_abgrid_data = CoreData()
-_abgrid_renderer = CoreRenderer()
+_abgrid_data: CoreData = CoreData()
+_abgrid_renderer: CoreRenderer = CoreRenderer()
 
 def lambda_handler(event: dict[str, Any], context: Any) -> dict[str, Any]:  # noqa: ARG001
     """
@@ -38,21 +39,21 @@ def lambda_handler(event: dict[str, Any], context: Any) -> dict[str, Any]:  # no
         Exception: For any unexpected errors
     """
     try:
-        # Check for API key authentication
-        headers = event.get("headers", {})
-        api_key = headers.get("x-api-key")
-
-        # Return 403 if API key is missing or invalid
-        if not api_key or api_key != AWS_API_KEY:
-            return {
-                "statusCode": 403,
-                "body": {
-                    "error": "Forbidden: Invalid or missing API key"
-                }
-            }
-
         # If event contains "body"
         if "body" in event:
+
+            # Check for API key authentication
+            headers = event.get("headers", {})
+            api_key = headers.get("x-api-key")
+
+            # Return 403 if API key is missing or invalid
+            if not api_key or api_key != AWS_API_KEY:
+                return {
+                    "statusCode": 403,
+                    "body": {
+                        "error": "invalid_or_missing_aws_api_key"
+                    }
+                }
 
             # Get body data
             body = event.get("body", "")
@@ -66,7 +67,6 @@ def lambda_handler(event: dict[str, Any], context: Any) -> dict[str, Any]:  # no
             language: str = body_data.get("language", "it")
 
         else:
-
             # Extract parameters from event
             data = event.get("data", {})
             with_sociogram = event.get("with_sociogram", False)
