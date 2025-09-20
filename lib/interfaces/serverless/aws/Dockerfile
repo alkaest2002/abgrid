@@ -1,4 +1,4 @@
-FROM public.ecr.aws/lambda/python:3.11-arm64
+FROM public.ecr.aws/lambda/python:3.13-arm64
 
 # Ensure non-interactive matplotlib backend and smaller images/logs
 ENV MPLBACKEND=Agg \

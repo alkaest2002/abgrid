@@ -11,6 +11,9 @@ REPO=${AWS_REPO}
 FUNCTION=${AWS_FUNCTION}
 ROLE_ARN=${AWS_ROLE_ARN}
 
+# Environment variables to set (add more as needed)
+ENV_VARS="AUTH_SECRET=${AUTH_SECRET:-},AWS_API_KEY=${AWS_API_KEY:-},MPLCONFIGDIR=/tmp/matplotlib"
+
 echo "Creating ECR repository..."
 aws ecr create-repository --repository-name $REPO --region $REGION >/dev/null 2>&1 || true
 
@@ -51,7 +54,7 @@ if [ "$FUNCTION_EXISTS" = "false" ]; then
       --timeout 60 \
       --memory-size 256 \
       --architecture arm64 \
-      --environment Variables="{AUTH_SECRET=${AUTH_SECRET},AWS_API_KEY=${AWS_API_KEY},MPLCONFIGDIR=/tmp/matplotlib}"
+      --environment Variables="{$ENV_VARS}"
 else
     echo "Updating Lambda function code..."
     aws lambda update-function-code \
@@ -67,7 +70,7 @@ else
     aws lambda update-function-configuration \
       --region $REGION \
       --function-name $FUNCTION \
-      --environment Variables="{AUTH_SECRET=${AUTH_SECRET:-}}"
+      --environment Variables="{$ENV_VARS}"
 fi
 
 echo "Deployment complete!"
