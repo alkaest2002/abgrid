@@ -12,7 +12,7 @@ FUNCTION=${AWS_FUNCTION}
 ROLE_ARN=${AWS_ROLE_ARN}
 
 # Environment variables to set (add more as needed)
-ENV_VARS="AUTH_SECRET=${AUTH_SECRET:-},AWS_API_KEY=${AWS_API_KEY:-},MPLCONFIGDIR=/tmp/matplotlib"
+ENV_VARS="AUTH_SECRET=${AUTH_SECRET:-},AWS_API_KEY=${AWS_API_KEY:-},MPLCONFIGDIR=${MPLCONFIGDIR:-/tmp/matplotlib}"
 
 echo "Creating ECR repository..."
 aws ecr create-repository --repository-name $REPO --region $REGION >/dev/null 2>&1 || true
@@ -24,9 +24,17 @@ IMAGE_URI=$ACCOUNT_ID.dkr.ecr.$REGION.amazonaws.com/$REPO:latest
 echo "Logging into ECR..."
 aws ecr get-login-password --region $REGION | docker login --username AWS --password-stdin $ACCOUNT_ID.dkr.ecr.$REGION.amazonaws.com
 
-# Usa buildx per cross-platform build
+# Better buildx handling
+echo "Setting up Docker buildx..."
+if ! docker buildx inspect lambda-builder >/dev/null 2>&1; then
+    echo "Creating new buildx builder..."
+    docker buildx create --name lambda-builder --use --bootstrap
+else
+    echo "Using existing buildx builder..."
+    docker buildx use lambda-builder
+fi
+
 echo "Building and pushing image..."
-docker buildx create --use --name lambda-builder >/dev/null 2>&1 || true
 docker buildx build \
     --platform linux/arm64 \
     --provenance=false \
