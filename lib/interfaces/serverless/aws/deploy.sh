@@ -43,7 +43,7 @@ docker buildx build \
     --progress=plain \
     .
 
-# Verifica che l'immagine sia stata pushata correttamente
+# Verify image in ECR
 echo "Verifying image in ECR..."
 aws ecr describe-images --repository-name $REPO --region $REGION --image-ids imageTag=latest
 
