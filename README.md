@@ -12,16 +12,12 @@ ABGrid is developed for those who need to analyze group dynamics within peer gro
 ## 🚀 Key Features
 
 ### Core Functionality
-- **Social Network Visualization**: Generate network graphs showing preference and rejection patterns
 - **Key Node Identification**: Identify influential members and potential sources of instability
-- **Cluster Analysis**: Map significant subgroups and relationship patterns
-- **Comprehensive Reporting**: Generate detailed PDF reports with both SNA and sociometric analysis
-
-### Analysis Capabilities
-- **Sociometric Analysis**: Traditional sociometric variables including impact, balance, affiliation, and influence indices
+- **SNA Network Properties**: Density, centralization, transitivity, reciprocity analysis
+- **SNA Network Visualization**: Generate network graphs showing preference and rejection patterns
+- **SNA Network Components Analysis**: Map significant subgroups and relationship patterns
 - **SNA Metrics**: Multiple centrality measures (degree, betweenness, closeness, PageRank, Katz, Hub)
-- **Network Properties**: Density, centralization, transitivity, reciprocity analysis
-- **Comparative Analysis**: Side-by-side comparison of preference vs. rejection networks
+- **Sociometric Analysis**: Traditional sociometric variables including impact, balance, affiliation, and influence indices
 
 ## 🏗️ Architecture
 
@@ -30,6 +26,7 @@ The software follows a modular architecture with three main components:
 ### Core Module (Python)
 - **NetworkX**: Graph analysis and network calculations
 - **Pandas**: Data manipulation and processing
+- **Scipy**: Data processing
 - **Matplotlib**: Graph visualization
 - **Jinja2**: Report template engine
 - **Pydantic**: Data validation
@@ -39,6 +36,7 @@ The software follows a modular architecture with three main components:
 - **FastAPI**: REST API framework
 - **Uvicorn**: ASGI server for development
 - **Gunicorn**: Production WSGI server
+- **AWS Lambda function**: On demand and scalable CPU-bound computations
 
 ### User Interface Module (JavaScript)
 - **Electron.js**: Cross-platform desktop application
@@ -63,20 +61,6 @@ The software follows a modular architecture with three main components:
 - **Sociometric Questions**: Customizable preference/rejection queries
 - **Anonymous Processing**: Privacy-protected data handling
 
-### Analysis Framework
-- **Macro Level**: Network-wide properties (density, centralization, transitivity)
-- **Micro Level**: Individual metrics (centrality measures, sociometric status)
-- **Subgroup Level**: Cliques and strongly/weakly connected components
-
-## 📈 Report Structure
-
-Generated reports include:
-1. **Key Nodes Summary**: List of influential and problematic members
-2. **Preference Network**: Visualization and metrics for positive relationships
-3. **Rejection Network**: Analysis of negative relationship patterns
-4. **Comparative Analysis**: Side-by-side network comparison
-5. **Sociometric Data**: Traditional sociometric variables and visualizations
-
 ## 📖 Usage
 
 1. **Define Group**: Set up group members (8-50 individuals)
@@ -85,7 +69,6 @@ Generated reports include:
 4. **Generate Analysis**: Run automated SNA and sociometric calculations
 5. **Review Reports**: Examine comprehensive PDF reports with visualizations
 6. **Implement Interventions**: Use insights for targeted group optimization
-
 
 ## 👥 Authors
 
