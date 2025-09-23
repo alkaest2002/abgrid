@@ -6,7 +6,6 @@ The code is part of the AB-Grid project and is licensed under the MIT License.
 # ruff: noqa: ARG001
 from collections.abc import AsyncGenerator
 from contextlib import asynccontextmanager
-from pathlib import Path
 
 from fastapi import FastAPI, Request, status
 from fastapi.exceptions import RequestValidationError
@@ -21,7 +20,7 @@ from lib.interfaces.fastapi.middlewares.header import HeaderMiddleware
 from lib.interfaces.fastapi.middlewares.query import QueryMiddleware
 from lib.interfaces.fastapi.middlewares.request import RequestMiddleware
 from lib.interfaces.fastapi.routers.router_api import get_router_api
-from lib.interfaces.fastapi.security.blacklist import load_blacklist, reload_blacklist
+from lib.interfaces.fastapi.security.blacklist import init_blacklist, reload_blacklist
 from lib.interfaces.fastapi.security.limiter import RateLimitError
 from lib.interfaces.fastapi.settings import Settings
 from lib.utils import to_snake_case
@@ -36,8 +35,7 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
     Args:
         app: The FastAPI application instance.
     """
-    blacklisted_data = Path("./lib/interfaces/fastapi/security/blacklisted_tokens.json")
-    load_blacklist(blacklisted_data)
+    init_blacklist()
     yield
 
 # Initialization of FastAPI application
@@ -117,6 +115,7 @@ def blacklist_reload() -> JSONResponse:
                 "detail": "blacklist_reloaded"
             }
         )
+
     return JSONResponse(
         status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
         content={
