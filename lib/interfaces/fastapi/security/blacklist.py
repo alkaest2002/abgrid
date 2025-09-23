@@ -32,10 +32,6 @@ class BlacklistManager:
             bool: True if loading was successful, False otherwise.
         """
         try:
-            # If file path is not set or file does not exist
-            if not self._file_path.exists():
-                return False
-
             # Open JSON
             with self._file_path.open("rb") as f:
                 # Parse JSON data
