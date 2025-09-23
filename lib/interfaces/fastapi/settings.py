@@ -46,6 +46,12 @@ class Settings(BaseSettings):
         validation_alias="AUTH_SECRET"
     )
 
+    fastapi_is_development: bool = Field(
+        default=False,
+        description="Enable or disable development mode",
+        validation_alias="FASTAPI_IS_DEVELOPMENT"
+    )
+
     fastapi_max_concurrent_requests: int = Field(
         default=5,
         description="Maximum number of concurrent requests allowed for /api endpoints",

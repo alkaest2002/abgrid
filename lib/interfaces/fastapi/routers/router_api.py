@@ -189,8 +189,8 @@ def get_router_api() -> APIRouter:  # noqa: PLR0915
             Rate limited to 1 request per 10 seconds due to computational intensity.
         """
         try:
-            # if we are calling aws lambda
-            if (settings.aws_function_url):
+            # if we are calling aws lambda and we are not in development mode
+            if (settings.aws_function_url and not settings.fastapi_is_development):
 
                 # Get data via aws lambda
                 data = await _get_report_via_aws(
