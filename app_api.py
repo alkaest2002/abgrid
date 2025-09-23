@@ -4,6 +4,10 @@ Author: Pierpaolo Calanna
 The code is part of the AB-Grid project and is licensed under the MIT License.
 """
 # ruff: noqa: ARG001
+from collections.abc import AsyncGenerator
+from contextlib import asynccontextmanager
+from pathlib import Path
+
 from fastapi import FastAPI, Request, status
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse, ORJSONResponse
@@ -17,6 +21,7 @@ from lib.interfaces.fastapi.middlewares.header import HeaderMiddleware
 from lib.interfaces.fastapi.middlewares.query import QueryMiddleware
 from lib.interfaces.fastapi.middlewares.request import RequestMiddleware
 from lib.interfaces.fastapi.routers.router_api import get_router_api
+from lib.interfaces.fastapi.security.blacklist import load_blacklist, reload_blacklist
 from lib.interfaces.fastapi.security.limiter import RateLimitError
 from lib.interfaces.fastapi.settings import Settings
 from lib.utils import to_snake_case
@@ -24,12 +29,24 @@ from lib.utils import to_snake_case
 
 settings = Settings.load()
 
+@asynccontextmanager
+async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
+    """Lifespan context manager for FastAPI application.
+
+    Args:
+        app: The FastAPI application instance.
+    """
+    blacklisted_data = Path("./lib/interfaces/fastapi/security/blacklisted_tokens.json")
+    load_blacklist(blacklisted_data)
+    yield
+
 # Initialization of FastAPI application
 app = FastAPI(
     openapi_url=None,
     docs_url=None,
     redoc_url=None,
-    default_response_class=ORJSONResponse
+    default_response_class=ORJSONResponse,
+    lifespan=lifespan
 )
 
 #######################################################################################
@@ -83,6 +100,27 @@ def server_check() -> JSONResponse:
         status_code=status.HTTP_200_OK,
         content={
             "detail": "up"
+        }
+    )
+
+@app.get("/blacklist-reload")
+def blacklist_reload() -> JSONResponse:
+    """Reload blacklist from JSON file without authentication.
+
+    Returns:
+        JSONResponse: Success or failure message.
+    """
+    if reload_blacklist():
+        return JSONResponse(
+            status_code=status.HTTP_200_OK,
+            content={
+                "detail": "blacklist_reloaded"
+            }
+        )
+    return JSONResponse(
+        status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+        content={
+            "detail": "blacklist_reload_failed"
         }
     )
 

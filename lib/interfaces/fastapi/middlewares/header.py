@@ -13,6 +13,7 @@ from starlette.types import ASGIApp
 
 from fastapi import Request, status
 from fastapi.responses import JSONResponse
+from lib.interfaces.fastapi.security.blacklist import is_blacklisted
 from lib.interfaces.fastapi.security.jwt import SimpleJWT
 
 
@@ -93,7 +94,14 @@ class HeaderMiddleware(BaseHTTPMiddleware):
         # Remove "Bearer " prefix from JWT token
         token = auth_header[7:].strip()
 
-        # Verify JWT token using shared class instance
+        # Ensure token is not blacklisted
+        if is_blacklisted(token):
+            return JSONResponse(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                content={"detail": "invalid_or_expired_jwt_token"}
+            )
+
+        # Verify non blacklisted JWT token
         if not self.JWT_HANDLER.verify_token(token):
             return JSONResponse(
                 status_code=status.HTTP_401_UNAUTHORIZED,
