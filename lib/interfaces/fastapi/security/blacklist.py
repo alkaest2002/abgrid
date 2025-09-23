@@ -86,7 +86,10 @@ class BlacklistManager:
 # Create a singleton instance
 blacklist_manager = BlacklistManager()
 
+####################################################################
 # Convenience functions that use the singleton
+####################################################################
+
 def load_blacklist(file_path: Path) -> None:
     """Load blacklisted tokens from JSON file into memory."""
     blacklist_manager.load_blacklist(file_path)
