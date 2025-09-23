@@ -43,8 +43,8 @@ class BlacklistManager:
                 # Store tokens in a set for O(1) lookup
                 self._blacklisted_tokens = set(data)
 
-        # JSON parsing error
-        except orjson.JSONDecodeError:
+        # Catch all for any other unexpected errors
+        except Exception:
             return False
         else:
             return True
