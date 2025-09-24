@@ -64,8 +64,6 @@ def universal_iter_rows(data: Any) -> Any:
 try:
     # If we are in AWS Lambda environment
     if aws_root_folder := os.getenv("LAMBDA_TASK_ROOT"):
-        # Define cache directory
-        template_cache_folder = "/tmp/abgrid_templates/.cache" #nosec
         # Initialize Jinja2 environment
         abgrid_jinja_env = Environment(
             # Use FileSystemLoader to load templates from the 'templates' directory
@@ -74,8 +72,6 @@ try:
             undefined=StrictUndefined,
             # Auto-escape HTML for security
             autoescape=select_autoescape(["html", "xml"]),
-            # Add bytecode cache for performance
-            bytecode_cache=FileSystemBytecodeCache(template_cache_folder)
         )
     else:
         # Define cache directory
