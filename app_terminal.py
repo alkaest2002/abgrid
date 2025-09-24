@@ -29,7 +29,7 @@ EXIT_APP_ERROR: int = 1
 EXIT_SYSTEM_ERROR: int = 2
 EXIT_USER_INTERRUPT: int = 130
 
-# Application configuration settings
+
 @dataclass
 class Config:
     """Application configuration settings container.
@@ -41,6 +41,7 @@ class Config:
     languages: list[str] = field(default_factory=lambda: ["en", "it"])
     min_members: int = 8
     max_members: int = 50
+
 
 class TerminalApp:
     """Main application class for AB-Grid terminal interface.
