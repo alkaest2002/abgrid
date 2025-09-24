@@ -38,7 +38,7 @@ class Command(ABC):
 
         Args:
             args: Parsed command line arguments containing user input.
-            config: Application configuration with settings and constraints.
+            config: Command configuration.
 
         Returns:
             None.
