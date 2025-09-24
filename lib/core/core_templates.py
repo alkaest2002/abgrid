@@ -3,11 +3,13 @@ Author: Pierpaolo Calanna
 
 The code is part of the AB-Grid project and is licensed under the MIT License.
 """
+import os
 from typing import Any
 
 from jinja2 import (
     Environment,
     FileSystemBytecodeCache,
+    FileSystemLoader,
     PackageLoader,
     StrictUndefined,
     select_autoescape,
@@ -19,9 +21,6 @@ from jinja2.exceptions import (
     UndefinedError,
 )
 
-
-# Define cache directory
-TEMPLATE_CACHE_DIR = "./lib/core/templates/.cache"
 
 def universal_iter_rows(data: Any) -> Any:
     """Universal iterator filter that works with both DataFrames and Python objects.
@@ -63,17 +62,35 @@ def universal_iter_rows(data: Any) -> Any:
 
 
 try:
-    # Initialize Jinja2 environment
-    abgrid_jinja_env = Environment(
-        # Use PackageLoader to load templates from the 'lib.core.templates' package
-        loader=PackageLoader(package_name="lib.core", package_path="templates"),
-        # Enable strict undefined handling to catch missing variables
-        undefined=StrictUndefined,
-        # Auto-escape HTML for security
-        autoescape=select_autoescape(["html", "xml"]),
-        # Add bytecode cache for performance
-        bytecode_cache=FileSystemBytecodeCache(TEMPLATE_CACHE_DIR)
-    )
+    # If we are in AWS Lambda environment
+    if aws_root_folder := os.getenv("LAMBDA_TASK_ROOT"):
+        # Define cache directory
+        template_cache_folder = "/tmp/abgrid_templates/.cache" #nosec
+        # Initialize Jinja2 environment
+        abgrid_jinja_env = Environment(
+            # Use FileSystemLoader to load templates from the 'templates' directory
+            loader=FileSystemLoader(f"{aws_root_folder}/templates"),
+            # Enable strict undefined handling to catch missing variables
+            undefined=StrictUndefined,
+            # Auto-escape HTML for security
+            autoescape=select_autoescape(["html", "xml"]),
+            # Add bytecode cache for performance
+            bytecode_cache=FileSystemBytecodeCache(template_cache_folder)
+        )
+    else:
+        # Define cache directory
+        template_cache_folder = "./lib/core/templates/.cache"
+        # Initialize Jinja2 environment
+        abgrid_jinja_env = Environment(
+            # Use PackageLoader to load templates from the 'lib.core.templates' package
+            loader=PackageLoader(package_name="lib.core", package_path="templates"),
+            # Enable strict undefined handling to catch missing variables
+            undefined=StrictUndefined,
+            # Auto-escape HTML for security
+            autoescape=select_autoescape(["html", "xml"]),
+            # Add bytecode cache for performance
+            bytecode_cache=FileSystemBytecodeCache(template_cache_folder)
+        )
 
     # Add custom filters
     abgrid_jinja_env.filters["universal_iter_rows"] = universal_iter_rows
