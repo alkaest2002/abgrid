@@ -1,5 +1,5 @@
 annotated-types==0.7.0
-anyio==4.10.0
+anyio==4.11.0
 bandit==1.8.6
 Brotli==1.1.0
 certifi==2025.8.3
@@ -11,9 +11,9 @@ cssselect2==0.8.0
 cycler==0.12.1
 dnspython==2.8.0
 email-validator==2.3.0
-fastapi==0.116.2
-fastapi-cli==0.0.12
-fastapi-cloud-cli==0.2.0
+fastapi==0.117.1
+fastapi-cli==0.0.13
+fastapi-cloud-cli==0.2.1
 fonttools==4.60.0
 gunicorn==23.0.0
 h11==0.16.0
@@ -44,12 +44,12 @@ pillow==11.3.0
 pycparser==2.23
 pydantic==2.11.9
 pydantic-extra-types==2.10.5
-pydantic-settings==2.10.1
+pydantic-settings==2.11.0
 pydantic_core==2.33.2
 pydyf==0.11.0
 Pygments==2.19.2
 PyJWT==2.10.1
-pyparsing==3.2.4
+pyparsing==3.2.5
 pyphen==0.17.2
 python-dateutil==2.9.0.post0
 python-dotenv==1.1.1
@@ -61,7 +61,7 @@ rich-toolkit==0.15.1
 rignore==0.6.4
 scipy==1.16.2
 scipy-stubs==1.16.2.0
-sentry-sdk==2.38.0
+sentry-sdk==2.39.0
 setuptools==80.9.0
 shellingham==1.5.4
 six==1.17.0
@@ -70,7 +70,7 @@ starlette==0.48.0
 stevedore==5.5.0
 tinycss2==1.4.0
 tinyhtml5==2.0.0
-typer==0.18.0
+typer==0.19.2
 types-networkx==3.5.0.20250918
 types-pytz==2025.2.0.20250809
 types-PyYAML==6.0.12.20250915
@@ -79,7 +79,7 @@ typing_extensions==4.15.0
 tzdata==2025.2
 ujson==5.11.0
 urllib3==2.5.0
-uvicorn==0.36.0
+uvicorn==0.37.0
 uvloop==0.21.0
 watchfiles==1.1.0
 weasyprint==66.0
