@@ -23,7 +23,7 @@ class CORSMiddleware(FastAPICORSMiddleware):
 
     DEVELOPMENT_PORTS: ClassVar[list[str]] = ["53472", "53247", "53274", "53427", "53724", "53742"]
     LOCAL_DOMAINS: ClassVar[list[str]] = ["https://localhost", "https://127.0.0.1", "http://localhost", "http://127.0.0.1"]
-    PRODUCTION_DOMAINS: ClassVar[list[str]] = ["https://abgrid-webapp.onrender.com", "https://main.d2uoduro0n2rfk.amplifyapp.com/"]
+    PRODUCTION_DOMAINS: ClassVar[list[str]] = ["*"]
     ALLOWED_METHODS: ClassVar[list[str]] = ["*"]
     ALLOWED_HEADERS: ClassVar[list[str]] = ["*"]
     EXPOSED_HEADERS: ClassVar[list[str]] = ["Content-Encoding"]
