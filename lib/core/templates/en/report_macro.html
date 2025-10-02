@@ -43,6 +43,11 @@
     <p class="text-dimmed text-small mt-xs">
         Each node can reach every other node: a) without intermediaries; b) ignoring the direction of connections
     </p>
+{% elif type == "reciprocal_strongly_connected" %}
+    <p><b>Strongly Connected Groups with reciprocal edges</b></p>
+    <p class="text-dimmed text-small mt-xs">
+        Each node can reach every other node: a) with or without intermediaries; b) following the direction of connections and considering only reciprocal edges
+    </p>
 {% elif type == "strongly_connected" %}
     <p><b>Strongly Connected Groups</b></p>
     <p class="text-dimmed text-small mt-xs">

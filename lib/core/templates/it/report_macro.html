@@ -43,6 +43,11 @@
     <p class="text-dimmed text-small mt-xs">
         Ogni nodo può raggiungere ogni altro nodo: a) senza intermediari; b) ignorando la direzione dei legami
     </p>
+{% elif type == "reciprocal_strongly_connected" %}
+    <p><b>Gruppi fortemente connessi con legami reciproci</b></p>
+    <p class="text-dimmed text-small mt-xs">
+        Ogni nodo può raggiungere ogni altro nodo: a) con o senza intermediari; b) seguendo la direzione dei legami e considerando solo i legami reciproci
+    </p>
 {% elif type == "strongly_connected" %}
     <p><b>Gruppi fortemente connessi</b></p>
     <p class="text-dimmed text-small mt-xs">

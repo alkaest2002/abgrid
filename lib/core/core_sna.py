@@ -482,9 +482,19 @@ class CoreSna:
         # Exclude strongly connected components from weakly connected components
         weakly_connected = weakly_connected.loc[~weakly_connected.isin(strongly_connected)]
 
-        # Cobine components
+        # Create a network with only reciprocal edges
+        reciprocal_edges: list[tuple[str,str]] = [edge for edge in network.edges if edge[::-1] in network.edges]
+        reciprocal_network: nx.DiGraph = nx.DiGraph(reciprocal_edges) # type: ignore[type-arg]
+
+        # Get reciprocal strongly connected components with min length of 3, ordered by size
+        reciprocal_strongly_connected = pd.Series(
+            [ "".join(sorted(c)) for c in sorted(nx.strongly_connected_components(reciprocal_network), key=len, reverse=True) if len(c) >= component_min_size ]
+        )
+
+        # Combine components
         components: dict[str, pd.Series] = {
             "cliques": cliques,
+            "reciprocal_strongly_connected": reciprocal_strongly_connected,
             "strongly_connected": strongly_connected,
             "weakly_connected": weakly_connected,
         }
@@ -692,7 +702,7 @@ class CoreSna:
         nx.draw_networkx_labels(network, loc, font_family="serif", font_color="#FFF", font_weight="normal", font_size=10, ax=ax)
 
         # Draw reciprocal edges with specific style (undirected lines)
-        reciprocal_edges: list[tuple[str, str]] = [e for e in network.edges if e[::-1] in network.edges]
+        reciprocal_edges: list[tuple[str, str]] = [edge for edge in network.edges if edge[::-1] in network.edges]
         nx.draw_networkx_edges(
             network, loc, edgelist=reciprocal_edges,
             edge_color=color, arrowstyle="-", width=4, min_target_margin=0,
