@@ -483,8 +483,10 @@ class CoreSna:
         weakly_connected = weakly_connected.loc[~weakly_connected.isin(strongly_connected)]
 
         # Create a network with only reciprocal edges
-        reciprocal_edges: list[tuple[str,str]] = [edge for edge in network.edges if edge[::-1] in network.edges]
-        reciprocal_network: nx.DiGraph = nx.DiGraph(reciprocal_edges) # type: ignore[type-arg]
+        edges_set = set(network.edges())
+        reverse_edges_set = {(v, u) for u, v in edges_set}
+        reciprocal_edges: list[tuple[str, str]] = list(edges_set & reverse_edges_set)
+        reciprocal_network: nx.DiGraph = nx.DiGraph(reciprocal_edges)  # type: ignore[type-arg]
 
         # Get reciprocal strongly connected components with min length of 3, ordered by size
         reciprocal_strongly_connected = pd.Series(
@@ -701,8 +703,15 @@ class CoreSna:
         # Draw nodes labels
         nx.draw_networkx_labels(network, loc, font_family="serif", font_color="#FFF", font_weight="normal", font_size=10, ax=ax)
 
+        # Compute reciprocal and not reciprocal edges
+        edges_set = set(network.edges())
+        reverse_edges_set = {(v, u) for u, v in edges_set}
+        reciprocal_edges_set = edges_set & reverse_edges_set
+        non_reciprocal_edges_set = edges_set - reciprocal_edges_set
+        reciprocal_edges: list[tuple[str, str]] = list(reciprocal_edges_set)
+        non_reciprocal_edges: list[tuple[str, str]] = list(non_reciprocal_edges_set)
+
         # Draw reciprocal edges with specific style (undirected lines)
-        reciprocal_edges: list[tuple[str, str]] = [edge for edge in network.edges if edge[::-1] in network.edges]
         nx.draw_networkx_edges(
             network, loc, edgelist=reciprocal_edges,
             edge_color=color, arrowstyle="-", width=4, min_target_margin=0,
@@ -710,7 +719,6 @@ class CoreSna:
         )
 
         # Draw non-reciprocal edges with specific style (directed arrows)
-        non_reciprocal_edges: list[tuple[str, str]] = [e for e in network.edges if e not in reciprocal_edges]
         nx.draw_networkx_edges(
             network, loc, edgelist=non_reciprocal_edges,
             edge_color=color, arrowstyle="->", width=.4, min_target_margin=10,
