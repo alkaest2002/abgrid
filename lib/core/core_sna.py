@@ -437,16 +437,16 @@ class CoreSna:
     def _compute_components(self, network_type: Literal["a", "b"]) -> dict[str, pd.Series]:
         """Identify and extract significant network components.
 
-        Finds various types of network components (cliques, strongly connected components,
-        weakly connected components) and returns them as concatenated node strings.
+        Finds various types of network components and returns them as concatenated node strings.
         Only components with more than 2 nodes are included.
 
         Args:
             network_type: Network identifier ('a' or 'b') for selecting the target network.
 
         Returns:
-            Dictionary containing three types of components:
+            Dictionary containing four types of components:
             - cliques: Maximal cliques in the undirected version of the graph.
+            - reciprocal_strongly_connected: Strongly connected components in the reciprocal graph.
             - strongly_connected: Strongly connected components in the directed graph.
             - weakly_connected: Weakly connected components in the directed graph.
 
