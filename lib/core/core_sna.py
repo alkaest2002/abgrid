@@ -392,8 +392,9 @@ class CoreSna:
             raise ValueError(error_message)
 
         # Get the adjacency DataFrames for the specified network type and reference
+        network_type_ref: Literal["a", "b"] = "b" if network_type == "a" else "a"
         adj_df: pd.DataFrame = self.sna[f"adjacency_{network_type}"]
-        adj_ref_df: pd.DataFrame = self.sna[f"adjacency_{network_type}"]
+        adj_ref_df: pd.DataFrame = self.sna[f"adjacency_{network_type_ref}"]
 
         # Define a function for filtering edges
         fn = lambda x: x == 1 # noqa: E731
