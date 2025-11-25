@@ -392,7 +392,7 @@ class CoreSna:
             raise ValueError(error_message)
 
         # Get the adjacency DataFrames for the specified network type and reference
-        network_type_ref: Literal["a", "b"] = "b" if network_type == "a" else "a"
+        network_type_ref: Literal["a", "b"] = "a" if network_type == "b" else "b"
         adj_df: pd.DataFrame = self.sna[f"adjacency_{network_type}"]
         adj_ref_df: pd.DataFrame = self.sna[f"adjacency_{network_type_ref}"]
 
