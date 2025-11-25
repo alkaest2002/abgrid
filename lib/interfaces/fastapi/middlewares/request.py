@@ -24,7 +24,7 @@ class RequestMiddleware(BaseHTTPMiddleware):
         request_timeout: Timeout duration for incoming requests.
     """
 
-    REQUEST_TIMEOUT: ClassVar[int] = 60  # 60 seconds timeout for all requests
+    REQUEST_TIMEOUT: ClassVar[int] = 120  # 120 seconds timeout for all requests
 
     # Lazy-initialized semaphore as a class variable to ensure event loop is available
     @property
