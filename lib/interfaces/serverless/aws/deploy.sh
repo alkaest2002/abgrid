@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+set -e  # Exit on any error
+
 # Load environment variables from .env file
 if [ -f .env ]; then
     export $(cat .env | grep -v '^#' | xargs)
@@ -34,18 +36,47 @@ else
     docker buildx use lambda-builder
 fi
 
+# Ensure we have a clean state
+echo "Removing any existing local images..."
+docker rmi $IMAGE_URI >/dev/null 2>&1 || true
+
 echo "Building and pushing image..."
+# Use a more robust build and push approach
 docker buildx build \
     --platform linux/arm64 \
     --provenance=false \
     --tag $IMAGE_URI \
     --push \
     --progress=plain \
+    --no-cache \
     .
 
-# Verify image in ECR
-echo "Verifying image in ECR..."
-aws ecr describe-images --repository-name $REPO --region $REGION --image-ids imageTag=latest
+# Additional verification that the push succeeded
+echo "Verifying image push to ECR..."
+if ! aws ecr describe-images --repository-name $REPO --region $REGION --image-ids imageTag=latest >/dev/null 2>&1; then
+    echo "ERROR: Image not found in ECR after push. Attempting manual push..."
+    
+    # Fallback: Build locally then push
+    docker buildx build \
+        --platform linux/arm64 \
+        --provenance=false \
+        --tag $IMAGE_URI \
+        --load \
+        --progress=plain \
+        .
+    
+    echo "Manually pushing image to ECR..."
+    docker push $IMAGE_URI
+    
+    # Verify again
+    if ! aws ecr describe-images --repository-name $REPO --region $REGION --image-ids imageTag=latest >/dev/null 2>&1; then
+        echo "ERROR: Failed to push image to ECR"
+        exit 1
+    fi
+fi
+
+echo "✅ Image successfully pushed to ECR"
+aws ecr describe-images --repository-name $REPO --region $REGION --image-ids imageTag=latest --query 'imageDetails[0].{Digest:imageDigest,Size:imageSizeInBytes,PushedAt:imagePushedAt}'
 
 # Check if Lambda function exists
 echo "Checking if Lambda function exists..."
@@ -81,4 +112,4 @@ else
       --environment Variables="{$ENV_VARS}"
 fi
 
-echo "Deployment complete!"
+echo "✅ Deployment complete!"
