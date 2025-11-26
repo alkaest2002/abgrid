@@ -36,20 +36,32 @@ else
     docker buildx use lambda-builder
 fi
 
-# Ensure we have a clean state
-echo "Removing any existing local images..."
-docker rmi $IMAGE_URI >/dev/null 2>&1 || true
+# Add this after ECR login for extra verification
+echo "Testing ECR connectivity..."
+aws ecr describe-repositories --repository-names $REPO --region $REGION
 
-echo "Building and pushing image..."
-# Use a more robust build and push approach
-docker buildx build \
-    --platform linux/arm64 \
-    --provenance=false \
-    --tag $IMAGE_URI \
-    --push \
-    --progress=plain \
-    --no-cache \
-    .
+# Add retry logic for the push
+echo "Building and pushing image (with retries)..."
+for i in {1..3}; do
+    if docker buildx build \
+        --platform linux/arm64 \
+        --provenance=false \
+        --tag $IMAGE_URI \
+        --push \
+        --progress=plain \
+        --no-cache \
+        .; then
+        echo "✅ Push succeeded on attempt $i"
+        break
+    else
+        echo "❌ Push failed on attempt $i"
+        if [ $i -eq 3 ]; then
+            echo "ERROR: All push attempts failed"
+            exit 1
+        fi
+        sleep 5
+    fi
+done
 
 # Additional verification that the push succeeded
 echo "Verifying image push to ECR..."
