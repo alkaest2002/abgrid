@@ -1,16 +1,28 @@
 [project]
-name = "ab-grid"
+name = "abgrid"
 version = "0.1.0"
 description = "AB-Grid project for group management and reporting"
-authors = [{name = "Pierpaolo Calanna"}]
-license = {text = "MIT"}
 readme = "README.md"
-requires-python = ">=3.12"
+requires-python = ">=3.13"
+dependencies = [
+    "jinja2>=3.1.6",
+    "matplotlib>=3.10.8",
+    "networkx>=3.6.1",
+    "numpy>=2.3.5",
+    "orjson>=3.11.5",
+    "pandas>=2.3.3",
+    "pydantic>=2.12.5",
+    "python-dotenv>=1.2.1",
+    "pyyaml>=6.0.3",
+    "scipy>=1.16.3",
+    "weasyprint>=67.0",
+]
 
 # Ruff configuration
 [tool.ruff]
+
 # Python version target
-target-version = "py312"
+target-version = "py313"
 
 # Line length (matching Black's default)
 line-length = 88
@@ -25,7 +37,7 @@ exclude = [
     "__pycache__",
     "build",
     "dist",
-    "venv",
+    ".venv",
     "*.egg-info",
     "./lib/interfaces/docker/**",
 ]
@@ -93,7 +105,7 @@ dummy-variable-rgx = "^(_+|(_+[a-zA-Z0-9_]*[a-zA-Z0-9]+?))$"
 
 [tool.ruff.lint.isort]
 # Configure import sorting
-known-first-party = ["lib", "app_terminal"]
+known-first-party = ["lib", "app_terminal", "app_api"]
 force-single-line = false
 lines-after-imports = 2
 
@@ -126,8 +138,9 @@ line-ending = "auto"
 
 # MyPy configuration
 [tool.mypy]
+
 # Python version target
-python_version = "3.12"
+python_version = "3.13"
 
 # Files to check - specify individual directories to avoid conflicts
 files = ["lib"]
@@ -141,6 +154,7 @@ exclude = [
     "^\\.git/",
     "^__pycache__/",
     "lib/interfaces/docker/",
+    "lib/interfaces/serverless/aws/",
 ]
 
 # Import discovery
@@ -232,3 +246,9 @@ exclude_dirs = [
 
 # Severity level (LOW, MEDIUM, HIGH)
 severity = "MEDIUM"
+
+[dependency-groups]
+dev = [
+    "mypy>=1.19.0",
+    "ruff>=0.14.8",
+]
