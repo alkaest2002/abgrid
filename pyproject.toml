@@ -7,6 +7,7 @@ name = "abgrid"
 version = "0.1.0"
 description = "AB-Grid project for group management and reporting"
 readme = "README.md"
+license = "MIT"
 requires-python = ">=3.13"
 dependencies = [
     "fastapi[standard]>=0.124.2",
@@ -25,14 +26,15 @@ dependencies = [
     "weasyprint>=67.0",
 ]
 
-# Package discovery configuration to handle your folder structure
+# Package discovery configuration - using find with explicit include/exclude
 [tool.setuptools.packages.find]
-include = ["lib*"]
-exclude = ["data*", "licenser*"]
+where = ["."]
+include = ["lib", "lib.*"]
+exclude = ["data", "data.*", "licenser", "licenser.*", "tests", "tests.*"]
 
-# Explicitly include your lib package
+# Include package data
 [tool.setuptools.package-data]
-"lib" = ["**/*.py", "**/*.json", "**/*.yaml", "**/*.yml"]
+"lib" = ["**/*.py", "**/*.json", "**/*.yaml", "**/*.yml", "**/*.txt"]
 
 # Ruff configuration
 [tool.ruff]
