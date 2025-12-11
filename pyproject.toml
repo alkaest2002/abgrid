@@ -205,8 +205,6 @@ cache_dir = ".mypy_cache"
 module = [
     "tests.*",
     "test.*",
-    "*.test.*",
-    "*_test",
 ]
 # Relax some rules for tests
 disallow_untyped_defs = false
@@ -219,6 +217,11 @@ module = [
     "jwt.*",
     "yaml.*",
     "dotenv.*",
+    "weasyprint.*",
+    "pandas.*",
+    "networkx.*", 
+    "numpy.*",
+    "scipy.*",
 ]
 # Ignore missing imports for third-party libraries without stubs
 ignore_missing_imports = true
