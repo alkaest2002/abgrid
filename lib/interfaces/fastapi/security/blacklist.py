@@ -104,7 +104,7 @@ class BlacklistManager:
             if time.time() - self._last_loaded >= self._reload_interval_seconds:
                 self.load_blacklist()
 
-    def get_cache_info(self) -> dict:
+    def get_cache_info(self) -> dict[str, float | int]:
         """Get information about the current cache state."""
         return {
             "last_loaded_timestamp": self._last_loaded,
@@ -145,6 +145,6 @@ def stop_auto_reload() -> None:
     blacklist_manager.stop_auto_reload()
 
 
-def get_cache_info() -> dict:
+def get_cache_info() -> dict[str, float | int]:
     """Get cache state information."""
     return blacklist_manager.get_cache_info()
