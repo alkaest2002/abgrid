@@ -4,6 +4,7 @@ __pycache__
 .DS_Store
 .env
 *.pyc
+*egg*
 test_api.paw
 data/am
 data/douhet
