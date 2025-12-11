@@ -18,10 +18,11 @@ lib/interfaces/electron/full/app/dist
 lib/interfaces/docker/abgrid-fastapi.tar
 todo.md
 jwt_token.yaml
-venv
+.venv
 .vscode
 licenser/licenses
 archive
 dist
 lib/interfaces/serverless/aws/lib
 lib/interfaces/fastapi/security/blacklisted_tokens.json
+build
