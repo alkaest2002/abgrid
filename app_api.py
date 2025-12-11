@@ -29,7 +29,7 @@ from lib.utils import to_snake_case
 settings = Settings.load()
 
 @asynccontextmanager
-async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
+async def lifespan(app: FastAPI) -> AsyncGenerator:
     """Lifespan context manager for FastAPI application.
 
     Args:
