@@ -1,3 +1,7 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
 [project]
 name = "abgrid"
 version = "0.1.0"
@@ -21,6 +25,15 @@ dependencies = [
     "weasyprint>=67.0",
 ]
 
+# Package discovery configuration to handle your folder structure
+[tool.setuptools.packages.find]
+include = ["lib*"]
+exclude = ["data*", "licenser*"]
+
+# Explicitly include your lib package
+[tool.setuptools.package-data]
+"lib" = ["**/*.py", "**/*.json", "**/*.yaml", "**/*.yml"]
+
 # Ruff configuration
 [tool.ruff]
 
@@ -42,6 +55,8 @@ exclude = [
     ".venv",
     "*.egg-info",
     "./lib/interfaces/docker/**",
+    "data",
+    "licenser",
 ]
 
 [tool.ruff.lint]
@@ -155,6 +170,8 @@ exclude = [
     "^venv/",
     "^\\.git/",
     "^__pycache__/",
+    "^data/",
+    "^licenser/",
     "lib/interfaces/docker/",
     "lib/interfaces/serverless/aws/",
 ]
@@ -247,6 +264,8 @@ exclude_dirs = [
     "/dist/",
     "/.git/",
     "__pycache__",
+    "/data/",
+    "/licenser/",
 ]
 
 # Severity level (LOW, MEDIUM, HIGH)
