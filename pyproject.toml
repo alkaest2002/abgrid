@@ -36,7 +36,6 @@ include = ["*.py", "lib/**/*.py"]
 # Exclude common directories
 exclude = [
     ".git",
-    ".venv",
     "__pycache__",
     "build",
     "dist",
@@ -235,7 +234,7 @@ skips = [
 ]
 
 # Target directories - explicitly specify where to look
-targets = [".", "lib"]
+targets = ["."]
 
 # Exclude paths
 exclude_dirs = [
