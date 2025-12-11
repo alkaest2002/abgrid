@@ -74,7 +74,7 @@ class CoreExport:
             """Convert numpy array to JSON-serializable dict."""
             return _convert_pandas_series(pd.Series(arr))
 
-        def _convert_networkx(graph: DiGraph) -> dict[str, Any]:  # type: ignore[type-arg]
+        def _convert_networkx(graph: DiGraph) -> dict[str, Any]:
             """Convert NetworkX DiGraph to JSON-serializable format."""
             return {
                 "nodes": list(graph.nodes()),

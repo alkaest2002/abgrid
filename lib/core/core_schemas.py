@@ -80,8 +80,8 @@ class ABGridSNASchema(BaseModel):
     edges_b: list[tuple[str, str]]
     adjacency_a: pd.DataFrame
     adjacency_b: pd.DataFrame
-    network_a: nx.DiGraph  # type: ignore[type-arg]
-    network_b: nx.DiGraph  # type: ignore[type-arg]
+    network_a: nx.DiGraph
+    network_b: nx.DiGraph
     loc_a: dict[str, np.ndarray]
     loc_b: dict[str, np.ndarray]
     macro_stats_a: pd.Series

@@ -195,7 +195,7 @@ class CoreSna:
             raise ValueError(error_message)
 
         # Get network
-        network: nx.DiGraph = self.sna[f"network_{network_type}"] # type: ignore[type-arg]
+        network: nx.DiGraph = self.sna[f"network_{network_type}"]
 
         # Get network edges types
         edges_types: dict[str, pd.Index] = self.sna[f"edges_types_{network_type}"]
@@ -204,7 +204,7 @@ class CoreSna:
         network_nodes: int = network.number_of_nodes()
         network_edges: int = network.number_of_edges()
         network_edges_reciprocal: int = edges_types["type_ii"].shape[0]
-        network_density: float = nx.density(network) # type: ignore[no-untyped-call]
+        network_density: float = nx.density(network)
         network_centralization: float = self._compute_network_centralization(network.to_undirected())
         network_transitivity: float = nx.transitivity(network)
         network_reciprocity: float = nx.overall_reciprocity(network)
@@ -487,7 +487,7 @@ class CoreSna:
         edges_set = set(network.edges())
         reverse_edges_set = {(v, u) for u, v in edges_set}
         reciprocal_edges: list[tuple[str, str]] = list(edges_set & reverse_edges_set)
-        reciprocal_network: nx.DiGraph = nx.DiGraph(reciprocal_edges)  # type: ignore[type-arg]
+        reciprocal_network: nx.DiGraph = nx.DiGraph(reciprocal_edges)
 
         # Get reciprocal strongly connected components with min length of 3, ordered by size
         reciprocal_strongly_connected = pd.Series(
@@ -602,7 +602,7 @@ class CoreSna:
 
         return relevant_nodes
 
-    def _compute_network_centralization(self, network: nx.Graph) -> float:  # type: ignore[type-arg]
+    def _compute_network_centralization(self, network: nx.Graph) -> float:
         """Calculate the degree centralization of an undirected network.
 
         Centralization measures how concentrated the network structure is around
@@ -631,7 +631,7 @@ class CoreSna:
         number_of_nodes: int = network.number_of_nodes()
 
         # Compute node centralities (degree values)
-        node_centralities: pd.Series = pd.Series(dict(nx.degree(network)))  # type: ignore[no-untyped-call]
+        node_centralities: pd.Series = pd.Series(dict(nx.degree(network)))
 
         # Compute Max centrality
         max_centrality: int = node_centralities.max()
@@ -675,7 +675,7 @@ class CoreSna:
             - ValueError: If the network layout computation fails.
         """
         # Get network
-        network: nx.DiGraph = self.sna[f"network_{network_type}"] # type: ignore[type-arg]
+        network: nx.DiGraph = self.sna[f"network_{network_type}"]
 
         # Get network layout locations
         loc: dict[str, np.ndarray] = self.sna[f"loc_{network_type}"]
@@ -728,7 +728,7 @@ class CoreSna:
 
         return figure_to_base64_svg(fig)
 
-    def _handle_isolated_nodes_in_graph(self, network: nx.DiGraph, loc: dict[str, np.ndarray]) -> dict[str, np.ndarray]: # type: ignore[type-arg]
+    def _handle_isolated_nodes_in_graph(self, network: nx.DiGraph, loc: dict[str, np.ndarray]) -> dict[str, np.ndarray]:
         """Position isolated nodes at the periphery of the network layout.
 
         Adjusts the positions of isolated nodes to appear outside the convex hull

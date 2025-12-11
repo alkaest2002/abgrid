@@ -170,8 +170,8 @@ class CoreSociogram:
                 - "wi_ii": Type II conflict index (ratio of bidirectional negative edges to network size)
         """
         # Get typed references to networks and adjacency matrices
-        network_a: nx.DiGraph = self.sna["network_a"] # type: ignore[type-arg]
-        network_b: nx.DiGraph = self.sna["network_b"] # type: ignore[type-arg]
+        network_a: nx.DiGraph = self.sna["network_a"]
+        network_b: nx.DiGraph = self.sna["network_b"]
         adjacency_a: pd.DataFrame = self.sna["adjacency_a"]
         adjacency_b: pd.DataFrame = self.sna["adjacency_b"]
 
@@ -241,17 +241,17 @@ class CoreSociogram:
                 - "*_rank": Dense ranking for each numeric metric and status (lower rank = better)
         """
         # Retrieve network graphs and adjacency matrices
-        network_a: nx.DiGraph = self.sna["network_a"]  # type: ignore[type-arg]
-        network_b: nx.DiGraph = self.sna["network_b"]  # type: ignore[type-arg]
+        network_a: nx.DiGraph = self.sna["network_a"]
+        network_b: nx.DiGraph = self.sna["network_b"]
         adjacency_a: pd.DataFrame = self.sna["adjacency_a"]
         adjacency_b: pd.DataFrame = self.sna["adjacency_b"]
 
         # Initialize DataFrame with basic degree measures
         sociogram_micro_stats = pd.DataFrame({
-            "rp": dict(network_a.in_degree()),  # type: ignore[call-overload]
-            "rr": dict(network_b.in_degree()),  # type: ignore[call-overload]
-            "gp": dict(network_a.out_degree()), # type: ignore[call-overload]
-            "gr": dict(network_b.out_degree()), # type: ignore[call-overload]
+            "rp": dict(network_a.in_degree()),
+            "rr": dict(network_b.in_degree()),
+            "gp": dict(network_a.out_degree()),
+            "gr": dict(network_b.out_degree()),
         })
 
         # Compute mutual connections using matrix multiplication

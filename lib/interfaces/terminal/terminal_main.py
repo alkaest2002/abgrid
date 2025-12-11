@@ -11,7 +11,7 @@ from typing import Any
 
 import orjson
 import yaml
-from weasyprint import HTML  # type: ignore[import-untyped]
+from weasyprint import HTML
 
 from lib.core import SYMBOLS
 from lib.core.core_data import CoreData
