@@ -794,7 +794,7 @@ class CoreSna:
                     isolate: str = next(isolate_iter)
 
                     # Create direction vector from coordinates centroid to current hull vertex
-                    direction: np.ndarray = (vertex - coordinates_centroid).to_numpy()
+                    direction: np.ndarray = (vertex - coordinates_centroid).to_numpy().copy()
                     direction /= np.linalg.norm(direction)
 
                     # Set distance multiplier (increases with each round)
